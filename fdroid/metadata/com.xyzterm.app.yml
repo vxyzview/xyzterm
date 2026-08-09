@@ -1,9 +1,9 @@
 Categories:
   - System
 License: GPL-3.0-or-later
-SourceCode: https://github.com/vxyzview/Xed-Editor
-IssueTracker: https://github.com/vxyzview/Xed-Editor/issues
-Changelog: https://github.com/vxyzview/Xed-Editor/releases
+SourceCode: https://github.com/vxyzview/xyzterm
+IssueTracker: https://github.com/vxyzview/xyzterm/issues
+Changelog: https://github.com/vxyzview/xyzterm/releases
 
 AutoName: xyzterm
 Summary: Terminal-only proot Ubuntu environment
@@ -13,7 +13,7 @@ Description: |
   feature and shared infrastructure (settings, theming, crash handling).
 
 RepoType: git
-Repo: https://github.com/vxyzview/Xed-Editor
+Repo: https://github.com/vxyzview/xyzterm
 
 Builds:
   - versionName: 3.4.4

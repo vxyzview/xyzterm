@@ -156,7 +156,7 @@ fun AboutScreen() {
 
             LaunchedEffect(Unit) {
                 val client = okHttpClient
-                val url = "https://api.github.com/repos/Xed-Editor/Xed-Editor"
+                val url = "https://api.github.com/repos/vxyzview/xyzterm"
                 val request = Request.Builder().url(url).build()
 
                 withContext(Dispatchers.IO) {
@@ -199,7 +199,7 @@ fun AboutScreen() {
                     )
                 },
                 sideEffect = {
-                    val url = "https://github.com/Xed-Editor/Xed-Editor"
+                    val url = "https://github.com/vxyzview/xyzterm"
                     val intent = Intent(Intent.ACTION_VIEW).apply { data = url.toUri() }
                     context.startActivity(intent)
                 },
