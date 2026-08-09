@@ -163,6 +163,7 @@
     <string name="restore">Pulihkan</string>
     <string name="success">Berhasil</string>
     <string name="failed">Gagal</string>
+    <string name="setup_failed">Penyiapan gagal: %s</string>
     <string name="file">File</string>
     <string name="unknown_err">Terjadi kesalahan</string>
     <string name="expose_saf_desc">Buat direktori beranda dapat diakses oleh aplikasi eksternal melalui pemilih file sistem (SAF)</string>

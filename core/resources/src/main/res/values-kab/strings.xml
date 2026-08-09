@@ -58,4 +58,5 @@
     <string name="folder">Akaram</string>
     <string name="open_file">Ldi afaylu</string>
     <string name="fonts">Tisefsa</string>
+    <string name="setup_failed">Agujjef n usetta: %s</string>
 </resources>

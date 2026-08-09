@@ -151,6 +151,7 @@
     <string name="backup">Yedek</string>
     <string name="success">Başarı</string>
     <string name="failed">İşlem başarısız</string>
+    <string name="setup_failed">Kurulum başarısız: %s</string>
     <string name="restore">Öncekini geri yükle</string>
     <string name="file">Dosya</string>
     <string name="ignore">Yoksay</string>

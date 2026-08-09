@@ -80,4 +80,5 @@
     <string name="editor_desc">Alapvető szerkesztési beállítások</string>
     <string name="terminal_desc">Alapvető terminálbeállítások</string>
     <string name="input">Bemenet</string>
+    <string name="setup_failed">A beállítás sikertelen: %s</string>
 </resources>

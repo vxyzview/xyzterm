@@ -171,6 +171,7 @@
     <string name="restore">Επαναφορά</string>
     <string name="success">Επιτυχία</string>
     <string name="failed">Αποτυχία</string>
+    <string name="setup_failed">Αποτυχία εγκατάστασης: %s</string>
     <string name="unknown_err">Κάτι πήγε στραβά</string>
     <string name="expose_saf">Εμφάνιση αρχικού καταλόγου</string>
     <string name="expose_saf_desc">Κάνει τον αρχικό κατάλογο προσβάσιμο σε εξωτερικές εφαρμογές μέσω του επιλογέα αρχείων συστήματος (SAF)</string>

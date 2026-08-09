@@ -98,6 +98,7 @@
     <string name="restore">Przywracanie</string>
     <string name="success">Powodzenie</string>
     <string name="failed">Niepowodzenie</string>
+    <string name="setup_failed">Konfiguracja nie powiodła się: %s</string>
     <string name="unknown_err">Coś poszło nie tak</string>
     <string name="expose_saf">Udostępnij katalog główny</string>
     <string name="apply">Zastosuj</string>

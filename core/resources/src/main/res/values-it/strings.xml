@@ -164,6 +164,7 @@
     <string name="restore">Ripristina</string>
     <string name="success">Successo</string>
     <string name="failed">Fallito</string>
+    <string name="setup_failed">Configurazione non riuscita: %s</string>
     <string name="unknown_err">Qualcosa è andato storto</string>
     <string name="expose_saf">Esponi directory home</string>
     <string name="saf_expose_warning">L’esposizione della directory home potrebbe rivelare informazioni sensibili ad app malevole, inclusi token Git, password, nomi utente e altri file presenti nella directory home del terminale. Vuoi continuare?</string>

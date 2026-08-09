@@ -160,6 +160,7 @@
     <string name="restore">恢复</string>
     <string name="success">成功</string>
     <string name="failed">失败</string>
+    <string name="setup_failed">设置失败：%s</string>
     <string name="folder">文件夹</string>
     <string name="file">文件</string>
     <string name="warning_private_dir">当你清除 xyzterm 的数据或卸载时，此文件夹的数据将被删除</string>

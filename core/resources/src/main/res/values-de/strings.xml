@@ -155,6 +155,7 @@
     <string name="restore">Wiederherstellen</string>
     <string name="success">Erfolg</string>
     <string name="failed">Fehlgeschlagen</string>
+    <string name="setup_failed">Einrichtung fehlgeschlagen: %s</string>
     <string name="unknown_err">Etwas ist schiefgelaufen</string>
     <string name="info">Info</string>
     <string name="copied">Kopiert</string>

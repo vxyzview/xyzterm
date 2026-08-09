@@ -159,6 +159,7 @@
     <string name="restore">שחזור</string>
     <string name="success">בצליח</string>
     <string name="failed">נכשל</string>
+    <string name="setup_failed">ההגדרה נכשלה: %s</string>
     <string name="unknown_err">משהו השתבש</string>
     <string name="expose_saf">חשיפת תיקיית הבית</string>
     <string name="expose_saf_desc">הפוך את תיקיית הבית לנגישה לאפליקציות חיצוניות באמצעות דפדפן קבצי המערכת (SAF)</string>

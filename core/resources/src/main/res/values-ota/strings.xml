@@ -25,6 +25,7 @@
     <string name="restore">اونجەكینی گری یوكلە</string>
     <string name="success">باشاری</string>
     <string name="failed">ایشلەم باشاریسز</string>
+    <string name="setup_failed">Quraşdırma uğursuz oldu: %s</string>
     <string name="info">بیلگی</string>
     <string name="lang">دیل</string>
     <string name="runners">چالیشدریجیلر</string>

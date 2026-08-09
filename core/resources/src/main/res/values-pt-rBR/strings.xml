@@ -160,6 +160,7 @@
     <string name="restore">Restaurar</string>
     <string name="success">Sucesso</string>
     <string name="failed">Falha</string>
+    <string name="setup_failed">Falha na configuração: %s</string>
     <string name="file">Arquivo</string>
     <string name="folder">Pasta</string>
     <string name="warning_private_dir">O conteúdo deste diretório será excluído se você limpar os dados ou excluir o xyzterm</string>

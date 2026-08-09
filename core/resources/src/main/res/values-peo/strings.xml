@@ -3,4 +3,5 @@
     <string name="input">ورودی</string>
     <string name="delete_session">حذف جلسه</string>
     <string name="logout">خروج</string>
+    <string name="setup_failed">راه‌اندازی ناموفق بود: %s</string>
 </resources>

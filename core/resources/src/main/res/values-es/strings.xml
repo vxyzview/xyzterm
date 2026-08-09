@@ -157,6 +157,7 @@
     <string name="restore">Restaurar</string>
     <string name="success">Éxito</string>
     <string name="failed">Fallido</string>
+    <string name="setup_failed">Configuración fallida: %s</string>
     <string name="file">Archivo</string>
     <string name="folder">Carpeta</string>
     <string name="no_ext">No se ha encontrado ninguna extensión.</string>

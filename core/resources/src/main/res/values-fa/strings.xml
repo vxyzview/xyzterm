@@ -113,4 +113,5 @@
     <string name="updating">در حال به‌روزرسانی…</string>
     <string name="loading">در حال بارگذاری…</string>
     <string name="downloading">در حال دانلود…</string>
+    <string name="setup_failed">راه‌اندازی ناموفق بود: %s</string>
 </resources>

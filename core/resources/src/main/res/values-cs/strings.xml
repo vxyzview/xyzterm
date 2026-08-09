@@ -38,6 +38,7 @@
     <string name="highlighting">Zvýraznění syntaxu</string>
     <string name="success">Úspěch</string>
     <string name="failed">Selhalo</string>
+    <string name="setup_failed">Nastavení selhalo: %s</string>
     <string name="go_prev">Vzad</string>
     <string name="replace">Nahradit</string>
     <string name="share">Sdílet</string>

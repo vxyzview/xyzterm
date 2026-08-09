@@ -134,4 +134,5 @@
     <string name="clone_repo_desc">Klona fjärrförråd</string>
     <string name="repo_url">Förrådets URL</string>
     <string name="branch">Gren</string>
+    <string name="setup_failed">Konfigureringen misslyckades: %s</string>
 </resources>

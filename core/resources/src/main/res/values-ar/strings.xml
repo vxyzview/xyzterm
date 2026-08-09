@@ -161,6 +161,7 @@
     <string name="file">ملف</string>
     <string name="feature_toggles">تبديل الميزات</string>
     <string name="failed">فشل</string>
+    <string name="setup_failed">فشل الإعداد: %s</string>
     <string name="success">‌بنجاح</string>
     <string name="restore">استعادة</string>
     <string name="backup">نسخ احتياطي</string>

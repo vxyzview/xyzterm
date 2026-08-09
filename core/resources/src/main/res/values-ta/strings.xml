@@ -20,6 +20,7 @@
     <string name="restore">மீட்டமை</string>
     <string name="success">செய்</string>
     <string name="failed">தோல்வியுற்றது</string>
+    <string name="setup_failed">அமைவு தோல்வியடைந்தது: %s</string>
     <string name="unsupported_content">ஆதரிக்கப்படாத உள்ளடக்கம்</string>
     <string name="save">சேமி</string>
     <string name="new_file">புதிய கோப்பு</string>

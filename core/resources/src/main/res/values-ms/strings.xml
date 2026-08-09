@@ -32,4 +32,5 @@
     <string name="theme_id_missing">Fail JSON tidak memberikan ID tema yang sah. Sila tambah satu dan cuba lagi.</string>
     <string name="input">Input</string>
     <string name="logout">Log keluar</string>
+    <string name="setup_failed">Persediaan gagal: %s</string>
 </resources>

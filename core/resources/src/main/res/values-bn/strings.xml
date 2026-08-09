@@ -68,4 +68,5 @@
     <string name="show_line_number">লাইনের সংখ্যা দেখুন</string>
     <string name="pin_line_number">লাইন নম্বর পিন করুন</string>
     <string name="input">ইনপুট</string>
+    <string name="setup_failed">সেটআপ ব্যর্থ হয়েছে: %s</string>
 </resources>

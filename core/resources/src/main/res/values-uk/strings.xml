@@ -172,6 +172,7 @@
     <string name="restore">Відновити</string>
     <string name="success">Успішно</string>
     <string name="failed">Невдача</string>
+    <string name="setup_failed">Помилка налаштування: %s</string>
     <string name="unknown_err">Щось пішло не так</string>
     <string name="expose_saf">Доступ до домашнього каталогу</string>
     <string name="expose_saf_desc">Надати зовнішнім додаткам доступ до домашнього каталогу через системний вибір файлів (SAF)</string>

@@ -296,7 +296,7 @@ class Terminal : AppCompatActivity() {
                                         File(getTempDir(), "sandbox.tar.gz").delete()
                                     }
                                 }
-                                errorDialog(msg = "Setup failed: ${error.message}")
+                                errorDialog(msg = strings.setup_failed.getFilledString(error.message))
                             }
                         }
                         finish()
@@ -309,7 +309,7 @@ class Terminal : AppCompatActivity() {
                     errorDialog(strings.timeout)
                 } else {
                     e.printStackTrace()
-                    toast("Setup failed: ${e.message}")
+                    toast(strings.setup_failed.getFilledString(e.message))
                 }
                 finish()
             }

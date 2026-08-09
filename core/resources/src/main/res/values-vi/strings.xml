@@ -115,6 +115,7 @@
     <string name="loading">Đang tải…</string>
     <string name="success">Thành công</string>
     <string name="failed">Thất bại</string>
+    <string name="setup_failed">Thiết lập thất bại: %s</string>
     <string name="unknown_err">Đã có lỗi xảy ra</string>
     <string name="info">Thông tin</string>
     <string name="size">Kích thước</string>

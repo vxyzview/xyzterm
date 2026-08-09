@@ -163,6 +163,7 @@
     <string name="restore">Восстановить</string>
     <string name="success">Успешно</string>
     <string name="failed">Не удалось</string>
+    <string name="setup_failed">Ошибка настройки: %s</string>
     <string name="backup">Резервное копирование</string>
     <string name="unknown_err">Что-то пошло не так</string>
     <string name="disable_virtual_kbd">Отключить виртуальную клавиатуру</string>

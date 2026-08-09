@@ -165,6 +165,7 @@
     <string name="backup">備份</string>
     <string name="success">成功</string>
     <string name="failed">失敗</string>
+    <string name="setup_failed">設定失敗：%s</string>
     <string name="restore">還原</string>
     <string name="unknown_err">出了點問題</string>
     <string name="expose_saf">顯示主目錄</string>

@@ -167,6 +167,7 @@
     <string name="restore">रिस्टोर</string>
     <string name="success">सफलता</string>
     <string name="failed">असफल</string>
+    <string name="setup_failed">सेटअप विफल: %s</string>
     <string name="unknown_err">कुछ गलत हुआ</string>
     <string name="expose_saf">होम डायरेक्टरी एक्सपोज़ करें</string>
     <string name="expose_saf_desc">सिस्टम फ़ाइल पिकर (SAF) के माध्यम से बाहरी ऐप्स को होम डायरेक्टरी एक्सेस करने दें</string>

@@ -158,6 +158,7 @@
     <string name="toggle_word_wrap">(Dés)activer le retour automatique à la ligne</string>
     <string name="success">Succès</string>
     <string name="failed">Échec</string>
+    <string name="setup_failed">Échec de l'installation : %s</string>
     <string name="file">Fichier</string>
     <string name="folder">Répertoire</string>
     <string name="support_desc">Soutenir le développement</string>

@@ -178,6 +178,7 @@
     <string name="restore">복구</string>
     <string name="success">성공</string>
     <string name="failed">실패</string>
+    <string name="setup_failed">설정 실패: %s</string>
     <string name="unknown_err">오류가 발생했습니다</string>
     <string name="expose_saf">홈 디렉터리 노출</string>
     <string name="expose_saf_desc">시스템 파일 선택기를 통해서 외부 앱에서 홈 디렉터리에 접근할 수 있게 합니다</string>

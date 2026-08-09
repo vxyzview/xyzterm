@@ -36,4 +36,5 @@
     <string name="open_internal_storage">Daxili yaddaşı aç</string>
     <string name="input">Giriş</string>
     <string name="logout">Çıxış</string>
+    <string name="setup_failed">Quraşdırma uğursuz oldu: %s</string>
 </resources>

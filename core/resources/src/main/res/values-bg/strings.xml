@@ -167,6 +167,7 @@
     <string name="restore">Възстановяване</string>
     <string name="success">Успешно</string>
     <string name="failed">Неуспешно</string>
+    <string name="setup_failed">Настройката се провали: %s</string>
     <string name="unknown_err">Нещо се обърка</string>
     <string name="expose_saf">Разкриване на домашната директория</string>
     <string name="expose_saf_desc">Направете домашната директория достъпна за външни приложения чрез инструмента за избор на системни файлове (SAF)</string>

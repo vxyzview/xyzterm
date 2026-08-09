@@ -169,7 +169,7 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
                                 loading.hide()
-                                toast("Error: ${e.message}")
+                                toast(strings.setup_failed.getFilledString(e.message))
                             }
                         }
                     }
@@ -240,7 +240,7 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {
                                         loading.hide()
-                                        toast("Error: ${e.message}")
+                                        toast(strings.setup_failed.getFilledString(e.message))
                                     }
                                 }
                             }

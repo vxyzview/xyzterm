@@ -64,4 +64,5 @@
     <string name="show_line_number">Näytä rivinumerot</string>
     <string name="text_size">Tekstin koko</string>
     <string name="input">Syöte</string>
+    <string name="setup_failed">Määritys epäonnistui: %s</string>
 </resources>

@@ -184,6 +184,7 @@
     <string name="restore">Restore</string>
     <string name="success">Success</string>
     <string name="failed">Failed</string>
+    <string name="setup_failed">Setup failed: %s</string>
     <string name="unknown_err">Something went wrong</string>
     <string name="expose_saf">Expose home directory</string>
     <string name="expose_saf_desc">Make the home directory accessible to external apps via the system file picker (SAF)</string>

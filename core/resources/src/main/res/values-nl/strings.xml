@@ -3,4 +3,5 @@
     <string name="input">Invoer</string>
     <string name="delete_session">Sessie verwijderen</string>
     <string name="logout">Afmelden</string>
+    <string name="setup_failed">Installatie mislukt: %s</string>
 </resources>

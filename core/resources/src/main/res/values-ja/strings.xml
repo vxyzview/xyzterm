@@ -163,6 +163,7 @@
     <string name="restore">復元</string>
     <string name="success">成功</string>
     <string name="failed">失敗</string>
+    <string name="setup_failed">セットアップに失敗しました: %s</string>
     <string name="file">ファイル</string>
     <string name="expose_saf">ホームディレクトリの公開</string>
     <string name="expose_saf_desc">システムのファイル選択(SAF)経由でホームディレクトリを外部アプリからアクセス可能にする</string>
