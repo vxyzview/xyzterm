@@ -52,7 +52,7 @@
     <string name="cloning">Dépôt en cours de clonage…</string>
     <string name="error">Erreur</string>
     <string name="unsupported_cpu">Processeur non pris en charge</string>
-    <string name="unsupported_cpu_desc">Aucun Ubuntu pour cette architecture. L'application ne peut pas fonctionner sur cet appareil.</string>
+    <string name="unsupported_cpu_desc">Aucun Ubuntu pour cette architecture. L\'application ne peut pas fonctionner sur cet appareil.</string>
     <string name="open_dir_desc">Ouvrir un dossier via le sélecteur de fichiers du système</string>
     <string name="internal_storage">Stockage interne</string>
     <string name="open_internal_storage">Ouvrir le stockage interne</string>
@@ -160,7 +160,7 @@
     <string name="toggle_word_wrap">(Dés)activer le retour automatique à la ligne</string>
     <string name="success">Succès</string>
     <string name="failed">Échec</string>
-    <string name="setup_failed">Échec de l'installation : %s</string>
+    <string name="setup_failed">Échec de l\'installation : %s</string>
     <string name="file">Fichier</string>
     <string name="folder">Répertoire</string>
     <string name="support_desc">Soutenir le développement</string>

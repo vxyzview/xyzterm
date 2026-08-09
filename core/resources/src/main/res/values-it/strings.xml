@@ -61,7 +61,7 @@
     <string name="cloning">Clonazione repository in corso…</string>
     <string name="error">Errore</string>
     <string name="unsupported_cpu">CPU non supportata</string>
-    <string name="unsupported_cpu_desc">Nessuna Ubuntu per questa architettura. L'app non può girare su questo dispositivo.</string>
+    <string name="unsupported_cpu_desc">Nessuna Ubuntu per questa architettura. L\'app non può girare su questo dispositivo.</string>
     <string name="open_dir_desc">Apri una cartella tramite il selettore file di sistema</string>
     <string name="internal_storage">Archiviazione interna</string>
     <string name="open_internal_storage">Apri archiviazione interna</string>
