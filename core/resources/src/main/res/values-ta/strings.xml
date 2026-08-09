@@ -5,6 +5,7 @@
     <string name="replace">மாற்றவும்</string>
     <string name="share">பங்கு</string>
     <string name="delete">நீக்கு</string>
+    <string name="delete_session">அமர்வை நீக்கு</string>
     <string name="add_file">வெளிப்புற கோப்பைச் சேர்க்கவும்</string>
     <string name="replace_all">Followeall</string>
     <string name="apply">இடு</string>
@@ -43,6 +44,7 @@
     <string name="close">மூடு</string>
     <string name="cancel">ரத்துசெய்</string>
     <string name="exit">வெளியேறு</string>
+    <string name="logout">வெளியேறு</string>
     <string name="oled">கருப்பு கருப்பொருள்</string>
     <string name="word_wrap">சொல் மடக்கு</string>
     <string name="keep_drawer_locked">டிராயரை பூட்டிக் கொள்ளுங்கள்</string>
@@ -123,6 +125,7 @@
     <string name="txt_word_wrap_desc">உரை கோப்புகளை தானாக மடிக்கவும்</string>
     <string name="manage_editor_font">எடிட்டர் எழுத்துருக்களை நிர்வகிக்கவும்</string>
     <string name="default_encoding">இயல்பு குறியாக்கம்</string>
+    <string name="input">உள்ளீடு</string>
     <string name="other">மற்றொன்று</string>
     <string name="content">உள்ளடக்கம்</string>
     <string name="fonts">எழுத்துருக்கள்</string>

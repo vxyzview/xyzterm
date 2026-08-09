@@ -23,12 +23,14 @@
     <string name="save_as">Tallenna nimellä</string>
     <string name="paste">Liitä</string>
     <string name="delete">Poista</string>
+    <string name="delete_session">Poista istunto</string>
     <string name="close_this">Sulje tämä</string>
     <string name="close_others">Sulje muut</string>
     <string name="close_all">Sulje kaikki</string>
     <string name="close">Sulje</string>
     <string name="cancel">Peruuta</string>
     <string name="exit">Poistu</string>
+    <string name="logout">Kirjaudu ulos</string>
     <string name="oled">Musta teema</string>
     <string name="word_wrap">Rivinvaihto</string>
     <string name="keep_drawer_locked">Lukitse paneeli</string>
@@ -61,4 +63,5 @@
     <string name="branch">Haara</string>
     <string name="show_line_number">Näytä rivinumerot</string>
     <string name="text_size">Tekstin koko</string>
+    <string name="input">Syöte</string>
 </resources>

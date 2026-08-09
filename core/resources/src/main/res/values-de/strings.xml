@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Löschen</string>
+    <string name="delete_session">Sitzung löschen</string>
     <string name="open_directory">Ein Verzeichnis öffnen</string>
     <string name="wait">Bitte warten …</string>
     <string name="save_all">Alles speichern</string>
@@ -38,6 +39,7 @@
     <string name="unsupported_content">Nicht unterstützter Inhalt</string>
     <string name="copy">Kopieren</string>
     <string name="exit">Beenden</string>
+    <string name="logout">Abmelden</string>
     <string name="attention">Achtung</string>
     <string name="add_file">Externe Datei hinzufügen</string>
     <string name="highlighting">Syntaxhervorhebung</string>
@@ -113,6 +115,7 @@
     <string name="manage_editor_font">Editor-Schriftarten verwalten</string>
     <string name="default_encoding">Standardcodierung</string>
     <string name="default_encoding_desc">Editor-Standardcodierung</string>
+    <string name="input">Eingabe</string>
     <string name="other">Sonstiges</string>
     <string name="content">Inhalt</string>
     <string name="fonts">Schriftarten</string>

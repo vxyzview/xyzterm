@@ -23,12 +23,14 @@
     <string name="save_as">Farklı kaydet</string>
     <string name="paste">Yapıştır</string>
     <string name="delete">Sil</string>
+    <string name="delete_session">Oturumu sil</string>
     <string name="close_this">Bunu kapat</string>
     <string name="close_others">Diğerlerini kapat</string>
     <string name="close_all">Hepsini kapat</string>
     <string name="close">Kapat</string>
     <string name="cancel">İptal et</string>
     <string name="exit">Çıkış</string>
+    <string name="logout">Çıkış</string>
     <string name="oled">Koyu tema</string>
     <string name="word_wrap">Satır kaydırma</string>
     <string name="keep_drawer_locked">Paneli sabitle</string>
@@ -117,6 +119,7 @@
     <string name="manage_editor_font">Editörün yazı tiplerini yönet</string>
     <string name="default_encoding">Varsayılan kodlama</string>
     <string name="default_encoding_desc">Varsayılan editör metin kodlaması</string>
+    <string name="input">Giriş</string>
     <string name="other">Diğer</string>
     <string name="content">İçerik</string>
     <string name="fonts">Yazı Tipleri</string>

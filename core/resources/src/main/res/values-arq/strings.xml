@@ -11,4 +11,7 @@
     <string name="save_all">حفظ الكل</string>
     <string name="undo">تراجع</string>
     <string name="settings">اعدادات</string>
+    <string name="input">إدخال</string>
+    <string name="delete_session">حذف الجلسة</string>
+    <string name="logout">تسجيل الخروج</string>
 </resources>

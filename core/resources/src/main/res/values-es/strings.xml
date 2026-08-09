@@ -25,12 +25,14 @@
     <string name="save_as">Guardar como</string>
     <string name="paste">Pegar</string>
     <string name="delete">Eliminar</string>
+    <string name="delete_session">Eliminar sesión</string>
     <string name="close_this">Cierra esto</string>
     <string name="close_others">Cerrar otros</string>
     <string name="close_all">Cerrar todo</string>
     <string name="close">Cerrar</string>
     <string name="cancel">Cancelar</string>
     <string name="exit">Salir</string>
+    <string name="logout">Cerrar sesión</string>
     <string name="oled">Tema oscuro</string>
     <string name="word_wrap">Ajuste de línea</string>
     <string name="keep_drawer_locked">Mantener el cajón bloqueado</string>
@@ -104,6 +106,7 @@
     <string name="manage_editor_font">Gestionar tipografías del editor</string>
     <string name="default_encoding">Codificación por defecto</string>
     <string name="default_encoding_desc">Codificación predeterminada del editor</string>
+    <string name="input">Entrada</string>
     <string name="other">Otro</string>
     <string name="content">Contenido</string>
     <string name="fonts">Fuentes</string>

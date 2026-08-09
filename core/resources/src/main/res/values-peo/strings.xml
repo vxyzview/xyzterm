@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="input">ورودی</string>
+    <string name="delete_session">حذف جلسه</string>
+    <string name="logout">خروج</string>
 </resources>

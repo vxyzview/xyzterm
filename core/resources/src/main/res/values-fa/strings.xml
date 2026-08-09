@@ -22,12 +22,14 @@
     <string name="open_with">باز کردن با…</string>
     <string name="save_as">ذخیره به عنوان</string>
     <string name="delete">حذف</string>
+    <string name="delete_session">حذف جلسه</string>
     <string name="close_all">بستن همه</string>
     <string name="close_others">بستن بقیه</string>
     <string name="close_this">بستن این</string>
     <string name="close">بستن</string>
     <string name="cancel">لغو</string>
     <string name="exit">خروج</string>
+    <string name="logout">خروج</string>
     <string name="attention">توجه</string>
     <string name="cant_handle">برنامه ای برای باز کردن فایل پیدا نشد</string>
     <string name="replace_all">جایگزین کردن همه</string>
@@ -98,6 +100,7 @@
     <string name="check_for_updates_desc">برسی دوره ای برای به‌روزرسانی ها</string>
     <string name="click_open">برای باز کردن فایل اینجا کلیک کنید</string>
     <string name="manage_editor_font">مدیریت فونت های ویرایشگر</string>
+    <string name="input">ورودی</string>
     <string name="other">سایر</string>
     <string name="files_unsaved">فایل‌ها ذخیره نشده‌اند</string>
     <string name="warning">هشدار</string>

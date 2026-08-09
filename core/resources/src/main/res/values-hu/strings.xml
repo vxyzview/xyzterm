@@ -20,6 +20,7 @@
     <string name="go_prev">Előzőhöz ugrás</string>
     <string name="close_all">Mind bezárása</string>
     <string name="exit">Kilépés</string>
+    <string name="logout">Kijelentkezés</string>
     <string name="create">Elkészítés</string>
     <string name="open_file">Fájl Megnyitása</string>
     <string name="new_folder">Új Mappa</string>
@@ -33,6 +34,7 @@
     <string name="save_as">Mentés másként</string>
     <string name="paste">Beillesztés</string>
     <string name="delete">Törlés</string>
+    <string name="delete_session">Munkamenet törlése</string>
     <string name="keep_drawer_locked">Polc zárva tartása</string>
     <string name="restart">Újraindítás</string>
     <string name="download">Letöltés</string>
@@ -77,4 +79,5 @@
     <string name="app_desc">Alapvető alkalmazásbeállítások</string>
     <string name="editor_desc">Alapvető szerkesztési beállítások</string>
     <string name="terminal_desc">Alapvető terminálbeállítások</string>
+    <string name="input">Bemenet</string>
 </resources>

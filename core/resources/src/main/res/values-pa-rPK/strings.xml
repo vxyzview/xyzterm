@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="input">ਇਨਪੁਟ</string>
+    <string name="delete_session">ਸੈਸ਼ਨ ਮਿਟਾਓ</string>
+    <string name="logout">ਲੌਗ ਆਊਟ</string>
 </resources>

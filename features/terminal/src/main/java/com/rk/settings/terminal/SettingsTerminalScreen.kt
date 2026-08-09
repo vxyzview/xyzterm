@@ -78,20 +78,20 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                     default = !Settings.sandbox,
                     sideEffect = { Settings.sandbox = !it },
                 )
-            }
 
-            PreferenceList(
-                label = "SECCOMP",
-                description = stringResource(strings.seccomp_desc),
-                items =
-                    listOf(
-                        "unspecified" to stringResource(strings.seccomp_unspecified),
-                        "no" to stringResource(strings.seccomp_no_seccomp),
-                        "yes" to stringResource(strings.seccomp_seccomp),
-                    ),
-                selectedItem = Settings.seccomp_mode,
-                onItemSelected = { Settings.seccomp_mode = it },
-            )
+                PreferenceList(
+                    label = "SECCOMP",
+                    description = stringResource(strings.seccomp_desc),
+                    items =
+                        listOf(
+                            "unspecified" to stringResource(strings.seccomp_unspecified),
+                            "no" to stringResource(strings.seccomp_no_seccomp),
+                            "yes" to stringResource(strings.seccomp_seccomp),
+                        ),
+                    selectedItem = Settings.seccomp_mode,
+                    onItemSelected = { Settings.seccomp_mode = it },
+                )
+            }
 
             NextScreenCard(
                 label = stringResource(strings.terminal_health),
@@ -287,7 +287,7 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
             )
         }
 
-        PreferenceGroup(heading = stringResource(strings.other)) {
+        PreferenceGroup(heading = stringResource(strings.input)) {
             NextScreenCard(
                 label = stringResource(strings.change_extra_keys),
                 description = stringResource(strings.change_extra_keys_desc),

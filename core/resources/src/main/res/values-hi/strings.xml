@@ -24,12 +24,14 @@
     <string name="save_as">अलग नाम से सेव करें</string>
     <string name="paste">पेस्ट करें</string>
     <string name="delete">डिलीट करें</string>
+    <string name="delete_session">सत्र हटाएं</string>
     <string name="close_this">यह बंद करें</string>
     <string name="close_others">बाकी बंद करें</string>
     <string name="close_all">सब बंद करें</string>
     <string name="close">बंद करें</string>
     <string name="cancel">कैंसिल</string>
     <string name="exit">बाहर निकलें</string>
+    <string name="logout">लॉग आउट</string>
     <string name="oled">ब्लैक थीम</string>
     <string name="word_wrap">वर्ड रैप</string>
     <string name="keep_drawer_locked">ड्रॉअर लॉक रखें</string>
@@ -118,6 +120,7 @@
     <string name="manage_editor_font">एडिटर फ़ॉन्ट प्रबंधित करें</string>
     <string name="default_encoding">डिफ़ॉल्ट एन्कोडिंग</string>
     <string name="default_encoding_desc">एडिटर की डिफ़ॉल्ट एन्कोडिंग</string>
+    <string name="input">इनपुट</string>
     <string name="other">अन्य</string>
     <string name="content">कंटेंट</string>
     <string name="fonts">फ़ॉन्ट्स</string>

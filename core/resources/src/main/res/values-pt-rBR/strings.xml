@@ -22,12 +22,14 @@
     <string name="save_as">Salvar como</string>
     <string name="paste">Colar</string>
     <string name="delete">Excluir</string>
+    <string name="delete_session">Excluir sessão</string>
     <string name="close_this">Fechar esta</string>
     <string name="close_others">Fechar os outros</string>
     <string name="close_all">Fechar todos</string>
     <string name="close">Fechar</string>
     <string name="cancel">Cancelar</string>
     <string name="exit">Sair</string>
+    <string name="logout">Sair</string>
     <string name="oled">Tema preto</string>
     <string name="word_wrap">Quebra de linha</string>
     <string name="keep_drawer_locked">Manter gaveta travada</string>
@@ -117,6 +119,7 @@
     <string name="manage_editor_font">Gerenciar fontes do editor</string>
     <string name="default_encoding">Codificação padrão</string>
     <string name="default_encoding_desc">Codificação padrão do editor</string>
+    <string name="input">Entrada</string>
     <string name="other">Outro</string>
     <string name="content">Conteúdo</string>
     <string name="fonts">Fontes</string>

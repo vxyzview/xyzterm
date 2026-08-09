@@ -9,6 +9,7 @@
     <string name="check_for_updates">Kontrolovat pro aktualizace</string>
     <string name="check_for_updates_desc">Pravidelné kontrolování aktualizacích</string>
     <string name="exit">Ukončit</string>
+    <string name="logout">Odhlásit</string>
     <string name="close">Zavřít</string>
     <string name="download">Stáhnout</string>
     <string name="attention">Upozornění</string>
@@ -64,6 +65,7 @@
     <string name="paste">Vložit</string>
     <string name="close_this">Zavřít toto</string>
     <string name="delete">Odstranit</string>
+    <string name="delete_session">Smazat relaci</string>
     <string name="close_others">Zavřít ostatní</string>
     <string name="close_all">Zavřít všechno</string>
     <string name="cancel">Zrušit</string>
@@ -122,6 +124,7 @@
     <string name="word_wrap_desc">Zapnout zalamování slov ve všech editorů</string>
     <string name="txt_word_wrap">Zalamovat txt soubory</string>
     <string name="default_encoding_desc">Výchozí kódování v editoru</string>
+    <string name="input">Vstup</string>
     <string name="other">Jiný</string>
     <string name="add_font_desc">Vyberte TTF font z úložiště</string>
     <string name="txt_word_wrap_desc">Automaticky zalamuje txt soubory</string>

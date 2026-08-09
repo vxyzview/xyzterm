@@ -23,12 +23,14 @@
     <string name="save_as">Simpan sebagai</string>
     <string name="paste">Tempel</string>
     <string name="delete">Hapus</string>
+    <string name="delete_session">Hapus sesi</string>
     <string name="close_this">Tutup ini</string>
     <string name="close_others">Tutup lainnya</string>
     <string name="close_all">Tutup semua</string>
     <string name="close">Tutup</string>
     <string name="cancel">Batal</string>
     <string name="exit">Keluar</string>
+    <string name="logout">Keluar</string>
     <string name="oled">Tema hitam</string>
     <string name="word_wrap">Bungkus kata</string>
     <string name="keep_drawer_locked">Biarkan laci tetap terkunci</string>
@@ -110,6 +112,7 @@
     <string name="txt_word_wrap_desc">Bungkus file TXT secara otomatis</string>
     <string name="manage_editor_font">Kelola font editor</string>
     <string name="default_encoding_desc">Pengkodean bawaan editor</string>
+    <string name="input">Input</string>
     <string name="other">Lainnya</string>
     <string name="content">Isi</string>
     <string name="font_added">Font berhasil ditambahkan</string>

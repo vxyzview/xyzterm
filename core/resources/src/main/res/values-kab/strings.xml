@@ -15,7 +15,9 @@
     <string name="rename">Snifel isem</string>
     <string name="paste">Senṭeḍ</string>
     <string name="delete">Kkes</string>
+    <string name="delete_session">Kkes asquen</string>
     <string name="exit">Ffeɣ</string>
+    <string name="logout">Ffegh</string>
     <string name="open">Ldi</string>
     <string name="editor">Amaẓrag</string>
     <string name="create">Snulfu-d</string>
@@ -38,6 +40,7 @@
     <string name="version">Lqem</string>
     <string name="run">Selḥu</string>
     <string name="content">Agbur</string>
+    <string name="input">Asekcem</string>
     <string name="other">Wayeḍ</string>
     <string name="close_this">Model wa</string>
     <string name="new_folder">Akaram amaynut</string>

@@ -23,12 +23,14 @@
     <string name="save_as">I-save bilang</string>
     <string name="paste">Idikit</string>
     <string name="delete">Tanggalin</string>
+    <string name="delete_session">Burahin ang session</string>
     <string name="close_this">Isara ito</string>
     <string name="close_others">Isara ang iba</string>
     <string name="close_all">Isara lahat</string>
     <string name="close">Isara</string>
     <string name="cancel">Kanselahin</string>
     <string name="exit">Lumabas</string>
+    <string name="logout">Mag-sign out</string>
     <string name="oled">Itim na tema</string>
     <string name="word_wrap">Balot ng salita</string>
     <string name="keep_drawer_locked">Panatilihing naka-lock ang drawer</string>
@@ -45,4 +47,5 @@
     <string name="apply">Mag-apply</string>
     <string name="open_in_terminal">Buksan sa Terminal</string>
     <string name="file_open_denied">Ang pagbubukas ng file na ito sa iba pang mga app ay hindi pinahihintulutan</string>
+    <string name="input">Input</string>
 </resources>

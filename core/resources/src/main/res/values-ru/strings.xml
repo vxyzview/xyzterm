@@ -23,12 +23,14 @@
     <string name="save_as">Сохранить как</string>
     <string name="paste">Вставить</string>
     <string name="delete">Удалить</string>
+    <string name="delete_session">Удалить сессию</string>
     <string name="close_this">Закрыть это</string>
     <string name="close_others">Закрыть другие</string>
     <string name="close_all">Закрыть все</string>
     <string name="close">Закрыть</string>
     <string name="cancel">Отмена</string>
     <string name="exit">Выйти</string>
+    <string name="logout">Выйти</string>
     <string name="oled">Тёмная тема</string>
     <string name="word_wrap">Перенос слов</string>
     <string name="keep_drawer_locked">Оставить панель закрытой</string>
@@ -116,6 +118,7 @@
     <string name="txt_word_wrap_desc">Автоматически переносить строки в TXT-файлах</string>
     <string name="content">Контент</string>
     <string name="default_encoding_desc">Кодировка редактора по умолчанию</string>
+    <string name="input">Ввод</string>
     <string name="other">Другое</string>
     <string name="fonts">Шрифты</string>
     <string name="font_added">Шрифт успешно добавлен</string>

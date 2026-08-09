@@ -23,12 +23,14 @@
     <string name="save_as">Зберегти як</string>
     <string name="paste">Вставити</string>
     <string name="delete">Видалити</string>
+    <string name="delete_session">Видалити сесію</string>
     <string name="close_this">Закрити цей файл</string>
     <string name="close_others">Закрити інші</string>
     <string name="close_all">Закрити все</string>
     <string name="close">Закрити</string>
     <string name="cancel">Скасувати</string>
     <string name="exit">Вийти</string>
+    <string name="logout">Вийти</string>
     <string name="oled">Темна тема</string>
     <string name="word_wrap">Перенесення слова</string>
     <string name="keep_drawer_locked">Тримати вкладку заблокованою</string>
@@ -117,6 +119,7 @@
     <string name="manage_editor_font">Керування шрифтами редактора</string>
     <string name="default_encoding">Кодування за замовчуванням</string>
     <string name="default_encoding_desc">Кодування за замовчуванням в редакторі</string>
+    <string name="input">Ввід</string>
     <string name="other">Інше</string>
     <string name="content">Вміст</string>
     <string name="fonts">Шрифти</string>

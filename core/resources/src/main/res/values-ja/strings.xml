@@ -24,6 +24,7 @@
     <string name="close_all">全て閉じる</string>
     <string name="cancel">キャンセル</string>
     <string name="exit">終了</string>
+    <string name="logout">ログアウト</string>
     <string name="word_wrap">ワードラップ</string>
     <string name="keep_drawer_locked">引き出しをロック</string>
     <string name="refresh">再読み込み</string>
@@ -76,6 +77,7 @@
     <string name="wait">お待ちください…</string>
     <string name="report_issue">問題を報告</string>
     <string name="delete">削除</string>
+    <string name="delete_session">セッションを削除</string>
     <string name="oled">ブラックテーマ</string>
     <string name="restart">再起動</string>
     <string name="terminal">ターミナル</string>
@@ -107,6 +109,7 @@
     <string name="check_for_updates_desc">定期的にアップデートを確認する</string>
     <string name="run">実行</string>
     <string name="default_encoding">デフォルトのエンコーディング</string>
+    <string name="input">入力</string>
     <string name="other">その他</string>
     <string name="font_added">フォントの追加に成功しました</string>
     <string name="add_font">新しいフォントを追加</string>

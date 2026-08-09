@@ -23,12 +23,14 @@
     <string name="save_as">Spara som</string>
     <string name="paste">Klistra in</string>
     <string name="delete">Ta bort</string>
+    <string name="delete_session">Ta bort session</string>
     <string name="close_this">Stäng den här</string>
     <string name="close_others">Stäng andra</string>
     <string name="close_all">Stäng alla</string>
     <string name="close">Stäng</string>
     <string name="cancel">Avbryt</string>
     <string name="exit">Avsluta</string>
+    <string name="logout">Logga ut</string>
     <string name="oled">Mörkt tema</string>
     <string name="word_wrap">Radbryt</string>
     <string name="keep_drawer_locked">Håll sidomeny stängd</string>
@@ -117,6 +119,7 @@
     <string name="manage_editor_font">Hantera teckensnitt för editor</string>
     <string name="default_encoding">Default encoding</string>
     <string name="default_encoding_desc">Editor default encoding</string>
+    <string name="input">Indata</string>
     <string name="other">Annat</string>
     <string name="content">Innehåll</string>
     <string name="fonts">Teckensnitt</string>

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,11 +26,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -132,6 +134,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val currentTheme = LocalThemeHolder.current
+    val currentSessionName = terminalActivity.sessionBinder?.get()?.getService()?.currentSession?.value ?: "main"
 
     DisposableEffect(Unit) { onDispose { keyboardController?.hide() } }
 
@@ -151,7 +154,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                 Scaffold(
                     topBar = {
                         TopAppBar(
-                            title = { Text(text = stringResource(strings.terminal)) },
+                            title = { Text(text = currentSessionName) },
                             navigationIcon = {
                                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                     Icon(Icons.Default.Menu, null)
@@ -400,43 +403,34 @@ private fun TerminalDrawer(drawerWidth: Dp, terminalActivity: Terminal, navContr
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(text = stringResource(strings.sessions), style = MaterialTheme.typography.titleLarge)
-                Row(horizontalArrangement = Arrangement.End) {
-                    IconButton(
-                        onClick = {
-                            fun generateUniqueString(existingStrings: List<String>): String {
-                                var index = 1
-                                var newString: String
+                IconButton(
+                    onClick = {
+                        fun generateUniqueString(existingStrings: List<String>): String {
+                            var index = 1
+                            var newString: String
 
-                                do {
-                                    newString = "main #$index"
-                                    index++
-                                } while (newString in existingStrings)
+                            do {
+                                newString = "main #$index"
+                                index++
+                            } while (newString in existingStrings)
 
-                                return newString
-                            }
-                            terminalView.get()?.let {
-                                val client = TerminalBackEnd()
-                                terminalActivity.sessionBinder
-                                    ?.get()!!
-                                    .createSession(
-                                        generateUniqueString(
-                                            terminalActivity.sessionBinder?.get()!!.getService().sessionList
-                                        ),
-                                        client,
-                                        terminalActivity,
-                                    )
-                            }
+                            return newString
                         }
-                    ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(strings.add_session))
+                        terminalView.get()?.let {
+                            val client = TerminalBackEnd()
+                            terminalActivity.sessionBinder
+                                ?.get()!!
+                                .createSession(
+                                    generateUniqueString(
+                                        terminalActivity.sessionBinder?.get()!!.getService().sessionList
+                                    ),
+                                    client,
+                                    terminalActivity,
+                                )
+                        }
                     }
-
-                    IconButton(onClick = { navController.navigate(SettingsRoutes.TerminalSettings.route) }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Settings,
-                            contentDescription = stringResource(strings.settings),
-                        )
-                    }
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(strings.add_session))
                 }
             }
 
@@ -451,55 +445,76 @@ private fun TerminalDrawer(drawerWidth: Dp, terminalActivity: Terminal, navContr
                             onClick = { terminalActivity.changeSession(sessionId) },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                             badge = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                IconButton(
+                                    onClick = {
+                                        sessionToRename = sessionId
+                                        renameValue = sessionId
+                                        renameError = null
+                                        showRenameDialog = true
+                                    },
+                                    modifier = Modifier.size(24.dp),
                                 ) {
-                                    IconButton(
-                                        onClick = {
-                                            sessionToRename = sessionId
-                                            renameValue = sessionId
-                                            renameError = null
-                                            showRenameDialog = true
-                                        },
-                                        modifier = Modifier.size(24.dp),
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.Edit,
-                                            contentDescription = stringResource(strings.rename),
-                                            modifier = Modifier.size(20.dp),
-                                        )
-                                    }
-
-                                    IconButton(
-                                        onClick = {
-                                            if (isSelected) {
-                                                val index = service.sessionList.indexOf(sessionId)
-                                                val sessionBefore = service.sessionList.getOrNull(index - 1)
-                                                val sessionAfter = service.sessionList.getOrNull(index + 1)
-                                                val neighborSession = sessionBefore ?: sessionAfter
-                                                neighborSession?.let { terminalActivity.changeSession(it) }
-                                            }
-
-                                            terminalActivity.sessionBinder?.get()?.terminateSession(sessionId)
-
-                                            if (service.sessionList.isEmpty()) {
-                                                terminalActivity.finish()
-                                                service.actionExit()
-                                            }
-                                        },
-                                        modifier = Modifier.size(24.dp),
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.Delete,
-                                            contentDescription = stringResource(strings.delete),
-                                            modifier = Modifier.size(20.dp),
-                                        )
-                                    }
+                                    Icon(
+                                        imageVector = Icons.Outlined.Edit,
+                                        contentDescription = stringResource(strings.rename),
+                                        modifier = Modifier.size(20.dp),
+                                    )
                                 }
                             },
                         )
                     }
+                }
+
+                HorizontalDivider()
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val activeSession = service.currentSession.value
+
+                    IconButton(
+                        onClick = {
+                            val index = service.sessionList.indexOf(activeSession)
+                            val sessionBefore = service.sessionList.getOrNull(index - 1)
+                            val sessionAfter = service.sessionList.getOrNull(index + 1)
+                            val neighborSession = sessionBefore ?: sessionAfter
+                            neighborSession?.let { terminalActivity.changeSession(it) }
+
+                            terminalActivity.sessionBinder?.get()?.terminateSession(activeSession)
+
+                            if (service.sessionList.isEmpty()) {
+                                terminalActivity.finish()
+                                service.actionExit()
+                            }
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = stringResource(strings.delete_session),
+                        )
+                    }
+
+                    Text(
+                        text = stringResource(strings.delete_session),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    IconButton(onClick = { service.actionExit() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.Logout,
+                            contentDescription = stringResource(strings.logout),
+                        )
+                    }
+
+                    Text(
+                        text = stringResource(strings.logout),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }

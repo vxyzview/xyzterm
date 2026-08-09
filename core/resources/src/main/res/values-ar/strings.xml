@@ -23,12 +23,14 @@
     <string name="save_as">حفظ باسم</string>
     <string name="paste">لصق</string>
     <string name="delete">حذف</string>
+    <string name="delete_session">حذف الجلسة</string>
     <string name="close_this">إغلاق هذا</string>
     <string name="close_others">إغلاق الآخرين</string>
     <string name="close_all">إغلاق الكل</string>
     <string name="close">إغلاق</string>
     <string name="cancel">إلغاء</string>
     <string name="exit">خروج</string>
+    <string name="logout">تسجيل الخروج</string>
     <string name="oled">السمة السوداء</string>
     <string name="word_wrap">التفاف النص</string>
     <string name="keep_drawer_locked">بقاء الدرج مغلقا</string>
@@ -117,6 +119,7 @@
     <string name="manage_editor_font">إدارة خطوط المحرر</string>
     <string name="default_encoding">الترميز الافتراضي</string>
     <string name="default_encoding_desc">الترميز الافتراضي عند فتح وإنشاء ملفات</string>
+    <string name="input">إدخال</string>
     <string name="other">أشياء أخرى</string>
     <string name="add_font_desc">اختيار ملف TTF من وحدة التخزين</string>
     <string name="file_unsaved">ملف غير محفوظ</string>

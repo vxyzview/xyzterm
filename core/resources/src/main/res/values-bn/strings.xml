@@ -23,12 +23,14 @@
     <string name="save_as">সেইভ এজ</string>
     <string name="paste">পেস্ট করুন</string>
     <string name="delete">মুছে ফেলুন</string>
+    <string name="delete_session">সেশন মুছুন</string>
     <string name="close_this">বন্ধ করুন</string>
     <string name="close_others">অন্যসব বন্ধ করুন</string>
     <string name="close_all">সব বন্ধ করুন</string>
     <string name="close">বন্ধ করুন</string>
     <string name="cancel">বাতিল</string>
     <string name="exit">বের হন</string>
+    <string name="logout">প্রস্থান</string>
     <string name="oled">ডার্ক থিম</string>
     <string name="word_wrap">ওয়ার্ড wrap</string>
     <string name="keep_drawer_locked">ড্রয়ার লক রাখুন</string>
@@ -65,4 +67,5 @@
     <string name="editor">সম্পাদক</string>
     <string name="show_line_number">লাইনের সংখ্যা দেখুন</string>
     <string name="pin_line_number">লাইন নম্বর পিন করুন</string>
+    <string name="input">ইনপুট</string>
 </resources>

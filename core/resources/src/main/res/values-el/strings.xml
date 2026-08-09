@@ -23,12 +23,14 @@
     <string name="save_as">Αποθήκευση ως</string>
     <string name="paste">Επικόλληση</string>
     <string name="delete">Διαγραφή</string>
+    <string name="delete_session">Διαγραφή συνεδρίας</string>
     <string name="close_this">Κλείσιμο αυτού</string>
     <string name="close_others">Κλείσιμο άλλων</string>
     <string name="close_all">Κλείσιμο όλων</string>
     <string name="close">Κλείσιμο</string>
     <string name="cancel">Ακύρωση</string>
     <string name="exit">Έξοδος</string>
+    <string name="logout">Αποσύνδεση</string>
     <string name="oled">Μαύρο θέμα</string>
     <string name="word_wrap">Αναδίπλωση λέξεων</string>
     <string name="keep_drawer_locked">Κρατήστε το συρτάρι κλειδωμένο</string>
@@ -141,6 +143,7 @@
     <string name="installed">Εγκατεστημένο</string>
     <string name="extra_keys_desc">Εμφάνιση επιπλέον πλήκτρων πάνω από το πληκτρολόγιο</string>
     <string name="run">Εκτέλεση</string>
+    <string name="input">Είσοδος</string>
     <string name="other">Άλλο</string>
     <string name="content">Περιεχόμενο</string>
     <string name="fonts">Γραμματοσειρές</string>

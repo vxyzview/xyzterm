@@ -23,12 +23,14 @@
     <string name="save_as">Запази като</string>
     <string name="paste">Поставяне</string>
     <string name="delete">Изтриване</string>
+    <string name="delete_session">Изтриване на сесия</string>
     <string name="close_this">Затвори това</string>
     <string name="close_others">Затвори други</string>
     <string name="close_all">Затвори всички</string>
     <string name="close">Затвори</string>
     <string name="cancel">Отказ</string>
     <string name="exit">Изход</string>
+    <string name="logout">Изход</string>
     <string name="oled">Черна тема</string>
     <string name="word_wrap">Пренасяне на думи</string>
     <string name="keep_drawer_locked">Дръжте чекмеджето заключено</string>
@@ -118,6 +120,7 @@
     <string name="manage_editor_font">Управление на шрифтовете на редактора</string>
     <string name="default_encoding">Кодиране по подразбиране</string>
     <string name="default_encoding_desc">Кодиране по подразбиране на редактора</string>
+    <string name="input">Вход</string>
     <string name="other">Друго</string>
     <string name="content">Съдържание</string>
     <string name="fonts">Шрифтове</string>

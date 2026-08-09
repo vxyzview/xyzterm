@@ -12,7 +12,9 @@
     <string name="open_file">打开文件</string>
     <string name="rename">重命名</string>
     <string name="delete">删除</string>
+    <string name="delete_session">删除会话</string>
     <string name="exit">退出</string>
+    <string name="logout">退出</string>
     <string name="oled">纯黑主题</string>
     <string name="word_wrap">自动换行</string>
     <string name="restart">重新启动</string>
@@ -114,6 +116,7 @@
     <string name="add_font">添加新字体</string>
     <string name="encoding_warning">不建议修改默认的 UTF-8 编码为其他编码，因为这可能会导致文件损坏。除非你了解相关的知识，并做好了相应的备份。</string>
     <string name="default_encoding_desc">编辑器的默认编码</string>
+    <string name="input">输入</string>
     <string name="other">其他</string>
     <string name="content">内容</string>
     <string name="fonts">字体</string>

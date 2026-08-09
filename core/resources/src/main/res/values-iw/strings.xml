@@ -21,11 +21,13 @@
     <string name="save_as">שמור כ</string>
     <string name="paste">הדבקה</string>
     <string name="delete">מחיקה</string>
+    <string name="delete_session">מחק הפעלה</string>
     <string name="close_others">סגור אחרים</string>
     <string name="close_all">סגור הכל</string>
     <string name="close">סגור</string>
     <string name="cancel">ביטול</string>
     <string name="exit">יציאה</string>
+    <string name="logout">התנתק</string>
     <string name="oled">עיצוב שחור</string>
     <string name="word_wrap">גלישת טקסט</string>
     <string name="close_this">סגור את זה</string>
@@ -81,6 +83,7 @@
     <string name="click_open">הקש פה כדי לפתוח קובץ</string>
     <string name="run">הרץ</string>
     <string name="manage_editor_font">ניהול גופני עורך</string>
+    <string name="input">קלט</string>
     <string name="other">אחר</string>
     <string name="content">תוכן</string>
     <string name="fonts">גופנים</string>

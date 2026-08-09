@@ -24,12 +24,14 @@
     <string name="save_as">Save as</string>
     <string name="paste">Paste</string>
     <string name="delete">Delete</string>
+    <string name="delete_session">Delete session</string>
     <string name="close_this">Close this</string>
     <string name="close_others">Close others</string>
     <string name="close_all">Close all</string>
     <string name="close">Close</string>
     <string name="cancel">Cancel</string>
     <string name="exit">Exit</string>
+    <string name="logout">Log out</string>
     <string name="oled">Black theme</string>
     <string name="word_wrap">Word wrap</string>
     <string name="keep_drawer_locked">Keep drawer locked</string>
@@ -127,6 +129,7 @@
     <string name="manage_editor_font">Manage editor fonts</string>
     <string name="default_encoding">Default encoding</string>
     <string name="default_encoding_desc">Editor default encoding</string>
+    <string name="input">Input</string>
     <string name="other">Other</string>
     <string name="content">Content</string>
     <string name="fonts">Fonts</string>

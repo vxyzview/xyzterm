@@ -32,11 +32,13 @@
     <string name="save_as">Salva come</string>
     <string name="paste">Incolla</string>
     <string name="delete">Elimina</string>
+    <string name="delete_session">Elimina sessione</string>
     <string name="close_this">Chiudi questo</string>
     <string name="close_others">Chiudi altri</string>
     <string name="close_all">Chiudi tutto</string>
     <string name="cancel">Annulla</string>
     <string name="exit">Esci</string>
+    <string name="logout">Esci</string>
     <string name="oled">Tema nero</string>
     <string name="word_wrap">A capo automatico</string>
     <string name="keep_drawer_locked">Mantieni il drawer bloccato</string>
@@ -114,6 +116,7 @@
     <string name="add_font_desc">Scegli un carattere TTF dall\'archiviazione</string>
     <string name="manage_editor_font">Gestisci font dell\'editor</string>
     <string name="default_encoding">Codificazione predefinita</string>
+    <string name="input">Input</string>
     <string name="other">Altro</string>
     <string name="delete_font">Elimina carattere</string>
     <string name="fonts">Caratteri</string>

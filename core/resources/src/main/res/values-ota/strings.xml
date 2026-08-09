@@ -4,6 +4,7 @@
     <string name="go_next">صوڭراكی</string>
     <string name="go_prev">اونجەكی</string>
     <string name="delete">سیل</string>
+    <string name="delete_session">Girişi sil</string>
     <string name="create">اولوشدر</string>
     <string name="apply">ایگولا</string>
     <string name="path">یول</string>
@@ -15,6 +16,7 @@
     <string name="auto_mode">اوتوماتیك</string>
     <string name="about">حقندە</string>
     <string name="run">چالیشدر</string>
+    <string name="input">Giriş</string>
     <string name="other">دیگر</string>
     <string name="fonts">یازی تیپلری</string>
     <string name="discard">آطمە</string>
@@ -42,4 +44,5 @@
     <string name="undo">گری آل</string>
     <string name="search">آرامە</string>
     <string name="share">پایلاش</string>
+    <string name="logout">Çıxış</string>
 </resources>

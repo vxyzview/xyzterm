@@ -23,12 +23,14 @@
     <string name="save_as">Zapisz jako</string>
     <string name="paste">Wklej</string>
     <string name="delete">Usuń</string>
+    <string name="delete_session">Usuń sesję</string>
     <string name="close_this">Zamknij obecny</string>
     <string name="close_others">Zamknij resztę</string>
     <string name="close_all">Zamknij wszystkie</string>
     <string name="close">Zamknij</string>
     <string name="cancel">Anuluj</string>
     <string name="exit">Wyjdź</string>
+    <string name="logout">Wyloguj</string>
     <string name="oled">Czarny motyw</string>
     <string name="word_wrap">Zawijanie tekstu</string>
     <string name="keep_drawer_locked">Zablokuj szufladę</string>
@@ -118,6 +120,7 @@
     <string name="manage_editor_font">Zarządzaj czcionkami edytora</string>
     <string name="default_encoding">Domyślne kodowanie</string>
     <string name="default_encoding_desc">Domyślne kodowanie w edytorze</string>
+    <string name="input">Wprowadzanie</string>
     <string name="other">Inne</string>
     <string name="content">Treść</string>
     <string name="fonts">Czcionki</string>

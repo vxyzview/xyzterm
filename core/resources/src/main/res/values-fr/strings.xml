@@ -18,10 +18,12 @@
     <string name="save_as">Enregistrer sous</string>
     <string name="paste">Coller</string>
     <string name="delete">Supprimer</string>
+    <string name="delete_session">Supprimer la session</string>
     <string name="close_this">Fermer</string>
     <string name="new_folder">Nouveau dossier</string>
     <string name="close_others">Fermer les autres</string>
     <string name="exit">Quitter</string>
+    <string name="logout">Se déconnecter</string>
     <string name="word_wrap">Retour à la ligne automatique</string>
     <string name="keep_drawer_locked">Garder le tiroir fermé</string>
     <string name="restart">Redémarrer</string>
@@ -94,6 +96,7 @@
     <string name="txt_word_wrap_desc">Retour à la ligne automatique pour les fichiers TXT</string>
     <string name="default_encoding">Encodage par défaut</string>
     <string name="default_encoding_desc">Encodage par défaut de l’éditeur</string>
+    <string name="input">Saisie</string>
     <string name="other">Autres</string>
     <string name="font_added">Ajout de police réussi</string>
     <string name="delete_font">Supprimer police</string>

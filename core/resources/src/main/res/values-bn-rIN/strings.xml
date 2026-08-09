@@ -20,11 +20,13 @@
     <string name="save_as">হিসাবে সংরক্ষণ করুন</string>
     <string name="paste">পেস্ট</string>
     <string name="delete">মুছুন</string>
+    <string name="delete_session">সেশন মুছুন</string>
     <string name="close_this">এটি বন্ধ করুন</string>
     <string name="close_all">সবগুলি বন্ধ করুন</string>
     <string name="close">বন্ধ</string>
     <string name="cancel">বাতিল করুন</string>
     <string name="exit">বেরিয়ে যান</string>
+    <string name="logout">প্রস্থান</string>
     <string name="oled">ব্ল্যাক নাইট থিম</string>
     <string name="word_wrap">শব্দ মোড়ানো</string>
     <string name="keep_drawer_locked">ড্রয়ার লক রাখুন</string>
@@ -113,4 +115,5 @@
     <string name="duplicate_line">ডুপ্লিকেট লাইন</string>
     <string name="change_extra_keys">অতিরিক্ত কী সম্পাদনা করুন</string>
     <string name="change_extra_keys_desc">কীবোর্ডের উপরে দেখানো অতিরিক্ত কীগুলি কাস্টমাইজ করুন</string>
+    <string name="input">ইনপুট</string>
 </resources>
