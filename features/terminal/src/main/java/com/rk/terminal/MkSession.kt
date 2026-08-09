@@ -15,7 +15,6 @@ import com.rk.utils.getSourceDirOfPackage
 import com.rk.utils.getTempDir
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
-import kotlinx.coroutines.runBlocking
 import java.io.File
 
 object MkSession {
@@ -41,7 +40,7 @@ object MkSession {
                 "PATH" to "${System.getenv("PATH")}:${localBinDir(context).absolutePath}",
             )
 
-        val workingDir = runBlocking { cwd ?: getPwd(context) }
+        val workingDir = cwd ?: getPwd(context)
 
         val tmpDir = localDir().child("tmp").child(sessionId)
 
@@ -144,7 +143,7 @@ object MkSession {
     }
 }
 
-suspend fun getPwd(context: Context): String {
+fun getPwd(context: Context): String {
     val pendingWorkingDir = pendingCommand?.workingDir
     if (pendingWorkingDir != null) {
         return pendingWorkingDir

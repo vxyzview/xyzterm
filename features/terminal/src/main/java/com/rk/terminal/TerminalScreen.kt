@@ -157,7 +157,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                             title = { Text(text = currentSessionName) },
                             navigationIcon = {
                                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                    Icon(Icons.Default.Menu, null)
+                                    Icon(Icons.Default.Menu, stringResource(strings.drawer))
                                 }
                             },
                         )
@@ -452,7 +452,7 @@ private fun TerminalDrawer(drawerWidth: Dp, terminalActivity: Terminal, navContr
                                         renameError = null
                                         showRenameDialog = true
                                     },
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(40.dp),
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Edit,

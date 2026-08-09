@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.components.compose.preferences.base.PreferenceLayout
 import com.rk.components.compose.preferences.base.PreferenceTemplate
@@ -124,8 +123,7 @@ fun TerminalCheckScreen() {
                                         style =
                                             MaterialTheme.typography.bodySmall.copy(
                                                 fontFamily = FontFamily.Monospace,
-                                                fontSize = 11.sp,
-                                                lineHeight = 16.sp,
+                                                lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
                                             ),
                                         color =
                                             if (
