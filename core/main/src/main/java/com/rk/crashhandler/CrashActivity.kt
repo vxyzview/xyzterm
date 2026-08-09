@@ -15,8 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -216,7 +214,7 @@ class CrashActivity : ComponentActivity() {
                                         .padding(paddingValues)
                                         .verticalScroll(rememberScrollState()),
                                 fontFamily = FontFamily.Monospace,
-                                fontSize = TextUnit(10f, TextUnitType.Sp),
+                                fontSize = MaterialTheme.typography.bodySmall.fontSize,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                         }

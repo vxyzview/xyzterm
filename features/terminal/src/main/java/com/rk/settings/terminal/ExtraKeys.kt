@@ -31,8 +31,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import com.rk.components.ResetButton
 import com.rk.resources.drawables
@@ -143,7 +141,7 @@ fun TerminalExtraKeys() {
                 textStyle =
                     TextStyle(
                         fontFamily = FontFamily.Monospace,
-                        fontSize = TextUnit(10f, TextUnitType.Sp),
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
                     ),
             )
         }
