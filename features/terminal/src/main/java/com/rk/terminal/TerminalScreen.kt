@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -57,6 +58,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -147,7 +149,13 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                 Scaffold(
                     topBar = {
                         TopAppBar(
-                            title = { Text(text = currentSessionName) },
+                            title = {
+                                Text(
+                                    text = currentSessionName,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            },
                             navigationIcon = {
                                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                     Icon(Icons.Default.Menu, stringResource(strings.drawer))
@@ -394,7 +402,18 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = stringResource(strings.sessions), style = MaterialTheme.typography.titleLarge)
+                Surface(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(start = 16.dp),
+                ) {
+                    Text(
+                        text = stringResource(strings.sessions),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
                 IconButton(
                     onClick = {
                         fun generateUniqueString(existingStrings: List<String>): String {
@@ -436,6 +455,11 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                             selected = isSelected,
                             onClick = { terminalActivity.changeSession(sessionId) },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors =
+                                NavigationDrawerItemDefaults.colors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                ),
                             badge = {
                                 IconButton(
                                     onClick = {

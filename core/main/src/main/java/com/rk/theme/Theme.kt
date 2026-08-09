@@ -75,7 +75,14 @@ fun XedTheme(
         MaterialTheme(
             colorScheme = colorScheme,
             typography = rememberAppTypography(LocalContext.current),
-            shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp)),
+            shapes =
+                MaterialTheme.shapes.copy(
+                    extraSmall = RoundedCornerShape(12.dp),
+                    small = RoundedCornerShape(16.dp),
+                    medium = RoundedCornerShape(20.dp),
+                    large = RoundedCornerShape(28.dp),
+                    extraLarge = RoundedCornerShape(40.dp),
+                ),
         ) {
             Surface(color = MaterialTheme.colorScheme.background) { content() }
         }
