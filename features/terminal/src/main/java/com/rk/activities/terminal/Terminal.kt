@@ -51,6 +51,7 @@ import com.rk.file.FilePermission
 import com.rk.file.child
 import com.rk.file.localBinDir
 import com.rk.file.sandboxDir
+import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings

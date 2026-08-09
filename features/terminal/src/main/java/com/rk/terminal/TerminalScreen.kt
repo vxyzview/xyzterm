@@ -25,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.DrawerValue
@@ -39,6 +38,7 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
@@ -144,8 +144,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
         ResponsiveDrawer(
             drawerState = drawerState,
             fullscreen = false,
-            sheetContent = { TerminalDrawer(terminalActivity, navController) },
-        ) {
+            mainContent = {
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -241,7 +240,9 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                         }
                     }
                 }
-            }
+            },
+        ) {
+            TerminalDrawer(terminalActivity, navController)
         }
     }
 }
@@ -520,17 +521,12 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    IconButton(onClick = { service.actionExit() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.Logout,
-                            contentDescription = stringResource(strings.logout),
+                    TextButton(onClick = { service.actionExit() }) {
+                        Text(
+                            text = stringResource(strings.logout),
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     }
-
-                    Text(
-                        text = stringResource(strings.logout),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
                 }
             }
         }
