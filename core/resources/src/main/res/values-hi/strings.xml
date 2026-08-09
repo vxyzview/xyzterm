@@ -195,4 +195,8 @@
     <string name="no_folder_opened">कोई फ़ोल्डर नहीं खुला</string>
     <string name="cut">कट करें</string>
     <string name="timeout">टाइमआउट के कारण डाउनलोड रद्द हुआ। कृपया सुनिश्चित करें कि आपका इंटरनेट कनेक्शन स्थिर है</string>
+    <string name="developer">डेवलपर</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
 </resources>

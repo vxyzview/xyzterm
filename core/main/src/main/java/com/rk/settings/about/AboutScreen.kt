@@ -71,6 +71,43 @@ fun AboutScreen() {
             )
         }
 
+        PreferenceGroup(heading = stringResource(strings.developer)) {
+            PreferenceTemplate(
+                title = {
+                    Text(
+                        text = stringResource(strings.developer_name),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                },
+                description = {
+                    Text(
+                        text = stringResource(strings.fork_attribution),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+            )
+
+            SettingsItem(
+                label = stringResource(id = strings.upstream_source),
+                description = stringResource(id = strings.upstream_source),
+                isEnabled = true,
+                showSwitch = false,
+                default = false,
+                endWidget = {
+                    Icon(
+                        modifier = Modifier.padding(16.dp),
+                        painter = painterResource(drawables.open_in_new),
+                        contentDescription = null,
+                    )
+                },
+                sideEffect = {
+                    val url = "https://github.com/Xed-Editor/Xed-Editor"
+                    val intent = Intent(Intent.ACTION_VIEW).apply { data = url.toUri() }
+                    context.startActivity(intent)
+                },
+            )
+        }
+
         PreferenceGroup(heading = stringResource(strings.build_info)) {
             PreferenceTemplate(
                 modifier =

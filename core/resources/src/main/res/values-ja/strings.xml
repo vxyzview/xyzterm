@@ -244,6 +244,9 @@
     <string name="use_tabs">タブ文字を挿入</string>
     <string name="use_tabs_desc">スペースではなく実際のタブ文字(\\t)をインデントとして使用する</string>
     <string name="developer">開発者</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">ビルド情報</string>
     <string name="community">コミュニティ</string>
     <string name="failsafe_mode">フェイルセーフ モード</string>

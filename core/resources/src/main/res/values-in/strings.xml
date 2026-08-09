@@ -244,6 +244,9 @@
     <string name="render_whitespace">Tampilkan spasi kosong</string>
     <string name="render_whitespace_desc">Tampilkan spasi, tab, dan baris baru sebagai simbol yang terlihat</string>
     <string name="developer">Pengembang</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">Info build</string>
     <string name="community">Komunitas</string>
     <string name="failsafe_mode">Mode failsafe</string>

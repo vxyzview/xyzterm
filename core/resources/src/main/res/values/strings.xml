@@ -277,6 +277,9 @@
     <string name="format_on_save">Format on save</string>
     <string name="format_on_save_desc">Format the file automatically when saved</string>
     <string name="developer">Developer</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">Build info</string>
     <string name="community">Community</string>
     <string name="failsafe_mode">Failsafe mode</string>

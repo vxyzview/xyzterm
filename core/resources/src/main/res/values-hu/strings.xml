@@ -81,4 +81,8 @@
     <string name="terminal_desc">Alapvető terminálbeállítások</string>
     <string name="input">Bemenet</string>
     <string name="setup_failed">A beállítás sikertelen: %s</string>
+    <string name="developer">Fejlesztő</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
 </resources>

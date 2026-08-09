@@ -244,6 +244,9 @@
     <string name="render_whitespace">Boşlukları göster</string>
     <string name="render_whitespace_desc">Boşlukları, sekmeleri ve satır sonlarını görünür semboller olarak işle</string>
     <string name="developer">Geliştirici</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">Derleme bilgisi</string>
     <string name="community">Topluluk</string>
     <string name="failsafe_mode">Güvenli mod</string>

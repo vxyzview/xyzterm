@@ -252,6 +252,9 @@
     <string name="format_on_save">Форматиране при запазване</string>
     <string name="format_on_save_desc">Автоматично форматиране на файла при запазване</string>
     <string name="developer">Разработчик</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">Информация за изграждането</string>
     <string name="community">Общност</string>
     <string name="failsafe_mode">Режим на безопасност</string>

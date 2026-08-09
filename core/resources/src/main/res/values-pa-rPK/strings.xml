@@ -4,4 +4,8 @@
     <string name="delete_session">ਸੈਸ਼ਨ ਮਿਟਾਓ</string>
     <string name="logout">ਲੌਗ ਆਊਟ</string>
     <string name="setup_failed">ਸੈੱਟਅੱਪ ਅਸਫਲ: %s</string>
+    <string name="developer">ਡਿਵੈਲਪਰ</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
 </resources>

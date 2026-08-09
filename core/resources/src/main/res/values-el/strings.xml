@@ -254,6 +254,9 @@
     <string name="format_on_save">Μορφοποίηση κατά την αποθήκευση</string>
     <string name="format_on_save_desc">Αυτόματη μορφοποίηση του αρχείου κατά την αποθήκευση</string>
     <string name="developer">Προγραμματιστής</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">Πληροφορίες κατασκευής</string>
     <string name="community">Κοινότητα</string>
     <string name="failsafe_mode">Λειτουργία ασφαλείας</string>

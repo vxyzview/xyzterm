@@ -33,4 +33,8 @@
     <string name="input">Input</string>
     <string name="logout">Log keluar</string>
     <string name="setup_failed">Persediaan gagal: %s</string>
+    <string name="developer">Pembangun</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
 </resources>

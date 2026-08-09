@@ -220,6 +220,9 @@
     <string name="discord">Komunita Discord</string>
     <string name="view_github_profile">Zobrazit GitHub profil</string>
     <string name="developer">Vývojář</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">Informace o sestavení</string>
     <string name="community">Komunita</string>
     <string name="render_whitespace">Zobrazovat neviditelné znaky</string>

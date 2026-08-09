@@ -196,6 +196,9 @@
     <string name="unknown">Không xác định</string>
     <string name="cant_write">Không thể ghi vào tệp (không có quyền ghi)</string>
     <string name="developer">Nhà phát triển</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="community">Cộng đồng</string>
     <string name="discord">Cộng đồng Discord</string>
     <string name="file_type">Loại tệp</string>

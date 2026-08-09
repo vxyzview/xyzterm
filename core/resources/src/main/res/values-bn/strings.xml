@@ -69,4 +69,8 @@
     <string name="pin_line_number">লাইন নম্বর পিন করুন</string>
     <string name="input">ইনপুট</string>
     <string name="setup_failed">সেটআপ ব্যর্থ হয়েছে: %s</string>
+    <string name="developer">ডেভেলপার</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
 </resources>

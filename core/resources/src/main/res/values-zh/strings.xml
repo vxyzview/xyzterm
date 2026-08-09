@@ -244,6 +244,9 @@
     <string name="render_whitespace">显示空白字符</string>
     <string name="render_whitespace_desc">使空格、制表符和换行符可见</string>
     <string name="developer">开发者</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">构建信息</string>
     <string name="community">社区</string>
     <string name="failsafe_mode">安全模式</string>

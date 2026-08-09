@@ -265,6 +265,9 @@
     <string name="use_tabs_desc">들여 쓰기에 스페이스 대신 Tab 키를 사용하기</string>
     <string name="format_on_save_desc">파일이 저장되었을 때 자동으로 서식을 지정합니다</string>
     <string name="developer">개발자</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">빌드 정보</string>
     <string name="community">커뮤니티</string>
     <string name="failsafe_mode">안전 모드</string>

@@ -244,6 +244,9 @@
     <string name="use_tabs">Вставить знак табуляции</string>
     <string name="use_tabs_desc">Использовать символ табуляции (\\t) вместо пробелов для отступов</string>
     <string name="developer">Разработчик</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
     <string name="build_info">Информация о сборке</string>
     <string name="community">Сообщество</string>
     <string name="failsafe_mode">Аварийный режим</string>

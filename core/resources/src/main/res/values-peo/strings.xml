@@ -4,4 +4,8 @@
     <string name="delete_session">حذف جلسه</string>
     <string name="logout">خروج</string>
     <string name="setup_failed">راه‌اندازی ناموفق بود: %s</string>
+    <string name="developer">توسعه‌دهنده</string>
+    <string name="developer_name">vxyzview</string>
+    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
+    <string name="upstream_source">Upstream source</string>
 </resources>
