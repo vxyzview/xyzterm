@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -35,8 +34,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
@@ -58,11 +55,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
@@ -72,6 +67,7 @@ import androidx.navigation.compose.rememberNavController
 import com.rk.activities.settings.SettingsRoutes
 import com.rk.activities.terminal.Terminal
 import com.rk.animations.NavigationAnimationTransitions
+import com.rk.components.ResponsiveDrawer
 import com.rk.components.SingleInputDialog
 import com.rk.utils.FontCache
 import com.rk.exec.pendingCommand
@@ -140,17 +136,14 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
 
     Box(modifier = Modifier.imePadding()) {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val configuration = LocalConfiguration.current
-        val screenWidthDp = configuration.screenWidthDp
-        val drawerWidth = (screenWidthDp * 0.84).dp
 
         BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
 
-        ModalNavigationDrawer(
+        ResponsiveDrawer(
             drawerState = drawerState,
-            gesturesEnabled = drawerState.isOpen,
-            drawerContent = { TerminalDrawer(drawerWidth, terminalActivity, navController) },
-            content = {
+            fullscreen = false,
+            sheetContent = { TerminalDrawer(terminalActivity, navController) },
+        ) {
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -240,8 +233,8 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                         }
                     }
                 }
-            },
-        )
+            }
+        }
     }
 }
 
@@ -363,7 +356,7 @@ private fun ColumnScope.TerminalView(
 }
 
 @Composable
-private fun TerminalDrawer(drawerWidth: Dp, terminalActivity: Terminal, navController: NavController) {
+private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController: NavController) {
     var showRenameDialog by remember { mutableStateOf(false) }
     var sessionToRename by remember { mutableStateOf("") }
     var renameValue by remember { mutableStateOf("") }
@@ -395,8 +388,7 @@ private fun TerminalDrawer(drawerWidth: Dp, terminalActivity: Terminal, navContr
         )
     }
 
-    ModalDrawerSheet(modifier = Modifier.width(drawerWidth)) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -518,7 +510,6 @@ private fun TerminalDrawer(drawerWidth: Dp, terminalActivity: Terminal, navContr
                 }
             }
         }
-    }
 }
 
 fun Terminal.changeSession(sessionId: String) {
