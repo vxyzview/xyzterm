@@ -29,7 +29,6 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.isAccessible
 
 // NOTE: USE snake_case FOR KEYS!
-@Suppress("IDENTITY_SENSITIVE_OPERATIONS") // WeakReference cache on boxed primitives is deliberate
 object Settings {
     var detect_bin_files by CachedPreference("detect_bin_files", true)
     var oom_prediction by CachedPreference("disable_oom_prediction", false)
@@ -253,10 +252,12 @@ object Preference {
 
     // Weak reference caches to allow garbage collection of unused settings
     private val stringCache = mutableMapOf<String, WeakReference<String?>>()
-    private val boolCache = mutableMapOf<String, WeakReference<Boolean>>()
-    private val intCache = mutableMapOf<String, WeakReference<Int>>()
-    private val longCache = mutableMapOf<String, WeakReference<Long>>()
-    private val floatCache = mutableMapOf<String, WeakReference<Float>>()
+    // Primitives are immutable values; weak-caching them is pointless and
+    // triggers identity-sensitive warnings on boxed types.
+    private val boolCache = mutableMapOf<String, Boolean>()
+    private val intCache = mutableMapOf<String, Int>()
+    private val longCache = mutableMapOf<String, Long>()
+    private val floatCache = mutableMapOf<String, Float>()
 
     fun getAll(): Map<String, Any?> {
         return sharedPreferences.all
@@ -320,7 +321,7 @@ object Preference {
     }
 
     fun getBoolean(key: String, default: Boolean): Boolean {
-        return boolCache[key]?.get()
+        return boolCache[key]
             ?: run {
                 val value =
                     try {
@@ -330,14 +331,14 @@ object Preference {
                         setBoolean(key, default)
                         default
                     }
-                boolCache[key] = WeakReference(value)
+                boolCache[key] = value
                 value
             }
     }
 
     fun setBoolean(key: String, value: Boolean) {
         notifyDelegate(key, value)
-        boolCache[key] = WeakReference(value)
+        boolCache[key] = value
         runCatching {
             sharedPreferences.edit {
                 putBoolean(
@@ -380,7 +381,7 @@ object Preference {
     }
 
     fun getInt(key: String, default: Int): Int {
-        return intCache[key]?.get()
+        return intCache[key]
             ?: run {
                 val value =
                     try {
@@ -390,14 +391,14 @@ object Preference {
                         setInt(key, default)
                         default
                     }
-                intCache[key] = WeakReference(value)
+                intCache[key] = value
                 value
             }
     }
 
     fun setInt(key: String, value: Int) {
         notifyDelegate(key, value)
-        intCache[key] = WeakReference(value)
+        intCache[key] = value
         runCatching {
             sharedPreferences.edit {
                 putInt(
@@ -410,7 +411,7 @@ object Preference {
     }
 
     fun getLong(key: String, default: Long): Long {
-        return longCache[key]?.get()
+        return longCache[key]
             ?: run {
                 val value =
                     try {
@@ -420,14 +421,14 @@ object Preference {
                         setLong(key, default)
                         default
                     }
-                longCache[key] = WeakReference(value)
+                longCache[key] = value
                 value
             }
     }
 
     fun setLong(key: String, value: Long) {
         notifyDelegate(key, value)
-        longCache[key] = WeakReference(value)
+        longCache[key] = value
         runCatching {
             sharedPreferences.edit {
                 putLong(
@@ -440,7 +441,7 @@ object Preference {
     }
 
     fun getFloat(key: String, default: Float): Float {
-        return floatCache[key]?.get()
+        return floatCache[key]
             ?: run {
                 val value =
                     try {
@@ -450,14 +451,14 @@ object Preference {
                         setFloat(key, default)
                         default
                     }
-                floatCache[key] = WeakReference(value)
+                floatCache[key] = value
                 value
             }
     }
 
     fun setFloat(key: String, value: Float) {
         notifyDelegate(key, value)
-        floatCache[key] = WeakReference(value)
+        floatCache[key] = value
         runCatching {
             sharedPreferences.edit {
                 putFloat(

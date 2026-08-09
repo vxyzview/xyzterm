@@ -77,32 +77,61 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build with Gradle
-        run: ./gradlew assembleRelease --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-${{ env.COMMIT_HASH }}.apk
+        run: ./gradlew assembleRelease --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-release.apk
         env:
           KEYSTORE_FILE: /tmp/xyzterm.keystore
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
         continue-on-error: false
 
-      - name: Archive APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: xyzterm-Release
-          path: app/xyzterm-${{ env.COMMIT_HASH }}.apk
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Got version: $VERSION"
+
+      - name: Rename APK with version
+        run: mv app/xyzterm-release.apk "app/xyzterm-${{ env.VERSION }}.apk"
+
+      - name: Create GitHub Release
+        id: release
+        if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ env.VERSION }}"
+          # Create or update the release for this version tag.
+          gh release create "$TAG" \
+            "app/xyzterm-${{ env.VERSION }}.apk" \
+            --title "xyzterm ${{ env.VERSION }}" \
+            --notes "Automated build of commit \`${{ env.COMMIT_HASH }}\`.
+
+**APK:** \`xyzterm-${{ env.VERSION }}.apk\`
+
+F-Droid: built from source via [metadata](fdroid/metadata/com.xyzterm.app.yml)." \
+            --repo "${{ github.repository }}" \
+            --generate-notes || \
+          gh release upload "$TAG" \
+            "app/xyzterm-${{ env.VERSION }}.apk" \
+            --clobber \
+            --repo "${{ github.repository }}"
 
       - name: Upload APK to PixelDrain
-        if: ${{ success() && github.event.head_commit.message != '' }}
+        if: ${{ success() }}
         timeout-minutes: 15
         env:
           PIXELDRAIN_API_KEY: ${{ secrets.PIXELDRAIN_API_KEY }}
           COMMIT_MSG: ${{ github.event.head_commit.message }}
+          VERSION: ${{ env.VERSION }}
         run: |
-          RESP=$(curl -s -T "app/xyzterm-${{ env.COMMIT_HASH }}.apk" \
+          RESP=$(curl -s -T "app/xyzterm-$VERSION.apk" \
             -u ":$PIXELDRAIN_API_KEY" \
             "https://pixeldrain.com/api/file/")
           echo "PixelDrain response: $RESP"
           ID=$(echo "$RESP" | jq -r '.id // empty')
           if [ -n "$ID" ]; then
             echo "APK uploaded: https://pixeldrain.com/u/$ID"
+            echo "Version: $VERSION"
             echo "Commit: $COMMIT_MSG"
           else
             echo "Upload failed: $RESP" >&2
