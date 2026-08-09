@@ -73,4 +73,6 @@
     <string name="developer_name">vxyzview</string>
     <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
+    <string name="unsupported_cpu">অসমর্থিত CPU</string>
+    <string name="unsupported_cpu_desc">এই আর্কিটেকচারের জন্য কোনো উবুন্টু নেই। অ্যাপটি এই ডিভাইসে চলবে না।</string>
 </resources>

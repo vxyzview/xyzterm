@@ -60,6 +60,8 @@
     <string name="private_files_desc">الملفات الخاصة بمحرر xyzterm</string>
     <string name="cloning">يجري نسخ المستودع …</string>
     <string name="error">خطأ</string>
+    <string name="unsupported_cpu">معالج غير مدعوم</string>
+    <string name="unsupported_cpu_desc">لا يتوفر إصدار Ubuntu لهذه البنية. التطبيق لا يمكن تشغيله على هذا الجهاز.</string>
     <string name="open_dir_desc">فتح دليل عبر منتقي الملفات في النظام</string>
     <string name="internal_storage">التخزين الداخلي</string>
     <string name="open_internal_storage">فتح وحدة التخزين الداخلية</string>

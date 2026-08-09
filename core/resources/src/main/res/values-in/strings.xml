@@ -59,6 +59,8 @@
     <string name="private_files_desc">File pribadi xyzterm</string>
     <string name="cloning">Cloning repositori…</string>
     <string name="error">Terjadi kesalahan</string>
+    <string name="unsupported_cpu">CPU tidak didukung</string>
+    <string name="unsupported_cpu_desc">Tidak ada Ubuntu untuk arsitektur ini. Aplikasi tidak dapat berjalan di perangkat ini.</string>
     <string name="open_dir_desc">Buka direktori melalui pemilih file sistem</string>
     <string name="internal_storage">Penyimpanan internal</string>
     <string name="open_internal_storage">Buka penyimpanan internal</string>

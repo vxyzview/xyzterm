@@ -60,6 +60,8 @@
     <string name="private_files_desc">Privata filer för xyzterm</string>
     <string name="cloning">Klonar repository…</string>
     <string name="error">Fel</string>
+    <string name="unsupported_cpu">Ej stödd CPU</string>
+    <string name="unsupported_cpu_desc">Ingen Ubuntu för denna arkitektur. Appen kan inte köras på den här enheten.</string>
     <string name="open_dir_desc">Öppna en katalog via systemets filväljare</string>
     <string name="internal_storage">Intern lagring</string>
     <string name="open_internal_storage">Öppna intern lagring</string>

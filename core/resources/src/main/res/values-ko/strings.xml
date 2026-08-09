@@ -65,6 +65,8 @@
     <string name="private_files_desc">xyzterm의 전용 파일</string>
     <string name="cloning">저장소 복제 중…</string>
     <string name="error">오류</string>
+    <string name="unsupported_cpu">지원되지 않는 CPU</string>
+    <string name="unsupported_cpu_desc">이 아키텍처용 우분투가 없습니다. 이 기기에서 앱을 실행할 수 없습니다.</string>
     <string name="open_dir_desc">시스템 파일 선택기로 디렉터리 열기</string>
     <string name="internal_storage">내부 저장공간</string>
     <string name="open_internal_storage">내부 저장공간 열기</string>

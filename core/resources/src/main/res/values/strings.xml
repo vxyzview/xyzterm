@@ -66,6 +66,8 @@
     <string name="private_files_desc">Private files of xyzterm</string>
     <string name="cloning">Cloning repository…</string>
     <string name="error">Error</string>
+    <string name="unsupported_cpu">Unsupported CPU</string>
+    <string name="unsupported_cpu_desc">No Ubuntu is available for this architecture. The app cannot run on this device.</string>
     <string name="open_dir_desc">Open a directory via system file picker</string>
     <string name="internal_storage">Internal storage</string>
     <string name="open_internal_storage">Open internal storage</string>

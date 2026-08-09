@@ -20,6 +20,8 @@
     <string name="open">Otevřít</string>
     <string name="permission_denied">Přístup odepřen</string>
     <string name="error">Chyba</string>
+    <string name="unsupported_cpu">Nepodporované CPU</string>
+    <string name="unsupported_cpu_desc">Žádný Ubuntu pro tuto architekturu. Aplikace na tomto zařízení nemůže běžet.</string>
     <string name="add">Přidat</string>
     <string name="show_line_number">Zobrazovat čísla řádků</string>
     <string name="extra_keys">Extra klávesy</string>

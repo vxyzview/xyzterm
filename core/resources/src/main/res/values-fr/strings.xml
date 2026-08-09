@@ -51,6 +51,8 @@
     <string name="private_files_desc">Fichiers privés de xyzterm</string>
     <string name="cloning">Dépôt en cours de clonage…</string>
     <string name="error">Erreur</string>
+    <string name="unsupported_cpu">Processeur non pris en charge</string>
+    <string name="unsupported_cpu_desc">Aucun Ubuntu pour cette architecture. L'application ne peut pas fonctionner sur cet appareil.</string>
     <string name="open_dir_desc">Ouvrir un dossier via le sélecteur de fichiers du système</string>
     <string name="internal_storage">Stockage interne</string>
     <string name="open_internal_storage">Ouvrir le stockage interne</string>

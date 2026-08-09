@@ -179,6 +179,8 @@
     <string name="strict_mode">Tryb ścisły</string>
     <string name="copied">Skopiowano</string>
     <string name="error">Błąd</string>
+    <string name="unsupported_cpu">Nieobsługiwane CPU</string>
+    <string name="unsupported_cpu_desc">Brak Ubuntu dla tej architektury. Aplikacja nie może działać na tym urządzeniu.</string>
     <string name="open_dir_desc">Otwórz katalog przez systemowy menedżer plików (SAF)</string>
     <string name="internal_storage">Pamięć urządzenia</string>
     <string name="open_internal_storage">Otwórz pamięć wewnętrzną</string>

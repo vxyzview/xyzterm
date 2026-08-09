@@ -45,6 +45,8 @@
     <string name="private_files_desc">xyztermのプライベートファイル</string>
     <string name="cloning">リポジトリをクローンしています…</string>
     <string name="error">エラー</string>
+    <string name="unsupported_cpu">対応していないCPU</string>
+    <string name="unsupported_cpu_desc">このアーキテクチャ用のUbuntuはありません。この端末ではアプリを実行できません。</string>
     <string name="open_dir_desc">システムのファイル選択ダイアログでディレクトリを開く</string>
     <string name="app">アプリケーション</string>
     <string name="oled_desc">純粋な黒色のテーマを適用する</string>

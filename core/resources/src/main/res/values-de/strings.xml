@@ -66,6 +66,8 @@
     <string name="permission_denied">Zugriff verweigert</string>
     <string name="private_files">Private Dateien</string>
     <string name="error">Fehler</string>
+    <string name="unsupported_cpu">Nicht unterstützte CPU</string>
+    <string name="unsupported_cpu_desc">Kein Ubuntu für diese Architektur. Die App kann auf diesem Gerät nicht laufen.</string>
     <string name="add">Hinzufügen</string>
     <string name="themes">Themen</string>
     <string name="open_internal_storage">Internen Speicher öffnen</string>

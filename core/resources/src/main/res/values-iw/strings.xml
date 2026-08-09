@@ -104,6 +104,8 @@
     <string name="add">הוספה</string>
     <string name="app_desc">הגדרות כלליות של האפליקציה</string>
     <string name="error">שגיאה</string>
+    <string name="unsupported_cpu">מעבד לא נתמך</string>
+    <string name="unsupported_cpu_desc">אין אובונטו לארכיטקטורה זו. האפליקציה לא יכולה לפעול במכשיר זה.</string>
     <string name="smooth_tabs">לשוניות חלקות</string>
     <string name="themes">עיצוב</string>
     <string name="drawer_lock_desc">שמור את מגירת הצד נעולה בעת פתיחת קובץ</string>

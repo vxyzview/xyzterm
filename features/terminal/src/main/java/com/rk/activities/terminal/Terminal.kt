@@ -15,6 +15,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -226,6 +228,7 @@ class Terminal : AppCompatActivity() {
         var currentFileName by remember { mutableStateOf("") }
         var downloadedBytes by remember { mutableLongStateOf(0L) }
         var totalBytes by remember { mutableLongStateOf(0L) }
+        var unsupportedCpu by remember { mutableStateOf(false) }
 
         // Helper function to format bytes to MB string
         fun formatBytesToMB(bytes: Long): String {
@@ -249,7 +252,8 @@ class Terminal : AppCompatActivity() {
                                 } else if (abi.contains("armeabi-v7a")) {
                                     ROOTFS_ARM
                                 } else {
-                                    throw RuntimeException("Unsupported CPU")
+                                    unsupportedCpu = true
+                                    return@LaunchedEffect
                                 },
                             outputFile = getTempDir().child("sandbox.tar.gz"),
                         )
@@ -325,7 +329,28 @@ class Terminal : AppCompatActivity() {
                 onDispose { activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
             }
 
-            if (installNextStage == null) {
+            if (unsupportedCpu) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        text = stringResource(strings.unsupported_cpu),
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(strings.unsupported_cpu_desc),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { finishAffinity() }) {
+                        Text(text = stringResource(strings.ok))
+                    }
+                }
+            } else if (installNextStage == null) {
                 if (needsDownload) {
                     Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                         Column(

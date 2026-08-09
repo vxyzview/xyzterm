@@ -61,6 +61,8 @@
     <string name="private_files_desc">xyzterm की निजी फ़ाइलें</string>
     <string name="cloning">रिपॉजिटरी क्लोन हो रही है…</string>
     <string name="error">त्रुटि</string>
+    <string name="unsupported_cpu">असमर्थित CPU</string>
+    <string name="unsupported_cpu_desc">इस आर्किटेक्चर के लिए कोई उबंटू नहीं। ऐप इस डिवाइस पर नहीं चल सकता।</string>
     <string name="open_dir_desc">SAF का उपयोग करके डायरेक्टरी खोलें</string>
     <string name="internal_storage">इंटरनल स्टोरेज</string>
     <string name="open_internal_storage">इंटरनल स्टोरेज खोलें</string>

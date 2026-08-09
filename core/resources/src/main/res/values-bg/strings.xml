@@ -61,6 +61,8 @@
     <string name="private_files_desc">Лични файлове на xyzterm</string>
     <string name="cloning">Клониране на хранилище…</string>
     <string name="error">Грешка</string>
+    <string name="unsupported_cpu">Неподдържан процесор</string>
+    <string name="unsupported_cpu_desc">Няма Ubuntu за тази архитектура. Приложението не може да работи на това устройство.</string>
     <string name="open_dir_desc">Отваряне на директория чрез инструмента за избор на системни файлове</string>
     <string name="internal_storage">Вътрешна памет</string>
     <string name="open_internal_storage">Отворете вътрешната памет</string>

@@ -89,6 +89,8 @@
     <string name="file_open_denied">无法通过其他应用打开此文件</string>
     <string name="cloning">克隆存储库…</string>
     <string name="error">错误</string>
+    <string name="unsupported_cpu">不支持的CPU</string>
+    <string name="unsupported_cpu_desc">此架构没有Ubuntu。应用无法在此设备上运行。</string>
     <string name="manage_storage_reason">xyzterm 需要存储空间权限以访问和读写文件。请稍后在系统设置中允许访问此权限。</string>
     <string name="private_files">私有文件</string>
     <string name="text_size">字体大小</string>

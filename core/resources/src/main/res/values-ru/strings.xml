@@ -60,6 +60,8 @@
     <string name="private_files_desc">Приватные файлы xyzterm</string>
     <string name="cloning">Клонирование репозитория…</string>
     <string name="error">Ошибка</string>
+    <string name="unsupported_cpu">Неподдерживаемый процессор</string>
+    <string name="unsupported_cpu_desc">Нет Ubuntu для этой архитектуры. Приложение не может работать на этом устройстве.</string>
     <string name="open_dir_desc">Открыть каталог с помощью проводника</string>
     <string name="internal_storage">Внутреннее хранилище</string>
     <string name="open_internal_storage">Открыть внутреннее хранилище</string>

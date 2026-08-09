@@ -64,6 +64,8 @@
     <string name="private_files_desc">xyzterm-এর নিজস্ব ফাইল</string>
     <string name="cloning">repository-টিকে পুন:প্রতিষ্ঠা করা চলছে…</string>
     <string name="error">ত্রুটি</string>
+    <string name="unsupported_cpu">Unsupported CPU</string>
+    <string name="unsupported_cpu_desc">No Ubuntu is available for this architecture. The app cannot run on this device.</string>
     <string name="open_dir_desc">system file picker-এর মাধ্যমে একটি ফোল্ডার খুলুন</string>
     <string name="internal_storage">Internal storage</string>
     <string name="open_internal_storage">internal storage খুলুন</string>

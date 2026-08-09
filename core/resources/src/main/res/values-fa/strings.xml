@@ -39,6 +39,8 @@
     <string name="manage_storage">مدیریت حافظه</string>
     <string name="ok">تایید</string>
     <string name="error">خطا</string>
+    <string name="unsupported_cpu">پردازنده پشتیبانی‌نشده</string>
+    <string name="unsupported_cpu_desc">هیچ اوبونتو برای این معماری وجود ندارد. برنامه نمی‌تواند روی این دستگاه اجرا شود.</string>
     <string name="add">اضافه کردن</string>
     <string name="oled">تم مشکی</string>
     <string name="create">ساختن</string>

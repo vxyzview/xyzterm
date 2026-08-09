@@ -27,6 +27,8 @@
     <string name="download">Yüklə</string>
     <string name="ok">OLDU</string>
     <string name="error">Xəta</string>
+    <string name="unsupported_cpu">Dəstəklənməyən CPU</string>
+    <string name="unsupported_cpu_desc">Bu arxitektura üçün Ubuntu təqdim edilmir. Tətbiq bu cihazda işləyə bilməz.</string>
     <string name="permission_denied">Icazə rədd edildi</string>
     <string name="manage_storage">Yaddaşı İdarə Et</string>
     <string name="manage_storage_reason">Karbon-un yaddaşdakı fayllara düzəliş etməsi üçün icazə lazımdır. Zəhmət olmasa, bir sonrakı sistem parametrində girişə icazə verin.</string>

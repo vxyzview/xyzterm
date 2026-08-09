@@ -43,6 +43,8 @@
     <string name="clone_repo">Clonar repositório</string>
     <string name="cloning">A clonar repositório…</string>
     <string name="error">Erro</string>
+    <string name="unsupported_cpu">CPU não suportada</string>
+    <string name="unsupported_cpu_desc">Nenhum Ubuntu para esta arquitetura. O aplicativo não pode ser executado neste dispositivo.</string>
     <string name="open_internal_storage">Abrir armazenamento interno</string>
     <string name="add">Adicionar</string>
     <string name="installed">Instalados</string>

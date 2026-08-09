@@ -61,6 +61,8 @@
     <string name="private_files">Tệp riêng tư</string>
     <string name="private_files_desc">Tệp riêng tư của xyzterm</string>
     <string name="error">Lỗi</string>
+    <string name="unsupported_cpu">CPU không được hỗ trợ</string>
+    <string name="unsupported_cpu_desc">Không có Ubuntu cho kiến trúc này. Ứng dụng không thể chạy trên thiết bị này.</string>
     <string name="open_dir_desc">Mở một thư mục sử dụng trình duyệt tệp của hệ thống</string>
     <string name="internal_storage">Bộ nhớ trong</string>
     <string name="open_internal_storage">Mở bộ nhớ trong</string>

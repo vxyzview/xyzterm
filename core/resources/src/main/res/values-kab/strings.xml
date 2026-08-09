@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="error">Tuccḍa</string>
+    <string name="unsupported_cpu">Unsupported CPU</string>
+    <string name="unsupported_cpu_desc">No Ubuntu is available for this architecture. The app cannot run on this device.</string>
     <string name="add">Rnu</string>
     <string name="copy">Nɣel</string>
     <string name="close">Mdel</string>

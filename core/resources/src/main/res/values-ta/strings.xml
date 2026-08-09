@@ -72,6 +72,8 @@
     <string name="private_files_desc">xyzterm இன் தனிப்பட்ட கோப்புகள்</string>
     <string name="cloning">குளோனிங் களஞ்சியம்…</string>
     <string name="error">பிழை</string>
+    <string name="unsupported_cpu">ஆதரிக்கப்படாத CPU</string>
+    <string name="unsupported_cpu_desc">இந்த கட்டமைப்பிற்கு உபுண்டு இல்லை. இந்த சாதனத்தில் பயன்பாட்டை இயக்க முடியாது.</string>
     <string name="open_dir_desc">சிச்டம் பைல் பிக்கர் வழியாக ஒரு கோப்பகத்தைத் திறக்கவும்</string>
     <string name="internal_storage">உள் சேமிப்பு</string>
     <string name="open_internal_storage">உள் சேமிப்பகத்தைத் திறக்கவும்</string>

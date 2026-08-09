@@ -60,6 +60,8 @@
     <string name="private_files_desc">xyzterm\'ün özel dosyaları</string>
     <string name="cloning">Klon Deposu…</string>
     <string name="error">Yanlış</string>
+    <string name="unsupported_cpu">Desteklenmeyen CPU</string>
+    <string name="unsupported_cpu_desc">Bu mimari için Ubuntu yok. Uygulama bu cihazda çalışamaz.</string>
     <string name="open_dir_desc">Sistem dosya seçicisinden bir klasör aç</string>
     <string name="internal_storage">Dahili depolama</string>
     <string name="open_internal_storage">Dahili depolamayı aç</string>

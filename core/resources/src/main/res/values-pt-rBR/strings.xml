@@ -59,6 +59,8 @@
     <string name="private_files_desc">Arquivos privados do xyzterm</string>
     <string name="cloning">Clonando repositório…</string>
     <string name="error">Erro</string>
+    <string name="unsupported_cpu">Unsupported CPU</string>
+    <string name="unsupported_cpu_desc">No Ubuntu is available for this architecture. The app cannot run on this device.</string>
     <string name="open_dir_desc">Abrir pasta usando seletor de arquivos do sistema</string>
     <string name="internal_storage">Armazenamento Interno</string>
     <string name="open_internal_storage">Abrir armazenamento interno</string>

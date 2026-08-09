@@ -37,4 +37,6 @@
     <string name="developer_name">vxyzview</string>
     <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
+    <string name="unsupported_cpu">CPU tidak disokong</string>
+    <string name="unsupported_cpu_desc">Tiada Ubuntu untuk seni bina ini. Aplikasi tidak boleh berjalan pada peranti ini.</string>
 </resources>

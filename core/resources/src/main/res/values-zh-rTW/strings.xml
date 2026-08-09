@@ -60,6 +60,8 @@
     <string name="private_files_desc">xyzterm 私有檔案</string>
     <string name="cloning">克隆存儲庫…</string>
     <string name="error">錯誤</string>
+    <string name="unsupported_cpu">不支援的CPU</string>
+    <string name="unsupported_cpu_desc">此架構沒有Ubuntu。應用程式無法在此裝置上執行。</string>
     <string name="open_dir_desc">打開資料夾（透過系統檔案選擇器）</string>
     <string name="internal_storage">內部儲存空間</string>
     <string name="open_internal_storage">開啟內部儲存空間</string>

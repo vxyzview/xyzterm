@@ -130,6 +130,8 @@
     <string name="manage_storage_reason">xyzterm necesita permisos para poder editar archivos en tu almacenamiento. Por favor, otorga acceso a la aplicación en el diálogo siguiente.</string>
     <string name="installed">Instaladas</string>
     <string name="error">Error</string>
+    <string name="unsupported_cpu">CPU no compatible</string>
+    <string name="unsupported_cpu_desc">No hay Ubuntu para esta arquitectura. La app no puede ejecutarse en este dispositivo.</string>
     <string name="extra_keys_desc">Mostrar teclas adicionales sobre el teclado</string>
     <string name="terminal_desc">Ajustes generales del terminal</string>
     <string name="github">GitHub</string>

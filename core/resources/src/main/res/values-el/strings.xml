@@ -61,6 +61,8 @@
     <string name="private_files_desc">Ιδιωτικά αρχεία του xyzterm</string>
     <string name="cloning">Κλωνοποίηση αποθετηρίου…</string>
     <string name="error">Σφάλμα</string>
+    <string name="unsupported_cpu">Μη υποστηριζόμενος επεξεργαστής</string>
+    <string name="unsupported_cpu_desc">Δεν υπάρχει Ubuntu για αυτή την αρχιτεκτονική. Η εφαρμογή δεν μπορεί να τρέξει σε αυτή τη συσκευή.</string>
     <string name="open_dir_desc">Άνοιγμα καταλόγου μέσω του επιλογέα αρχείων συστήματος</string>
     <string name="internal_storage">Εσωτερικός αποθηκευτικός χώρος</string>
     <string name="open_internal_storage">Άνοιγμα εσωτερικού χώρου αποθήκευσης</string>
