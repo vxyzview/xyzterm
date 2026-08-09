@@ -104,11 +104,7 @@ jobs:
           gh release create "$TAG" \
             "app/xyzterm-${{ env.VERSION }}.apk" \
             --title "xyzterm ${{ env.VERSION }}" \
-            --notes "Automated build of commit \`${{ env.COMMIT_HASH }}\`.
-
-**APK:** \`xyzterm-${{ env.VERSION }}.apk\`
-
-F-Droid: built from source via [metadata](fdroid/metadata/com.xyzterm.app.yml)." \
+            --notes "Automated build of commit \`${{ env.COMMIT_HASH }}\`.**APK:** \`xyzterm-${{ env.VERSION }}.apk\`F-Droid: built from source via [metadata](fdroid/metadata/com.xyzterm.app.yml)." \
             --repo "${{ github.repository }}" \
             --generate-notes || \
           gh release upload "$TAG" \
