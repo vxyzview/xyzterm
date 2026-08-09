@@ -42,8 +42,17 @@ fun XedTheme(
             val baseColorScheme =
                 when {
                     darkTheme && highContrastDarkTheme ->
-                        dynamicDarkColorScheme(context)
-                            .copy(background = Color.Black, surface = Color.Black, surfaceDim = Color.Black)
+                        dynamicDarkColorScheme(context).copy(
+                            background = Color.Black,
+                            surface = Color.Black,
+                            surfaceDim = Color.Black,
+                            surfaceBright = Color(0xFF161618),
+                            surfaceContainerLowest = Color.Black,
+                            surfaceContainerLow = Color(0xFF101012),
+                            surfaceContainer = Color(0xFF151517),
+                            surfaceContainerHigh = Color(0xFF1B1B1E),
+                            surfaceContainerHighest = Color(0xFF202024),
+                        )
 
                     darkTheme -> dynamicDarkColorScheme(context)
                     else -> dynamicLightColorScheme(context)
@@ -60,8 +69,16 @@ fun XedTheme(
                 if (highContrastDarkTheme) {
                     themeHolder.darkScheme.copy(
                         background = Color.Black,
+                        onBackground = themeHolder.darkScheme.onBackground,
                         surface = Color.Black,
+                        onSurface = themeHolder.darkScheme.onSurface,
                         surfaceDim = Color.Black,
+                        surfaceBright = Color(0xFF161618),
+                        surfaceContainerLowest = Color.Black,
+                        surfaceContainerLow = Color(0xFF101012),
+                        surfaceContainer = Color(0xFF151517),
+                        surfaceContainerHigh = Color(0xFF1B1B1E),
+                        surfaceContainerHighest = Color(0xFF202024),
                     )
                 } else {
                     themeHolder.darkScheme
