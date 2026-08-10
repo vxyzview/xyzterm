@@ -1,32 +1,38 @@
 package com.rk.terminal
 
+import android.content.Intent
 import android.graphics.Typeface
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -42,6 +48,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +64,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -66,6 +76,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.rk.App
+import com.rk.activities.settings.SettingsActivity
 import com.rk.activities.settings.SettingsRoutes
 import com.rk.activities.terminal.Terminal
 import com.rk.animations.NavigationAnimationTransitions
@@ -75,6 +87,7 @@ import com.rk.utils.FontCache
 import com.rk.exec.pendingCommand
 import com.rk.file.child
 import com.rk.file.sandboxDir
+import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
@@ -397,62 +410,155 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val service = terminalActivity.sessionBinder?.get()?.getService()
+    val context = LocalContext.current
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // ── Branded header ─────────────────────────────────────────────
+        Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Surface(
-                    shape = MaterialTheme.shapes.extraLarge,
+                    shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(start = 16.dp),
                 ) {
-                    Text(
-                        text = stringResource(strings.sessions),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    Icon(
+                        painter = painterResource(drawables.terminal),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(12.dp).size(28.dp),
                     )
                 }
-                IconButton(
-                    onClick = {
-                        fun generateUniqueString(existingStrings: List<String>): String {
-                            var index = 1
-                            var newString: String
 
-                            do {
-                                newString = "main #$index"
-                                index++
-                            } while (newString in existingStrings)
+                Spacer(modifier = Modifier.width(16.dp))
 
-                            return newString
-                        }
-                        terminalView.get()?.let {
-                            val client = TerminalBackEnd()
-                            terminalActivity.sessionBinder
-                                ?.get()!!
-                                .createSession(
-                                    generateUniqueString(
-                                        terminalActivity.sessionBinder?.get()!!.getService().sessionList
-                                    ),
-                                    client,
-                                    terminalActivity,
-                                )
-                        }
-                    }
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(strings.add_session))
+                Column {
+                    Text(
+                        text = stringResource(strings.app_name),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "v${App.versionCode}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
+        }
 
-            val service = terminalActivity.sessionBinder?.get()?.getService()
-            service?.sessionList?.let {
-                LazyColumn {
-                    items(it) { sessionId ->
-                        val isSelected = sessionId == service.currentSession.value
+        // ── Settings entry ─────────────────────────────────────────────
+        Surface(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 12.dp, top = 12.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .clickable { context.startActivity(Intent(context, SettingsActivity::class.java)) },
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = stringResource(strings.settings),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f),
+                )
+            }
+        }
+
+        // ── Sessions ───────────────────────────────────────────────────
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(strings.sessions),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+
+            SuggestionChip(
+                onClick = {
+                    fun generateUniqueString(existingStrings: List<String>): String {
+                        var index = 1
+                        var newString: String
+
+                        do {
+                            newString = "main #$index"
+                            index++
+                        } while (newString in existingStrings)
+
+                        return newString
+                    }
+                    terminalView.get()?.let {
+                        val client = TerminalBackEnd()
+                        terminalActivity.sessionBinder
+                            ?.get()!!
+                            .createSession(
+                                generateUniqueString(
+                                    terminalActivity.sessionBinder?.get()!!.getService().sessionList
+                                ),
+                                client,
+                                terminalActivity,
+                            )
+                    }
+                },
+                label = {
+                    Text(
+                        text = stringResource(strings.add_session),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(SuggestionChipDefaults.IconSize),
+                    )
+                },
+            )
+        }
+
+        service?.sessionList?.let { sessions ->
+            LazyColumn {
+                items(sessions) { sessionId ->
+                    val isSelected = sessionId == service.currentSession.value
+
+                    // Active session indicator: leading dot
+                    Box(
+                        modifier =
+                            Modifier
+                                .padding(vertical = 2.dp)
+                                .fillMaxWidth(),
+                    ) {
                         NavigationDrawerItem(
-                            label = { Text(text = sessionId) },
+                            label = {
+                                Text(
+                                    text = sessionId,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                )
+                            },
                             selected = isSelected,
                             onClick = { terminalActivity.changeSession(sessionId) },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -460,6 +566,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                                 NavigationDrawerItemDefaults.colors(
                                     selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    unselectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
                                 ),
                             badge = {
                                 IconButton(
@@ -479,57 +586,72 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                                 }
                             },
                         )
-                    }
-                }
 
-                HorizontalDivider()
-
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val activeSession = service.currentSession.value
-
-                    IconButton(
-                        onClick = {
-                            val index = service.sessionList.indexOf(activeSession)
-                            val sessionBefore = service.sessionList.getOrNull(index - 1)
-                            val sessionAfter = service.sessionList.getOrNull(index + 1)
-                            val neighborSession = sessionBefore ?: sessionAfter
-                            neighborSession?.let { terminalActivity.changeSession(it) }
-
-                            terminalActivity.sessionBinder?.get()?.terminateSession(activeSession)
-
-                            if (service.sessionList.isEmpty()) {
-                                terminalActivity.finish()
-                                service.actionExit()
-                            }
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = stringResource(strings.delete_session),
-                        )
-                    }
-
-                    Text(
-                        text = stringResource(strings.delete_session),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    TextButton(onClick = { service.actionExit() }) {
-                        Text(
-                            text = stringResource(strings.logout),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                        if (isSelected) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .width(3.dp)
+                                        .height(24.dp)
+                                        .align(Alignment.CenterStart)
+                                        .background(MaterialTheme.colorScheme.primary),
+                            )
+                        }
                     }
                 }
             }
         }
+
+        HorizontalDivider()
+
+        // ── Footer actions ─────────────────────────────────────────────
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val activeSession = service?.currentSession?.value
+
+            IconButton(
+                onClick = {
+                    if (service == null || activeSession == null) return@IconButton
+
+                    val index = service.sessionList.indexOf(activeSession)
+                    val sessionBefore = service.sessionList.getOrNull(index - 1)
+                    val sessionAfter = service.sessionList.getOrNull(index + 1)
+                    val neighborSession = sessionBefore ?: sessionAfter
+                    neighborSession?.let { terminalActivity.changeSession(it) }
+
+                    terminalActivity.sessionBinder?.get()?.terminateSession(activeSession)
+
+                    if (service.sessionList.isEmpty()) {
+                        terminalActivity.finish()
+                        service.actionExit()
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = stringResource(strings.delete_session),
+                )
+            }
+
+            Text(
+                text = stringResource(strings.delete_session),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            TextButton(onClick = { service?.actionExit() }) {
+                Text(
+                    text = stringResource(strings.logout),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+    }
 }
 
 fun Terminal.changeSession(sessionId: String) {
