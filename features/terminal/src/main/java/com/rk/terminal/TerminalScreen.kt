@@ -555,7 +555,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = null,
+                    contentDescription = stringResource(strings.add_session),
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -567,7 +567,9 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
         }
 
         service?.sessionList?.let { sessions ->
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+            ) {
                 items(sessions) { sessionId ->
                     val isSelected = sessionId == service.currentSession.value
 
@@ -662,7 +664,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
-                    contentDescription = null,
+                    contentDescription = stringResource(strings.delete_session),
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.error,
                 )
