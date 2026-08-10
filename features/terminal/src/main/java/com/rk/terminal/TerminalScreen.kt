@@ -48,8 +48,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -61,6 +59,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.toArgb
@@ -497,7 +496,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                 fontWeight = FontWeight.SemiBold,
             )
 
-            SuggestionChip(
+            TextButton(
                 onClick = {
                     fun generateUniqueString(existingStrings: List<String>): String {
                         var index = 1
@@ -523,20 +522,18 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                             )
                     }
                 },
-                label = {
-                    Text(
-                        text = stringResource(strings.add_session),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(SuggestionChipDefaults.IconSize),
-                    )
-                },
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(strings.add_session),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
         }
 
         service?.sessionList?.let { sessions ->
