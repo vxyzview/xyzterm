@@ -69,6 +69,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -162,11 +163,25 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                     topBar = {
                         TopAppBar(
                             title = {
-                                Text(
-                                    text = currentSessionName,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                ) {
+                                    // Live session indicator
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .size(8.dp)
+                                                .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                    )
+                                    Text(
+                                        text = currentSessionName,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
                             },
                             navigationIcon = {
                                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -222,30 +237,44 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                     var text by rememberSaveable { mutableStateOf("") }
                                     val focusRequester = remember { FocusRequester() }
 
-                                    TextField(
-                                        value = text,
-                                        onValueChange = { text = it },
-                                        maxLines = 1,
-                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                        keyboardActions =
-                                            KeyboardActions(
-                                                onDone = {
-                                                    if (text.isEmpty()) {
-                                                        // Dispatch enter key events if text is empty
-                                                        val eventDown =
-                                                            KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
-                                                        val eventUp =
-                                                            KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
-                                                        terminalView.get()?.dispatchKeyEvent(eventDown)
-                                                        terminalView.get()?.dispatchKeyEvent(eventUp)
-                                                    } else {
-                                                        terminalView.get()?.currentSession?.write(text)
-                                                        text = ""
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth().height(75.dp).padding(8.dp),
+                                        shape = MaterialTheme.shapes.medium,
+                                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    ) {
+                                        TextField(
+                                            value = text,
+                                            onValueChange = { text = it },
+                                            maxLines = 1,
+                                            singleLine = true,
+                                            placeholder = {
+                                                Text(
+                                                    text = stringResource(strings.input),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                )
+                                            },
+                                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                            keyboardActions =
+                                                KeyboardActions(
+                                                    onDone = {
+                                                        if (text.isEmpty()) {
+                                                            // Dispatch enter key events if text is empty
+                                                            val eventDown =
+                                                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
+                                                            val eventUp =
+                                                                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
+                                                            terminalView.get()?.dispatchKeyEvent(eventDown)
+                                                            terminalView.get()?.dispatchKeyEvent(eventUp)
+                                                        } else {
+                                                            terminalView.get()?.currentSession?.write(text)
+                                                            text = ""
+                                                        }
                                                     }
-                                                }
-                                            ),
-                                        modifier = Modifier.fillMaxWidth().height(75.dp).focusRequester(focusRequester),
-                                    )
+                                                ),
+                                            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                                        )
+                                    }
 
                                     LaunchedEffect(Unit) { focusRequester.requestFocus() }
                                 }
