@@ -646,12 +646,6 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             }
 
             TextButton(onClick = { service?.actionExit() }) {
-                Icon(
-                    imageVector = Icons.Outlined.ExitToApp,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = stringResource(strings.logout),
                     style = MaterialTheme.typography.labelLarge,
