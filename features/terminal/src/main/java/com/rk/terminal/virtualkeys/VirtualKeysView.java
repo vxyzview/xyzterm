@@ -68,6 +68,7 @@ import java.util.stream.Collectors;
  * {TerminalVirtualKeys} to handle Termux app specific logic and
  * leave the rest to the super class.
  */
+@SuppressWarnings("deprecation") // setBackgroundColor + Handler() legacy APIs used for virtual key colors
 public final class VirtualKeysView extends GridLayout {
 
     /**
