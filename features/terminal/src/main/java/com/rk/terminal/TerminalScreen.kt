@@ -203,6 +203,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                         // vertical space on small-height windows.
                         val keyRowHeight =
                             if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) 52.dp else 75.dp
+                        val extraKeysLabel = stringResource(strings.extra_keys)
 
                         HorizontalPager(
                             state = pagerState,
@@ -246,8 +247,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                                 .fillMaxWidth()
                                                 .height(keyRowHeight)
                                                 .semantics {
-                                                    contentDescription =
-                                                        stringResource(strings.extra_keys).toString()
+                                                    contentDescription = extraKeysLabel
                                                 },
                                     )
                                 }
