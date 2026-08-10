@@ -1,6 +1,7 @@
 package com.rk.terminal
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Typeface
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
@@ -61,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -68,6 +70,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
@@ -195,7 +199,15 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                         TerminalView(isDarkMode, currentTheme, surfaceColor, onSurfaceColor, terminalActivity)
 
                         val pagerState = rememberPagerState(pageCount = { 2 })
-                        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth().height(75.dp)) { page ->
+                        // Slimmer keys/input row in landscape so the terminal keeps
+                        // vertical space on small-height windows.
+                        val keyRowHeight =
+                            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) 52.dp else 75.dp
+
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxWidth().height(keyRowHeight),
+                        ) { page ->
                             when (page) {
                                 0 -> {
                                     terminalView.get()?.requestFocus()
@@ -229,7 +241,14 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                                     }
                                             }
                                         },
-                                        modifier = Modifier.fillMaxWidth().height(75.dp),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(keyRowHeight)
+                                                .semantics {
+                                                    contentDescription =
+                                                        stringResource(strings.extra_keys).toString()
+                                                },
                                     )
                                 }
 
@@ -238,7 +257,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                     val focusRequester = remember { FocusRequester() }
 
                                     Surface(
-                                        modifier = Modifier.fillMaxWidth().height(75.dp).padding(8.dp),
+                                        modifier = Modifier.fillMaxWidth().height(keyRowHeight).padding(8.dp),
                                         shape = MaterialTheme.shapes.medium,
                                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
                                     ) {
