@@ -205,45 +205,6 @@ fun AboutScreen() {
                 },
             )
 
-            SettingsItem(
-                label = stringResource(id = strings.telegram),
-                description = stringResource(id = strings.telegram_desc),
-                isEnabled = true,
-                showSwitch = false,
-                default = false,
-                endWidget = {
-                    Icon(
-                        modifier = Modifier.padding(16.dp),
-                        painter = painterResource(drawables.open_in_new),
-                        contentDescription = null,
-                    )
-                },
-                sideEffect = {
-                    val url = "https://t.me/XedEditor"
-                    val intent = Intent(Intent.ACTION_VIEW).apply { data = url.toUri() }
-                    context.startActivity(intent)
-                },
-            )
-
-            SettingsItem(
-                label = stringResource(id = strings.discord),
-                description = stringResource(id = strings.telegram_desc),
-                isEnabled = true,
-                showSwitch = false,
-                default = false,
-                endWidget = {
-                    Icon(
-                        modifier = Modifier.padding(16.dp),
-                        painter = painterResource(drawables.open_in_new),
-                        contentDescription = null,
-                    )
-                },
-                sideEffect = {
-                    val url = "https://discord.gg/6bKzcQRuef"
-                    val intent = Intent(Intent.ACTION_VIEW).apply { data = url.toUri() }
-                    context.startActivity(intent)
-                },
-            )
-        }
+            }
     }
 }

@@ -119,8 +119,6 @@
     <string name="version_code">Version code</string>
     <string name="github" translatable="false">GitHub</string>
     <string name="github_desc">Star it on GitHub 🤩</string>
-    <string name="telegram">Telegram group</string>
-    <string name="telegram_desc">Report issues, feature requests etc.</string>
     <string name="git_commit">Git commit hash</string>
     <string name="check_for_updates">Check for updates</string>
     <string name="check_for_updates_desc">Periodically check for updates</string>
@@ -270,7 +268,6 @@
     <string name="invalid_port">Invalid port</string>
     <string name="port_number">Port number</string>
     <string name="file_ext_example">File extension (e.g. py)</string>
-    <string name="discord">Discord community</string>
     <string name="use_tabs">Insert tab character</string>
     <string name="use_tabs_desc">Use a real tab (\\t) instead of spaces for indentation</string>
     <string name="language_server">Language server</string>
