@@ -36,7 +36,6 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -564,7 +564,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                                 NavigationDrawerItemDefaults.colors(
                                     selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    unselectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+                                    unselectedContainerColor = Color.Transparent,
                                 ),
                             badge = {
                                 IconButton(
@@ -600,19 +600,22 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             }
         }
 
-        HorizontalDivider()
-
         // ── Footer actions ─────────────────────────────────────────────
+        val activeSession = service?.currentSession?.value
+
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
+                    .clip(MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val activeSession = service?.currentSession?.value
-
-            IconButton(
+            TextButton(
                 onClick = {
-                    if (service == null || activeSession == null) return@IconButton
+                    if (service == null || activeSession == null) return@TextButton
 
                     val index = service.sessionList.indexOf(activeSession)
                     val sessionBefore = service.sessionList.getOrNull(index - 1)
@@ -630,22 +633,28 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
-                    contentDescription = stringResource(strings.delete_session),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.error,
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(strings.delete_session),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.error,
                 )
             }
 
-            Text(
-                text = stringResource(strings.delete_session),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
             TextButton(onClick = { service?.actionExit() }) {
+                Icon(
+                    imageVector = Icons.Outlined.ExitToApp,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = stringResource(strings.logout),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
