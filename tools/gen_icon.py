@@ -89,8 +89,12 @@ for density, (fg_sz, leg_sz, mono_sz) in SIZES.items():
     # background: vertical gradient
     gradient(fg_sz, BG_TOP, BG_BOT).save(d / "ic_launcher_background.png")
 
-    # foreground: the same 24-grid at every density, scaled by cell size
-    art = render(N, fit_cell(fg_sz))
+    # foreground: the same 24-grid at every density, scaled by cell size.
+    # The art fills the grid edge-to-edge (bezel at rows/cols 0-1 and 22-23),
+    # so sizing the 24-cell grid to fill ~85% of the canvas makes the glyph
+    # read large in the drawer. 85% of 108dp = 92dp grid, inside the 66dp
+    # safe circle-equivalent mask region the launcher applies.
+    art = render(N, fit_cell(fg_sz, fill=0.85))
     canvas = Image.new("RGBA", (fg_sz, fg_sz), (0, 0, 0, 0))
     offset = (fg_sz - art.width) // 2
     canvas.paste(art, (offset, offset), art)
@@ -117,7 +121,7 @@ for density, (fg_sz, leg_sz, mono_sz) in SIZES.items():
     # legacy launcher: art centered on gradient, rounded mask
     leg = Image.new("RGBA", (leg_sz, leg_sz))
     leg.paste(gradient(leg_sz, BG_TOP, BG_BOT), (0, 0))
-    art = render(N, fit_cell(leg_sz, fill=0.72))
+    art = render(N, fit_cell(leg_sz, fill=0.9))
     offset = (leg_sz - art.width) // 2
     leg.paste(art, (offset, offset), art)
     mask = Image.new("L", (leg_sz, leg_sz), 0)
