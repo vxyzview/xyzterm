@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.os.SystemClock
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -464,6 +465,12 @@ class Terminal : AppCompatActivity() {
                 val totalBytes = body.contentLength()
 
                 var downloadedBytes = 0L
+                // Throttle progress: hopping to the main thread and recomposing the
+                // progress UI on every 8 KiB block (tens of thousands of times for a
+                // 200-400 MB rootfs) janks the setup screen. Emit at most every ~250ms
+                // and always send the final 100% update.
+                val THROTTLE_MS = 250L
+                var lastEmit = 0L
 
                 outputFile.outputStream().use { output ->
                     body.byteStream().use { input ->
@@ -473,8 +480,13 @@ class Terminal : AppCompatActivity() {
                         while (input.read(buffer).also { bytesRead = it } != -1) {
                             output.write(buffer, 0, bytesRead)
                             downloadedBytes += bytesRead
-                            withContext(Dispatchers.Main) { onProgress(downloadedBytes, totalBytes) }
+                            val now = SystemClock.elapsedRealtime()
+                            if (now - lastEmit >= THROTTLE_MS) {
+                                lastEmit = now
+                                withContext(Dispatchers.Main) { onProgress(downloadedBytes, totalBytes) }
+                            }
                         }
+                        withContext(Dispatchers.Main) { onProgress(downloadedBytes, totalBytes) }
                     }
                 }
             }
