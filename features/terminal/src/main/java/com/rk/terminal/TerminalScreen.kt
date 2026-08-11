@@ -84,6 +84,7 @@ import com.rk.activities.settings.SettingsActivity
 import com.rk.activities.settings.SettingsRoutes
 import com.rk.activities.terminal.Terminal
 import com.rk.animations.NavigationAnimationTransitions
+import com.rk.components.compose.preferences.base.ProvideIsExpandedScreen
 import com.rk.components.ResponsiveDrawer
 import com.rk.components.SingleInputDialog
 import com.rk.utils.FontCache
@@ -122,6 +123,7 @@ var virtualKeysView = WeakReference<VirtualKeysView?>(null)
 @Composable
 fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
     val navController = rememberNavController()
+    ProvideIsExpandedScreen {
     NavHost(
         navController = navController,
         startDestination = "terminal",
@@ -137,6 +139,7 @@ fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
         composable(SettingsRoutes.TerminalFontScreen.route) { TerminalFontScreen() }
         composable(SettingsRoutes.TerminalExtraKeys.route) { TerminalExtraKeys() }
         composable(SettingsRoutes.TerminalCheck.route) { TerminalCheckScreen() }
+    }
     }
 }
 

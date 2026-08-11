@@ -30,10 +30,15 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toDp
 
 /**
  * Represents the layout of all Preference screens. Uses a combination of [PreferenceScaffold] and [PreferenceColumn] to
@@ -243,3 +248,15 @@ fun PreferenceLayoutLazyColumn(
 }
 
 val LocalIsExpandedScreen = compositionLocalOf { false }
+
+/**
+ * Provides [LocalIsExpandedScreen] from the actual window width (Material's expanded
+ * breakpoint is >= 840dp), so tablet / landscape windows get the expanded top-app-bar
+ * treatment instead of the compact phone layout.
+ */
+@Composable
+fun ProvideIsExpandedScreen(content: @Composable () -> Unit) {
+    val screenWidthDp = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() }
+    val isExpanded = remember(screenWidthDp) { screenWidthDp >= 840.dp }
+    CompositionLocalProvider(LocalIsExpandedScreen provides isExpanded) { content() }
+}

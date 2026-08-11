@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.rk.components.compose.preferences.base.ProvideIsExpandedScreen
 import com.rk.file.FileManager
 import com.rk.resources.strings
 import com.rk.theme.XedTheme
@@ -38,6 +39,7 @@ class SettingsActivity : AppCompatActivity() {
         setContent {
             XedTheme {
                 Surface {
+                    ProvideIsExpandedScreen {
                     val navController = rememberNavController()
                     settingsNavController = WeakReference(navController)
                     SettingsNavHost(activity = this@SettingsActivity, navController = navController)
@@ -54,6 +56,7 @@ class SettingsActivity : AppCompatActivity() {
                                 toast(strings.unknown_err)
                             }
                         }
+                    }
                     }
                 }
             }
