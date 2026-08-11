@@ -1,7 +1,6 @@
 package com.rk.terminal
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Typeface
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
@@ -62,7 +61,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -199,10 +197,15 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                         TerminalView(isDarkMode, currentTheme, surfaceColor, onSurfaceColor, terminalActivity)
 
                         val pagerState = rememberPagerState(pageCount = { 2 })
-                        // Slimmer keys/input row in landscape so the terminal keeps
-                        // vertical space on small-height windows.
-                        val keyRowHeight =
-                            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) 52.dp else 75.dp
+
+                        // Extra-keys row: height derives from the key-row count so each
+                        // key keeps a >=48dp touch target (a11y minimum). The default
+                        // matrix has 2 rows -> 96dp; landscape also 96dp so keys are
+                        // tappable instead of the previous 26-37dp. The input page uses
+                        // the same height so the two pager pages align.
+                        val extraKeysRowCount =
+                            runCatching { org.json.JSONArray(Settings.terminal_extra_keys).length() }.getOrElse { 2 }
+                        val keyRowHeight = (extraKeysRowCount * 48).coerceAtLeast(52).dp
                         val extraKeysLabel = stringResource(strings.extra_keys)
 
                         HorizontalPager(
@@ -257,7 +260,11 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                     val focusRequester = remember { FocusRequester() }
 
                                     Surface(
-                                        modifier = Modifier.fillMaxWidth().height(keyRowHeight).padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(keyRowHeight)
+                                                .padding(8.dp),
                                         shape = MaterialTheme.shapes.medium,
                                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
                                     ) {
