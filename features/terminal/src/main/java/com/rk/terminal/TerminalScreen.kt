@@ -6,7 +6,6 @@ import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -87,6 +86,7 @@ import com.rk.animations.NavigationAnimationTransitions
 import com.rk.components.ResponsiveDrawer
 import com.rk.components.SingleInputDialog
 import com.rk.utils.FontCache
+import com.rk.utils.isDarkTheme
 import com.rk.exec.pendingCommand
 import com.rk.file.child
 import com.rk.file.sandboxDir
@@ -144,7 +144,10 @@ fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
 fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Terminal, navController: NavController) {
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val surfaceColor = MaterialTheme.colorScheme.surface.toArgb()
-    val isDarkMode = isSystemInDarkTheme()
+    // Use the app's theme-mode resolution (honors Settings.theme_mode), not the raw
+    // system flag, so the ANSI palette matches the rendered scheme when the user
+    // forces light/dark independent of the system.
+    val isDarkMode = isDarkTheme(LocalContext.current)
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val currentTheme = LocalThemeHolder.current
@@ -741,10 +744,14 @@ private fun TerminalView.applyTerminalColors(onSurfaceColor: Int, surfaceColor: 
     mEmulator?.mColors?.reset()
     TerminalColors.COLOR_SCHEME.updateWith(terminalColors)
 
+    // Honor the theme's own cursor color when provided, falling back to onSurface
+    // for the default schemes that don't define one.
+    val cursorColor = terminalColors.getProperty("cursor")?.let { android.graphics.Color.parseColor(it) } ?: onSurfaceColor
+
     mEmulator?.mColors?.mCurrentColors?.apply {
         set(TextStyle.COLOR_INDEX_FOREGROUND, onSurfaceColor)
         set(TextStyle.COLOR_INDEX_BACKGROUND, surfaceColor)
-        set(TextStyle.COLOR_INDEX_CURSOR, onSurfaceColor)
+        set(TextStyle.COLOR_INDEX_CURSOR, cursorColor)
     }
 
     invalidate()

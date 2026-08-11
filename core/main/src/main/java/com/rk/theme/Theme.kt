@@ -41,19 +41,7 @@ fun XedTheme(
             val context = LocalContext.current
             val baseColorScheme =
                 when {
-                    darkTheme && highContrastDarkTheme ->
-                        dynamicDarkColorScheme(context).copy(
-                            background = Color.Black,
-                            surface = Color.Black,
-                            surfaceDim = Color.Black,
-                            surfaceBright = Color(0xFF161618),
-                            surfaceContainerLowest = Color.Black,
-                            surfaceContainerLow = Color(0xFF101012),
-                            surfaceContainer = Color(0xFF151517),
-                            surfaceContainerHigh = Color(0xFF1B1B1E),
-                            surfaceContainerHighest = Color(0xFF202024),
-                        )
-
+                    darkTheme && highContrastDarkTheme -> dynamicDarkColorScheme(context).amoledScheme()
                     darkTheme -> dynamicDarkColorScheme(context)
                     else -> dynamicLightColorScheme(context)
                 }
@@ -67,19 +55,7 @@ fun XedTheme(
 
             if (darkTheme) {
                 if (highContrastDarkTheme) {
-                    themeHolder.darkScheme.copy(
-                        background = Color.Black,
-                        onBackground = themeHolder.darkScheme.onBackground,
-                        surface = Color.Black,
-                        onSurface = themeHolder.darkScheme.onSurface,
-                        surfaceDim = Color.Black,
-                        surfaceBright = Color(0xFF161618),
-                        surfaceContainerLowest = Color.Black,
-                        surfaceContainerLow = Color(0xFF101012),
-                        surfaceContainer = Color(0xFF151517),
-                        surfaceContainerHigh = Color(0xFF1B1B1E),
-                        surfaceContainerHighest = Color(0xFF202024),
-                    )
+                    themeHolder.darkScheme.amoledScheme()
                 } else {
                     themeHolder.darkScheme
                 }
@@ -113,6 +89,38 @@ fun supportsDynamicTheming() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 fun harmonize(color: Long): Int {
     val context = LocalContext.current
     return MaterialColors.harmonizeWithPrimary(context, color.toInt())
+}
+
+/**
+ * AMOLED scheme: collapse the background/surface family to true black and derive the
+ * container ramp by darkening the BASE scheme's own surface containers toward black.
+ * This keeps the active theme's hue in AMOLED mode (instead of stamping a fixed
+ * blue-gray ramp over, say, Lime or a Monet palette) while still achieving the
+ * pure-black look the setting promises.
+ */
+private fun ColorScheme.amoledScheme(): ColorScheme =
+    copy(
+        background = Color.Black,
+        surface = Color.Black,
+        surfaceDim = Color.Black,
+        surfaceBright = surfaceContainer,
+        surfaceContainerLowest = Color.Black,
+        surfaceContainerLow = surfaceContainerLowest.towardBlack(0.25f),
+        surfaceContainer = surfaceContainerLowest.towardBlack(0.15f),
+        surfaceContainerHigh = surfaceContainerLowest.towardBlack(0.0f),
+        surfaceContainerHighest = surfaceContainerLowest,
+    )
+
+/** Blend [this] color toward black by [amount] (0f = unchanged, 1f = black). */
+private fun Color.towardBlack(amount: Float): Color {
+    if (amount <= 0f) return this
+    if (amount >= 1f) return Color.Black
+    return Color(
+        red = red * (1f - amount),
+        green = green * (1f - amount),
+        blue = blue * (1f - amount),
+        alpha = alpha,
+    )
 }
 
 // Custom warning colors
