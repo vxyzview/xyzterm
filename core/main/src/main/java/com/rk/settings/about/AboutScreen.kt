@@ -1,8 +1,7 @@
 package com.rk.settings.about
 
 import android.content.Intent
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,7 +39,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AboutScreen() {
     val context = LocalContext.current
@@ -109,13 +107,11 @@ fun AboutScreen() {
         }
 
         PreferenceGroup(heading = stringResource(strings.build_info)) {
+            // Tap-to-copy build info. The copy action lives on a normal tap so
+            // TalkBack announces a real button (a single tap does something) instead
+            // of a dead "button" whose action was hidden behind a long-press.
             PreferenceTemplate(
-                modifier =
-                    Modifier.combinedClickable(
-                        enabled = true,
-                        onClick = {},
-                        onLongClick = { copyToClipboard(versionName.toString()) },
-                    ),
+                modifier = Modifier.clickable { copyToClipboard(versionName.toString()) },
                 title = {
                     Text(text = stringResource(id = strings.version), style = MaterialTheme.typography.titleMedium)
                 },
@@ -123,12 +119,7 @@ fun AboutScreen() {
             )
 
             PreferenceTemplate(
-                modifier =
-                    Modifier.combinedClickable(
-                        enabled = true,
-                        onClick = {},
-                        onLongClick = { copyToClipboard(versionCode.toString()) },
-                    ),
+                modifier = Modifier.clickable { copyToClipboard(versionCode.toString()) },
                 title = {
                     Text(text = stringResource(id = strings.version_code), style = MaterialTheme.typography.titleMedium)
                 },
@@ -136,12 +127,7 @@ fun AboutScreen() {
             )
 
             PreferenceTemplate(
-                modifier =
-                    Modifier.combinedClickable(
-                        enabled = true,
-                        onClick = {},
-                        onLongClick = { copyToClipboard(BuildConfig.GIT_SHORT_COMMIT_HASH) },
-                    ),
+                modifier = Modifier.clickable { copyToClipboard(BuildConfig.GIT_SHORT_COMMIT_HASH) },
                 title = {
                     Text(text = stringResource(id = strings.git_commit), style = MaterialTheme.typography.titleMedium)
                 },
