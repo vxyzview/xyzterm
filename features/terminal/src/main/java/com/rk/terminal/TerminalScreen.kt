@@ -41,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -438,6 +439,7 @@ private fun ColumnScope.TerminalView(
 @Composable
 private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController: NavController) {
     var showRenameDialog by remember { mutableStateOf(false) }
+    var showExitConfirm by remember { mutableStateOf(false) }
     var sessionToRename by remember { mutableStateOf("") }
     var renameValue by remember { mutableStateOf("") }
     var renameError by remember { mutableStateOf<String?>(null) }
@@ -705,13 +707,44 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                 )
             }
 
-            TextButton(onClick = { service?.actionExit() }) {
+            TextButton(
+                onClick = {
+                    // Respect the "Confirm exit" setting: ask before closing the app.
+                    if (Settings.confirm_exit) {
+                        showExitConfirm = true
+                    } else {
+                        service?.actionExit()
+                    }
+                },
+            ) {
                 Text(
                     text = stringResource(strings.logout),
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
+    }
+
+    if (showExitConfirm) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirm = false },
+            title = { Text(text = stringResource(strings.confirm_exit)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitConfirm = false
+                        service?.actionExit()
+                    },
+                ) {
+                    Text(text = stringResource(strings.logout))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitConfirm = false }) {
+                    Text(text = stringResource(strings.cancel))
+                }
+            },
+        )
     }
 }
 
