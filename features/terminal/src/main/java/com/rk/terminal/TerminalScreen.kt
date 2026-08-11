@@ -125,10 +125,10 @@ fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
     NavHost(
         navController = navController,
         startDestination = "terminal",
-        enterTransition = { NavigationAnimationTransitions.enterTransition },
-        exitTransition = { NavigationAnimationTransitions.exitTransition },
-        popEnterTransition = { NavigationAnimationTransitions.popEnterTransition },
-        popExitTransition = { NavigationAnimationTransitions.popExitTransition },
+        enterTransition = { NavigationAnimationTransitions.enterTransition() },
+        exitTransition = { NavigationAnimationTransitions.exitTransition() },
+        popEnterTransition = { NavigationAnimationTransitions.popEnterTransition() },
+        popExitTransition = { NavigationAnimationTransitions.popExitTransition() },
     ) {
         composable("terminal") {
             TerminalScreenInternal(terminalActivity = terminalActivity, navController = navController)

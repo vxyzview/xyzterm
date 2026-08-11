@@ -21,10 +21,10 @@ fun SettingsNavHost(navController: NavHostController, activity: SettingsActivity
     NavHost(
         navController = navController,
         startDestination = SettingsRoutes.Settings.route,
-        enterTransition = { NavigationAnimationTransitions.enterTransition },
-        exitTransition = { NavigationAnimationTransitions.exitTransition },
-        popEnterTransition = { NavigationAnimationTransitions.popEnterTransition },
-        popExitTransition = { NavigationAnimationTransitions.popExitTransition },
+        enterTransition = { NavigationAnimationTransitions.enterTransition() },
+        exitTransition = { NavigationAnimationTransitions.exitTransition() },
+        popEnterTransition = { NavigationAnimationTransitions.popEnterTransition() },
+        popExitTransition = { NavigationAnimationTransitions.popExitTransition() },
     ) {
         composable(SettingsRoutes.Settings.route) { SettingsScreen(navController) }
         composable(SettingsRoutes.AppSettings.route) { SettingsAppScreen(activity, navController) }
