@@ -89,6 +89,7 @@
     <string name="pin_line_number">Pin line numbers</string>
     <string name="extra_keys">Extra keys</string>
     <string name="extra_keys_desc">Show extra keys above the keyboard</string>
+    <string name="terminal_output">Terminal output</string>
     <string name="auto_save">Auto save</string>
     <string name="auto_save_desc">Automatically save file</string>
     <string name="auto_save_delay">Auto save delay</string>
@@ -699,6 +700,8 @@
     <string name="clipboard_keybindings_desc">Enable copy and paste keybindings for hardware keyboards</string>
     <string name="terminal_health">Terminal health</string>
     <string name="terminal_health_desc">Run diagnostics to identify issues with the terminal environment</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
     <string name="no_logs">No logs available</string>
     <string name="pending">Pending</string>
     <string name="check_proot">Check PRoot</string>

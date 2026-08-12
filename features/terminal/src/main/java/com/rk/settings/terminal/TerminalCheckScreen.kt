@@ -94,7 +94,10 @@ fun TerminalCheckScreen() {
 
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                            contentDescription = if (check.isExpanded) "Collapse" else "Expand",
+                            contentDescription =
+                                stringResource(
+                                    if (check.isExpanded) strings.collapse else strings.expand
+                                ),
                             modifier = Modifier.rotate(rotation).size(24.dp),
                         )
                     },
@@ -152,7 +155,7 @@ private fun StatusIcon(status: CheckStatus) {
                 Icon(
                     imageVector = LucideCircleQuestionMark,
                     contentDescription = stringResource(strings.pending),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp),
                 )
             }

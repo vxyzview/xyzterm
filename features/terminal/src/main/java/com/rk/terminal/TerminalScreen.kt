@@ -421,7 +421,11 @@ private fun ColumnScope.TerminalView(
                 }
             }
         },
-        modifier = Modifier.fillMaxWidth().weight(1f),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .semantics { contentDescription = stringResource(strings.terminal_output) },
         update = { terminalView ->
             val terminalColors =
                 if (isDarkMode) {
@@ -589,7 +593,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(strings.add_session),
+                    contentDescription = null,
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -698,7 +702,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
-                    contentDescription = stringResource(strings.delete_session),
+                    contentDescription = null,
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.error,
                 )
