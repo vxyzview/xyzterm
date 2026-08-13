@@ -25,6 +25,7 @@ android {
         viewBinding = true
         compose = false
         buildConfig = true
+        resValues = true
     }
 
     dependenciesInfo {

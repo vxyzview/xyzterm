@@ -109,8 +109,6 @@
     <string name="version_code">رمز الإصدار</string>
     <string name="github">Github</string>
     <string name="github_desc">ضع نجمة في جيتهب🤩</string>
-    <string name="telegram">مجموعة التيليجرام</string>
-    <string name="telegram_desc">الإبلاغ عن المشكلات وطلب الميزات وما إلى ذلك.</string>
     <string name="git_commit">تجزئة الكوميت Git</string>
     <string name="check_for_updates">التحقق من وجود تحديثات</string>
     <string name="check_for_updates_desc">التحقق دوريًا من وجود تحديثات</string>
@@ -246,7 +244,6 @@
     <string name="unsupported_file_ext">ملف غير مدعوم</string>
     <string name="invalid_port">منفذ غير صالح</string>
     <string name="port_number">رقم المنفذ</string>
-    <string name="discord">مجتمع Discord</string>
     <string name="language_server">خادم اللغة</string>
     <string name="manage_language_servers">إدارة خوادم اللغة</string>
     <string name="manage_language_servers_desc">تثبيت، توصيل، وتجهيز خوادم اللغة</string>

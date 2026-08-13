@@ -108,8 +108,6 @@
     <string name="version_code">Código da versão</string>
     <string name="github">GitHub</string>
     <string name="github_desc">Deixe uma estrela no Github 🤩</string>
-    <string name="telegram">Grupo no Telegram</string>
-    <string name="telegram_desc">Reporte problemas, solicite recursos, etc.</string>
     <string name="git_commit">Hash do commit Git</string>
     <string name="check_for_updates">Checar por atualizações</string>
     <string name="check_for_updates_desc">Verificar periodicamente se há atualizações</string>
@@ -223,7 +221,6 @@
     <string name="new_name">Novo nome</string>
     <string name="type">Tipo</string>
     <string name="name">Nome</string>
-    <string name="discord">Comunidade Discord</string>
     <string name="use_tabs">Inserir Caractere de Tabulação</string>
     <string name="use_tabs_desc">Usar uma tabulação real (\\t) em vez de espaços para recuo</string>
     <string name="view_github_profile">Ver perfil no GitHub</string>

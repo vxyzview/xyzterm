@@ -141,13 +141,11 @@
     <string name="cursor_anim_desc">Zapnout hladké animace kurzoru</string>
     <string name="warning_private_dir">Obsah této složky bude odstraněn jestli vyčistíte data nebo odstraníte xyzterm</string>
     <string name="github_desc">Dejte hvězdičku na GitHubu 🤩</string>
-    <string name="telegram_desc">Nahlásit problémy, žádosti o nové funkce atd.</string>
     <string name="ask_unsaved">Opravdu chcete tento neuložený soubor zahodit?</string>
     <string name="ext_desc">Spravovat doplňky</string>
     <string name="ext">Doplňky</string>
     <string name="content">Obsah</string>
     <string name="discard">Zahodit</string>
-    <string name="telegram">Telegram skupina</string>
     <string name="file_open_denied">Otevřít tento soubor jinými aplikacemi není povoleno</string>
     <string name="close_current_project">Opravdu chcete uzavřít projekt \'%s\'?</string>
     <string name="clone_repo">Klonovat repozitář</string>
@@ -219,7 +217,6 @@
     <string name="invalid_port">Neplatný port</string>
     <string name="port_number">Číslo portu</string>
     <string name="file_ext_example">Koncovka souboru (např. py)</string>
-    <string name="discord">Komunita Discord</string>
     <string name="view_github_profile">Zobrazit GitHub profil</string>
     <string name="developer">Vývojář</string>
     <string name="developer_name">vxyzview</string>

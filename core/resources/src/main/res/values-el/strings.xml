@@ -107,8 +107,6 @@
     <string name="version_code">Κωδικός έκδοσης</string>
     <string name="github">GitHub</string>
     <string name="github_desc">Δώστε αστέρι στο GitHub 🤩</string>
-    <string name="telegram">Ομάδα Telegram</string>
-    <string name="telegram_desc">Αναφορά προβλημάτων, αιτημάτων για λειτουργίες κ.λπ.</string>
     <string name="git_commit">Αναγνωριστικό αλλαγής Git</string>
     <string name="check_for_updates">Έλεγχος για ενημερώσεις</string>
     <string name="check_for_updates_desc">Περιοδικός έλεγχος για ενημερώσεις</string>
@@ -246,7 +244,6 @@
     <string name="invalid_port">Μη έγκυρη θύρα</string>
     <string name="port_number">Αριθμός θύρας</string>
     <string name="file_ext_example">Επέκταση αρχείου (π.χ. py)</string>
-    <string name="discord">Κοινότητα Discord</string>
     <string name="use_tabs">Εισαγωγή χαρακτήρα tab</string>
     <string name="use_tabs_desc">Χρήση πραγματικού tab (\\t) αντί για κενά για εσοχή</string>
     <string name="language_server">Διακομιστής γλώσσας</string>

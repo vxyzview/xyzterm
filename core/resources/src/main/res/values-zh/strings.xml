@@ -127,14 +127,12 @@
     <string name="add_font_desc">从储存空间中选择 TTF 字体文件</string>
     <string name="discard">放弃</string>
     <string name="light_mode">亮色</string>
-    <string name="telegram_desc">报告问题、功能需求等。</string>
     <string name="git_commit">Git 提交哈希</string>
     <string name="check_for_updates_desc">定期检查更新</string>
     <string name="click_open">点击这里打开文件</string>
     <string name="run">运行</string>
     <string name="txt_word_wrap">换行 TXT 文件</string>
     <string name="txt_word_wrap_desc">自动换行 TXT 文件</string>
-    <string name="telegram">Telegram 群</string>
     <string name="update_av">有新版本可用</string>
     <string name="update">更新</string>
     <string name="ignore">忽略</string>
@@ -234,7 +232,6 @@
     <string name="memory_usage">获取已用内存</string>
     <string name="anr_watchdog_desc">如果发现 xyzterm‐Editor 处在未响应状态并持续 5 秒钟，就终止其运行</string>
     <string name="anr_watchdog">监听应用是否 ANR</string>
-    <string name="discord">Discord 社区</string>
     <string name="use_tabs">使用 Tab 制表符</string>
     <string name="use_tabs_desc">使用制表符 \\t 代替空格进行缩进</string>
     <string name="invalid_port">端口号无效</string>

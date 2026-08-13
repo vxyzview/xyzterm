@@ -108,9 +108,7 @@
     <string name="version">版本</string>
     <string name="version_code">版本代號</string>
     <string name="github">GitHub</string>
-    <string name="telegram">Telegram 群組</string>
     <string name="github_desc">在 GitHub 上給顆星吧 🤩</string>
-    <string name="telegram_desc">回報問題、功能請求等。</string>
     <string name="git_commit">Git 提交哈希值</string>
     <string name="check_for_updates">檢查更新</string>
     <string name="check_for_updates_desc">定期檢查更新</string>
@@ -240,7 +238,6 @@
     <string name="invalid_port">無效的連接埠號</string>
     <string name="port_number">通讯埠</string>
     <string name="file_ext_example">檔案類型（例如 .py）</string>
-    <string name="discord">Discord 社群</string>
     <string name="use_tabs">插入 Tab 字元</string>
     <string name="use_tabs_desc">使用制表符 \\t 取代空格進行縮排</string>
     <string name="render_whitespace">呈現空白字元</string>

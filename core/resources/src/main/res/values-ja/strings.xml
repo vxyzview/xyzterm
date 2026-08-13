@@ -104,8 +104,6 @@
     <string name="version_code">バージョンコード</string>
     <string name="github">GitHub</string>
     <string name="github_desc">Githubでスターを付ける🤩</string>
-    <string name="telegram">Telegramグループ</string>
-    <string name="telegram_desc">問題の報告・機能の提案など</string>
     <string name="git_commit">Gitコミットのハッシュ</string>
     <string name="check_for_updates">アップデートを確認</string>
     <string name="check_for_updates_desc">定期的にアップデートを確認する</string>
@@ -242,7 +240,6 @@
     <string name="invalid_port">無効なポートです</string>
     <string name="port_number">ポート番号</string>
     <string name="file_ext_example">拡張子 (例: py)</string>
-    <string name="discord">Discordコミュニティ</string>
     <string name="use_tabs">タブ文字を挿入</string>
     <string name="use_tabs_desc">スペースではなく実際のタブ文字(\\t)をインデントとして使用する</string>
     <string name="developer">開発者</string>
