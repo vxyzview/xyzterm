@@ -7,8 +7,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.material3.LocalReducedMotion
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalReducedMotion
 
 object NavigationAnimationTransitions {
     // Honor the system "Remove animations" accessibility setting: finite tweens
