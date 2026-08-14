@@ -7,26 +7,21 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.material3.LocalReducedMotion
-import androidx.compose.runtime.Composable
 
+// NavHost's transition lambdas are non-composable scopes, so these cannot depend
+// on CompositionLocals. Compose's animation framework already honors the system
+// "Remove animations" accessibility setting (animator duration scale = 0) on its
+// own, so no explicit reduced-motion branch is needed here.
 object NavigationAnimationTransitions {
-    // Honor the system "Remove animations" accessibility setting: finite tweens
-    // run at full speed even when reduced motion is on, so fall back to instant
-    // (no-op) transitions so screen-reader / vestibular users get a static switch.
-    @Composable
     fun popEnterTransition(): EnterTransition =
-        if (LocalReducedMotion.current) EnterTransition.None else fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
+        fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
 
-    @Composable
     fun popExitTransition(): ExitTransition =
-        if (LocalReducedMotion.current) ExitTransition.None else fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
+        fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
 
-    @Composable
     fun enterTransition(): EnterTransition =
-        if (LocalReducedMotion.current) EnterTransition.None else fadeIn(tween(250)) + slideInHorizontally { it / 2 }
+        fadeIn(tween(250)) + slideInHorizontally { it / 2 }
 
-    @Composable
     fun exitTransition(): ExitTransition =
-        if (LocalReducedMotion.current) ExitTransition.None else fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
+        fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
 }
