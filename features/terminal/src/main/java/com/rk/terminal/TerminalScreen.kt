@@ -330,6 +330,7 @@ private fun ColumnScope.TerminalView(
     onSurfaceColor: Int,
     terminalActivity: Terminal,
 ) {
+    val terminalOutputLabel = stringResource(strings.terminal_output)
     AndroidView(
         factory = { context ->
             TerminalView(context, null).apply {
@@ -425,7 +426,7 @@ private fun ColumnScope.TerminalView(
             Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .semantics { contentDescription = stringResource(strings.terminal_output) },
+                .semantics { contentDescription = terminalOutputLabel },
         update = { terminalView ->
             val terminalColors =
                 if (isDarkMode) {
