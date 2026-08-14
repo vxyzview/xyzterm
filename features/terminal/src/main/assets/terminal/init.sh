@@ -93,16 +93,17 @@ ensure_nodejs_once() {
 
   touch "/.nodejs_inflight"
 
+  local log="/.cache/.nodejs.log"
   info "Setting up Node.js in the background (one-time)..."
   (
     if install_nodejs; then
       touch "$marker"
       info "Node.js ready."
     else
-      warn "Node.js setup failed. Run 'install_nodejs' inside the shell to retry."
+      warn "Node.js setup failed. Log: $log — run 'install_nodejs' inside the shell to retry."
     fi
     rm -f "/.nodejs_inflight"
-  ) >/dev/null 2>&1 &
+  ) >>"$log" 2>&1 &
 }
 
 ensure_nodejs_once
