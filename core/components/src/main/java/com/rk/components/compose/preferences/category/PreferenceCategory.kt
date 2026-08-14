@@ -32,6 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.rk.components.compose.preferences.base.PreferenceTemplate
 
@@ -52,6 +55,7 @@ fun PreferenceCategory(
             modifier
                 .padding(horizontal = 16.dp)
                 .clip(MaterialTheme.shapes.large)
+                .semantics { role = Role.Button }
                 .clickable { onNavigate() }
                 .background(
                     if (isSelected) MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp) else Color.Transparent

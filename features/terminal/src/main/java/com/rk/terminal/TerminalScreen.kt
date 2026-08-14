@@ -68,7 +68,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -287,6 +289,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 )
                                             },
+                                            label = { Text(text = stringResource(strings.input)) },
                                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                                             keyboardActions =
                                                 KeyboardActions(
@@ -525,6 +528,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                     .fillMaxWidth()
                     .padding(start = 12.dp, end = 12.dp, top = 12.dp)
                     .clip(MaterialTheme.shapes.medium)
+                    .semantics { role = Role.Button }
                     .clickable { context.startActivity(Intent(context, SettingsActivity::class.java)) },
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
@@ -594,7 +598,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = null,
+                    contentDescription = stringResource(strings.add_session),
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -632,8 +636,8 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                             colors =
                                 NavigationDrawerItemDefaults.colors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                     unselectedContainerColor = Color.Transparent,
                                 ),
                             badge = {
@@ -703,7 +707,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
-                    contentDescription = null,
+                    contentDescription = stringResource(strings.delete_session),
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.error,
                 )

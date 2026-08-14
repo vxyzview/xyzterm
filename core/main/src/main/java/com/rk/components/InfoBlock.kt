@@ -17,6 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.theme.onWarningSurface
@@ -34,7 +37,10 @@ fun InfoBlock(
 ) {
     PreferenceGroup(modifier = modifier) {
         Card(
-            modifier = Modifier.clickable(enabled = onClick != null, onClick = { onClick?.invoke() }).fillMaxWidth(),
+            modifier =
+                Modifier.semantics { role = Role.Button }
+                    .clickable(enabled = onClick != null, onClick = { onClick?.invoke() })
+                    .fillMaxWidth(),
             shape = shape,
             colors =
                 if (warning) CardDefaults.cardColors(MaterialTheme.colorScheme.warningSurface)

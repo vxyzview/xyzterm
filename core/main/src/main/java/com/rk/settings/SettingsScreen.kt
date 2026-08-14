@@ -25,6 +25,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rk.activities.settings.SettingsRoutes
@@ -88,6 +91,7 @@ private fun Categories(navController: NavController) {
     PreferenceTemplate(
         modifier =
             Modifier.padding(horizontal = 16.dp)
+                .semantics { role = Role.Button }
                 .clip(MaterialTheme.shapes.large)
                 .clickable { navController.navigate(SettingsRoutes.About.route) }
                 .background(Color.Transparent),
@@ -109,6 +113,7 @@ private fun Categories(navController: NavController) {
     PreferenceTemplate(
         modifier =
             Modifier.padding(horizontal = 16.dp)
+                .semantics { role = Role.Button }
                 .clip(MaterialTheme.shapes.large)
                 .clickable { navController.navigate(SettingsRoutes.Support.route) }
                 .background(Color.Transparent),
