@@ -6,6 +6,8 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/games:/usr/local/bin:/usr/local/s
 export SHELL="bash"
 export PS1="\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] \\$ "
 
+# Ubuntu-only helpers (utils.sh refuses to run inside the Android shell).
+export TERMINAL_MODE=ubuntu
 source "$LOCAL/bin/utils"
 
 if [ -f "$LOCAL/.sandbox_degraded" ]; then
@@ -78,6 +80,25 @@ ensure_packages_once() {
 
 ensure_packages_once
 unset -f ensure_packages_once
+
+# Auto-install Node.js once — the one helper most tooling (and the LSP
+# installers in $LOCAL/bin) need. Opt-out by touching /.skip_nodejs.
+ensure_nodejs_once() {
+  local marker="/.cache/.nodejs_done"
+  [[ -f "$marker" ]] && return 0
+  [[ -f "/.skip_nodejs" ]] && return 0
+
+  info "Setting up Node.js (one-time)..."
+  if install_nodejs; then
+    touch "$marker"
+    info "Node.js ready."
+  else
+    warn "Node.js setup failed. Run 'install_nodejs' inside the shell to retry."
+  fi
+}
+
+ensure_nodejs_once
+unset -f ensure_nodejs_once
 
 if [ -x /usr/lib/command-not-found -o -x /usr/share/command-not-found/command-not-found ]; then
 	function command_not_found_handle {

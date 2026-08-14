@@ -1,3 +1,12 @@
+# Shell mode guard. utils.sh is Ubuntu-only: the LSP installers / setup helpers
+# are intended for the proot Ubuntu shell, not the Android shell. When a future
+# android shell lands, set TERMINAL_MODE=android there so these stay inactive.
+: "${TERMINAL_MODE:=ubuntu}"
+
+is_android_shell() {
+  [ "${TERMINAL_MODE:-ubuntu}" != "ubuntu" ]
+}
+
 RESET='\033[0m'
 
 BOLD_BLUE='\033[1;34m'
@@ -42,13 +51,28 @@ ask() {
 }
 
 install_nodejs() {
+  if is_android_shell; then
+    error "Node.js is installed inside the Ubuntu shell only. Run this inside Ubuntu."
+    return 1
+  fi
+
   info "Installing Node.js LTS..."
   apt install -y curl ca-certificates
   curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
   apt install -y nodejs
+  if ! command_exists node; then
+    error "Node.js install failed: node was not found after install."
+    return 1
+  fi
+  info "Node.js installed: $(node -v)"
 }
 
 uninstall_nodejs() {
+  if is_android_shell; then
+    error "Node.js is installed inside the Ubuntu shell only. Run this inside Ubuntu."
+    return 1
+  fi
+
   if ask "Do you want to uninstall Node.js LTS? It was installed as a dependency of this language server. This will also remove all globally installed npm packages."; then
     info "Uninstalling Node.js LTS..."
     apt remove -y nodejs

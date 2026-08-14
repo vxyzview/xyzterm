@@ -228,6 +228,9 @@
     <string name="text_mate_suggestion">TextMate auto-completion</string>
     <string name="text_mate_suggestion_desc">Suggest predefined keywords</string>
     <string name="install">Install</string>
+    <string name="install_ubuntu_optional">Ubuntu is not installed</string>
+    <string name="install_ubuntu_optional_desc">Install Ubuntu to get a full Linux environment. You can do this now or later from Terminal settings.</string>
+    <string name="not_now">Not now</string>
     <string name="ask_lsp_install">Would you like to install \'%s\' language server?</string>
     <string name="ask_lsp_update">Would you like to update \'%s\' language server?</string>
     <string name="uninstall_terminal_warning">Permanently uninstall Ubuntu? This action cannot be undone.</string>

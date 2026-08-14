@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -226,25 +227,27 @@ class Terminal : AppCompatActivity() {
     @Composable
     fun TerminalScreenHost(context: Context) {
         var progress by remember { mutableFloatStateOf(0f) }
-        var needsDownload by remember { mutableStateOf(false) }
         var currentFileName by remember { mutableStateOf("") }
         var downloadedBytes by remember { mutableLongStateOf(0L) }
         var totalBytes by remember { mutableLongStateOf(0L) }
         var unsupportedCpu by remember { mutableStateOf(false) }
+        var downloadStarted by remember { mutableStateOf(false) }
+        var ubuntuInstalled by remember { mutableStateOf(isTerminalInstalled()) }
 
         // Helper function to format bytes to MB string
         fun formatBytesToMB(bytes: Long): String {
             return "%.2f".format(bytes / (1024.0 * 1024.0))
         }
 
-        LaunchedEffect(Unit) {
-            try {
+        fun startInstall() {
+            progressText = strings.installing.getString()
+            downloadStarted = true
+
+            lifecycleScope.launch(Dispatchers.Main) {
                 val abi = Build.SUPPORTED_ABIS
 
-                val filesToDownload = mutableListOf<DownloadFile>()
-
-                if (isTerminalInstalled().not()) {
-                    filesToDownload.add(
+                val filesToDownload =
+                    mutableListOf(
                         DownloadFile(
                             url =
                                 if (abi.contains("x86_64")) {
@@ -255,69 +258,71 @@ class Terminal : AppCompatActivity() {
                                     ROOTFS_ARM
                                 } else {
                                     unsupportedCpu = true
-                                    return@LaunchedEffect
+                                    return@launch
                                 },
                             outputFile = getTempDir().child("sandbox.tar.gz"),
-                        )
+                        ),
                     )
-                }
 
-                needsDownload = filesToDownload.any { file -> file.outputFile.exists().not() }
+                try {
+                    setupEnvironment(
+                        context = context,
+                        filesToDownload = filesToDownload,
+                        onProgress = { fileName, downloaded, total ->
+                            downloadedBytes = downloaded
+                            totalBytes = total
+                            currentFileName = fileName
 
-                setupEnvironment(
-                    context = context,
-                    filesToDownload = filesToDownload,
-                    onProgress = { fileName, downloaded, total ->
-                        downloadedBytes = downloaded
-                        totalBytes = total
-                        currentFileName = fileName
-
-                        if (total > 0) {
-                            val downloadedMB = formatBytesToMB(downloaded)
-                            val totalMB = formatBytesToMB(total)
-                            progressText =
-                                "${strings.downloading.getString()} ${fileName.removeSuffix(".so").removePrefix("lib")} ($downloadedMB/$totalMB MB)"
-                        }
-                    },
-                    onComplete = { installNextStage = it },
-                    onError = { error, file ->
-                        when (error) {
-                            is UnknownHostException -> {
-                                toast(strings.network_err.getString())
+                            if (total > 0) {
+                                val downloadedMB = formatBytesToMB(downloaded)
+                                val totalMB = formatBytesToMB(total)
+                                progressText =
+                                    "${strings.downloading.getString()} ${fileName.removeSuffix(".so").removePrefix("lib")} ($downloadedMB/$totalMB MB)"
                             }
-
-                            is SocketTimeoutException -> {
-                                errorDialog(strings.timeout)
-                            }
-
-                            else -> {
-                                error.printStackTrace()
-                                GlobalScope.launch(Dispatchers.IO) {
-                                    if (file?.absolutePath?.contains(localBinDir().absolutePath) == true) {
-                                        localBinDir().deleteRecursively()
-                                    }
-
-                                    if (file?.name == "sandbox.tar.gz") {
-                                        sandboxDir().deleteRecursively()
-                                        File(getTempDir(), "sandbox.tar.gz").delete()
-                                    }
+                        },
+                        onComplete = {
+                            installNextStage = it
+                            ubuntuInstalled = it != NEXT_STAGE.NONE || isTerminalInstalled()
+                        },
+                        onError = { error, file ->
+                            when (error) {
+                                is UnknownHostException -> {
+                                    toast(strings.network_err.getString())
                                 }
-                                errorDialog(msg = strings.setup_failed.getFilledString(error.message))
+
+                                is SocketTimeoutException -> {
+                                    errorDialog(strings.timeout)
+                                }
+
+                                else -> {
+                                    error.printStackTrace()
+                                    GlobalScope.launch(Dispatchers.IO) {
+                                        if (file?.absolutePath?.contains(localBinDir().absolutePath) == true) {
+                                            localBinDir().deleteRecursively()
+                                        }
+
+                                        if (file?.name == "sandbox.tar.gz") {
+                                            sandboxDir().deleteRecursively()
+                                            File(getTempDir(), "sandbox.tar.gz").delete()
+                                        }
+                                    }
+                                    errorDialog(msg = strings.setup_failed.getFilledString(error.message))
+                                }
                             }
-                        }
-                        finish()
-                    },
-                )
-            } catch (e: Exception) {
-                if (e is UnknownHostException) {
-                    toast(strings.network_err.getString())
-                } else if (e is SocketTimeoutException) {
-                    errorDialog(strings.timeout)
-                } else {
-                    e.printStackTrace()
-                    toast(strings.setup_failed.getFilledString(e.message))
+                            downloadStarted = false
+                        },
+                    )
+                } catch (e: Exception) {
+                    if (e is UnknownHostException) {
+                        toast(strings.network_err.getString())
+                    } else if (e is SocketTimeoutException) {
+                        errorDialog(strings.timeout)
+                    } else {
+                        e.printStackTrace()
+                        toast(strings.setup_failed.getFilledString(e.message))
+                    }
+                    downloadStarted = false
                 }
-                finish()
             }
         }
 
@@ -331,29 +336,35 @@ class Terminal : AppCompatActivity() {
                 onDispose { activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
             }
 
-            if (unsupportedCpu) {
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(
-                        text = stringResource(strings.unsupported_cpu),
-                        style = MaterialTheme.typography.headlineSmall,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(strings.unsupported_cpu_desc),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { finishAffinity() }) {
-                        Text(text = stringResource(strings.ok))
+            when {
+                unsupportedCpu -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            text = stringResource(strings.unsupported_cpu),
+                            style = MaterialTheme.typography.headlineSmall,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(strings.unsupported_cpu_desc),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { finishAffinity() }) {
+                            Text(text = stringResource(strings.ok))
+                        }
                     }
                 }
-            } else if (installNextStage == null) {
-                if (needsDownload) {
+
+                installNextStage != null && (installNextStage != NEXT_STAGE.NONE || ubuntuInstalled) -> {
+                    TerminalScreen(terminalActivity = this@Terminal)
+                }
+
+                downloadStarted -> {
                     Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                         Column(
                             modifier = Modifier.align(Alignment.Center),
@@ -386,8 +397,40 @@ class Terminal : AppCompatActivity() {
                         )
                     }
                 }
-            } else {
-                TerminalScreen(terminalActivity = this@Terminal)
+
+                ubuntuInstalled -> {
+                    TerminalScreen(terminalActivity = this@Terminal)
+                }
+
+                else -> {
+                    // Ubuntu not installed and no download in progress: offer the
+                    // optional install instead of forcing the rootfs download.
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            text = stringResource(strings.install_ubuntu_optional),
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(strings.install_ubuntu_optional_desc),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(onClick = { startInstall() }) {
+                            Text(text = stringResource(strings.install))
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedButton(onClick = { finish() }) {
+                            Text(text = stringResource(strings.not_now))
+                        }
+                    }
+                }
             }
         }
     }
