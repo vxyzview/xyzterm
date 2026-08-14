@@ -27,7 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -406,7 +408,11 @@ class Terminal : AppCompatActivity() {
                     // Ubuntu not installed and no download in progress: offer the
                     // optional install instead of forcing the rootfs download.
                     Column(
-                        modifier = Modifier.fillMaxSize().padding(24.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(24.dp)
+                                .semantics(mergeDescendants = true) {},
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
@@ -414,6 +420,7 @@ class Terminal : AppCompatActivity() {
                             text = stringResource(strings.install_ubuntu_optional),
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
+                            modifier = Modifier.semantics { heading() },
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -426,7 +433,7 @@ class Terminal : AppCompatActivity() {
                             Text(text = stringResource(strings.install))
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(onClick = { finish() }) {
+                        TextButton(onClick = { finishAffinity() }) {
                             Text(text = stringResource(strings.not_now))
                         }
                     }
