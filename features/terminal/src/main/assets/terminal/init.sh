@@ -82,8 +82,8 @@ ensure_packages_once
 unset -f ensure_packages_once
 
 # Auto-install Node.js once — the one helper most tooling (and the LSP
-# installers in $LOCAL/bin) need. Runs in the background so the first
-# shell prompt is never blocked on a network download. Opt-out by touching
+# installers in $LOCAL/bin) need. Runs in the foreground so the first
+# shell prompt only appears once Node.js is ready. Opt-out by touching
 # /.skip_nodejs.
 ensure_nodejs_once() {
   local marker="/.cache/.nodejs_done"
@@ -93,17 +93,14 @@ ensure_nodejs_once() {
 
   touch "/.nodejs_inflight"
 
-  local log="/.cache/.nodejs.log"
-  info "Setting up Node.js in the background (one-time)..."
-  (
-    if install_nodejs; then
-      touch "$marker"
-      info "Node.js ready."
-    else
-      warn "Node.js setup failed. Log: $log — run 'install_nodejs' inside the shell to retry."
-    fi
-    rm -f "/.nodejs_inflight"
-  ) >>"$log" 2>&1 &
+  info "Setting up Node.js (one-time)..."
+  if install_nodejs; then
+    touch "$marker"
+    info "Node.js ready."
+  else
+    warn "Node.js setup failed — run 'install_nodejs' inside the shell to retry."
+  fi
+  rm -f "/.nodejs_inflight"
 }
 
 ensure_nodejs_once
