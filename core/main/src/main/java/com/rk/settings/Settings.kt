@@ -164,7 +164,6 @@ object Settings {
     var terminal_font_size by CachedPreference("terminal_font_size", 13)
     var terminal_scrollback_buffer by CachedPreference("terminal_scrollback_buffer", 5000)
     var auto_save_delay by CachedPreference("auto_save_delay", 400L)
-    var lsp_log_limit by CachedPreference("lsp_log_limit", 5000)
 
     var user_declined_value by CachedPreference("user_declined_value", false)
     var user_said_maybe_later by CachedPreference("user_said_maybe_later", false)

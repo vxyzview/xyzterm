@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.rk.activities.settings.SettingsRoutes
-import com.rk.components.RoundedValueSlider
 import com.rk.components.SettingsItem
 import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.components.compose.preferences.base.PreferenceLayout
@@ -156,16 +155,6 @@ fun DeveloperOptions(modifier: Modifier = Modifier, navController: NavController
                         LogcatService.stop(application!!)
                     }
                 },
-            )
-
-            RoundedValueSlider(
-                label = stringResource(strings.lsp_log_limit),
-                description = stringResource(strings.lsp_log_limit_desc),
-                min = 1_000,
-                max = 100_000,
-                stepSize = 5_000,
-                default = Settings.lsp_log_limit,
-                onValueChanged = { Settings.lsp_log_limit = it },
             )
 
             SettingsItem(
