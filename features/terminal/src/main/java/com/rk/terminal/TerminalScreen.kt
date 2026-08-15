@@ -45,6 +45,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -270,49 +271,42 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                     var text by rememberSaveable { mutableStateOf("") }
                                     val focusRequester = remember { FocusRequester() }
 
-                                    Surface(
+                                    TextField(
+                                        value = text,
+                                        onValueChange = { text = it },
+                                        maxLines = 1,
+                                        singleLine = true,
+                                        label = { Text(text = stringResource(strings.input)) },
+                                        shape = MaterialTheme.shapes.medium,
+                                        colors =
+                                            TextFieldDefaults.colors(
+                                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                            ),
+                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                        keyboardActions =
+                                            KeyboardActions(
+                                                onDone = {
+                                                    if (text.isEmpty()) {
+                                                        // Dispatch enter key events if text is empty
+                                                        val eventDown =
+                                                            KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
+                                                        val eventUp =
+                                                            KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
+                                                        terminalView.get()?.dispatchKeyEvent(eventDown)
+                                                        terminalView.get()?.dispatchKeyEvent(eventUp)
+                                                    } else {
+                                                        terminalView.get()?.currentSession?.write(text)
+                                                        text = ""
+                                                    }
+                                                }
+                                            ),
                                         modifier =
                                             Modifier
                                                 .fillMaxWidth()
                                                 .height(keyRowHeight)
-                                                .padding(8.dp),
-                                        shape = MaterialTheme.shapes.medium,
-                                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                    ) {
-                                        TextField(
-                                            value = text,
-                                            onValueChange = { text = it },
-                                            maxLines = 1,
-                                            singleLine = true,
-                                            placeholder = {
-                                                Text(
-                                                    text = stringResource(strings.input),
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                )
-                                            },
-                                            label = { Text(text = stringResource(strings.input)) },
-                                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                            keyboardActions =
-                                                KeyboardActions(
-                                                    onDone = {
-                                                        if (text.isEmpty()) {
-                                                            // Dispatch enter key events if text is empty
-                                                            val eventDown =
-                                                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
-                                                            val eventUp =
-                                                                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
-                                                            terminalView.get()?.dispatchKeyEvent(eventDown)
-                                                            terminalView.get()?.dispatchKeyEvent(eventUp)
-                                                        } else {
-                                                            terminalView.get()?.currentSession?.write(text)
-                                                            text = ""
-                                                        }
-                                                    }
-                                                ),
-                                            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-                                        )
-                                    }
+                                                .focusRequester(focusRequester),
+                                    )
 
                                     LaunchedEffect(Unit) { focusRequester.requestFocus() }
                                 }
