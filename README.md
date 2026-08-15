@@ -1,19 +1,12 @@
 <div align="center">
 
-```
-██╗  ██╗██╗   ██╗███████╗████████╗███████╗██████╗ ███╗   ███╗
-╚██╗██╔╝╚██╗ ██╔╝╚══███╔╝╚══██╔══╝██╔════╝██╔══██╗████╗ ████║
- ╚███╔╝  ╚████╔╝   ███╔╝    ██║   █████╗  ██████╔╝██╔████╔██║
- ██╔██╗   ╚██╔╝   ███╔╝     ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║
-██╔╝ ██╗   ██║   ███████╗   ██║   ███████╗██║  ██║██║ ╚═╝ ██║
-╚═╝  ╚═╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝
+<img src="core/main/src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="96" alt="xyzterm logo" />
 
-   ████████
-   █        █   a proot Linux shell in your pocket
-   █  >_     █   terminal-only · no root · no telemetry
-   █        █
-   ████████
-```
+# xyzterm
+
+**a proot Linux shell in your pocket**
+
+terminal-only · no root · no telemetry
 
 **xyzterm** is a minimal, terminal-only Android app that runs a real
 [proot](https://github.com/termux/proot)-based Ubuntu environment with a full
