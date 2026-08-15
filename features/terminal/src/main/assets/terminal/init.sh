@@ -62,6 +62,9 @@ ensure_packages_once() {
 
     info "Installing missing packages: ${MISSING[*]}"
 
+    # Recover an interrupted dpkg state (e.g. a killed install) before apt will run
+    dpkg --configure -a || warn "dpkg --configure -a reported errors; continuing anyway"
+
     if export DEBIAN_FRONTEND=noninteractive && \
        apt update -y && \
        apt install -y "${MISSING[@]}"; then

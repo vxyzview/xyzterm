@@ -57,6 +57,8 @@ install_nodejs() {
   fi
 
   info "Installing Node.js LTS..."
+  # Recover an interrupted dpkg state (e.g. a killed install) before apt will run
+  dpkg --configure -a || warn "dpkg --configure -a reported errors; continuing anyway"
   apt install -y curl ca-certificates
   curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
   apt install -y nodejs
