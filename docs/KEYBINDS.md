@@ -1,29 +1,41 @@
 # Keybinds
 
-Supported keyboard shortcuts in the Xed-Editor
+Keyboard shortcuts in xyzterm.
 
-## File Operations
+## Global commands
 
-| Shortcut&emsp;&emsp;&emsp;&emsp;&emsp; | Action                |
-|----------------------------------------|-----------------------|
-| <kbd>CTRL</kbd>+<kbd>S</kbd>           | Save the current file |
+Rebindable in **Settings → Keybindings**.
 
-## Editing
+| Shortcut | Action |
+|----------|--------|
+| <kbd>CTRL</kbd>+<kbd>J</kbd> | Open the terminal |
+| <kbd>CTRL</kbd>+<kbd>,</kbd> | Open settings |
+| <kbd>F1</kbd> | Open documentation |
 
-| Shortcut&emsp;&emsp;&emsp;&emsp;&emsp; | Action                          |
-|----------------------------------------|---------------------------------|
-| <kbd>CTRL</kbd>+<kbd>X</kbd>           | Cut selected text               |
-| <kbd>CTRL</kbd>+<kbd>C</kbd>           | Copy selected text              |
-| <kbd>CTRL</kbd>+<kbd>V</kbd>           | Paste copied or cut text        |
-| <kbd>CTRL</kbd>+<kbd>A</kbd>           | Select all text in the document |
-| <kbd>CTRL</kbd>+<kbd>Z</kbd>           | Undo the last action            |
-| <kbd>CTRL</kbd>+<kbd>Y</kbd>           | Redo the last undone action     |
-| <kbd>CTRL</kbd>+<kbd>D</kbd>           | Duplicate current line          |
-| <kbd>CTRL</kbd>+<kbd>W</kbd>           | Select current word             |
+## Terminal
 
-## Text Navigation
+| Shortcut | Action |
+|----------|--------|
+| <kbd>CTRL</kbd>+<kbd>C</kbd> | Interrupt the running command (SIGINT) |
+| <kbd>CTRL</kbd>+<kbd>D</kbd> | EOF — exit the shell or close the session |
+| <kbd>CTRL</kbd>+<kbd>L</kbd> | Clear the terminal screen |
+| <kbd>CTRL</kbd>+<kbd>Z</kbd> | Suspend the foreground process (SIGTSTP) |
+| <kbd>CTRL</kbd>+<kbd>A</kbd> / <kbd>E</kbd> | Jump to start / end of the line |
+| <kbd>CTRL</kbd>+<kbd>U</kbd> / <kbd>K</kbd> | Delete back to start / forward to end of line |
+| <kbd>CTRL</kbd>+<kbd>W</kbd> | Delete the previous word |
+| <kbd>CTRL</kbd>+<kbd>R</kbd> | Reverse-search shell history |
+| <kbd>ESC</kbd> | Escape |
+| <kbd>TAB</kbd> | Shell completion |
 
-| Shortcut&emsp;&emsp;&emsp;&emsp;&emsp; | Action                    |
-|----------------------------------------|---------------------------|
-| <kbd>CTRL</kbd>+<kbd>F</kbd>           | Find text in the document |
-| <kbd>CTRL</kbd>+<kbd>H</kbd>           | Find and replace text     |
+> CTRL, ALT, SHIFT, and FN are also available as on-screen keys in the extra-keys row; hold one and tap a key to combine them. The extra-keys matrix itself is configurable in **Terminal settings → Extra keys**.
+
+## Pinch to zoom
+
+Pinch on the terminal to scale the font (11–45 px).
+
+## Text selection
+
+Long-press the terminal screen to select text, then copy it. The extra-keys
+row also has a paste key (<kbd>⎘</kbd>) to insert from the clipboard, and the
+default key matrix includes <kbd>CTRL</kbd>, <kbd>ALT</kbd>, <kbd>SHIFT</kbd>,
+and <kbd>FN</kbd> modifier keys.

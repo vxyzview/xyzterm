@@ -35,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -231,7 +230,6 @@ class Terminal : AppCompatActivity() {
     @OptIn(DelicateCoroutinesApi::class)
     @Composable
     fun TerminalScreenHost(context: Context) {
-        var progress by remember { mutableFloatStateOf(0f) }
         var currentFileName by remember { mutableStateOf("") }
         var downloadedBytes by remember { mutableLongStateOf(0L) }
         var totalBytes by remember { mutableLongStateOf(0L) }
@@ -379,11 +377,13 @@ class Terminal : AppCompatActivity() {
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth(0.8f))
+                            LinearProgressIndicator(
+                                progress = { if (totalBytes > 0) downloadedBytes.toFloat() / totalBytes else 0f },
+                                modifier = Modifier.fillMaxWidth(0.8f),
+                            )
 
                             if (totalBytes > 0) {
                                 val percent = (downloadedBytes.toFloat() / totalBytes * 100).toInt()
-                                progress = downloadedBytes.toFloat() / totalBytes
 
                                 Text(
                                     text = "$percent%",

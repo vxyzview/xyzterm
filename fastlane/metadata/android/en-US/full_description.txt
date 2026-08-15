@@ -1,9 +1,17 @@
-Xed-Editor is a versatile text editor for Android, offering advanced functionality such as syntax highlighting, extensive customization options, and a streamlined interface for efficient editing.
+xyzterm is a minimal, terminal-only Android app that runs a real proot-based Ubuntu environment with a full terminal emulator. Tap the icon, and you are in a shell — no code editor, no file manager, no git UI, no extensions.
 
-Key Features:
+Getting started
+1. Install xyzterm and open it.
+2. On first launch, choose to install Ubuntu — a one-time rootfs download for your device (arm, arm64, or x64).
+3. Start typing. You are in a real Ubuntu shell.
 
-- Advanced Editing Capabilities: Syntax highlighting for multiple programming languages, auto-indentation, search and undo-redo support.
-- File Management: Open and edit multiple files using tabs, integrated file browser, and options to create, rename, copy, and delete files/folders.
-- Customization: AMOLED theme for night use, multiple theme options.
-- Developer Tools: Built-in terminal with Ubuntu Linux support, ability to run Python and Node.js
-- Additional Features: Word wrap, print text documents, Markdown support with preview functionality, and a plugin system.
+Features
+- Real Ubuntu, no root — proot userspace rootfs per ABI (arm, arm64, x64)
+- Full terminal emulator — configurable font, size, colors, and an extra-keys row
+- Multiple named sessions — add, rename, delete, switch; persisted across restarts
+- Terminal themes — including AMOLED and dynamic color (Monet)
+- Session-safe — sessions survive backgrounding and app restarts
+- Backup and restore of the terminal environment from terminal settings
+
+Privacy
+xyzterm is distributed only through F-Droid, is licensed GPL-3.0-or-later, and contains no telemetry and no third-party analytics. Your shell is your business.

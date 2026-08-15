@@ -12,10 +12,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalDensity
@@ -33,9 +30,6 @@ inline fun getDrawerWidth(): Dp {
     return width
 }
 
-var isPermanentDrawer by mutableStateOf(false)
-    private set
-
 @Composable
 fun ResponsiveDrawer(
     drawerState: DrawerState,
@@ -43,10 +37,11 @@ fun ResponsiveDrawer(
     mainContent: @Composable () -> Unit,
     sheetContent: @Composable ColumnScope.() -> Unit,
 ) {
-    if (Settings.desktop_mode) {
-        val screenWidthDp = LocalWindowInfo.current.containerSize.width.dp
-        isPermanentDrawer = remember(screenWidthDp) { screenWidthDp >= 1080.dp }
-    }
+    val screenWidthDp = LocalWindowInfo.current.containerSize.width.dp
+    val isPermanentDrawer =
+        remember(screenWidthDp, Settings.desktop_mode) {
+            Settings.desktop_mode && screenWidthDp >= 1080.dp
+        }
 
     if (isPermanentDrawer) {
         PermanentNavigationDrawer(
