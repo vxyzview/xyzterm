@@ -1,13 +1,13 @@
 package com.rk.settings.terminal
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
@@ -109,7 +109,8 @@ fun TerminalCheckScreen() {
                             Modifier.padding(horizontal = 16.dp)
                                 .padding(bottom = 12.dp)
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(MaterialTheme.shapes.extraSmall)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                                 .padding(12.dp)
                     ) {
                         Column {

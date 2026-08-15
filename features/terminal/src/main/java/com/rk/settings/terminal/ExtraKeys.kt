@@ -1,6 +1,5 @@
 package com.rk.settings.terminal
 
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,17 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +27,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.rk.components.ResetButton
+import com.rk.components.compose.preferences.base.LocalIsExpandedScreen
+import com.rk.components.compose.preferences.base.PreferenceScaffold
 import com.rk.resources.drawables
 import com.rk.resources.strings
 import com.rk.settings.Preference
@@ -68,10 +64,8 @@ const val DEFAULT_TERMINAL_EXTRA_KEYS =
         "\n  ]" +
         "\n]")
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TerminalExtraKeys() {
-    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val context = LocalContext.current
 
     var text by remember { mutableStateOf(Settings.terminal_extra_keys) }
@@ -80,27 +74,16 @@ fun TerminalExtraKeys() {
         Settings.terminal_extra_keys = text
     }
 
-    Scaffold(
-        topBar = {
-            Column {
-                TopAppBar(
-                    navigationIcon = {
-                        IconButton(onClick = { backDispatcher?.onBackPressed() }) {
-                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
-                    },
-                    title = { Text(stringResource(strings.change_extra_keys)) },
-                    actions = {
-                        ResetButton {
-                            text = DEFAULT_TERMINAL_EXTRA_KEYS
-                            Preference.removeKey("terminal_extra_keys")
-                            save()
-                        }
-                    },
-                )
-                HorizontalDivider()
+    PreferenceScaffold(
+        label = stringResource(strings.change_extra_keys),
+        isExpandedScreen = LocalIsExpandedScreen.current,
+        actions = {
+            ResetButton {
+                text = DEFAULT_TERMINAL_EXTRA_KEYS
+                Preference.removeKey("terminal_extra_keys")
+                save()
             }
-        }
+        },
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             Row(

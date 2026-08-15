@@ -3,11 +3,16 @@ package com.rk.settings.about
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,15 +55,24 @@ fun AboutScreen() {
 
     PreferenceLayout(label = stringResource(id = strings.about), backArrowVisible = true) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            AsyncImage(
-                model = appIcon,
-                contentDescription = null,
-                modifier = Modifier.size(96.dp).padding(bottom = 8.dp),
-            )
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(112.dp),
+            ) {
+                AsyncImage(
+                    model = appIcon,
+                    contentDescription = null,
+                    modifier = Modifier.padding(8.dp).fillMaxSize(),
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(strings.app_name),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
 

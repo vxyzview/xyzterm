@@ -212,8 +212,13 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                         // matrix has 2 rows -> 96dp; landscape also 96dp so keys are
                         // tappable instead of the previous 26-37dp. The input page uses
                         // the same height so the two pager pages align.
+                        // Parse the extra-keys matrix once per settings change, not on every
+                        // recomposition (the JSONArray constructor is slow enough to jank the
+                        // terminal screen when sessions/theme/state churn).
                         val extraKeysRowCount =
-                            runCatching { org.json.JSONArray(Settings.terminal_extra_keys).length() }.getOrElse { 2 }
+                            remember(Settings.terminal_extra_keys) {
+                                runCatching { org.json.JSONArray(Settings.terminal_extra_keys).length() }.getOrElse { 2 }
+                            }
                         val keyRowHeight = (extraKeysRowCount * 48).coerceAtLeast(52).dp
                         val extraKeysLabel = stringResource(strings.extra_keys)
 
@@ -531,7 +536,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                     .semantics { role = Role.Button }
                     .clickable { context.startActivity(Intent(context, SettingsActivity::class.java)) },
             shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.primaryContainer,
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
@@ -616,60 +621,41 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                 items(sessions) { sessionId ->
                     val isSelected = sessionId == service.currentSession.value
 
-                    // Active session indicator: leading dot
-                    Box(
-                        modifier =
-                            Modifier
-                                .padding(vertical = 2.dp)
-                                .fillMaxWidth(),
-                    ) {
-                        NavigationDrawerItem(
-                            label = {
-                                Text(
-                                    text = sessionId,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                )
-                            },
-                            selected = isSelected,
-                            onClick = { terminalActivity.changeSession(sessionId) },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors =
-                                NavigationDrawerItemDefaults.colors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    unselectedContainerColor = Color.Transparent,
-                                ),
-                            badge = {
-                                IconButton(
-                                    onClick = {
-                                        sessionToRename = sessionId
-                                        renameValue = sessionId
-                                        renameError = null
-                                        showRenameDialog = true
-                                    },
-                                    modifier = Modifier.size(40.dp),
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Edit,
-                                        contentDescription = stringResource(strings.rename),
-                                        modifier = Modifier.size(20.dp),
-                                    )
-                                }
-                            },
-                        )
-
-                        if (isSelected) {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .width(3.dp)
-                                        .height(24.dp)
-                                        .align(Alignment.CenterStart)
-                                        .background(MaterialTheme.colorScheme.primary),
+                    NavigationDrawerItem(
+                        label = {
+                            Text(
+                                text = sessionId,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                             )
-                        }
-                    }
+                        },
+                        selected = isSelected,
+                        onClick = { terminalActivity.changeSession(sessionId) },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors =
+                            NavigationDrawerItemDefaults.colors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                unselectedContainerColor = Color.Transparent,
+                            ),
+                        badge = {
+                            IconButton(
+                                onClick = {
+                                    sessionToRename = sessionId
+                                    renameValue = sessionId
+                                    renameError = null
+                                    showRenameDialog = true
+                                },
+                                modifier = Modifier.size(40.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Edit,
+                                    contentDescription = stringResource(strings.rename),
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
+                        },
+                    )
                 }
             }
         }

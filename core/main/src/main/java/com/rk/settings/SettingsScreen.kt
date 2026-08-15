@@ -1,12 +1,5 @@
 package com.rk.settings
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -21,9 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -31,6 +21,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rk.activities.settings.SettingsRoutes
+import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.components.compose.preferences.base.PreferenceLayout
 import com.rk.components.compose.preferences.base.PreferenceTemplate
 import com.rk.components.compose.preferences.category.PreferenceCategory
@@ -49,98 +40,84 @@ fun SettingsScreen(navController: NavController) {
 
 @Composable
 private fun Categories(navController: NavController) {
-    PreferenceCategory(
-        label = stringResource(id = strings.app),
-        description = stringResource(id = strings.app_desc),
-        iconResource = drawables.android,
-        onNavigate = { navController.navigate(SettingsRoutes.AppSettings.route) },
-    )
-
-    PreferenceCategory(
-        label = stringResource(strings.themes),
-        description = stringResource(strings.theme_settings),
-        iconResource = drawables.palette,
-        onNavigate = { navController.navigate(SettingsRoutes.Themes.route) },
-    )
-
-    PreferenceCategory(
-        label = stringResource(strings.keybindings),
-        description = stringResource(strings.keybindings_desc),
-        iconResource = drawables.keyboard,
-        onNavigate = { navController.navigate(SettingsRoutes.Keybindings.route) },
-    )
-
-    SettingsRegistry.categories.forEach { category ->
+    PreferenceGroup {
         PreferenceCategory(
-            label = stringResource(id = category.labelRes),
-            description = stringResource(id = category.descriptionRes),
-            iconResource = category.iconRes,
-            onNavigate = { navController.navigate(category.route) },
+            label = stringResource(id = strings.app),
+            description = stringResource(id = strings.app_desc),
+            iconResource = drawables.android,
+            onNavigate = { navController.navigate(SettingsRoutes.AppSettings.route) },
         )
+
+        PreferenceCategory(
+            label = stringResource(strings.themes),
+            description = stringResource(strings.theme_settings),
+            iconResource = drawables.palette,
+            onNavigate = { navController.navigate(SettingsRoutes.Themes.route) },
+        )
+
+        PreferenceCategory(
+            label = stringResource(strings.keybindings),
+            description = stringResource(strings.keybindings_desc),
+            iconResource = drawables.keyboard,
+            onNavigate = { navController.navigate(SettingsRoutes.Keybindings.route) },
+        )
+
+        SettingsRegistry.categories.forEach { category ->
+            PreferenceCategory(
+                label = stringResource(id = category.labelRes),
+                description = stringResource(id = category.descriptionRes),
+                iconResource = category.iconRes,
+                onNavigate = { navController.navigate(category.route) },
+            )
+        }
+
+        if (FeatureRegistry.isEnabled("debug_mode")) {
+            PreferenceCategory(
+                label = stringResource(strings.debug_options),
+                description = strings.debug_options_desc.getFilledString(strings.app_name.getString()),
+                iconResource = drawables.build,
+                onNavigate = { navController.navigate(SettingsRoutes.DeveloperOptions.route) },
+            )
+        }
     }
 
-    if (FeatureRegistry.isEnabled("debug_mode")) {
-        PreferenceCategory(
-            label = stringResource(strings.debug_options),
-            description = strings.debug_options_desc.getFilledString(strings.app_name.getString()),
-            iconResource = drawables.build,
-            onNavigate = { navController.navigate(SettingsRoutes.DeveloperOptions.route) },
+    PreferenceGroup {
+        PreferenceTemplate(
+            modifier =
+                Modifier
+                    .semantics { role = Role.Button }
+                    .clickable { navController.navigate(SettingsRoutes.About.route) },
+            verticalPadding = 14.dp,
+            title = { Text(stringResource(id = strings.about)) },
+            description = { Text(stringResource(id = strings.about_desc)) },
+            startWidget = {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            },
+        )
+
+        PreferenceTemplate(
+            modifier =
+                Modifier
+                    .semantics { role = Role.Button }
+                    .clickable { navController.navigate(SettingsRoutes.Support.route) },
+            verticalPadding = 14.dp,
+            title = { Text(stringResource(strings.support)) },
+            description = { Text(stringResource(id = strings.support_desc)) },
+            startWidget = { SupportIcon() },
         )
     }
-
-    PreferenceTemplate(
-        modifier =
-            Modifier.padding(horizontal = 16.dp)
-                .semantics { role = Role.Button }
-                .clip(MaterialTheme.shapes.large)
-                .clickable { navController.navigate(SettingsRoutes.About.route) }
-                .background(Color.Transparent),
-        verticalPadding = 14.dp,
-        title = { Text(stringResource(id = strings.about)) },
-        description = { Text(stringResource(id = strings.about_desc)) },
-        startWidget = {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(32.dp)) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            }
-        },
-    )
-
-    PreferenceTemplate(
-        modifier =
-            Modifier.padding(horizontal = 16.dp)
-                .semantics { role = Role.Button }
-                .clip(MaterialTheme.shapes.large)
-                .clickable { navController.navigate(SettingsRoutes.Support.route) }
-                .background(Color.Transparent),
-        verticalPadding = 14.dp,
-        title = { Text(stringResource(strings.support)) },
-        description = { Text(stringResource(id = strings.support_desc)) },
-        startWidget = { HeartbeatIcon() },
-    )
 }
 
 @Composable
-fun HeartbeatIcon() {
-    val infiniteTransition = rememberInfiniteTransition(label = "heartbeat")
-
-    val scale =
-        infiniteTransition.animateFloat(
-            initialValue = 0.9f,
-            targetValue = 1f,
-            animationSpec =
-                infiniteRepeatable(
-                    animation = tween(durationMillis = 500, easing = LinearOutSlowInEasing),
-                    repeatMode = RepeatMode.Reverse,
-                ),
-            label = "scale",
-        )
-
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(32.dp).scale(scale.value)) {
+fun SupportIcon() {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(32.dp)) {
         Icon(
             imageVector =
                 if (Settings.donated) {
