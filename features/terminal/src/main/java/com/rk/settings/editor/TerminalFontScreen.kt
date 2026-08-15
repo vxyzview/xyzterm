@@ -1,7 +1,6 @@
 package com.rk.settings.editor
 
 import android.net.Uri
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -9,16 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rk.components.InfoBlock
+import com.rk.components.compose.preferences.base.LocalIsExpandedScreen
+import com.rk.components.compose.preferences.base.PreferenceScaffold
 import com.rk.file.child
 import com.rk.file.sandboxDir
 import com.rk.resources.strings
@@ -38,11 +34,9 @@ import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
 import java.io.File
 import java.io.FileOutputStream
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TerminalFontScreen() {
     val context = LocalContext.current
-    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val etcFontExists = sandboxDir().child("etc/font.ttf").exists()
     var fontPath by remember { mutableStateOf(Settings.terminal_font_path) }
 
@@ -82,17 +76,9 @@ fun TerminalFontScreen() {
             },
         )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(strings.manage_terminal_font)) },
-                navigationIcon = {
-                    IconButton(onClick = { backDispatcher?.onBackPressed() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-            )
-        }
+    PreferenceScaffold(
+        label = stringResource(strings.manage_terminal_font),
+        isExpandedScreen = LocalIsExpandedScreen.current,
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (etcFontExists) {
