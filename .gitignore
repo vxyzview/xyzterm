@@ -38,3 +38,9 @@ __pycache__/
 *~
 /rbuilder_setup
 graphify-out/
+
+# Agent-generated design artifacts (never commit)
+/PRODUCT.md
+/DESIGN.md
+/.impeccable/
+/.opencode/
