@@ -2,7 +2,7 @@ package com.rk.components.compose.radio
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -27,7 +27,7 @@ fun IntRadioController(
             .forEach { option ->
                 Row(
                     modifier =
-                        Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).padding(vertical = 1.dp).clickable {
+                        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.extraSmall).padding(vertical = 1.dp).clickable {
                             selectedChoice = option
                             onChoiceSelected(option)
                         },

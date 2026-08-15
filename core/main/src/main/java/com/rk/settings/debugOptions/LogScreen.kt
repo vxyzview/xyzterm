@@ -1,7 +1,6 @@
 package com.rk.settings.debugOptions
 
 import android.content.Intent
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -10,18 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,21 +24,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.rk.activities.settings.SettingsActivity
+import com.rk.components.compose.preferences.base.LocalIsExpandedScreen
+import com.rk.components.compose.preferences.base.PreferenceScaffold
 import com.rk.crashhandler.CrashHandler.logErrorOrExit
 import com.rk.resources.getString
 import com.rk.resources.strings
-import com.rk.theme.XedTheme
 import com.rk.utils.copyToClipboard
 import com.rk.utils.dialogRes
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.flow.Flow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogScreen(
     logText: String,
@@ -55,7 +46,6 @@ fun LogScreen(
     flow: Flow<String>? = null,
     toolbarButtons: @Composable RowScope.() -> Unit,
 ) {
-    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     var logs by remember { mutableStateOf(logText) }
 
     LaunchedEffect(flow) {
@@ -64,58 +54,43 @@ fun LogScreen(
         }
     }
 
-    XedTheme {
-        Scaffold(
-            topBar = {
-                Column {
-                    TopAppBar(
-                        navigationIcon = {
-                            IconButton(onClick = { backDispatcher?.onBackPressed() }) {
-                                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                            }
-                        },
-                        title = { Text(stringResource(strings.logs)) },
-                        actions = {
-                            TextButton(
-                                onClick = { copyToClipboard(copyLabel, logs, true) }
-                            ) {
-                                Text(stringResource(strings.copy))
-                            }
+    PreferenceScaffold(
+        label = stringResource(strings.logs),
+        isExpandedScreen = LocalIsExpandedScreen.current,
+        actions = {
+            TextButton(onClick = { copyToClipboard(copyLabel, logs, true) }) {
+                Text(stringResource(strings.copy))
+            }
 
-                            TextButton(
-                                onClick = {
-                                    runCatching { reportLogs(logs, issueTitle, copyLabel) }
-                                        .onFailure { logErrorOrExit(it) }
-                                }
-                            ) {
-                                Text(stringResource(strings.report_issue))
-                            }
-                        },
-                    )
+            TextButton(
+                onClick = {
+                    runCatching { reportLogs(logs, issueTitle, copyLabel) }
+                        .onFailure { logErrorOrExit(it) }
+                },
+            ) {
+                Text(stringResource(strings.report_issue))
+            }
+        },
+    ) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            Surface {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+                        toolbarButtons()
+                    }
+
                     HorizontalDivider()
                 }
             }
-        ) { paddingValues ->
-            Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                Surface {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
-                            toolbarButtons()
-                        }
 
-                        HorizontalDivider()
-                    }
-                }
-
-                SelectionContainer {
-                    Text(
-                        text = logs,
-                        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
+            SelectionContainer {
+                Text(
+                    text = logs,
+                    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
     }
