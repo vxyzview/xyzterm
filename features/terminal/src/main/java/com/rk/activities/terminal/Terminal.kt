@@ -83,7 +83,9 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.io.FileOutputStream
 import java.lang.ref.WeakReference
+import java.util.zip.GZIPInputStream
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
@@ -485,7 +487,11 @@ class Terminal : AppCompatActivity() {
 
                     outputFile.parentFile?.mkdirs()
 
-                    if (!outputFile.exists()) {
+                    if (!outputFile.exists() || !isValidGzip(outputFile)) {
+                        // Existing file is a leftover from a killed download or a
+                        // pre-resume version: discard it, the download writes a
+                        // .part sibling and only renames it once verified.
+                        outputFile.delete()
                         downloadFile(
                             url = file.url,
                             outputFile = outputFile,
@@ -525,17 +531,44 @@ class Terminal : AppCompatActivity() {
                     .writeTimeout(1, TimeUnit.MINUTES)
                     .callTimeout(10, TimeUnit.MINUTES)
                     .build()
-            val request = Request.Builder().url(url).build()
 
+            // Download to a .part sibling: a killed download leaves a resumable
+            // partial, and a partial can never be mistaken for a complete rootfs.
+            val partFile = File(outputFile.parentFile, outputFile.name + ".part")
+
+            // Resume from where the previous attempt stopped; the server answers
+            // 206 with the remainder, or 200 if it ignores the Range header.
+            val rangeStart = if (partFile.exists()) partFile.length() else 0L
+            val request =
+                Request.Builder()
+                    .url(url)
+                    .apply { if (rangeStart > 0) header("Range", "bytes=$rangeStart-") }
+                    .build()
+
+            var startedAt = 0L
             client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    throw Exception("Failed to download file: ${response.code}")
+                when (response.code) {
+                    206 -> startedAt = rangeStart
+                    200 -> {
+                        startedAt = 0
+                        partFile.delete()
+                    }
+                    416 -> {
+                        // Server reports nothing past what we already have: the
+                        // partial is complete, integrity is verified below.
+                    }
+                    else -> {
+                        // e.g. 404 after a re-release: the partial is stale, drop
+                        // it so the next attempt starts clean.
+                        partFile.delete()
+                        throw Exception("Failed to download file: ${response.code}")
+                    }
                 }
 
-                val body = response.body
-                val totalBytes = body.contentLength()
+                val body = response.body ?: throw Exception("Empty response body")
+                val totalBytes = startedAt + body.contentLength()
 
-                var downloadedBytes = 0L
+                var downloadedBytes = startedAt
                 // Throttle progress: hopping to the main thread and recomposing the
                 // progress UI on every 8 KiB block (tens of thousands of times for a
                 // 200-400 MB rootfs) janks the setup screen. Emit at most every ~250ms
@@ -543,7 +576,7 @@ class Terminal : AppCompatActivity() {
                 val THROTTLE_MS = 250L
                 var lastEmit = 0L
 
-                outputFile.outputStream().use { output ->
+                FileOutputStream(partFile, append = startedAt > 0).use { output ->
                     body.byteStream().use { input ->
                         val buffer = ByteArray(8 * 1024)
                         var bytesRead: Int
@@ -561,6 +594,28 @@ class Terminal : AppCompatActivity() {
                     }
                 }
             }
+
+            // Reading the file to EOF verifies the gzip CRC-32 trailer: a stream
+            // cut short cannot pass, so the file is only promoted to the real name
+            // once it is actually complete and uncorrupted.
+            if (!isValidGzip(partFile)) {
+                partFile.delete()
+                throw Exception("Downloaded file failed integrity check: ${outputFile.name}")
+            }
+            if (!partFile.renameTo(outputFile)) {
+                throw Exception("Failed to move downloaded file: ${outputFile.name}")
+            }
         }
     }
+
+    private fun isValidGzip(file: File): Boolean =
+        runCatching {
+            GZIPInputStream(file.inputStream()).use { input ->
+                val buffer = ByteArray(8 * 1024)
+                while (input.read(buffer) != -1) {
+                    // Drain to EOF: GZIPInputStream only verifies the trailer CRC
+                    // once the stream is fully consumed.
+                }
+            }
+        }.isSuccess
 }
