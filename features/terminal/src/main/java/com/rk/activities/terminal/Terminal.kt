@@ -100,10 +100,11 @@ class Terminal : AppCompatActivity() {
                 val binder = service as SessionService.SessionBinder
                 sessionBinder = WeakReference(binder)
                 isBound = true
-                // Re-create saved sessions from previous runs before handling the intent,
-                // so the screen picks the last active session instead of a fresh "main".
-                // Runs synchronously like handleIntent()'s createSession; Compose snapshot
-                // state (sessionList/currentSession) is only mutated on the main thread.
+                // Restore saved sessions from previous runs before handling the
+                // intent, so the screen picks the last active session instead of
+                // a fresh "main". The shells themselves spawn off the main thread
+                // (restoreSessions); Compose snapshot state (sessionList/
+                // currentSession) is only mutated on the main thread.
                 if (binder.getService().sessionList.isEmpty()) {
                     binder.restoreSessions(this@Terminal)
                 }

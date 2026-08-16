@@ -357,29 +357,38 @@ private fun ColumnScope.TerminalView(
 
                 val session =
                     if (pendingCommand != null) {
-                        terminalActivity.sessionBinder?.get()!!.getService().currentSession.value = pendingCommand!!.id
+                        terminalActivity.sessionBinder?.get()!!.getService().currentSession.value =
+                            pendingCommand!!.id
                         terminalActivity.sessionBinder?.get()!!.getSession(pendingCommand!!.id)
                             ?: terminalActivity.sessionBinder
                                 ?.get()!!
                                 .createSession(pendingCommand!!.id, client, terminalActivity)
                                 .session
                     } else {
-                        terminalActivity.sessionBinder
-                            ?.get()!!
-                            .getSession(terminalActivity.sessionBinder?.get()!!.getService().currentSession.value)
-                            ?: terminalActivity.sessionBinder
-                                ?.get()!!
-                                .createSession(
-                                    terminalActivity.sessionBinder?.get()!!.getService().currentSession.value,
-                                    client,
-                                    terminalActivity,
-                                )
-                                .session
+                        val service = terminalActivity.sessionBinder?.get()!!.getService()
+                        val current = service.currentSession.value
+                        service.getSession(current)
+                            ?: if (service.restorePending) {
+                                // Saved sessions are being spawned off the main
+                                // thread (cold start) — attach the restored
+                                // session to this view when it lands.
+                                service.onRestored {
+                                    if (terminalView.get()?.mTermSession != null) return@onRestored
+                                    terminalActivity.changeSession(
+                                        terminalActivity.sessionBinder?.get()!!.getService().currentSession.value
+                                    )
+                                }
+                                null
+                            } else {
+                                service.createSession(current, client, terminalActivity).session
+                            }
                     }
 
-                session.updateTerminalSessionClient(client)
-                attachSession(session)
-                setTerminalViewClient(client)
+                if (session != null) {
+                    session.updateTerminalSessionClient(client)
+                    attachSession(session)
+                    setTerminalViewClient(client)
+                }
 
                 // Legacy behavior
                 val fontFile = sandboxDir().child("etc/font.ttf")

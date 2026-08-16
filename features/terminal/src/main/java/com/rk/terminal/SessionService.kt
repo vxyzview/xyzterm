@@ -21,7 +21,12 @@ import com.rk.settings.Preference
 import com.rk.settings.Settings
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class SessionService : Service() {
@@ -29,6 +34,9 @@ class SessionService : Service() {
     private val sessionWorkDirs = mutableMapOf<SessionId, SessionPwd>()
     val sessionList = mutableStateListOf<String>()
     var currentSession = mutableStateOf("main")
+    var restorePending = false
+    private val restoreCallbacks = mutableListOf<() -> Unit>()
+    private val restoreScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var deamonRunning = false
 
     inner class SessionBinder : Binder() {
@@ -71,15 +79,58 @@ class SessionService : Service() {
         }
 
         fun restoreSessions(activity: Terminal) {
-            if (sessions.isNotEmpty()) return
-            savedSessions().forEach { (id, pwd) ->
-                // Pass the saved cwd directly so the restored session starts as a plain
-                // interactive shell in pwd, without mutating the activity intent or
-                // touching pendingCommand (which changes the shell invocation shape).
-                runCatching { createSession(id, TerminalBackEnd(), activity, cwd = pwd) }
+            if (sessions.isNotEmpty() || restorePending) return
+            val saved = savedSessions()
+            if (saved.isEmpty()) return
+
+            // Spawn the saved shells off the main thread — proot startup takes
+            // hundreds of ms per session, and doing it synchronously froze the
+            // first frames of cold start. The terminal view defers attaching
+            // until the current session is published below.
+            restorePending = true
+            restoreScope.launch {
+                val built =
+                    saved.mapNotNull { (id, pwd) ->
+                        runCatching { MkSession.createSession(activity, TerminalBackEnd(), id, false, pwd) }
+                            .getOrNull()
+                            ?.let { id to it }
+                    }
+                withContext(Dispatchers.Main) {
+                    // App exited while the restore was in flight — drop the shells.
+                    if (!deamonRunning) {
+                        built.forEach { it.second.first.finishIfRunning() }
+                        restorePending = false
+                        return@withContext
+                    }
+                    built.forEach { (id, pair) ->
+                        val (session, pwd) = pair
+                        if (id in sessions) {
+                            // Already created on the main thread meanwhile (e.g.
+                            // from the drawer) — drop the duplicate shell.
+                            session.finishIfRunning()
+                        } else {
+                            sessions[id] = session
+                            sessionWorkDirs[id] = pwd
+                            sessionList.add(id)
+                        }
+                    }
+                    restorePending = false
+                    if (currentSession.value == "main" && sessionList.isNotEmpty()) {
+                        currentSession.value = sessionList.last()
+                    }
+                    val callbacks = restoreCallbacks.toList()
+                    restoreCallbacks.clear()
+                    callbacks.forEach { runCatching { it() } }
+                    if (sessions.isNotEmpty()) updateNotification()
+                }
             }
-            if (sessionList.isNotEmpty()) {
-                currentSession.value = sessionList.last()
+        }
+
+        fun onRestored(callback: () -> Unit) {
+            if (restorePending) {
+                restoreCallbacks.add(callback)
+            } else {
+                callback()
             }
         }
 
