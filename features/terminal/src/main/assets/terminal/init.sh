@@ -18,13 +18,17 @@ fi
 CONTAINER_TIMEZONE="UTC"  # or any timezone like "Asia/Kolkata"
 
 # Symlink /etc/localtime to the desired timezone
-ln -snf "/usr/share/zoneinfo/$CONTAINER_TIMEZONE" /etc/localtime
+# Only reconfigure when the timezone actually changed — dpkg-reconfigure on
+# every shell start wastes a second each time.
+if [ "$(cat /etc/timezone 2>/dev/null)" != "$CONTAINER_TIMEZONE" ]; then
+    ln -snf "/usr/share/zoneinfo/$CONTAINER_TIMEZONE" /etc/localtime
 
-# Write the timezone string to /etc/timezone
-echo "$CONTAINER_TIMEZONE" > /etc/timezone
+    # Write the timezone string to /etc/timezone
+    echo "$CONTAINER_TIMEZONE" > /etc/timezone
 
-# Reconfigure tzdata to apply without prompts
-DEBIAN_FRONTEND=noninteractive dpkg-reconfigure -f noninteractive tzdata >/dev/null 2>&1
+    # Reconfigure tzdata to apply without prompts
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure -f noninteractive tzdata >/dev/null 2>&1
+fi
 
 
 if [[ -f ~/.bashrc ]]; then
@@ -33,83 +37,15 @@ if [[ -f ~/.bashrc ]]; then
 fi
 
 
-ensure_packages_once() {
-    local marker_file="/.cache/.packages_ensured"
-    local PACKAGES=(
-        "command-not-found" "sudo" "xkb-data" "libjemalloc-dev"
-        "python-is-python3" "python3-pip" "python3-pillow" "python3-pil"
-        "wget" "curl" "nano" "git" "ripgrep" "grep" "jq" "openssh-client"
-    )
-
-    # Exit early if already done
-    [[ -f "$marker_file" ]] && return 0
-
-    echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/99norecommends
-    echo 'APT::Install-Suggests "false";' >> /etc/apt/apt.conf.d/99norecommends
-
-    # Create cache dir
-    mkdir -p "/.cache"
-
-    # Check for missing packages
-    local MISSING=()
-    for pkg in "${PACKAGES[@]}"; do
-        if ! dpkg -s "$pkg" >/dev/null 2>&1; then
-            MISSING+=("$pkg")
-        fi
-    done
-
-    # If nothing missing, just mark as done
-    if [ ${#MISSING[@]} -eq 0 ]; then
-        touch "$marker_file"
-        return 0
+# One-time base setup now runs inside setup.sh, which writes the marker files,
+# so this is normally a no-op. It only blocks when an older install never
+# finished (e.g. an app update that kept the sandbox) — after that first
+# start the prompt appears instantly.
+if [ ! -f "/.cache/.packages_ensured" ]; then
+    if ensure_packages_once && ensure_nodejs_once; then
+        clear
     fi
-
-    # Recover an interrupted dpkg state (e.g. a killed install) before apt will run
-    dpkg --configure -a || warn "dpkg --configure -a reported errors; continuing anyway"
-
-    if export DEBIAN_FRONTEND=noninteractive && \
-       apt update -y && \
-       apt install -y "${MISSING[@]}"; then
-       touch "$marker_file"
-       clear
-       info "Setup complete."
-    else
-        error "Failed to install packages."
-        return 1
-    fi
-
-    # Update command-not-found database
-    update-command-not-found 2>/dev/null || true
-}
-
-
-ensure_packages_once
-unset -f ensure_packages_once
-
-# Auto-install Node.js once — the one helper most tooling (and the LSP
-# installers in $LOCAL/bin) need. Runs in the foreground so the first
-# shell prompt only appears once Node.js is ready. Opt-out by touching
-# /.skip_nodejs.
-ensure_nodejs_once() {
-  local marker="/.cache/.nodejs_done"
-  [[ -f "$marker" ]] && return 0
-  [[ -f "/.skip_nodejs" ]] && return 0
-  [[ -e "/.nodejs_inflight" ]] && return 0
-
-  touch "/.nodejs_inflight"
-
-  info "Setting up Node.js (one-time)..."
-  if install_nodejs; then
-    touch "$marker"
-    info "Node.js ready."
-  else
-    warn "Node.js setup failed — run 'install_nodejs' inside the shell to retry."
-  fi
-  rm -f "/.nodejs_inflight"
-}
-
-ensure_nodejs_once
-unset -f ensure_nodejs_once
+fi
 
 if [ -x /usr/lib/command-not-found -o -x /usr/share/command-not-found/command-not-found ]; then
 	function command_not_found_handle {

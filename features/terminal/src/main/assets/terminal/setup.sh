@@ -225,6 +225,29 @@ chmod +x "$SANDBOX_DIR/usr/local/bin/node-postinstall.sh"
 
 info "Node.js APT hook installed"
 
+# One-time base package + Node.js install. Done here, during setup, so the
+# first shell opens instantly instead of blocking for minutes. If it fails,
+# init.sh retries it on the first shell start.
+info "Installing base packages (one-time, takes a few minutes)…"
+
+mkdir -p "$SANDBOX_DIR/tmp"
+chmod 1777 "$SANDBOX_DIR/tmp"
+
+SANDBOX_ARGS="${ARGS/-r \//-r $SANDBOX_DIR}"
+SANDBOX_ARGS="$SANDBOX_ARGS -b $SANDBOX_DIR/tmp:/dev/shm"
+[ -e "$EXT_HOME" ] && SANDBOX_ARGS="$SANDBOX_ARGS -b $EXT_HOME:/root"
+
+set +e
+$PROOT $SANDBOX_ARGS /bin/bash -c 'source "$LOCAL/bin/utils" && ensure_packages_once && ensure_nodejs_once'
+ret=$?
+set -e
+
+if [ "$ret" -ne 0 ]; then
+    warn "Package install failed (exit code $ret) — it will retry on first shell start."
+else
+    info "Base packages installed."
+fi
+
 
 
 if [ $# -gt 0 ]; then
