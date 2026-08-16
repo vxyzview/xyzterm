@@ -576,7 +576,7 @@ class Terminal : AppCompatActivity() {
                 val THROTTLE_MS = 250L
                 var lastEmit = 0L
 
-                FileOutputStream(partFile, append = startedAt > 0).use { output ->
+                FileOutputStream(partFile, startedAt > 0).use { output ->
                     body.byteStream().use { input ->
                         val buffer = ByteArray(8 * 1024)
                         var bytesRead: Int
