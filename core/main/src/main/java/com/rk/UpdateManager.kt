@@ -47,6 +47,9 @@ object UpdateManager {
         return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
     }
 
+    private fun installedVersionName(): String? =
+        runCatching { application!!.packageManager.getPackageInfo(application!!.packageName, 0).versionName }.getOrNull()
+
     /**
      * Checks the GitHub latest release against the installed app. Throttled to
      * once per day; only runs when the "Check for updates" setting is on.
@@ -64,7 +67,8 @@ object UpdateManager {
 
         GlobalScope.launch(Dispatchers.Main) {
             val latest = GithubReleasesApi(UPDATE_OWNER, UPDATE_REPO).fetchLatestVersion() ?: return@launch
-            if (!isNewer(latest, BuildConfig.VERSION_NAME)) return@launch
+            val installed = installedVersionName() ?: return@launch
+            if (!isNewer(latest, installed)) return@launch
 
             val version = latest.removePrefix("v")
             dialogRes(
