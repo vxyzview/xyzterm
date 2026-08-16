@@ -35,7 +35,11 @@ fi
 
 ensure_packages_once() {
     local marker_file="/.cache/.packages_ensured"
-    local PACKAGES=("command-not-found" "sudo" "xkb-data" "libjemalloc-dev")
+    local PACKAGES=(
+        "command-not-found" "sudo" "xkb-data" "libjemalloc-dev"
+        "python-is-python3" "python3-pip" "python3-pillow" "python3-pil"
+        "wget" "curl" "nano" "git" "ripgrep" "grep" "jq" "openssh-client"
+    )
 
     # Exit early if already done
     [[ -f "$marker_file" ]] && return 0
@@ -59,8 +63,6 @@ ensure_packages_once() {
         touch "$marker_file"
         return 0
     fi
-
-    info "Installing missing packages: ${MISSING[*]}"
 
     # Recover an interrupted dpkg state (e.g. a killed install) before apt will run
     dpkg --configure -a || warn "dpkg --configure -a reported errors; continuing anyway"
