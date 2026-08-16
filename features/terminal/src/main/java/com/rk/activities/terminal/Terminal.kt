@@ -141,7 +141,7 @@ class Terminal : AppCompatActivity() {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
             val binder = sessionBinder?.get() ?: return
             lifecycleScope.launch(Dispatchers.Main) {
-                val session = binder.getService().getSession(binder.getService().currentSession.value)
+                val session = binder.getSession(binder.getService().currentSession.value)
                 session?.write(text)
             }
             return
