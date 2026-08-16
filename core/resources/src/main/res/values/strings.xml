@@ -43,6 +43,7 @@
     <string name="ask_deletion_many">Are you sure you want to permanently delete %d files?</string>
     <string name="cant_handle">No app found to handle the file</string>
     <string name="terminal">Terminal</string>
+    <string name="notification_title">xyz terminal</string>
     <string name="add_file">Add external file</string>
     <string name="open_as_project">Open as a project</string>
     <string name="replace_all">Replace all</string>

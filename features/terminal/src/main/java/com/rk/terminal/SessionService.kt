@@ -287,7 +287,7 @@ class SessionService : Service() {
             )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("${strings.app_name.getString()} ${strings.terminal.getString()}")
+            .setContentTitle(strings.notification_title.getString())
             .setContentText(getNotificationContentText(wakeLock?.isHeld == true))
             .setSmallIcon(drawables.terminal)
             .setContentIntent(pendingIntent)
