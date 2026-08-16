@@ -155,7 +155,6 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val currentTheme = LocalThemeHolder.current
-    val currentSessionName = terminalActivity.sessionBinder?.get()?.getService()?.currentSession?.value ?: "main"
 
     DisposableEffect(Unit) { onDispose { keyboardController?.hide() } }
 
@@ -183,13 +182,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                                 .size(8.dp)
                                                 .background(MaterialTheme.colorScheme.primary, CircleShape),
                                     )
-                                    Text(
-                                        text = currentSessionName,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
+                                    SessionTitle(terminalActivity)
                                 }
                             },
                             navigationIcon = {
@@ -319,6 +312,18 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
             TerminalDrawer(terminalActivity, navController)
         }
     }
+}
+
+@Composable
+private fun SessionTitle(terminalActivity: Terminal) {
+    val name = terminalActivity.sessionBinder?.get()?.getService()?.currentSession?.value ?: "main"
+    Text(
+        text = name,
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.SemiBold,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 @Composable
@@ -734,7 +739,24 @@ fun Terminal.changeSession(sessionId: String) {
     binder.getService().currentSession.value = sessionId
 }
 
+// Colors last applied to the terminal, so applyTerminalColors can skip the
+// expensive reset + full repaint when nothing changed. Both the AndroidView
+// update block and the layout-change listener fire on every recomposition
+// and every resize frame (e.g. the IME show/hide animation), where a
+// redundant palette reset + invalidate would double every redraw.
+private var lastAppliedColors: Properties? = null
+private var lastAppliedSurface = 0
+private var lastAppliedOnSurface = 0
+
 private fun TerminalView.applyTerminalColors(onSurfaceColor: Int, surfaceColor: Int, terminalColors: Properties) {
+    if (mEmulator == null) return
+    if (terminalColors == lastAppliedColors && onSurfaceColor == lastAppliedOnSurface && surfaceColor == lastAppliedSurface) {
+        return
+    }
+    lastAppliedColors = terminalColors
+    lastAppliedSurface = surfaceColor
+    lastAppliedOnSurface = onSurfaceColor
+
     this.onScreenUpdated()
 
     mEmulator?.mColors?.reset()
