@@ -90,7 +90,6 @@
     <string name="about_desc">À propos de xyzterm</string>
     <string name="version">Version</string>
     <string name="version_code">Code de version</string>
-    <string name="telegram">Groupe Telegram</string>
     <string name="git_commit">Condensat du commit git</string>
     <string name="check_for_updates">Vérifier les mise-à-jour</string>
     <string name="run">Exécuter</string>
@@ -128,7 +127,6 @@
     <string name="about">À propos</string>
     <string name="manage_editor_font">Gérer les polices de l’éditeur</string>
     <string name="theme_mode_desc">Changer la couleur de l\'apparence</string>
-    <string name="telegram_desc">Rapports d’erreur, demandes de fonctionnalités, etc.</string>
     <string name="click_open">Cliquer ici pour ouvrir un fichier</string>
     <string name="fonts">Polices</string>
     <string name="content">Contenu</string>
@@ -241,7 +239,6 @@
     <string name="invalid_port">Port invalide</string>
     <string name="port_number">Numéro du port</string>
     <string name="file_ext_example">Extension de fichier (par ex. py)</string>
-    <string name="discord">Communauté Discord</string>
     <string name="use_tabs">Insérer un caractère de tabulation</string>
     <string name="render_whitespace">Afficher les espaces</string>
     <string name="render_whitespace_desc">Affiche les espaces, les tabulations et les sauts de ligne comme des symboles visibles</string>

@@ -78,7 +78,6 @@
     <string name="version_code">Wersja kodu</string>
     <string name="github">GitHub</string>
     <string name="github_desc">Gwiazdkuj na GitHub\'ie 🤩</string>
-    <string name="telegram">Grupa na Telegram\'ie</string>
     <string name="tab_opened">Karta otwarta</string>
     <string name="name_empty_err">Pole nie może być puste</string>
     <string name="installing">Instaluje…</string>
@@ -110,7 +109,6 @@
     <string name="open">Otwórz</string>
     <string name="permission_denied">Odmowa dostępu</string>
     <string name="manage_storage">Zarządzaj pamięcią</string>
-    <string name="telegram_desc">Zgłoś problemy, sugestie, itp.</string>
     <string name="git_commit">Skrót Git</string>
     <string name="check_for_updates">Sprawdź aktualizacje</string>
     <string name="check_for_updates_desc">Okresowo sprawdzaj aktualizacje</string>
@@ -205,7 +203,6 @@
     <string name="invalid_port">Nieprawidłowy port</string>
     <string name="port_number">Numer portu</string>
     <string name="file_ext_example">Rozszerzenie pliku (np. .py)</string>
-    <string name="discord">Społeczność Discord\'a</string>
     <string name="use_tabs">Wstaw znak Tab</string>
     <string name="view_github_profile">Odwiedź profil GitHub</string>
     <string name="debug_options">Opcje debug</string>

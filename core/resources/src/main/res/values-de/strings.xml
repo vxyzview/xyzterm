@@ -29,13 +29,11 @@
     <string name="rename">Umbenennen</string>
     <string name="close_others">Andere schließen</string>
     <string name="share">Teilen</string>
-    <string name="telegram_desc">Probleme, Funktionswünsche usw. melden</string>
     <string name="open_with">Öffnen mit …</string>
     <string name="close">Schließen</string>
     <string name="github">GitHub</string>
     <string name="terminal">Terminal</string>
     <string name="github_desc">Stern auf GitHub vergeben 🤩</string>
-    <string name="telegram">Telegram-Gruppe</string>
     <string name="unsupported_content">Nicht unterstützter Inhalt</string>
     <string name="copy">Kopieren</string>
     <string name="exit">Beenden</string>
@@ -240,7 +238,6 @@
     <string name="invalid_port">Ungültiger Port</string>
     <string name="port_number">Port-Nummer</string>
     <string name="file_ext_example">Dateierweiterung (z. B. py)</string>
-    <string name="discord">Discord Community</string>
     <string name="use_tabs">Tab-Zeichen einfügen</string>
     <string name="use_tabs_desc">Einen echten Tab (\\t) statt Leerzeichen für Einrückungen verwenden</string>
     <string name="developer">Entwickler</string>

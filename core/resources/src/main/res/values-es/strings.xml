@@ -95,8 +95,6 @@
     <string name="version_code">Código de versión</string>
     <string name="light_mode">Claro</string>
     <string name="github_desc">Ponme una estrellita en Github 🤩</string>
-    <string name="telegram">Grupo de Telegram</string>
-    <string name="telegram_desc">Infórmame los defectos, solicita característica, etc.</string>
     <string name="git_commit">Hash de cambio git</string>
     <string name="check_for_updates">Buscar actualizaciones</string>
     <string name="check_for_updates_desc">Buscar actualizaciones periódicamente</string>
@@ -206,7 +204,6 @@
     <string name="strict_mode">Modo estricto</string>
     <string name="unsupported_file_ext">Extensión de archivo sin soporte</string>
     <string name="file_ext_example">Extensión de archivo (ej: py)</string>
-    <string name="discord">Comunidad de Discord</string>
     <string name="developer">Desarrollador</string>
     <string name="developer_name">vxyzview</string>
     <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>

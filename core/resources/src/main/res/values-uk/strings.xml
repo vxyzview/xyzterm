@@ -109,8 +109,6 @@
     <string name="version_code">Код версії</string>
     <string name="github">GitHub</string>
     <string name="github_desc">Постав зірку на GitHub 🤩</string>
-    <string name="telegram">Група в Telegram</string>
-    <string name="telegram_desc">Повідомляйте про проблеми, пропонуйте нові функції тощо.</string>
     <string name="git_commit">хеш коміту Git</string>
     <string name="check_for_updates">Перевірити оновлення</string>
     <string name="check_for_updates_desc">Періодично перевіряти наявність оновлень</string>
@@ -217,7 +215,6 @@
     <string name="invalid_port">Неправильний порт</string>
     <string name="port_number">Номер порта</string>
     <string name="file_ext_example">Розширення файлу (наприклад, py)</string>
-    <string name="discord">Спільнота Discord</string>
     <string name="use_tabs">Вставити символ табуляції</string>
     <string name="language_server">Мовний сервер</string>
     <string name="manage_language_servers">Керування мовними серверами</string>

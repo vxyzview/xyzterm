@@ -106,8 +106,6 @@
     <string name="version">Versione</string>
     <string name="version_code">Codice versione</string>
     <string name="github_desc">Metti una stella su GitHub 🤩</string>
-    <string name="telegram">Gruppo Telegram</string>
-    <string name="telegram_desc">Segnala problemi, richiedi funzionalità, etc.</string>
     <string name="github">GitHub</string>
     <string name="check_for_updates">Verifica aggiornamenti</string>
     <string name="check_for_updates_desc">Verifica periodicamente gli aggiornamenti</string>
@@ -254,7 +252,6 @@
     <string name="invalid_port">Porta non valida</string>
     <string name="port_number">Numero porta</string>
     <string name="file_ext_example">Estensione file (es. py)</string>
-    <string name="discord">Community Discord</string>
     <string name="use_tabs">Inserisci carattere di tabulazione</string>
     <string name="use_tabs_desc">Usa una vera tabulazione (\\t) invece degli spazi per l\'indentazione</string>
     <string name="language_server">Language server</string>

@@ -72,7 +72,6 @@
     <string name="about_desc">Sobre o xyzterm</string>
     <string name="version">Versão</string>
     <string name="github">GitHub</string>
-    <string name="telegram_desc">Reporte problemas, solicite recursos, etc.</string>
     <string name="check_for_updates_desc">Verificar periodicamente se há atualizações</string>
     <string name="click_open">Clique aqui para abrir o ficheiro</string>
     <string name="run">Executar</string>
@@ -181,7 +180,6 @@
     <string name="show_suggestions">Mostrar sugestões do teclado</string>
     <string name="version_code">Código de versão</string>
     <string name="github_desc">Dê uma estrela no github 🤩</string>
-    <string name="telegram">Grupo do telegram</string>
     <string name="git_commit">Hash do commit</string>
     <string name="check_for_updates">Verificar atualizações</string>
     <string name="manage_editor_font">Gerenciar fontes do editor</string>
@@ -238,7 +236,6 @@
     <string name="invalid_port">Porta inválida</string>
     <string name="port_number">Número da porta</string>
     <string name="file_ext_example">Extensão do arquivo (Ex: py)</string>
-    <string name="discord">Comunidade do Discord</string>
     <string name="language_server">Servidor de linguagem</string>
     <string name="manage_language_servers">Gerenciar servidores de linguagem</string>
     <string name="manage_language_servers_desc">Instalar, conectar e configurar servidores de linguagem</string>

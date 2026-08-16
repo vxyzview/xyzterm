@@ -78,8 +78,6 @@
     <string name="version_code">קוד גירסא</string>
     <string name="github">גיטהאב</string>
     <string name="github_desc">תן כוכב בגיטהאב 🤩</string>
-    <string name="telegram">קבוצת טלגרם</string>
-    <string name="telegram_desc">דווח על בעיה, בקש תכונות חדשות וכו\'.</string>
     <string name="click_open">הקש פה כדי לפתוח קובץ</string>
     <string name="run">הרץ</string>
     <string name="manage_editor_font">ניהול גופני עורך</string>

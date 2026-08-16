@@ -109,8 +109,6 @@
     <string name="version_code">Код версии</string>
     <string name="github">GitHub</string>
     <string name="github_desc">Поставьте звезду на GitHub 🤩</string>
-    <string name="telegram">Telegram</string>
-    <string name="telegram_desc">Сообщить об ошибках, предложить улучшения и т.д.</string>
     <string name="git_commit">Хеш коммита</string>
     <string name="check_for_updates">Проверять обновления</string>
     <string name="check_for_updates_desc">Периодически проверять наличие обновлений</string>
@@ -242,7 +240,6 @@
     <string name="ask_lsp_install">Установить языковой сервер «%s»?</string>
     <string name="strict_mode_desc">Обнаружить доступ к диску или сети в основном процессе</string>
     <string name="anr_watchdog">Мониторинг ANR</string>
-    <string name="discord">Discord</string>
     <string name="use_tabs">Вставить знак табуляции</string>
     <string name="use_tabs_desc">Использовать символ табуляции (\\t) вместо пробелов для отступов</string>
     <string name="developer">Разработчик</string>

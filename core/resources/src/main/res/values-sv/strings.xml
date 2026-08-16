@@ -109,8 +109,6 @@
     <string name="version_code">Versionskod</string>
     <string name="github">GitHub</string>
     <string name="github_desc">Stjärnmärk på Github 🤩</string>
-    <string name="telegram">Telegramgrupp</string>
-    <string name="telegram_desc">Rapportera buggar, önskemål om funktioner etc.</string>
     <string name="git_commit">Git commit hash</string>
     <string name="check_for_updates">Sök efter uppdateringar</string>
     <string name="check_for_updates_desc">Sök efter uppdateringar periodiskt</string>

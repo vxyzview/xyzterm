@@ -104,7 +104,6 @@
     <string name="version">Versi</string>
     <string name="version_code">Kode versi</string>
     <string name="github_desc">Beri bintang di GitHub🤩</string>
-    <string name="telegram_desc">Laporkan masalah, permintaan fitur, dll.</string>
     <string name="git_commit">Hash commit git</string>
     <string name="check_for_updates">Periksa pembaruan</string>
     <string name="check_for_updates_desc">Periksa pembaruan secara berkala</string>
@@ -134,7 +133,6 @@
     <string name="show_line_number">Tampilkan nomor baris</string>
     <string name="terminal_desc">Pengaturan umum terminal</string>
     <string name="github">Github</string>
-    <string name="telegram">Grup Telegram</string>
     <string name="restore_sessions">Pulihkan sesi</string>
     <string name="restore_sessions_desc">Pulihkan tab sebelumnya</string>
     <string name="sessions">Sesi</string>
@@ -223,7 +221,6 @@
     <string name="new_name">Nama baru</string>
     <string name="type">Tipe</string>
     <string name="name">Nama</string>
-    <string name="discord">Komunitas discord</string>
     <string name="use_tabs">Sisipkan karakter tab</string>
     <string name="use_tabs_desc">Gunakan tab asli (\\t) alih-alih spasi untuk indentasi</string>
     <string name="view_github_profile">Lihat profil GitHub</string>

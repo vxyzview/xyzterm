@@ -118,8 +118,6 @@
     <string name="version">버전</string>
     <string name="version_code">빌드 번호</string>
     <string name="github_desc">GitHub에서 스타를 눌러주세요 🤩</string>
-    <string name="telegram">텔레그램 그룹</string>
-    <string name="telegram_desc">오류를 제보하거나, 기능을 제안하거나, 기타 등등.</string>
     <string name="git_commit">Git 커밋 해시</string>
     <string name="check_for_updates">업데이트 확인하기</string>
     <string name="check_for_updates_desc">주기적으로 업데이트 확인하기</string>
@@ -256,7 +254,6 @@
     <string name="invalid_port">유효하지 않는 포트</string>
     <string name="port_number">포트 번호</string>
     <string name="file_ext_example">파일 확장자 (예시: *.py)</string>
-    <string name="discord">디스코드 커뮤니티</string>
     <string name="use_tabs">탭 문자 삽입</string>
     <string name="more">더</string>
     <string name="updating">업데이트 중…</string>

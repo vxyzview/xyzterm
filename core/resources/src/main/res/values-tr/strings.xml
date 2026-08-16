@@ -109,8 +109,6 @@
     <string name="version_code">Sürüm kodu</string>
     <string name="github">GitHub</string>
     <string name="github_desc">GitHub\'da Yıldızla 🤩</string>
-    <string name="telegram">Telegram grubu</string>
-    <string name="telegram_desc">Sorunları, özellik isteklerini vb. bildirin.</string>
     <string name="git_commit">Git commit hash</string>
     <string name="check_for_updates">Güncellemeleri kontrol edin</string>
     <string name="check_for_updates_desc">Güncellemeleri düzenli olarak kontrol et</string>
@@ -240,7 +238,6 @@
     <string name="invalid_port">Geçersiz bağlantı noktası</string>
     <string name="port_number">Port numarası</string>
     <string name="file_ext_example">Dosya uzantısı (örn. py)</string>
-    <string name="discord">Discord topluluğu</string>
     <string name="use_tabs">Sekme karakteri ekle</string>
     <string name="use_tabs_desc">Girintileme için boşluk yerine gerçek bir sekme (\\t) kullanın</string>
     <string name="render_whitespace">Boşlukları göster</string>

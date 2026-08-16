@@ -118,8 +118,6 @@
     <string name="about_desc">xyzterm பற்றி</string>
     <string name="version_code">பதிப்பு குறியீடு</string>
     <string name="github_desc">GitHub 🤩 இல் நட்சத்திரமிடுங்கள்</string>
-    <string name="telegram">தந்தி குழு</string>
-    <string name="telegram_desc">அறிக்கைகள் சிக்கல்கள், அம்ச கோரிக்கைகள் போன்றவை.</string>
     <string name="check_for_updates">புதுப்பிப்புகளை சரிபார்க்கவும்</string>
     <string name="check_for_updates_desc">புதுப்பிப்புகளை அவ்வப்போது சரிபார்</string>
     <string name="click_open">கோப்பைத் திறக்க இங்கே சொடுக்கு செய்க</string>
@@ -244,7 +242,6 @@
     <string name="invalid_port">தவறான துறைமுகம்</string>
     <string name="port_number">துறைமுகம் எண்</string>
     <string name="file_ext_example">கோப்பு நீட்டிப்பு (எ.கா. பை)</string>
-    <string name="discord">கருத்து வேறுபாடு சமூகம்</string>
     <string name="use_tabs">தாவல் எழுத்தைச் செருகவும்</string>
     <string name="use_tabs_desc">உள்தள்ளலுக்கான இடைவெளிகளுக்குப் பதிலாக உண்மையான தாவலைப் (\\t) பயன்படுத்தவும்</string>
     <string name="language_server">மொழி சேவையகம்</string>

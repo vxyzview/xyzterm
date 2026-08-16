@@ -110,8 +110,6 @@
     <string name="version_code">वर्ज़न कोड</string>
     <string name="github">GitHub</string>
     <string name="github_desc">इसे गिटहब पर स्टार करें 🤩</string>
-    <string name="telegram">टेलीग्राम ग्रुप</string>
-    <string name="telegram_desc">समस्याएँ रिपोर्ट करें, फ़ीचर रिक्वेस्ट आदि</string>
     <string name="git_commit">Git कमिट हैश</string>
     <string name="check_for_updates">अपडेट के लिए जाँचें</string>
     <string name="check_for_updates_desc">समय-समय पर अपडेट के लिए जाँचें</string>
