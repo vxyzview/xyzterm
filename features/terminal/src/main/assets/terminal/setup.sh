@@ -238,7 +238,10 @@ SANDBOX_ARGS="$SANDBOX_ARGS -b $SANDBOX_DIR/tmp:/dev/shm"
 [ -e "$EXT_HOME" ] && SANDBOX_ARGS="$SANDBOX_ARGS -b $EXT_HOME:/root"
 
 set +e
-$PROOT $SANDBOX_ARGS /bin/bash -c 'source "$LOCAL/bin/utils" && ensure_packages_once && ensure_nodejs_once'
+# The proot child inherits the Android-side PATH, which lacks the
+# container's /usr/bin etc.; set the same container PATH init.sh uses
+# or dpkg/apt are not found.
+$PROOT $SANDBOX_ARGS /bin/bash -c 'export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$LOCAL/bin:$PATH && source "$LOCAL/bin/utils" && ensure_packages_once && ensure_nodejs_once'
 ret=$?
 set -e
 
