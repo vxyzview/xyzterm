@@ -103,11 +103,9 @@ install_nodejs() {
 
 ensure_packages_once() {
     local marker_file="/.cache/.packages_ensured"
-    local PACKAGES=(
-        "command-not-found" "sudo" "xkb-data" "libjemalloc-dev"
-        "python-is-python3" "python3-pip" "python3-pillow" "python3-pil"
-        "wget" "curl" "nano" "git" "ripgrep" "grep" "jq" "openssh-client"
-    )
+    # Plain string, not a bash array: this runs under Android's /system/bin/sh
+    # (mksh), which rejects PACKAGES=(...) with "unexpected '('".
+    local PACKAGES="command-not-found sudo xkb-data libjemalloc-dev python-is-python3 python3-pip python3-pillow python3-pil wget curl nano git ripgrep grep jq openssh-client"
 
     # Exit early if already done
     [[ -f "$marker_file" ]] && return 0
@@ -124,27 +122,27 @@ ensure_packages_once() {
     } > /etc/apt/apt.conf.d/99norecommends
 
     # Check for missing packages
-    local MISSING=()
-    for pkg in "${PACKAGES[@]}"; do
+    local MISSING=""
+    for pkg in $PACKAGES; do
         if ! dpkg -s "$pkg" >/dev/null 2>&1; then
-            MISSING+=("$pkg")
+            MISSING="$MISSING $pkg"
         fi
     done
 
     # If nothing missing, just mark as done
-    if [ ${#MISSING[@]} -eq 0 ]; then
+    if [ -z "$MISSING" ]; then
         touch "$marker_file"
         return 0
     fi
 
-    info "Installing missing packages: ${MISSING[*]}"
+    info "Installing missing packages:$MISSING"
 
     # Recover an interrupted dpkg state (e.g. a killed install) before apt will run
     dpkg --configure -a || warn "dpkg --configure -a reported errors; continuing anyway"
 
     if export DEBIAN_FRONTEND=noninteractive && \
        apt update -y && \
-       apt install -y "${MISSING[@]}"; then
+       apt install -y $MISSING; then
        touch "$marker_file"
        info "Setup complete."
     else
