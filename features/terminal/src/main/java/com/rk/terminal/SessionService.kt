@@ -126,14 +126,6 @@ class SessionService : Service() {
             }
         }
 
-        fun onRestored(callback: () -> Unit) {
-            if (restorePending) {
-                restoreCallbacks.add(callback)
-            } else {
-                callback()
-            }
-        }
-
         fun terminateSession(id: SessionId) {
             sessions[id]?.apply {
                 if (emulator != null) {
@@ -179,6 +171,15 @@ class SessionService : Service() {
 
     private val binder = SessionBinder()
     private val notificationManager by lazy { getSystemService(NotificationManager::class.java) }
+
+    /** Runs [callback] once the in-flight session restore has published, or immediately. */
+    fun onRestored(callback: () -> Unit) {
+        if (restorePending) {
+            restoreCallbacks.add(callback)
+        } else {
+            callback()
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder {
         return binder
