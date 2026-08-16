@@ -39,3 +39,12 @@ Long-press the terminal screen to select text, then copy it. The extra-keys
 row also has a paste key (<kbd>⎘</kbd>) to insert from the clipboard, and the
 default key matrix includes <kbd>CTRL</kbd>, <kbd>ALT</kbd>, <kbd>SHIFT</kbd>,
 and <kbd>FN</kbd> modifier keys.
+
+## URLs
+
+Tap a URL (http, https, or www.) in the terminal to open it in the browser.
+
+## Share into the terminal
+
+Share any text from another app — pick xyzterm from the share sheet — and the
+text is typed into the current session.

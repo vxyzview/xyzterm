@@ -54,6 +54,7 @@
     <string name="file_name">File name</string>
     <string name="path">Path</string>
     <string name="open">Open</string>
+    <string name="open_url_msg">Open this URL in the browser?</string>
     <string name="permission_denied">Permission denied</string>
     <string name="manage_storage">Manage storage</string>
     <string name="manage_storage_reason">xyzterm needs access to your storage so the terminal can read and write files. Please allow the access in the upcoming system setting.</string>

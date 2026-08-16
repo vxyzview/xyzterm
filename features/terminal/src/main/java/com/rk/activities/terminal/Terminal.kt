@@ -136,6 +136,17 @@ class Terminal : AppCompatActivity() {
 
     fun handleIntent(intent: Intent) {
         this.intent = intent
+
+        if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
+            val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
+            val binder = sessionBinder?.get() ?: return
+            lifecycleScope.launch(Dispatchers.Main) {
+                val session = binder.getService().getSession(binder.getService().currentSession.value)
+                session?.write(text)
+            }
+            return
+        }
+
         val pwd = intent.getStringExtra("cwd") ?: return
         val binder = sessionBinder?.get() ?: return
         terminalView.get() ?: return

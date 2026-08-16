@@ -6,13 +6,19 @@ import android.view.MotionEvent
 import com.blankj.utilcode.util.ClipboardUtils
 import com.blankj.utilcode.util.KeyboardUtils
 import com.rk.activities.terminal.Terminal
+import com.rk.resources.getString
+import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.settings.terminal.TerminalCursorStyle
 import com.rk.terminal.virtualkeys.SpecialButton
+import com.rk.utils.dialog
+import com.rk.utils.openUrl
 import com.termux.terminal.TerminalEmulator
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 import com.termux.view.TerminalViewClient
+
+private val URL_REGEX = Regex("""https?://[^\s"'<>]+|www\.[^\s"'<>]+""")
 
 class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     override fun onTextChanged(changedSession: TerminalSession) {
@@ -87,7 +93,30 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     override fun onSingleTapUp(e: MotionEvent) {
+        val view = terminalView.get()
+        val emulator = view?.mEmulator
+        if (view != null && emulator != null) {
+            val (column, row) = view.getColumnAndRow(e, true).let { it[0] to it[1] }
+            val line = emulator.getScreen().getSelectedText(0, row, emulator.mColumns - 1, row)
+            val url = URL_REGEX.find(line)?.takeIf { column in it.range }?.value?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
+            if (url != null) {
+                openUrlPrompt(url)
+                return
+            }
+        }
         showSoftInput()
+    }
+
+    private fun openUrlPrompt(url: String) {
+        val activity = Terminal.instance ?: return
+        val target = if (url.startsWith("www.")) "https://$url" else url
+        dialog(
+            activity = activity,
+            title = url,
+            msg = strings.open_url_msg.getString(),
+            okText = strings.open.getString(),
+            onOk = { activity.openUrl(target) },
+        )
     }
 
     override fun shouldBackButtonBeMappedToEscape(): Boolean {
