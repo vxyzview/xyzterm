@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.rk.UpdateManager
 import com.rk.activities.settings.DisclaimerScreen
 import com.rk.exec.isTerminalInstalled
 import com.rk.file.FilePermission
@@ -124,6 +125,9 @@ class Terminal : AppCompatActivity() {
         Intent(this, SessionService::class.java).also { intent ->
             bindService(intent, serviceConnection, BIND_AUTO_CREATE)
         }
+
+        // Auto-update check (throttled to once per day inside).
+        UpdateManager.checkForUpdates(this)
     }
 
     override fun onNewIntent(intent: Intent) {

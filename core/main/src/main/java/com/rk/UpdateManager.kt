@@ -1,5 +1,9 @@
 package com.rk
 
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.core.content.FileProvider
 import androidx.core.content.pm.PackageInfoCompat
 import com.rk.commands.KeybindingsManager
 import com.rk.file.child
@@ -8,17 +12,123 @@ import com.rk.file.localDir
 import com.rk.file.sandboxDir
 import com.rk.file.sandboxHomeDir
 import com.rk.file.toFileWrapper
+import com.rk.resources.getString
+import com.rk.resources.getFilledString
+import com.rk.resources.strings
 import com.rk.settings.Preference
 import com.rk.settings.Settings
 import com.rk.utils.DEFAULT_EXTRA_KEYS_SYMBOLS
+import com.rk.utils.GithubReleasesApi
 import com.rk.utils.application
+import com.rk.utils.dialogRes
 import com.rk.utils.hasHardwareKeyboard
+import com.rk.utils.toast
 import com.xyzterm.BuildConfig
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.File
 
 object UpdateManager {
+    private const val UPDATE_OWNER = "vxyzview"
+    private const val UPDATE_REPO = "xyzterm"
+    private const val UPDATE_INTERVAL_MS = 24 * 60 * 60 * 1000L
+    private const val LAST_UPDATE_CHECK_KEY = "last_update_check"
+
+    /** Compares "vX.Y.Z" (or "X.Y.Z") tags. Returns true if [latest] > [installed]. */
+    private fun isNewer(latest: String, installed: String): Boolean {
+        val parse = { v: String -> Regex("""v?(\d+)\.(\d+)\.(\d+)""").matchEntire(v.trim())?.groupValues?.drop(1)?.map { it.toInt() } }
+        val a = parse(latest) ?: return false
+        val b = parse(installed) ?: return true
+        return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
+    }
+
+    /**
+     * Checks the GitHub latest release against the installed app. Throttled to
+     * once per day; only runs when the "Check for updates" setting is on.
+     * If the installed app was built locally (same version as the release),
+     * nothing is offered — no install conflict. If the release is signed with
+     * a different key, the user gets a clear message instead of an install
+     * failure.
+     */
+    @OptIn(DelicateCoroutinesApi::class)
+    fun checkForUpdates(activity: Activity) {
+        if (!Settings.check_for_update) return
+        val now = System.currentTimeMillis()
+        if (now - Preference.getLong(LAST_UPDATE_CHECK_KEY, 0L) < UPDATE_INTERVAL_MS) return
+        Preference.setLong(LAST_UPDATE_CHECK_KEY, now)
+
+        GlobalScope.launch(Dispatchers.Main) {
+            val latest = GithubReleasesApi(UPDATE_OWNER, UPDATE_REPO).fetchLatestVersion() ?: return@launch
+            if (!isNewer(latest, BuildConfig.VERSION_NAME)) return@launch
+
+            val version = latest.removePrefix("v")
+            dialogRes(
+                activity = activity,
+                title = strings.update_available.getString(),
+                msg = strings.update_available_msg.getFilledString(version),
+                onOk = { downloadAndInstall(activity, version) },
+            )
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun downloadAndInstall(activity: Activity, version: String) {
+        toast(strings.update_downloading.getString())
+        GlobalScope.launch(Dispatchers.Main) {
+            val file =
+                runCatching {
+                    withContext(Dispatchers.IO) {
+                        val target = File(application!!.filesDir, "update/xyzterm-$version.apk")
+                        target.parentFile?.mkdirs()
+                        val request =
+                            Request.Builder()
+                                .url("https://github.com/$UPDATE_OWNER/$UPDATE_REPO/releases/latest/download/xyzterm-$version.apk")
+                                .build()
+                        OkHttpClient().newCall(request).execute().use { response ->
+                            if (!response.isSuccessful) error("download failed: ${response.code}")
+                            target.outputStream().use { response.body!!.byteStream().copyTo(it) }
+                        }
+                        target
+                    }
+                }.getOrNull()
+
+            if (file == null) {
+                toast(strings.update_download_failed.getString())
+                return@launch
+            }
+
+            if (!signatureMatches(file.absolutePath)) {
+                toast(strings.update_signature_mismatch.getString())
+                return@launch
+            }
+
+            val uri = FileProvider.getUriForFile(application!!, "${application!!.packageName}.fileprovider", file)
+            val intent =
+                Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "application/vnd.android.package-archive")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+            activity.startActivity(intent)
+        }
+    }
+
+    /** True when the release APK is signed with the same key as the installed app. */
+    @Suppress("DEPRECATION")
+    private fun signatureMatches(apkPath: String): Boolean {
+        val app = application ?: return true
+        val pm = app.packageManager
+        val installed = runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return true
+        val archive = runCatching { pm.getPackageArchiveInfo(apkPath, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return false
+        val a = installed.signatures?.firstOrNull() ?: return true
+        val b = archive.signatures?.firstOrNull() ?: return false
+        return a == b
+    }
+
     private fun deleteCommonFiles() =
         with(application!!) {
             codeCacheDir.apply {

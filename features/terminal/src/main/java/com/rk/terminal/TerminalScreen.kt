@@ -365,9 +365,10 @@ private fun ColumnScope.TerminalView(
                                 .createSession(pendingCommand!!.id, client, terminalActivity)
                                 .session
                     } else {
-                        val service = terminalActivity.sessionBinder?.get()!!.getService()
+                        val binder = terminalActivity.sessionBinder?.get()!!
+                        val service = binder.getService()
                         val current = service.currentSession.value
-                        service.getSession(current)
+                        binder.getSession(current)
                             ?: if (service.restorePending) {
                                 // Saved sessions are being spawned off the main
                                 // thread (cold start) — attach the restored
@@ -380,7 +381,7 @@ private fun ColumnScope.TerminalView(
                                 }
                                 null
                             } else {
-                                service.createSession(current, client, terminalActivity).session
+                                binder.createSession(current, client, terminalActivity).session
                             }
                     }
 
