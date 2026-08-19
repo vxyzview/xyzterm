@@ -354,6 +354,13 @@ private fun ColumnScope.TerminalView(
                 terminalActivity.handleIntent(terminalActivity.intent)
                 setTextSize(dpToPx(Settings.terminal_font_size.toFloat(), context))
                 val client = TerminalBackEnd()
+                // Wire up the client immediately, independent of session availability
+                // below. TerminalView.onCreateInputConnection() reads mClient
+                // unconditionally as soon as this view is attached/focused, which can
+                // race ahead of an in-flight session restore on cold start
+                // (restorePending below) and NPE if setTerminalViewClient() were
+                // deferred until a session exists.
+                setTerminalViewClient(client)
 
                 val session =
                     if (pendingCommand != null) {
