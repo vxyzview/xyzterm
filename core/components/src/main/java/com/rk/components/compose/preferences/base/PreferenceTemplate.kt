@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -49,11 +50,12 @@ fun PreferenceTemplate(
     horizontalPadding: Dp = 16.dp,
     verticalPadding: Dp = 16.dp,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    carded: Boolean = true,
     description: @Composable () -> Unit = {},
     startWidget: (@Composable () -> Unit)? = null,
     endWidget: (@Composable () -> Unit)? = null,
 ) {
-    Column {
+    val row: @Composable () -> Unit = {
         Row(
             verticalAlignment = verticalAlignment,
             modifier =
@@ -95,5 +97,17 @@ fun PreferenceTemplate(
                 endWidget()
             }
         }
+    }
+
+    if (carded) {
+        Surface(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) {
+            row()
+        }
+    } else {
+        Column { row() }
     }
 }

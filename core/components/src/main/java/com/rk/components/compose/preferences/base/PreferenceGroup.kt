@@ -25,13 +25,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -40,32 +38,11 @@ fun PreferenceGroup(
     heading: String? = null,
     description: String? = null,
     showDescription: Boolean = true,
-    showDividers: Boolean = true,
-    // DividerColumn adds 16dp internally; 48dp here aligns dividers with row text
-    // (16dp card padding + 32dp icon + 16dp gap = 64dp from the card edge).
-    dividerStartIndent: Dp = 48.dp,
-    dividerEndIndent: Dp = 0.dp,
-    dividersToSkip: Int = 0,
     content: @Composable () -> Unit,
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         PreferenceGroupHeading(heading)
-        Surface(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
-        ) {
-            if (showDividers) {
-                DividerColumn(
-                    startIndent = dividerStartIndent,
-                    endIndent = dividerEndIndent,
-                    content = content,
-                    dividersToSkip = dividersToSkip,
-                )
-            } else {
-                Column { content() }
-            }
-        }
+        content()
         PreferenceGroupDescription(description = description, showDescription = showDescription)
     }
 }

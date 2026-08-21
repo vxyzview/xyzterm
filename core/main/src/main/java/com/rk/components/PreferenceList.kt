@@ -61,6 +61,7 @@ fun <T> PreferenceList(
                                 RadioButton(selected = tempSelectedItem == item, onClick = null)
                             },
                             verticalPadding = 12.dp,
+                            carded = false,
                         )
                     }
                 }

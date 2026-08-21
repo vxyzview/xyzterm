@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.PermanentDrawerSheet
@@ -51,6 +52,7 @@ fun ResponsiveDrawer(
                 PermanentDrawerSheet(
                     windowInsets = if (fullscreen) WindowInsets() else DrawerDefaults.windowInsets,
                     drawerShape = RectangleShape,
+                    drawerContainerColor = MaterialTheme.colorScheme.background,
                     content = sheetContent,
                 )
             },
@@ -66,6 +68,7 @@ fun ResponsiveDrawer(
                     windowInsets = if (fullscreen) WindowInsets() else DrawerDefaults.windowInsets,
                     modifier = Modifier.width(getDrawerWidth()),
                     drawerShape = RectangleShape,
+                    drawerContainerColor = MaterialTheme.colorScheme.background,
                     content = sheetContent,
                 )
             },

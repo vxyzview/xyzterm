@@ -2,7 +2,9 @@ package com.rk.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -136,41 +138,48 @@ private fun ValueSliderImpl(
     var job by remember { mutableStateOf<Job?>(null) }
     var sliderPosition by remember { mutableIntStateOf(default) }
 
-    Column {
-        PreferenceTemplate(
-            title = { Text(fontWeight = FontWeight.Bold, text = label) },
-            description = {
-                description?.let {
-                    Text(
-                        text = it,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = if (singleLineDescription) 1 else Int.MAX_VALUE,
-                    )
-                }
-            },
-            enabled = enabled,
-            applyPaddings = false,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
-        ) {
-            Text(sliderPosition.toString(), modifier = Modifier.padding(start = 16.dp), fontWeight = FontWeight.Bold)
-        }
-
-        PreferenceTemplate(title = {}) {
-            Slider(
-                value = sliderPosition.toFloat(),
-                onValueChange = {
-                    sliderPosition = valueMapper(it)
-
-                    job?.cancel()
-                    job = scope.launch {
-                        delay(debounce.milliseconds)
-                        onValueChanged(sliderPosition)
+    Surface(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
+        Column {
+            PreferenceTemplate(
+                title = { Text(fontWeight = FontWeight.Bold, text = label) },
+                description = {
+                    description?.let {
+                        Text(
+                            text = it,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = if (singleLineDescription) 1 else Int.MAX_VALUE,
+                        )
                     }
                 },
                 enabled = enabled,
-                steps = steps,
-                valueRange = min.toFloat()..max.toFloat(),
-            )
+                applyPaddings = false,
+                carded = false,
+                modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
+            ) {
+                Text(sliderPosition.toString(), modifier = Modifier.padding(start = 16.dp), fontWeight = FontWeight.Bold)
+            }
+
+            PreferenceTemplate(title = {}, carded = false) {
+                Slider(
+                    value = sliderPosition.toFloat(),
+                    onValueChange = {
+                        sliderPosition = valueMapper(it)
+
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(debounce.milliseconds)
+                            onValueChanged(sliderPosition)
+                        }
+                    },
+                    enabled = enabled,
+                    steps = steps,
+                    valueRange = min.toFloat()..max.toFloat(),
+                )
+            }
         }
     }
 }

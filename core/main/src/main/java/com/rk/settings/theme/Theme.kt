@@ -273,6 +273,7 @@ fun DayNightDialog(showBottomSheet: MutableState<Boolean>, context: Context) {
                                     }
                                 },
                             startWidget = { RadioButton(selected = selectedMode == mode, onClick = null) },
+                            carded = false,
                         )
                     }
                 }
