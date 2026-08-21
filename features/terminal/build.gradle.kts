@@ -34,9 +34,7 @@ dependencies {
 
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.utilcode)
     implementation(libs.okhttp)
-    implementation(libs.nanohttpd)
     implementation(libs.androidx.browser)
     implementation(libs.gson)
     implementation(libs.semver)

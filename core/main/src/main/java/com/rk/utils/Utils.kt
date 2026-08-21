@@ -10,6 +10,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.PictureDrawable
 import android.os.Build
+import android.os.Looper
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.text.style.StrikethroughSpan
@@ -36,7 +37,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.core.net.toUri
-import com.blankj.utilcode.util.ThreadUtils
 import com.caverock.androidsvg.SVG
 import com.rk.extension.ActivityProvider
 import com.rk.file.BuiltinFileType
@@ -121,7 +121,7 @@ fun dpToPx(dp: Float, ctx: Context): Int {
 }
 
 fun isMainThread(): Boolean {
-    return ThreadUtils.isMainThread()
+    return Looper.myLooper() == Looper.getMainLooper()
 }
 
 @OptIn(DelicateCoroutinesApi::class)

@@ -5,15 +5,16 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
-import com.blankj.utilcode.util.ClipboardUtils
-import com.blankj.utilcode.util.KeyboardUtils
 import com.rk.activities.terminal.Terminal
 import com.rk.resources.drawables
 import com.rk.resources.getString
@@ -48,12 +49,23 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     override fun onCopyTextToClipboard(session: TerminalSession, text: String) {
-        ClipboardUtils.copyText("Terminal", text)
+        val context = terminalView.get()?.context ?: return
+        val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return
+        clipboard.setPrimaryClip(ClipData.newPlainText("Terminal", text))
     }
 
     override fun onPasteTextFromClipboard(session: TerminalSession?) {
-        val clip = ClipboardUtils.getText().toString()
         val emulator = terminalView.get()?.mEmulator ?: return
+        val clip =
+            terminalView
+                .get()
+                ?.context
+                ?.getSystemService(ClipboardManager::class.java)
+                ?.primaryClip
+                ?.getItemAt(0)
+                ?.text
+                ?.toString()
+                .orEmpty()
         if (clip.isNotBlank()) {
             emulator.paste(clip)
         }
@@ -285,7 +297,8 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     private fun showSoftInput() {
-        terminalView.get()?.requestFocus()
-        terminalView.get()?.let { KeyboardUtils.showSoftInput(it) }
+        val view = terminalView.get() ?: return
+        view.requestFocus()
+        view.context.getSystemService(InputMethodManager::class.java)?.showSoftInput(view, 0)
     }
 }
