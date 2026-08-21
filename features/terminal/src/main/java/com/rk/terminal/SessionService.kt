@@ -26,6 +26,8 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -90,12 +92,20 @@ class SessionService : Service() {
             // until the current session is published below.
             restorePending = true
             restoreScope.launch {
+                // Spawn the saved shells in parallel — proot startup takes hundreds
+                // of ms per session, and restoring N sessions serially multiplied
+                // that into seconds of cold-start delay.
                 val built =
-                    saved.mapNotNull { (id, pwd) ->
-                        runCatching { MkSession.createSession(activity, TerminalBackEnd(), id, false, pwd) }
-                            .getOrNull()
-                            ?.let { id to it }
-                    }
+                    saved
+                        .map { (id, pwd) ->
+                            async {
+                                runCatching { MkSession.createSession(activity, TerminalBackEnd(), id, false, pwd) }
+                                    .getOrNull()
+                                    ?.let { id to it }
+                            }
+                        }
+                        .awaitAll()
+                        .filterNotNull()
                 withContext(Dispatchers.Main) {
                     // App exited while the restore was in flight — drop the shells.
                     if (!deamonRunning) {

@@ -5,15 +5,14 @@ import android.util.Log
 import com.rk.feature.FeatureRegistry
 import com.rk.file.child
 import com.rk.file.localBinDir
-import com.rk.file.localDir
-import com.rk.file.localLibDir
 import com.rk.file.sandboxDir
 import com.rk.file.sandboxHomeDir
-import com.rk.settings.Settings
 import com.rk.utils.application
-import com.rk.utils.getSourceDirOfPackage
 import com.rk.utils.getTempDir
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
@@ -120,67 +119,25 @@ suspend fun ubuntuProcess(
         val processBuilder = ProcessBuilder(linker, *args.toTypedArray())
 
         processBuilder.environment().let { env ->
-            env["WKDIR"] = workingDir.orEmpty()
-            env["COLORTERM"] = "truecolor"
-            env["TERM"] = "xterm-256color"
-            env["LANG"] = "C.UTF-8"
-            env["PUBLIC_HOME"] = application!!.getExternalFilesDir(null)?.absolutePath.orEmpty()
-            env["DEBUG"] = FeatureRegistry.isEnabled("debug_mode").toString()
-            env["LOCAL"] = localDir().absolutePath
-            env["PRIVATE_DIR"] = application!!.filesDir.parentFile!!.absolutePath
-            env["EXT_HOME"] = sandboxHomeDir().absolutePath
-            env["HOME"] =
-                if (Settings.sandbox) {
-                    "/home"
-                } else {
-                    sandboxHomeDir().absolutePath
-                }
-            env["PROMPT_DIRTRIM"] = "2"
-            env["LINKER"] =
-                if (File("/system/bin/linker64").exists()) {
-                    "/system/bin/linker64"
-                } else {
-                    "/system/bin/linker"
-                }
-            env["NATIVE_LIB_DIR"] = application!!.applicationInfo.nativeLibraryDir
-            env["PROOT"] = "${application!!.applicationInfo.nativeLibraryDir}/libproot.so"
-            env["PROOT_LOADER"] = "${application!!.applicationInfo.nativeLibraryDir}/libloader.so"
-            env["SANDBOX"] = Settings.sandbox.toString()
-            env["TMP_DIR"] = getTempDir().absolutePath
-            env["TMPDIR"] = getTempDir().absolutePath
-            env["TZ"] = "UTC"
-            env["DOTNET_GCHeapHardLimit"] = "1C0000000"
-            env["SOURCE_DIR"] = application!!.applicationInfo.sourceDir
-            env["TERMUX_X11_SOURCE_DIR"] = getSourceDirOfPackage(application!!, "com.termux.x11").orEmpty()
-            env["DISPLAY"] = ":0"
-            env["LD_LIBRARY_PATH"] = localLibDir().absolutePath
-            env["PROOT_TMP_DIR"] = tmpDir.absolutePath
+            env.putAll(SandboxEnv.build(application!!, tmpDir.absolutePath))
 
-            env["ANDROID_ART_ROOT"] = System.getenv("ANDROID_ART_ROOT").orEmpty()
-            env["ANDROID_DATA"] = System.getenv("ANDROID_DATA").orEmpty()
-            env["ANDROID_I18N_ROOT"] = System.getenv("ANDROID_I18N_ROOT").orEmpty()
-            env["ANDROID_ROOT"] = System.getenv("ANDROID_ROOT").orEmpty()
-            env["ANDROID_RUNTIME_ROOT"] = System.getenv("ANDROID_RUNTIME_ROOT").orEmpty()
-            env["ANDROID_TZDATA_ROOT"] = System.getenv("ANDROID_TZDATA_ROOT").orEmpty()
-            env["BOOTCLASSPATH"] = System.getenv("BOOTCLASSPATH").orEmpty()
-            env["DEX2OATBOOTCLASSPATH"] = System.getenv("DEX2OATBOOTCLASSPATH").orEmpty()
-            env["EXTERNAL_STORAGE"] = System.getenv("EXTERNAL_STORAGE").orEmpty()
+            env["WKDIR"] = workingDir.orEmpty()
 
             env["PATH"] =
                 "/bin:/sbin:/usr/bin:/usr/sbin:/usr/games:/usr/local/bin:/usr/local/sbin:${localBinDir()}:${System.getenv("PATH")}"
-
-            val loader32 = "${application!!.applicationInfo.nativeLibraryDir}/libloader32.so"
-            if (File(loader32).exists()) {
-                env["PROOT_LOADER_32"] = loader32
-            }
-
-            when (Settings.seccomp_mode) {
-                "yes" -> env["SECCOMP"] = "1"
-                "no" -> env["PROOT_NO_SECCOMP"] = "1"
-            }
         }
 
-        return@withContext processBuilder.start()
+        val process = processBuilder.start()
+
+        // The per-invocation PROOT_TMP_DIR binding is never reused; reap it once
+        // the process is gone instead of leaking one temp dir per spawn.
+        @OptIn(DelicateCoroutinesApi::class)
+        GlobalScope.launch(Dispatchers.IO) {
+            runCatching { process.waitFor() }
+            tmpDir.deleteRecursively()
+        }
+
+        return process
     }
 
 @SuppressLint("SdCardPath")

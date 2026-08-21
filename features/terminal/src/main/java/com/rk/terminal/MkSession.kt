@@ -2,20 +2,15 @@ package com.rk.terminal
 
 import android.app.Activity
 import android.content.Context
+import com.rk.exec.SandboxEnv
 import com.rk.exec.pendingCommand
-import com.rk.feature.FeatureRegistry
 import com.rk.file.child
 import com.rk.file.localBinDir
 import com.rk.file.localDir
-import com.rk.file.localLibDir
 import com.rk.file.sandboxHomeDir
 import com.rk.settings.Settings
-import com.rk.utils.application
-import com.rk.utils.getSourceDirOfPackage
-import com.rk.utils.getTempDir
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
-import java.io.File
 
 object MkSession {
 
@@ -26,20 +21,6 @@ object MkSession {
         isExtraction: Boolean = false,
         cwd: String? = null,
     ): Pair<TerminalSession, SessionPwd> {
-        val envVariables =
-            mapOf(
-                "ANDROID_ART_ROOT" to System.getenv("ANDROID_ART_ROOT"),
-                "ANDROID_DATA" to System.getenv("ANDROID_DATA"),
-                "ANDROID_I18N_ROOT" to System.getenv("ANDROID_I18N_ROOT"),
-                "ANDROID_ROOT" to System.getenv("ANDROID_ROOT"),
-                "ANDROID_RUNTIME_ROOT" to System.getenv("ANDROID_RUNTIME_ROOT"),
-                "ANDROID_TZDATA_ROOT" to System.getenv("ANDROID_TZDATA_ROOT"),
-                "BOOTCLASSPATH" to System.getenv("BOOTCLASSPATH"),
-                "DEX2OATBOOTCLASSPATH" to System.getenv("DEX2OATBOOTCLASSPATH"),
-                "EXTERNAL_STORAGE" to System.getenv("EXTERNAL_STORAGE"),
-                "PATH" to "${System.getenv("PATH")}:${localBinDir(context).absolutePath}",
-            )
-
         val workingDir = cwd ?: getPwd(context)
 
         val tmpDir = localDir().child("tmp").child(sessionId)
@@ -50,46 +31,11 @@ object MkSession {
 
         tmpDir.mkdirs()
 
-        val env =
-            mutableListOf(
-                "PROOT=${application!!.applicationInfo.nativeLibraryDir}/libproot.so",
-                "PROOT_LOADER=${application!!.applicationInfo.nativeLibraryDir}/libloader.so",
-                "PROOT_TMP_DIR=${tmpDir.absolutePath}",
-                "WKDIR=${workingDir}",
-                "PUBLIC_HOME=${context.getExternalFilesDir(null)?.absolutePath}",
-                "COLORTERM=truecolor",
-                "TERM=xterm-256color",
-                "LANG=C.UTF-8",
-                "DEBUG=${FeatureRegistry.isEnabled("debug_mode")}",
-                "LOCAL=${localDir(context).absolutePath}",
-                "PRIVATE_DIR=${context.filesDir.parentFile!!.absolutePath}",
-                "LD_LIBRARY_PATH=${localLibDir(context).absolutePath}",
-                "EXT_HOME=${sandboxHomeDir(context)}",
-                "HOME=${if (Settings.sandbox){ "/home"} else{ sandboxHomeDir(context)}}",
-                "PROMPT_DIRTRIM=2",
-                "LINKER=${if(File("/system/bin/linker64").exists()){"/system/bin/linker64"}else{"/system/bin/linker"}}",
-                "NATIVE_LIB_DIR=${context.applicationInfo.nativeLibraryDir}",
-                "SANDBOX=${Settings.sandbox}",
-                "TMP_DIR=${getTempDir()}",
-                "TMPDIR=${getTempDir()}",
-                "TZ=UTC",
-                "DOTNET_GCHeapHardLimit=1C0000000",
-                "SOURCE_DIR=${context.applicationInfo.sourceDir}",
-                "TERMUX_X11_SOURCE_DIR=${getSourceDirOfPackage(application!!,"com.termux.x11")}",
-                "DISPLAY=:0",
-            )
+        val envMap = SandboxEnv.build(context, tmpDir.absolutePath)
+        envMap["WKDIR"] = workingDir
+        envMap["PATH"] = "${System.getenv("PATH")}:${localBinDir(context).absolutePath}"
 
-        val loader32 = "${context.applicationInfo.nativeLibraryDir}/libloader32.so"
-        if (File(loader32).exists()) {
-            env.add("PROOT_LOADER_32=$loader32")
-        }
-
-        when (Settings.seccomp_mode) {
-            "yes" -> env.add("SECCOMP=1")
-            "no" -> env.add("PROOT_NO_SECCOMP=1")
-        }
-
-        env.addAll(envVariables.map { "${it.key}=${it.value}" })
+        val env = envMap.map { "${it.key}=${it.value}" }.toMutableList()
 
         pendingCommand?.env?.let { env.addAll(it) }
 
