@@ -13,7 +13,6 @@ import com.rk.crashhandler.CrashHandler
 import com.rk.utils.FontCache
 import com.rk.icons.pack.IconPackManager
 import com.rk.resources.Res
-import com.rk.settings.Preference
 import com.rk.settings.Settings
 import com.rk.settings.debugOptions.LogcatService
 import com.rk.settings.debugOptions.startThemeFlipperIfNotRunning
@@ -96,9 +95,7 @@ open class App : Application() {
                 FontCache.loadFont(this@App, terminalFontPath, isTerminalAsset)
             }
 
-            launch(Dispatchers.IO) { Preference.preloadAllSettings() }
-
-            launch { DocumentProvider.setDocumentProviderEnabled(this@App, Settings.expose_home_dir) }
+            launch(Dispatchers.IO) { DocumentProvider.setDocumentProviderEnabled(this@App, Settings.expose_home_dir) }
 
             launch(Dispatchers.IO) {
                 getTempDir().apply {

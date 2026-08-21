@@ -1,0 +1,26 @@
+# Hand-written starter baseline profile for xyzterm.
+# Covers the cold-start path: Application.onCreate -> Terminal activity ->
+# session service/spawn -> first terminal frame.
+# Regenerate with a macrobenchmark run for exact coverage; these wildcard
+# rules are deliberately broad over the hot packages.
+
+# App startup
+HSPLcom/rk/App;->onCreate()V
+HSPLcom/rk/App;-><init>()V
+HSPLcom/rk/crashhandler/**->**(**)**
+HSPLcom/rk/settings/**->**(**)**
+HSPLcom/rk/resources/**->**(**)**
+HSPLcom/rk/commands/CommandProvider;->**(**)**
+HSPLcom/rk/commands/KeybindingsManager;->**(**)**
+HSPLcom/rk/utils/FontCache;->**(**)**
+
+# Terminal cold start
+HSPLcom/rk/activities/terminal/**->**(**)**
+HSPLcom/rk/terminal/**->**(**)**
+HSPLcom/rk/exec/**->**(**)**
+HSPLcom/rk/theme/**->**(**)**
+HSPLcom/rk/file/FileConstants;->**(**)**
+HSPLcom/rk/UpdateManager;->**(**)**
+
+# Terminal emulation (termux libs)
+HSPLcom/termux/terminal/**->**(**)**

@@ -18,8 +18,6 @@ import com.rk.theme.blueberry
 import com.rk.utils.application
 import com.rk.utils.hasHardwareKeyboard
 import com.xyzterm.BuildConfig
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.nio.charset.Charset
 import kotlin.properties.ReadWriteProperty
@@ -273,22 +271,6 @@ object Preference {
             else -> throw IllegalArgumentException("Unsupported preference type")
         }
     }
-
-    // Preload all settings at startup
-    suspend fun preloadAllSettings() =
-        withContext(Dispatchers.IO) {
-            // This will force all settings to be loaded into cache
-            // The weak references will allow GC if settings aren't used
-            Settings::class.members.forEach { member ->
-                if (member is KProperty<*>) {
-                    try {
-                        member.getter.call(Settings)
-                    } catch (e: Exception) {
-                        // Ignore - some properties might not be accessible
-                    }
-                }
-            }
-        }
 
     fun clearData() {
         sharedPreferences.edit(commit = true) { clear() }
