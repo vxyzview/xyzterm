@@ -91,6 +91,13 @@
     <string name="show_line_number">Show line numbers</string>
     <string name="pin_line_number">Pin line numbers</string>
     <string name="extra_keys">Extra keys</string>
+    <string name="manage_snippets">Command snippets</string>
+    <string name="manage_snippets_desc">Quick commands shown as one-tap chips above the keyboard</string>
+    <string name="snippet_add">Add snippet</string>
+    <string name="snippet_label">Label</string>
+    <string name="snippet_command">Command</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
     <string name="extra_keys_desc">Show extra keys above the keyboard</string>
     <string name="terminal_output">Terminal output</string>
     <string name="auto_save">Auto save</string>

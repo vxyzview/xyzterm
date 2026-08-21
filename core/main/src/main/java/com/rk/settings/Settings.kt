@@ -139,6 +139,7 @@ object Settings {
     var terminal_keep_screen_on by CachedPreference("terminal_keep_screen_on", true)
     var terminal_show_extra_keys by CachedPreference("terminal_show_extra_keys", true)
     var terminal_clipboard_keybindings by CachedPreference("terminal_clipboard_keybindings", true)
+    var terminal_snippets by CachedPreference("terminal_snippets", "[]")
 
     private var _enable_logcat by CachedPreference("enable_logcat", false)
     var enable_logcat: Boolean

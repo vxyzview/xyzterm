@@ -105,6 +105,7 @@ import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
 import com.rk.settings.editor.TerminalFontScreen
 import com.rk.settings.terminal.DEFAULT_TERMINAL_EXTRA_KEYS
 import com.rk.settings.terminal.SettingsTerminalScreen
+import com.rk.settings.terminal.SnippetsScreen
 import com.rk.settings.terminal.TerminalBackupsScreen
 import com.rk.settings.terminal.TerminalCheckScreen
 import com.rk.settings.terminal.TerminalExtraKeys
@@ -148,6 +149,7 @@ fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
         composable(SettingsRoutes.TerminalSettings.route) { SettingsTerminalScreen(navController) }
         composable(SettingsRoutes.TerminalFontScreen.route) { TerminalFontScreen() }
         composable(SettingsRoutes.TerminalExtraKeys.route) { TerminalExtraKeys() }
+        composable(SettingsRoutes.TerminalSnippets.route) { SnippetsScreen() }
         composable(SettingsRoutes.TerminalCheck.route) { TerminalCheckScreen() }
         composable(SettingsRoutes.TerminalBackups.route) { TerminalBackupsScreen() }
     }
@@ -166,6 +168,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val currentTheme = LocalThemeHolder.current
+    var showSearch by rememberSaveable { mutableStateOf(false) }
 
     DisposableEffect(Unit) { onDispose { keyboardController?.hide() } }
 
@@ -219,12 +222,24 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                     Icon(Icons.Default.Menu, stringResource(strings.drawer))
                                 }
                             },
+                            actions = {
+                                IconButton(onClick = { showSearch = !showSearch }) {
+                                    Icon(Icons.Default.Search, stringResource(strings.search))
+                                }
+                            },
                         )
                         }
                     }
                 ) { paddingValues ->
                     Column(modifier = Modifier.padding(paddingValues)) {
+                        if (showSearch) {
+                            TerminalSearchOverlay(onClose = { showSearch = false })
+                        }
+
                         TerminalView(isDarkMode, currentTheme, surfaceColor, onSurfaceColor, terminalActivity)
+
+                        // One-tap command snippets (configured under terminal settings).
+                        SnippetsRow()
 
                         // Extra-keys row: height derives from the key-row count so each
                         // key keeps a >=48dp touch target (a11y minimum). The default

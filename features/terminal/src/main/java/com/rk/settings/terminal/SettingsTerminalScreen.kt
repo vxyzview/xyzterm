@@ -327,6 +327,13 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                 route = SettingsRoutes.TerminalExtraKeys,
             )
 
+            NextScreenCard(
+                label = stringResource(strings.manage_snippets),
+                description = stringResource(strings.manage_snippets_desc),
+                navController = overrideNavController ?: settingsNavController.get(),
+                route = SettingsRoutes.TerminalSnippets,
+            )
+
             SettingsItem(
                 label = stringResource(strings.clipboard_keybindings),
                 description = stringResource(strings.clipboard_keybindings_desc),
