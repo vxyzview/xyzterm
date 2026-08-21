@@ -113,12 +113,16 @@ import com.rk.utils.toast
 import com.termux.terminal.TerminalColors
 import com.termux.terminal.TextStyle
 import com.termux.view.TerminalView
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.util.Properties
 
 var terminalView = WeakReference<TerminalView?>(null)
 var virtualKeysView = WeakReference<VirtualKeysView?>(null)
+
+/** Set by TerminalBackEnd.onBell; the header indicator flashes until reset. */
+var bellPulse by mutableStateOf(false)
 
 @Composable
 fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
@@ -175,12 +179,27 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
-                                    // Live session indicator
+                                    // Session indicator: solid while live, flashes
+                                    // amber for 2s when the shell rings the bell
+                                    // (e.g. a background job finished).
+                                    LaunchedEffect(bellPulse) {
+                                        if (bellPulse) {
+                                            delay(2000)
+                                            bellPulse = false
+                                        }
+                                    }
                                     Box(
                                         modifier =
                                             Modifier
                                                 .size(8.dp)
-                                                .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                                .background(
+                                                    if (bellPulse) {
+                                                        Color(0xFFFFB300)
+                                                    } else {
+                                                        MaterialTheme.colorScheme.primary
+                                                    },
+                                                    CircleShape,
+                                                ),
                                     )
                                     SessionTitle(terminalActivity)
                                 }
@@ -219,7 +238,6 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                         ) { page ->
                             when (page) {
                                 0 -> {
-                                    terminalView.get()?.requestFocus()
                                     AndroidView(
                                         factory = { context ->
                                             VirtualKeysView(context, null).apply {
@@ -264,45 +282,58 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                     var text by rememberSaveable { mutableStateOf("") }
                                     val focusRequester = remember { FocusRequester() }
 
-                                    TextField(
-                                        value = text,
-                                        onValueChange = { text = it },
-                                        maxLines = 1,
-                                        singleLine = true,
-                                        label = { Text(text = stringResource(strings.input)) },
-                                        shape = MaterialTheme.shapes.medium,
-                                        colors =
-                                            TextFieldDefaults.colors(
-                                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                            ),
-                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                        keyboardActions =
-                                            KeyboardActions(
-                                                onDone = {
-                                                    if (text.isEmpty()) {
-                                                        // Dispatch enter key events if text is empty
-                                                        val eventDown =
-                                                            KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
-                                                        val eventUp =
-                                                            KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
-                                                        terminalView.get()?.dispatchKeyEvent(eventDown)
-                                                        terminalView.get()?.dispatchKeyEvent(eventUp)
-                                                    } else {
-                                                        terminalView.get()?.currentSession?.write(text)
-                                                        text = ""
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth().height(keyRowHeight),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        TextField(
+                                            value = text,
+                                            onValueChange = { text = it },
+                                            maxLines = 1,
+                                            singleLine = true,
+                                            label = { Text(text = stringResource(strings.input)) },
+                                            shape = MaterialTheme.shapes.medium,
+                                            colors =
+                                                TextFieldDefaults.colors(
+                                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                                ),
+                                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                            keyboardActions =
+                                                KeyboardActions(
+                                                    onDone = {
+                                                        if (text.isEmpty()) {
+                                                            // Dispatch enter key events if text is empty
+                                                            val eventDown =
+                                                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
+                                                            val eventUp =
+                                                                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
+                                                            terminalView.get()?.dispatchKeyEvent(eventDown)
+                                                            terminalView.get()?.dispatchKeyEvent(eventUp)
+                                                        } else {
+                                                            terminalView.get()?.currentSession?.write(text)
+                                                            text = ""
+                                                        }
                                                     }
-                                                }
-                                            ),
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .height(keyRowHeight)
-                                                .focusRequester(focusRequester),
-                                    )
+                                                ),
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 8.dp)
+                                                    .focusRequester(focusRequester),
+                                        )
+                                    }
 
                                     LaunchedEffect(Unit) { focusRequester.requestFocus() }
                                 }
+                            }
+                        }
+
+                        // Refocus the terminal when swiping back from the input
+                        // page so typing resumes without an extra tap.
+                        LaunchedEffect(pagerState.currentPage) {
+                            if (pagerState.currentPage == 0) {
+                                terminalView.get()?.requestFocus()
                             }
                         }
                     }
@@ -437,7 +468,7 @@ private fun ColumnScope.TerminalView(
                 }
 
                 post {
-                    keepScreenOn = true
+                    if (Settings.terminal_keep_screen_on) keepScreenOn = true
                     isFocusableInTouchMode = true
                     requestFocus()
                 }
@@ -469,6 +500,8 @@ private fun ColumnScope.TerminalView(
 private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController: NavController) {
     var showRenameDialog by remember { mutableStateOf(false) }
     var showExitConfirm by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var sessionToDelete by remember { mutableStateOf<String?>(null) }
     var sessionToRename by remember { mutableStateOf("") }
     var renameValue by remember { mutableStateOf("") }
     var renameError by remember { mutableStateOf<String?>(null) }
@@ -501,6 +534,23 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
 
     val service = terminalActivity.sessionBinder?.get()?.getService()
     val context = LocalContext.current
+
+    fun deleteSession(id: String) {
+        val binder = terminalActivity.sessionBinder?.get() ?: return
+        val svc = service ?: return
+        val index = svc.sessionList.indexOf(id)
+        val sessionBefore = svc.sessionList.getOrNull(index - 1)
+        val sessionAfter = svc.sessionList.getOrNull(index + 1)
+        val neighborSession = sessionBefore ?: sessionAfter
+        neighborSession?.let { terminalActivity.changeSession(it) }
+
+        binder.terminateSession(id)
+
+        if (svc.sessionList.isEmpty()) {
+            terminalActivity.finish()
+            svc.actionExit()
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // ── Branded header ─────────────────────────────────────────────
@@ -631,20 +681,36 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                                 unselectedContainerColor = Color.Transparent,
                             ),
                         badge = {
-                            IconButton(
-                                onClick = {
-                                    sessionToRename = sessionId
-                                    renameValue = sessionId
-                                    renameError = null
-                                    showRenameDialog = true
-                                },
-                                modifier = Modifier.size(40.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Edit,
-                                    contentDescription = stringResource(strings.rename),
-                                    modifier = Modifier.size(20.dp),
-                                )
+                            Row {
+                                IconButton(
+                                    onClick = {
+                                        sessionToRename = sessionId
+                                        renameValue = sessionId
+                                        renameError = null
+                                        showRenameDialog = true
+                                    },
+                                    modifier = Modifier.size(40.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Edit,
+                                        contentDescription = stringResource(strings.rename),
+                                        modifier = Modifier.size(20.dp),
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        sessionToDelete = sessionId
+                                        showDeleteConfirm = true
+                                    },
+                                    modifier = Modifier.size(40.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Delete,
+                                        contentDescription = stringResource(strings.delete_session),
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(20.dp),
+                                    )
+                                }
                             }
                         },
                     )
@@ -663,19 +729,8 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             TextButton(
                 onClick = {
                     if (service == null || activeSession == null) return@TextButton
-
-                    val index = service.sessionList.indexOf(activeSession)
-                    val sessionBefore = service.sessionList.getOrNull(index - 1)
-                    val sessionAfter = service.sessionList.getOrNull(index + 1)
-                    val neighborSession = sessionBefore ?: sessionAfter
-                    neighborSession?.let { terminalActivity.changeSession(it) }
-
-                    terminalActivity.sessionBinder?.get()?.terminateSession(activeSession)
-
-                    if (service.sessionList.isEmpty()) {
-                        terminalActivity.finish()
-                        service.actionExit()
-                    }
+                    sessionToDelete = activeSession
+                    showDeleteConfirm = true
                 },
             ) {
                 Icon(
@@ -708,6 +763,39 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                 )
             }
         }
+    }
+
+    if (showDeleteConfirm && sessionToDelete != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteConfirm = false
+                sessionToDelete = null
+            },
+            title = { Text(text = stringResource(strings.delete_session)) },
+            text = { Text(text = stringResource(strings.delete_session_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm = false
+                        sessionToDelete?.let { deleteSession(it) }
+                        sessionToDelete = null
+                    },
+                ) {
+                    Text(
+                        text = stringResource(strings.delete),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteConfirm = false
+                    sessionToDelete = null
+                }) {
+                    Text(text = stringResource(strings.cancel))
+                }
+            },
+        )
     }
 
     if (showExitConfirm) {
@@ -746,7 +834,7 @@ fun Terminal.changeSession(sessionId: String) {
 
     terminalView.apply {
         post {
-            keepScreenOn = true
+            if (Settings.terminal_keep_screen_on) keepScreenOn = true
             isFocusableInTouchMode = true
             requestFocus()
         }

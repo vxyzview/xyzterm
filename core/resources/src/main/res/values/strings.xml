@@ -780,4 +780,10 @@
     <string name="preview">Preview</string>
     <string name="xed_package">xyzterm package</string>
     <string name="migrating_themes">Migrating themes…</string>
+    <string name="session_ended">Session ended</string>
+    <string name="delete_session_confirm">Kill this session? Its processes will be terminated.</string>
+    <string name="keep_screen_on">Keep screen on</string>
+    <string name="keep_screen_on_desc">Prevent the screen from sleeping while a terminal is open</string>
+    <string name="service_connection_error">Lost connection to the terminal service</string>
+    <string name="retry">Retry</string>
 </resources>

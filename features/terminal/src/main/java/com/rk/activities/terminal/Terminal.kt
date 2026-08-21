@@ -252,8 +252,20 @@ class Terminal : AppCompatActivity() {
                         LaunchedEffect(Unit) { FilePermission.verifyStoragePermission(this@Terminal) }
                         TerminalScreenHost(this)
                     } else {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Error: No service connection")
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Text(
+                                text = stringResource(strings.service_connection_error),
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center,
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { recreate() }) {
+                                Text(text = stringResource(strings.retry))
+                            }
                         }
                     }
                 }
@@ -385,7 +397,9 @@ class Terminal : AppCompatActivity() {
             val activity = context as? Activity
 
             DisposableEffect(Unit) {
-                activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                if (Settings.terminal_keep_screen_on) {
+                    activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
 
                 onDispose { activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
             }

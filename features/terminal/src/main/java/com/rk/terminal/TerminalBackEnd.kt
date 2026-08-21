@@ -12,7 +12,9 @@ import com.rk.settings.Settings
 import com.rk.settings.terminal.TerminalCursorStyle
 import com.rk.terminal.virtualkeys.SpecialButton
 import com.rk.utils.dialog
+import com.rk.utils.dpToPx
 import com.rk.utils.openUrl
+import com.rk.utils.toast
 import com.termux.terminal.TerminalEmulator
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
@@ -27,7 +29,9 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
 
     override fun onTitleChanged(changedSession: TerminalSession) {}
 
-    override fun onSessionFinished(finishedSession: TerminalSession) {}
+    override fun onSessionFinished(finishedSession: TerminalSession) {
+        toast(strings.session_ended)
+    }
 
     override fun onCopyTextToClipboard(session: TerminalSession, text: String) {
         ClipboardUtils.copyText("Terminal", text)
@@ -41,7 +45,9 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         }
     }
 
-    override fun onBell(session: TerminalSession) {}
+    override fun onBell(session: TerminalSession) {
+        bellPulse = true
+    }
 
     override fun onColorsChanged(session: TerminalSession) {}
 
@@ -87,10 +93,20 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     override fun onScale(scale: Float): Float {
-        val fontScale = scale.coerceIn(11f, 45f)
-        terminalView.get()?.setTextSize(fontScale.toInt())
-        return fontScale
+        val view = terminalView.get() ?: return 1f
+        // Settings stores the size in dp; convert like every other call site.
+        // Returning 1f resets the view's cumulative factor, making `scale` a
+        // per-gesture increment applied to the float accumulator below (int
+        // round-trips through Settings would stall small pinches).
+        if (fontSizeDp < 0f) fontSizeDp = Settings.terminal_font_size.toFloat()
+        val newSize = (fontSizeDp * scale).coerceIn(10f, 20f)
+        fontSizeDp = newSize
+        Settings.terminal_font_size = newSize.toInt()
+        view.setTextSize(dpToPx(newSize, view.context))
+        return 1f
     }
+
+    private var fontSizeDp = -1f
 
     override fun onSingleTapUp(e: MotionEvent) {
         val view = terminalView.get()

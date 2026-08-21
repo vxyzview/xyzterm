@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
+import android.view.WindowManager
 import com.rk.activities.terminal.Terminal
 import com.rk.exec.isTerminalInstalled
 import androidx.compose.runtime.Composable
@@ -131,6 +132,24 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                 items = TerminalCursorStyle.entries.map { it to stringResource(it.stringRes) },
                 selectedItem = TerminalCursorStyle.fromString(Settings.terminal_cursor_style),
                 onItemSelected = { Settings.terminal_cursor_style = it.value },
+            )
+
+            SettingsItem(
+                label = stringResource(strings.keep_screen_on),
+                description = stringResource(strings.keep_screen_on_desc),
+                default = Settings.terminal_keep_screen_on,
+                sideEffect = {
+                    Settings.terminal_keep_screen_on = it
+                    // Apply live: both the view flag and the window flag set by
+                    // the terminal host must follow, not just after a restart.
+                    val window = Terminal.instance?.window
+                    if (it) {
+                        window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    } else {
+                        window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                    terminalView.get()?.keepScreenOn = it
+                },
             )
         }
 
