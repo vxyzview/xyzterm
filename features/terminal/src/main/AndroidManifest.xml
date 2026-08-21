@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
+
     <application>
         <service
             android:name="com.rk.terminal.SessionService"
             android:foregroundServiceType="specialUse" />
+
+        <service
+            android:name="com.rk.terminal.TerminalTileService"
+            android:exported="true"
+            android:icon="@drawable/terminal"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
 
         <activity
             android:name="com.rk.activities.terminal.Terminal"
@@ -21,6 +33,14 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="xyzterm" />
             </intent-filter>
         </activity>
     </application>

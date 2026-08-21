@@ -39,6 +39,7 @@ import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
+import com.rk.terminal.TerminalBackup
 import com.rk.terminal.terminalView
 import com.rk.utils.LoadingPopup
 import com.rk.utils.dialogRes
@@ -211,46 +212,22 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                                 loading.show()
 
                                 try {
-                                    val sandboxDir = sandboxDir().absolutePath
-                                    val targetPath = targetFile.absolutePath
+                                    val ok = TerminalBackup.create(targetFile)
 
-                                    val processBuilder =
-                                        ProcessBuilder(
-                                                "tar",
-                                                "-czf",
-                                                targetPath,
-                                                ".",
-                                                "--exclude=dev",
-                                                "--exclude=sys",
-                                                "--exclude=proc",
-                                                "--exclude=system",
-                                                "--exclude=apex",
-                                                "--exclude=vendor",
-                                                "--exclude=data",
-                                                "--exclude=home",
-                                                "--exclude=root",
-                                                "--exclude=var/cache",
-                                                "--exclude=var/tmp",
-                                                "--exclude=lost+found",
-                                                "--exclude=storage",
-                                                "--exclude=system_ext",
-                                                "--exclude=tmp",
-                                                "--exclude=vendor",
-                                                "--exclude=sdcard",
-                                                "--exclude=storage",
-                                            )
-                                            .apply {
-                                                directory(File(sandboxDir))
-                                                redirectErrorStream(true)
+                                    withContext(Dispatchers.Main) {
+                                        loading.hide()
+                                        if (ok) {
+                                            toast(strings.success)
+                                        } else {
+                                            toast(strings.failed)
+                                        }
+                                    }
+
+                                    if (ok) {
+                                        targetFile.inputStream().use { inputStream ->
+                                            fileObject.getOutputStream(false).use { outputStream ->
+                                                inputStream.copyTo(outputStream)
                                             }
-
-                                    processBuilder.start().waitFor()
-
-                                    loading.hide()
-
-                                    targetFile.inputStream().use { inputStream ->
-                                        fileObject.getOutputStream(false).use { outputStream ->
-                                            inputStream.copyTo(outputStream)
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -271,6 +248,13 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                 showSwitch = false,
                 default = false,
                 sideEffect = { restore.launch("application/gzip") },
+            )
+
+            SettingsItem(
+                label = stringResource(strings.auto_backup),
+                description = stringResource(strings.auto_backup_desc),
+                default = Settings.auto_backup,
+                sideEffect = { Settings.auto_backup = it },
             )
 
             SettingsItem(

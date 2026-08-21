@@ -190,6 +190,8 @@
     <string name="feature_toggles">Feature toggles</string>
     <string name="backup">Backup</string>
     <string name="restore">Restore</string>
+    <string name="auto_backup">Auto backup</string>
+    <string name="auto_backup_desc">Back up the terminal environment when the service exits, keeping the last 3 backups</string>
     <string name="success">Success</string>
     <string name="failed">Failed</string>
     <string name="setup_failed">Setup failed: %s</string>

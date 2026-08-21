@@ -24,6 +24,7 @@ import com.termux.terminal.TerminalSessionClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -191,6 +192,10 @@ class SessionService : Service() {
         deamonRunning = false
         if (wakeLock?.isHeld == true) {
             wakeLock?.release()
+        }
+        if (Settings.auto_backup) {
+            @OptIn(DelicateCoroutinesApi::class)
+            GlobalScope.launch { runCatching { TerminalBackup.autoBackup() } }
         }
         super.onDestroy()
     }

@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.net.Uri
 import android.os.SystemClock
 import android.view.WindowManager
 import androidx.activity.compose.setContent
@@ -144,6 +145,11 @@ class Terminal : AppCompatActivity() {
     fun handleIntent(intent: Intent) {
         this.intent = intent
 
+        if (intent.data?.scheme == "xyzterm") {
+            handleDeepLink(intent.data ?: return)
+            return
+        }
+
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
             val binder = sessionBinder?.get() ?: return
@@ -166,6 +172,33 @@ class Terminal : AppCompatActivity() {
 
             this@Terminal.changeSession(info.id)
             setIntent(intent)
+        }
+    }
+
+    /**
+     * Handles xyzterm:// URIs:
+     *   xyzterm://run?cmd=<command>          write command to the current session
+     *   xyzterm://session/<name>?cmd=<cmd>   create or switch to session <name>, optionally run <cmd>
+     */
+    private fun handleDeepLink(uri: Uri) {
+        val binder = sessionBinder?.get() ?: return
+        lifecycleScope.launch(Dispatchers.Main) {
+            when (uri.host) {
+                "run" -> {
+                    val cmd = uri.getQueryParameter("cmd") ?: return@launch
+                    binder.getSession(binder.getService().currentSession.value)?.write("$cmd\n")
+                }
+
+                "session" -> {
+                    val name = uri.lastPathSegment?.trim().orEmpty()
+                    if (name.isEmpty()) return@launch
+                    if (name !in binder.getService().sessionList) {
+                        binder.createSession(name, TerminalBackEnd(), this@Terminal)
+                    }
+                    this@Terminal.changeSession(name)
+                    uri.getQueryParameter("cmd")?.let { cmd -> binder.getSession(name)?.write("$cmd\n") }
+                }
+            }
         }
     }
 
