@@ -41,7 +41,7 @@ class SessionService : Service() {
     var restorePending = false
     private val restoreCallbacks = mutableListOf<() -> Unit>()
     private val restoreScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var deamonRunning = false
+    private var daemonRunning = false
 
     inner class SessionBinder : Binder() {
         fun getService(): SessionService {
@@ -109,7 +109,7 @@ class SessionService : Service() {
                         .filterNotNull()
                 withContext(Dispatchers.Main) {
                     // App exited while the restore was in flight — drop the shells.
-                    if (!deamonRunning) {
+                    if (!daemonRunning) {
                         built.forEach { it.second.first.finishIfRunning() }
                         restorePending = false
                         return@withContext
@@ -159,8 +159,8 @@ class SessionService : Service() {
 
             if (sessions.isEmpty()) {
                 stopSelf()
-                if (deamonRunning) {
-                    deamonRunning = false
+                if (daemonRunning) {
+                    daemonRunning = false
                 }
             } else {
                 updateNotification()
@@ -212,7 +212,7 @@ class SessionService : Service() {
     override fun onDestroy() {
         sessions.forEach { s -> s.value.finishIfRunning() }
 
-        deamonRunning = false
+        daemonRunning = false
         if (wakeLock?.isHeld == true) {
             wakeLock?.release()
         }
@@ -245,8 +245,8 @@ class SessionService : Service() {
             startForeground(1, notification)
         }
 
-        if (deamonRunning.not()) {
-            deamonRunning = true
+        if (daemonRunning.not()) {
+            daemonRunning = true
         }
 
         if (wakeLock == null) {
@@ -262,8 +262,8 @@ class SessionService : Service() {
 
     fun actionExit() {
         sessions.forEach { s -> s.value.finishIfRunning() }
-        if (deamonRunning) {
-            deamonRunning = false
+        if (daemonRunning) {
+            daemonRunning = false
         }
         stopSelf()
     }

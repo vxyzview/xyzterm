@@ -70,6 +70,10 @@ fun TerminalExtraKeys() {
 
     var text by remember { mutableStateOf(Settings.terminal_extra_keys) }
 
+    // Live validation: surface a broken matrix while typing instead of only
+    // showing the fallback toast after navigating back to the terminal.
+    val jsonError = remember(text) { runCatching { org.json.JSONArray(text) }.exceptionOrNull() }
+
     fun save() {
         Settings.terminal_extra_keys = text
     }
@@ -117,6 +121,12 @@ fun TerminalExtraKeys() {
                 onValueChange = {
                     text = it
                     Settings.terminal_extra_keys = it
+                },
+                isError = jsonError != null,
+                supportingText = {
+                    if (jsonError != null) {
+                        Text(stringResource(strings.invalid_terminal_extra_keys))
+                    }
                 },
                 modifier = Modifier
                     .fillMaxSize()
