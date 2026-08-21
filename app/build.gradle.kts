@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ktfmt)
+    alias(libs.plugins.android.baselineprofile)
 }
 
 android {
@@ -101,6 +102,8 @@ kotlin { jvmToolchain(21) }
 dependencies {
     implementation(libs.androidx.profileinstaller)
     coreLibraryDesugaring(libs.desugar)
+
+    baselineProfile(project(":baselineprofile"))
 
     implementation(project(":core:main"))
     implementation(project(":core:resources"))
