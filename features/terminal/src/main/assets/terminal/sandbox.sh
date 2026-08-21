@@ -26,7 +26,9 @@ bind_if_exists() {
 bind_if_exists /sdcard
 bind_if_exists /storage
 bind_if_exists /dev
-bind_if_exists /data
+# Respect sandbox mode: raw /data stays invisible to the guest, matching
+# getDefaultBindings() in ubuntuProcess.kt. Failsafe mode keeps the binding.
+[ "$SANDBOX" = "true" ] || bind_if_exists /data
 bind_if_exists /dev/urandom:/dev/random
 bind_if_exists /proc
 [ -e "$EXT_HOME" ] && ARGS="$ARGS -b $EXT_HOME:/home"
@@ -50,7 +52,6 @@ if [ -e "/proc/self/fd/2" ]; then
 fi
 
 
-bind_if_exists "$PRIVATE_DIR"
 bind_if_exists /sys
 
 if [ ! -d "$LOCAL/sandbox/tmp" ]; then
@@ -66,7 +67,12 @@ ARGS="$ARGS --link2symlink"
 ARGS="$ARGS --sysvipc"
 ARGS="$ARGS -L"
 
-chmod -R +x $LOCAL/bin
+# Exec bits only need restoring once; scripts are written a single time by
+# the app (setupAssetFile skips existing files), so they persist across spawns.
+if [ ! -f "$LOCAL/.bin_chmod_done" ]; then
+  chmod -R +x "$LOCAL/bin"
+  touch "$LOCAL/.bin_chmod_done"
+fi
 
 if [ $# -gt 0 ]; then
     # shellcheck disable=SC2086

@@ -161,10 +161,9 @@ suspend fun ubuntuProcess(
 suspend fun Process.readStdout(): String =
     withContext(Dispatchers.IO) {
         try {
-            inputStream.bufferedReader().use { reader ->
-                if (inputStream.available() <= 0) return@use ""
-                reader.readText()
-            }
+            // readText blocks to EOF — an available() pre-check here would
+            // return "" whenever the process hasn't flushed yet.
+            inputStream.bufferedReader().use { it.readText() }
         } catch (e: IOException) {
             e.printStackTrace()
             if (e.message?.contains("Stream closed") == true) "" else throw e
@@ -174,10 +173,7 @@ suspend fun Process.readStdout(): String =
 suspend fun Process.readStderr(): String =
     withContext(Dispatchers.IO) {
         try {
-            errorStream.bufferedReader().use { reader ->
-                if (errorStream.available() <= 0) return@use ""
-                reader.readText()
-            }
+            errorStream.bufferedReader().use { it.readText() }
         } catch (e: IOException) {
             e.printStackTrace()
             if (e.message?.contains("Stream closed") == true) "" else throw e

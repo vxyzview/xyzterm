@@ -15,7 +15,8 @@ if [ -f "$LOCAL/.sandbox_degraded" ]; then
 fi
 
 # Set timezone
-CONTAINER_TIMEZONE="UTC"  # or any timezone like "Asia/Kolkata"
+# Follow the device timezone (the app exports TZ); fall back to UTC.
+CONTAINER_TIMEZONE="${TZ:-UTC}"
 
 # Symlink /etc/localtime to the desired timezone
 # Only reconfigure when the timezone actually changed — dpkg-reconfigure on
