@@ -41,7 +41,9 @@ fun PreferenceGroup(
     description: String? = null,
     showDescription: Boolean = true,
     showDividers: Boolean = true,
-    dividerStartIndent: Dp = 0.dp,
+    // DividerColumn adds 16dp internally; 48dp here aligns dividers with row text
+    // (16dp card padding + 32dp icon + 16dp gap = 64dp from the card edge).
+    dividerStartIndent: Dp = 48.dp,
     dividerEndIndent: Dp = 0.dp,
     dividersToSkip: Int = 0,
     content: @Composable () -> Unit,
@@ -51,7 +53,7 @@ fun PreferenceGroup(
         Surface(
             modifier = Modifier.padding(horizontal = 16.dp),
             shape = MaterialTheme.shapes.large,
-            tonalElevation = 1.dp,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
         ) {
             if (showDividers) {
                 DividerColumn(

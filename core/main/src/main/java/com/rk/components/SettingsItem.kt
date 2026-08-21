@@ -12,7 +12,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rk.components.compose.preferences.base.PreferenceTemplate
@@ -95,7 +94,7 @@ fun SettingsItem(
                     onClick = { onClick?.invoke() ?: sideEffect?.invoke(false) },
                 ),
             contentModifier = Modifier.fillMaxHeight().padding(vertical = 16.dp).padding(start = 16.dp),
-            title = { Text(fontWeight = FontWeight.Bold, text = label) },
+            title = { Text(text = label) },
             description = {
                 description?.let {
                     Text(

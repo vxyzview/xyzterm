@@ -42,7 +42,6 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -359,7 +358,7 @@ private fun SessionTitle(terminalActivity: Terminal) {
     val name = terminalActivity.sessionBinder?.get()?.getService()?.currentSession?.value ?: "main"
     Text(
         text = name,
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -564,23 +563,17 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
     Column(modifier = Modifier.fillMaxSize()) {
         // ── Branded header ─────────────────────────────────────────────
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            ) {
-                Icon(
-                    painter = painterResource(drawables.terminal),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(12.dp).size(28.dp),
-                )
-            }
+            Icon(
+                painter = painterResource(drawables.terminal),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp),
+            )
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Text(
                 text = stringResource(strings.app_name),
@@ -594,7 +587,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
                     .semantics { role = Role.Button }
                     .clickable { context.startActivity(Intent(context, SettingsActivity::class.java)) },
             verticalAlignment = Alignment.CenterVertically,
@@ -615,7 +608,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
 
         // ── Sessions ───────────────────────────────────────────────────
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -719,7 +712,8 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                                     Icon(
                                         imageVector = Icons.Outlined.Edit,
                                         contentDescription = stringResource(strings.rename),
-                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp),
                                     )
                                 }
                                 IconButton(
@@ -732,8 +726,8 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                                     Icon(
                                         imageVector = Icons.Outlined.Delete,
                                         contentDescription = stringResource(strings.delete_session),
-                                        tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp),
                                     )
                                 }
                             }
