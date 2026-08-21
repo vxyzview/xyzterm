@@ -179,6 +179,10 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                         val fileObject = uri.toFileObject(expectedIsFile = true)
 
                         val tempFile = getTempDir().child("terminal-backup.tar.gz")
+                        // Extract next to the real sandbox and only replace it once
+                        // extraction succeeded — a corrupt archive must never leave
+                        // the existing installation deleted.
+                        val stagingDir = getTempDir().child("terminal-restore-staging")
 
                         try {
                             fileObject.getInputStream().use { inputStream ->
@@ -187,26 +191,60 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                                 }
                             }
 
-                            sandboxDir().deleteRecursively()
-                            sandboxDir().mkdirs()
+                            stagingDir.deleteRecursively()
+                            stagingDir.mkdirs()
 
-                            val result =
-                                getRuntime().exec("tar -xf ${tempFile.absolutePath} -C ${sandboxDir()}").waitFor()
-                            withContext(Dispatchers.Main) {
-                                loading.hide()
-                                if (result == 0) {
-                                    toast(strings.success)
-                                } else {
-                                    toast(strings.failed)
+                            // -z is explicit: some toybox builds don't sniff gzip.
+                            val process =
+                                getRuntime()
+                                    .exec(
+                                        arrayOf(
+                                            "tar",
+                                            "-xzf",
+                                            tempFile.absolutePath,
+                                            "-C",
+                                            stagingDir.absolutePath,
+                                        )
+                                    )
+                            val result = process.waitFor()
+                            val stderr =
+                                runCatching { process.errorStream.bufferedReader().use { it.readText() } }
+                                    .getOrDefault("")
+
+                            if (result != 0) {
+                                withContext(Dispatchers.Main) {
+                                    loading.hide()
+                                    toast(
+                                        strings.setup_failed.getFilledString(
+                                            stderr.lineSequence().firstOrNull { it.isNotBlank() }
+                                                ?: "tar exited with $result"
+                                        )
+                                    )
                                 }
+                                return@launch
                             }
 
+                            // Raw child path: the sandboxDir() getter auto-creates the
+                            // directory, which would block the rename below.
+                            val sandboxPath = localDir().child("sandbox")
+                            sandboxPath.deleteRecursively()
+                            stagingDir.renameTo(sandboxPath)
+                            stagingDir.deleteRecursively()
+
                             localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
+
+                            withContext(Dispatchers.Main) {
+                                loading.hide()
+                                toast(strings.success)
+                            }
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
                                 loading.hide()
                                 toast(strings.setup_failed.getFilledString(e.message))
                             }
+                        } finally {
+                            tempFile.delete()
+                            stagingDir.deleteRecursively()
                         }
                     }
                 }
