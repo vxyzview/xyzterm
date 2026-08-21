@@ -9,23 +9,27 @@ import com.rk.utils.application
 fun setupTerminalFiles() {
     if (sandboxDir().exists().not() || localBinDir().exists().not()) return
 
-    with(localBinDir().child("termux-x11")) {
-        if (exists().not()) {
-            createFileIfNot()
-            writeText(application!!.assets.open("terminal/termux-x11.sh").bufferedReader().use { it.readText() })
-        }
-    }
+    setupAssetFile("termux-x11")
 
     val internalFiles = listOf("init", "sandbox", "setup", "utils")
     internalFiles.forEach { setupAssetFile(it) }
 }
 
+/**
+ * Installs a bundled script into [localBinDir], rewriting it when the shipped
+ * copy changed (app update) so script fixes reach existing installs instead of
+ * only fresh ones. Exec bit is set here — the one-time chmod in sandbox.sh
+ * predates rewrites and would leave updated scripts non-executable.
+ */
 fun setupAssetFile(fileName: String) {
+    val assetContent = application!!.assets.open("terminal/$fileName.sh").bufferedReader().use { it.readText() }
+
     with(localBinDir().child(fileName)) {
         parentFile?.mkdir()
-        if (exists().not()) {
+        if (!exists() || readText() != assetContent) {
             createFileIfNot()
-            writeText(application!!.assets.open("terminal/$fileName.sh").bufferedReader().use { it.readText() })
+            writeText(assetContent)
+            runCatching { setExecutable(true) }.onFailure { it.printStackTrace() }
         }
     }
 }
