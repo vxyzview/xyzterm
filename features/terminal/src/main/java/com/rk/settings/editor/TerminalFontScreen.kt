@@ -116,7 +116,7 @@ fun TerminalFontScreen() {
 
             Text(
                 text = stringResource(strings.font_preview),
-                fontFamily = FontFamily(previewTypeface),
+                fontFamily = previewTypeface?.let { FontFamily(it) },
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(16.dp),
             )
