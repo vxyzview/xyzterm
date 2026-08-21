@@ -26,12 +26,10 @@ object SandboxEnv {
                 "PROOT_LOADER" to "$nativeLibDir/libloader.so",
                 "NATIVE_LIB_DIR" to nativeLibDir,
                 "LINKER" to
-                    {
-                        if (File("/system/bin/linker64").exists()) {
-                            "/system/bin/linker64"
-                        } else {
-                            "/system/bin/linker"
-                        }
+                    if (File("/system/bin/linker64").exists()) {
+                        "/system/bin/linker64"
+                    } else {
+                        "/system/bin/linker"
                     },
                 "COLORTERM" to "truecolor",
                 "TERM" to "xterm-256color",
@@ -39,12 +37,10 @@ object SandboxEnv {
                 "DEBUG" to FeatureRegistry.isEnabled("debug_mode").toString(),
                 "PUBLIC_HOME" to context.getExternalFilesDir(null)?.absolutePath.orEmpty(),
                 "HOME" to
-                    {
-                        if (Settings.sandbox) {
-                            "/home"
-                        } else {
-                            sandboxHomeDir(context).absolutePath
-                        }
+                    if (Settings.sandbox) {
+                        "/home"
+                    } else {
+                        sandboxHomeDir(context).absolutePath
                     },
                 "PROMPT_DIRTRIM" to "2",
                 "SANDBOX" to Settings.sandbox.toString(),

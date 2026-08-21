@@ -144,7 +144,7 @@ suspend fun ubuntuProcess(
             tmpDir.deleteRecursively()
         }
 
-        return process
+        return@withContext process
     }
 
 @SuppressLint("SdCardPath")
