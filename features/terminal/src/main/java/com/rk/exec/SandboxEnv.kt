@@ -10,6 +10,7 @@ import com.rk.utils.application
 import com.rk.utils.getSourceDirOfPackage
 import com.rk.utils.getTempDir
 import java.io.File
+import java.util.TimeZone
 
 /**
  * Single source of truth for the environment handed to proot sessions and
@@ -53,7 +54,7 @@ object SandboxEnv {
                 "LD_LIBRARY_PATH" to localLibDir(context).absolutePath,
                 "TMP_DIR" to getTempDir().absolutePath,
                 "TMPDIR" to getTempDir().absolutePath,
-                "TZ" to "UTC",
+                "TZ" to TimeZone.getDefault().id,
                 "DOTNET_GCHeapHardLimit" to "1C0000000",
                 "SOURCE_DIR" to context.applicationInfo.sourceDir,
                 "TERMUX_X11_SOURCE_DIR" to getSourceDirOfPackage(application!!, "com.termux.x11").orEmpty(),

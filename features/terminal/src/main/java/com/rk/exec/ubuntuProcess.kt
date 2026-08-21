@@ -7,6 +7,7 @@ import com.rk.file.child
 import com.rk.file.localBinDir
 import com.rk.file.sandboxDir
 import com.rk.file.sandboxHomeDir
+import com.rk.settings.Settings
 import com.rk.utils.application
 import com.rk.utils.getTempDir
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -49,7 +50,13 @@ fun getDefaultBindings(): List<Binding> {
         bind(sandboxHomeDir().absolutePath, "/home")
         bind("/sdcard")
         bind("/storage")
-        bind("/data")
+        // Sandbox mode deliberately does not expose raw /data: the guest reaches
+        // its own files through the app-private dir binding below, while other
+        // apps' private dirs (and /data/adb on rooted devices) stay invisible.
+        // Failsafe (non-sandbox) mode keeps the legacy full-/data binding.
+        if (!Settings.sandbox) {
+            bind("/data")
+        }
         bind(application!!.filesDir.parentFile!!.absolutePath)
         bind("/dev")
         bind("/proc")
