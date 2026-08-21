@@ -1,8 +1,10 @@
 package com.rk.terminal
 
 import com.rk.file.child
+import com.rk.file.createFileIfNot
 import com.rk.file.localDir
 import com.rk.file.sandboxDir
+import com.rk.utils.getTempDir
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,6 +13,9 @@ import kotlinx.coroutines.withContext
 object TerminalBackup {
     private const val KEEP = 3
 
+    // NOTE: /home and /root are deliberately NOT excluded — they hold the user's
+    // shell history, dotfiles and installed tool configs. Excluding them made
+    // backups silently lossless-looking but useless for real restores.
     private val EXCLUDES =
         arrayOf(
             "--exclude=dev",
@@ -20,8 +25,6 @@ object TerminalBackup {
             "--exclude=apex",
             "--exclude=vendor",
             "--exclude=data",
-            "--exclude=home",
-            "--exclude=root",
             "--exclude=var/cache",
             "--exclude=var/tmp",
             "--exclude=lost+found",
@@ -49,8 +52,15 @@ object TerminalBackup {
         val dir = backupDir()
         dir.mkdirs()
         val target = File(dir, "terminal-backup-${System.currentTimeMillis()}.tar.gz")
-        if (!create(target)) {
-            target.delete()
+        // Write to a temp name first so an interrupted run never leaves a
+        // truncated archive that a later restore would choke on.
+        val partial = File(dir, target.name + ".part")
+        if (!create(partial)) {
+            partial.delete()
+            return false
+        }
+        if (!partial.renameTo(target)) {
+            partial.delete()
             return false
         }
         dir.listFiles { f -> f.name.startsWith("terminal-backup-") }
@@ -59,4 +69,51 @@ object TerminalBackup {
             ?.forEach { it.delete() }
         return true
     }
+
+    /**
+     * Restores [archive] into the sandbox. The archive is extracted into a
+     * staging directory first; the live sandbox is only replaced once tar
+     * exited 0, so a corrupt backup never destroys the current install.
+     *
+     * Returns null on success, otherwise a human-readable error string.
+     */
+    suspend fun restore(archive: File): String? =
+        withContext(Dispatchers.IO) {
+            val staging = getTempDir().child("terminal-restore-staging")
+            try {
+                staging.deleteRecursively()
+                staging.mkdirs()
+
+                // -z is explicit: some toybox builds don't sniff gzip.
+                val process =
+                    ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", staging.absolutePath)
+                        .start()
+                val code = process.waitFor()
+                val stderr =
+                    runCatching { process.errorStream.bufferedReader().use { it.readText() } }
+                        .getOrDefault("")
+
+                if (code != 0) {
+                    return@withContext (
+                        stderr.lineSequence().firstOrNull { it.isNotBlank() }
+                            ?: "tar exited with $code"
+                        )
+                }
+
+                // Raw child path: the sandboxDir() getter auto-creates the
+                // directory, which would block the rename below.
+                val sandboxPath = localDir().child("sandbox")
+                sandboxPath.deleteRecursively()
+                if (!staging.renameTo(sandboxPath)) {
+                    return@withContext "could not move extracted files into place"
+                }
+
+                localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
+                null
+            } catch (e: Exception) {
+                e.message ?: "restore failed"
+            } finally {
+                staging.deleteRecursively()
+            }
+        }
 }

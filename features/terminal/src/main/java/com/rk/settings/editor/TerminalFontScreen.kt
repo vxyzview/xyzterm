@@ -74,6 +74,9 @@ fun TerminalFontScreen() {
 
                         val destinationFile = File(context.filesDir, "fonts/$fileName")
                         destinationFile.parentFile?.mkdirs()
+                        // A re-picked font often lands on the same path — drop the
+                        // stale cache entry or the preview keeps the old glyphs.
+                        FontCache.invalidate(destinationFile.absolutePath)
                         if (destinationFile.exists().not()) {
                             destinationFile.createNewFile()
                         }
@@ -100,6 +103,9 @@ fun TerminalFontScreen() {
         actions = {
             // Only way back to the bundled default once a custom font is set.
             ResetButton {
+                if (fontPath.isNotEmpty()) {
+                    FontCache.invalidate(fontPath)
+                }
                 Settings.terminal_font_path = ""
                 fontPath = ""
             }

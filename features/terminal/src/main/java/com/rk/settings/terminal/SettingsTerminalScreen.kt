@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.rk.DocumentProvider
+import com.rk.DefaultScope
 import com.rk.activities.settings.SettingsActivity
 import com.rk.activities.settings.SettingsRoutes
 import com.rk.activities.settings.settingsNavController
@@ -50,12 +51,9 @@ import com.rk.utils.toast
 import com.termux.terminal.TerminalEmulator
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.io.FileOutputStream
-import java.lang.Runtime.getRuntime
 
 enum class TerminalCursorStyle(val value: String, val stringRes: Int) {
     BLOCK("block", strings.block),
@@ -175,14 +173,10 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                     val loading = LoadingPopup(activity, null)
                     loading.show()
 
-                    GlobalScope.launch(Dispatchers.IO) {
+                    DefaultScope.launch(Dispatchers.IO) {
                         val fileObject = uri.toFileObject(expectedIsFile = true)
 
                         val tempFile = getTempDir().child("terminal-backup.tar.gz")
-                        // Extract next to the real sandbox and only replace it once
-                        // extraction succeeded — a corrupt archive must never leave
-                        // the existing installation deleted.
-                        val stagingDir = getTempDir().child("terminal-restore-staging")
 
                         try {
                             fileObject.getInputStream().use { inputStream ->
@@ -191,60 +185,25 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                                 }
                             }
 
-                            stagingDir.deleteRecursively()
-                            stagingDir.mkdirs()
-
-                            // -z is explicit: some toybox builds don't sniff gzip.
-                            val process =
-                                getRuntime()
-                                    .exec(
-                                        arrayOf(
-                                            "tar",
-                                            "-xzf",
-                                            tempFile.absolutePath,
-                                            "-C",
-                                            stagingDir.absolutePath,
-                                        )
-                                    )
-                            val result = process.waitFor()
-                            val stderr =
-                                runCatching { process.errorStream.bufferedReader().use { it.readText() } }
-                                    .getOrDefault("")
-
-                            if (result != 0) {
-                                withContext(Dispatchers.Main) {
-                                    loading.hide()
-                                    toast(
-                                        strings.setup_failed.getFilledString(
-                                            stderr.lineSequence().firstOrNull { it.isNotBlank() }
-                                                ?: "tar exited with $result"
-                                        )
-                                    )
-                                }
-                                return@launch
-                            }
-
-                            // Raw child path: the sandboxDir() getter auto-creates the
-                            // directory, which would block the rename below.
-                            val sandboxPath = localDir().child("sandbox")
-                            sandboxPath.deleteRecursively()
-                            stagingDir.renameTo(sandboxPath)
-                            stagingDir.deleteRecursively()
-
-                            localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
+                            // Extraction happens into a staging dir inside restore();
+                            // the live sandbox is only replaced on success.
+                            val error = TerminalBackup.restore(tempFile)
 
                             withContext(Dispatchers.Main) {
-                                loading.hide()
-                                toast(strings.success)
+                                runCatching { loading.hide() }
+                                if (error == null) {
+                                    toast(strings.success)
+                                } else {
+                                    toast(strings.setup_failed.getFilledString(error))
+                                }
                             }
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
-                                loading.hide()
+                                runCatching { loading.hide() }
                                 toast(strings.setup_failed.getFilledString(e.message))
                             }
                         } finally {
                             tempFile.delete()
-                            stagingDir.deleteRecursively()
                         }
                     }
                 }
@@ -261,18 +220,18 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                         mimeType = "application/octet-stream",
                         title = "terminal-backup.tar.gz",
                     ) { fileObject ->
-                        GlobalScope.launch(Dispatchers.IO) {
+                        DefaultScope.launch(Dispatchers.IO) {
                             if (fileObject != null) {
                                 val targetFile = getTempDir().child("terminal-backup.tar.gz")
 
                                 val loading = LoadingPopup(activity, null)
-                                loading.show()
+                                withContext(Dispatchers.Main) { runCatching { loading.show() } }
 
                                 try {
                                     val ok = TerminalBackup.create(targetFile)
 
                                     withContext(Dispatchers.Main) {
-                                        loading.hide()
+                                        runCatching { loading.hide() }
                                         if (ok) {
                                             toast(strings.success)
                                         } else {
@@ -289,9 +248,11 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                                     }
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {
-                                        loading.hide()
+                                        runCatching { loading.hide() }
                                         toast(strings.setup_failed.getFilledString(e.message))
                                     }
+                                } finally {
+                                    targetFile.delete()
                                 }
                             }
                         }
@@ -327,16 +288,16 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                         onCancel = {},
                         okRes = strings.delete,
                         onOk = {
-                            GlobalScope.launch(Dispatchers.IO) {
+                            DefaultScope.launch(Dispatchers.IO) {
                                 val loading = LoadingPopup(activity, null)
-                                loading.show()
+                                withContext(Dispatchers.Main) { runCatching { loading.show() } }
                                 runCatching {
                                     localBinDir().deleteRecursively()
                                     localLibDir().deleteRecursively()
                                     sandboxDir().deleteRecursively()
                                     localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
                                 }
-                                loading.hide()
+                                withContext(Dispatchers.Main) { runCatching { loading.hide() } }
                             }
                         },
                     )

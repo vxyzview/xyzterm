@@ -270,6 +270,9 @@ object Preference {
     fun clearData() {
         sharedPreferences.edit(commit = true) { clear() }
         clearCaches()
+        // Snap every registered delegate back to its default so open screens
+        // stop showing pre-clear values until the process restarts.
+        delegateRegistry.values.forEach { it.resetToDefault() }
     }
 
     fun clearCaches() {
@@ -488,6 +491,10 @@ open class CachedPreference<T>(val key: String, val defaultValue: T) : ReadWrite
 
     internal fun applyStateValue(value: T) {
         state = value
+    }
+
+    internal fun resetToDefault() {
+        state = defaultValue
     }
 }
 

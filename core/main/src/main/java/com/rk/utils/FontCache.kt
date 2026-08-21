@@ -58,4 +58,9 @@ object FontCache {
     fun getFont(context: Context, path: String, isAsset: Boolean): Font? {
         return getCachedFont(context, path, isAsset)?.composeFont
     }
+
+    /** Drop the cached entry so the next [getTypeface]/[getFont] re-reads the file from disk. */
+    fun invalidate(path: String) {
+        cachedFonts.remove(path)
+    }
 }
