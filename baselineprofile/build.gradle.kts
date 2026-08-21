@@ -1,5 +1,3 @@
-import com.android.build.api.dsl.ManagedVirtualDevice
-
 plugins {
     alias(libs.plugins.android.test)
     alias(libs.plugins.android.baselineprofile)
@@ -18,22 +16,12 @@ android {
     targetProjectPath = ":app"
 
     experimentalProperties["android.experimental.self-instrumenting"] = true
-
-    managedDevices {
-        devices {
-            create<ManagedVirtualDevice>("pixel6Api34") {
-                device = "Pixel 6"
-                apiLevel = 34
-                systemImageSource = "aosp-atd"
-            }
-        }
-    }
 }
 
 baselineProfile {
-    // Generate on a CI-managed emulator instead of requiring a connected device.
-    useConnectedDevices = false
-    managedDevices += "pixel6Api34"
+    // CI starts an emulator (see .github/workflows/baseline-profile.yml) and
+    // the plugin drives it as a connected device.
+    useConnectedDevices = true
 }
 
 dependencies {

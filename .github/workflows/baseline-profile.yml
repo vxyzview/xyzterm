@@ -53,7 +53,12 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Generate baseline profiles
-        run: ./gradlew :app:generateBaselineProfiles --no-daemon --no-configuration-cache
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: aosp_atd
+          arch: x86_64
+          script: ./gradlew :app:generateBaselineProfiles --no-daemon --no-configuration-cache
 
       - name: Upload profile artifact
         uses: actions/upload-artifact@v4
