@@ -19,11 +19,9 @@ package com.rk.components.compose.preferences.base
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,8 +59,6 @@ fun PreferenceGroupHeading(heading: String?, modifier: Modifier = Modifier) {
                 modifier = Modifier.semantics { this.heading() },
             )
         }
-    } else {
-        Spacer(modifier = modifier.requiredHeight(8.dp))
     }
 }
 
