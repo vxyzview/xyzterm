@@ -225,13 +225,6 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         return true
     }
 
-    //TODO
-
-//    override fun shouldSupportClipboardKeybindings(): Boolean {
-//        return Settings.terminal_clipboard_keybindings
-//    }
-
-
     override fun isTerminalViewSelected(): Boolean {
         return true
     }
@@ -239,6 +232,40 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     override fun copyModeChanged(copyMode: Boolean) {}
 
     override fun onKeyDown(keyCode: Int, e: KeyEvent, session: TerminalSession): Boolean {
+        // Clipboard keybindings (toggleable in terminal settings). The pinned
+        // terminal-view v0.118.3 has no shouldSupportClipboardKeybindings() client
+        // hook, so Ctrl+Shift+C / Ctrl+Shift+V are handled here instead.
+        if (Settings.terminal_clipboard_keybindings && e.isCtrlPressed && e.isShiftPressed) {
+            val view = terminalView.get()
+            when (keyCode) {
+                KeyEvent.KEYCODE_V -> {
+                    val clip =
+                        view
+                            ?.context
+                            ?.getSystemService(ClipboardManager::class.java)
+                            ?.primaryClip
+                            ?.getItemAt(0)
+                            ?.text
+                            ?.toString()
+                            .orEmpty()
+                    if (clip.isNotEmpty()) {
+                        view?.mEmulator?.paste(clip)
+                    }
+                    return true
+                }
+                KeyEvent.KEYCODE_C -> {
+                    val selected = view?.selectedText
+                    if (!selected.isNullOrEmpty()) {
+                        val context = view.context
+                        context
+                            .getSystemService(ClipboardManager::class.java)
+                            ?.setPrimaryClip(ClipData.newPlainText("Terminal", selected))
+                        return true
+                    }
+                }
+            }
+        }
+
         if (keyCode == KeyEvent.KEYCODE_ENTER && !session.isRunning) {
             val activity = Terminal.instance ?: return false
             val sessionBinder = activity.sessionBinder?.get() ?: return false

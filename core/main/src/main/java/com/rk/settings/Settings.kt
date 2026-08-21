@@ -90,7 +90,6 @@ object Settings {
         set(value) {
             _verbose_error = value
         }
-    var project_as_pwd by CachedPreference("project_as_pwd", true)
     var terminate_sessions_on_exit by CachedPreference("terminate_sessions_on_exit", false)
     var auto_backup by CachedPreference("auto_backup", false)
     var donated by CachedPreference("donated", false)
@@ -140,12 +139,6 @@ object Settings {
     var terminal_keep_screen_on by CachedPreference("terminal_keep_screen_on", true)
     var terminal_show_extra_keys by CachedPreference("terminal_show_extra_keys", true)
     var terminal_clipboard_keybindings by CachedPreference("terminal_clipboard_keybindings", true)
-    private var _record_rpc by CachedPreference("record_rpc", BuildConfig.DEBUG)
-    var record_rpc: Boolean
-        get() = FeatureRegistry.isEnabled("debug_mode") && _record_rpc
-        set(value) {
-            _record_rpc = value
-        }
 
     private var _enable_logcat by CachedPreference("enable_logcat", false)
     var enable_logcat: Boolean

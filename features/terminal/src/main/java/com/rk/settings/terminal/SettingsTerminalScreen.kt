@@ -347,13 +347,6 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                 sideEffect = { Settings.terminate_sessions_on_exit = it },
             )
 
-            SettingsItem(
-                label = stringResource(strings.project_as_wk),
-                description = stringResource(strings.project_as_wk_desc),
-                default = Settings.project_as_pwd,
-                sideEffect = { Settings.project_as_pwd = it },
-            )
-
             var exposeHomeDirState by remember { mutableStateOf(Settings.expose_home_dir) }
             PreferenceSwitch(
                 checked = exposeHomeDirState,

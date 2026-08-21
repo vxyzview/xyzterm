@@ -17,6 +17,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -401,12 +403,28 @@ class Terminal : AppCompatActivity() {
             val context = LocalContext.current
             val activity = context as? Activity
 
-            DisposableEffect(Unit) {
+            DisposableEffect(Settings.fullscreen) {
                 if (Settings.terminal_keep_screen_on) {
                     activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 }
 
-                onDispose { activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+                // Fullscreen mode: hide the status bar, swipe to reveal (toggle in
+                // app settings). Re-applies when the toggle changes.
+                val insetsController =
+                    activity?.window?.let { window ->
+                        WindowInsetsControllerCompat(window, window.decorView).also { controller ->
+                            if (Settings.fullscreen) {
+                                controller.hide(WindowInsetsCompat.Type.statusBars())
+                                controller.systemBarsBehavior =
+                                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                            }
+                        }
+                    }
+
+                onDispose {
+                    activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    insetsController?.show(WindowInsetsCompat.Type.statusBars())
+                }
             }
 
             when {

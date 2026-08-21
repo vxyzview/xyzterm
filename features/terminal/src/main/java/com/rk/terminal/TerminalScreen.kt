@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -149,7 +151,7 @@ fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Terminal, navController: NavController) {
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface.toArgb()
@@ -171,11 +173,14 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
 
         ResponsiveDrawer(
             drawerState = drawerState,
-            fullscreen = false,
+            fullscreen = Settings.fullscreen,
             mainContent = {
                 Scaffold(
                     topBar = {
-                        TopAppBar(
+                        // Smart toolbar: hide the header while the keyboard is open so
+                        // the terminal gets the rows back (toggle in app settings).
+                        if (!(Settings.smart_toolbar && WindowInsets.isImeVisible)) {
+                            TopAppBar(
                             title = {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -212,6 +217,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                 }
                             },
                         )
+                        }
                     }
                 ) { paddingValues ->
                     Column(modifier = Modifier.padding(paddingValues)) {

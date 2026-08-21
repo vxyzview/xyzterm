@@ -135,14 +135,6 @@ fun DeveloperOptions(modifier: Modifier = Modifier, navController: NavController
             )
 
             SettingsItem(
-                label = stringResource(strings.record_rpc_traffic),
-                description = stringResource(strings.record_rpc_traffic_desc),
-                showSwitch = true,
-                default = Settings.record_rpc,
-                sideEffect = { Settings.record_rpc = it },
-            )
-
-            SettingsItem(
                 label = stringResource(strings.enable_logcat),
                 description = stringResource(strings.enable_logcat_desc),
                 showSwitch = true,
