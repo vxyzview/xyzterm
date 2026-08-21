@@ -791,4 +791,7 @@
     <string name="sessions_running">%d sessions running</string>
     <string name="wake_lock_active">(wake lock held)</string>
     <string name="bell_notification">A terminal session needs your attention</string>
+    <string name="show_extra_keys">Show extra keys</string>
+    <string name="show_extra_keys_desc">Show the extra keys row below the terminal</string>
+    <string name="font_preview">AaBbCc 0123 ~$ ls -la | grep xyz</string>
 </resources>

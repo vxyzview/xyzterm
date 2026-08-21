@@ -138,6 +138,7 @@ object Settings {
     var auto_closing_bracket by CachedPreference("auto_closing_bracket", true)
     var confirm_exit by CachedPreference("confirm_exit", true)
     var terminal_keep_screen_on by CachedPreference("terminal_keep_screen_on", true)
+    var terminal_show_extra_keys by CachedPreference("terminal_show_extra_keys", true)
     var terminal_clipboard_keybindings by CachedPreference("terminal_clipboard_keybindings", true)
     private var _record_rpc by CachedPreference("record_rpc", BuildConfig.DEBUG)
     var record_rpc: Boolean

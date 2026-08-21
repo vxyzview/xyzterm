@@ -307,6 +307,13 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
         }
 
         PreferenceGroup(heading = stringResource(strings.input)) {
+            SettingsItem(
+                label = stringResource(strings.show_extra_keys),
+                description = stringResource(strings.show_extra_keys_desc),
+                default = Settings.terminal_show_extra_keys,
+                sideEffect = { Settings.terminal_show_extra_keys = it },
+            )
+
             NextScreenCard(
                 label = stringResource(strings.change_extra_keys),
                 description = stringResource(strings.change_extra_keys_desc),
