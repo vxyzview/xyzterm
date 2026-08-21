@@ -93,7 +93,7 @@ info "Setting up the Ubuntu container…"
 nameserver="nameserver 8.8.8.8
 nameserver 8.8.4.4"
 
-hosts="127.0.0.1   localhost.localdomain localhost
+hosts="127.0.0.1   localhost.localdomain localhost xyz
 
 # IPv6.
 ::1         localhost.localdomain localhost ip6-localhost ip6-loopback
@@ -107,7 +107,7 @@ ff02::3     ip6-allhosts"
 mkdir -p "$SANDBOX_DIR/etc"
 
 # write hostname
-printf '%s\n' "Xed-Editor" > "$SANDBOX_DIR/etc/hostname"
+printf '%s\n' "xyz" > "$SANDBOX_DIR/etc/hostname"
 
 # write resolv.conf (create file if not exists, then overwrite)
 : > "$SANDBOX_DIR/etc/resolv.conf"

@@ -2,9 +2,9 @@
 force_color_prompt=yes
 shopt -s checkwinsize
 
+export HOSTNAME="xyz"
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/games:/usr/local/bin:/usr/local/sbin:$LOCAL/bin:$PATH
 export SHELL="bash"
-export PS1="\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\] \\$ "
 
 # Ubuntu-only helpers (utils.sh refuses to run inside the Android shell).
 export TERMINAL_MODE=ubuntu
@@ -36,6 +36,11 @@ if [[ -f ~/.bashrc ]]; then
     # shellcheck disable=SC1090
     source ~/.bashrc
 fi
+
+# Prompt set AFTER ~/.bashrc so the stock Ubuntu colored prompt cannot
+# override it. Plain (non-bold) 32/34 map straight to the theme palette's
+# green/blue slots, so the prompt always matches the selected color scheme.
+export PS1="\[\e[32m\]\u@\h\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \\$ "
 
 
 # One-time base setup now runs inside setup.sh, which writes the marker files,
