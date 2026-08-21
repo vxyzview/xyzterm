@@ -18,6 +18,7 @@ import com.rk.settings.SettingsCategory
 import com.rk.settings.SettingsRegistry
 import com.rk.settings.editor.TerminalFontScreen
 import com.rk.settings.terminal.SettingsTerminalScreen
+import com.rk.settings.terminal.TerminalBackupsScreen
 import com.rk.settings.terminal.TerminalCheckScreen
 import com.rk.settings.terminal.TerminalExtraKeys
 import com.rk.utils.toast
@@ -57,6 +58,7 @@ class TerminalFeature : Feature {
         routes.add(DynamicRoute(SettingsRoutes.TerminalExtraKeys.route) { _, _ -> TerminalExtraKeys() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalCheck.route) { _, _ -> TerminalCheckScreen() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalFontScreen.route) { _, _ -> TerminalFontScreen() })
+        routes.add(DynamicRoute(SettingsRoutes.TerminalBackups.route) { _, _ -> TerminalBackupsScreen() })
 
         routes.forEach { SettingsRegistry.registerRoute(it) }
 

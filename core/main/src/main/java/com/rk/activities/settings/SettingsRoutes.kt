@@ -15,6 +15,8 @@ sealed class SettingsRoutes(val route: String) {
 
     data object TerminalCheck : SettingsRoutes("terminal_check")
 
+    data object TerminalBackups : SettingsRoutes("terminal_backups")
+
     data object About : SettingsRoutes("about")
 
     data object EditorFontScreen : SettingsRoutes("editor_font_screen")

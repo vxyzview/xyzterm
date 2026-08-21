@@ -105,6 +105,7 @@ import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
 import com.rk.settings.editor.TerminalFontScreen
 import com.rk.settings.terminal.DEFAULT_TERMINAL_EXTRA_KEYS
 import com.rk.settings.terminal.SettingsTerminalScreen
+import com.rk.settings.terminal.TerminalBackupsScreen
 import com.rk.settings.terminal.TerminalCheckScreen
 import com.rk.settings.terminal.TerminalExtraKeys
 import com.rk.terminal.virtualkeys.VirtualKeysConstants
@@ -148,6 +149,7 @@ fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
         composable(SettingsRoutes.TerminalFontScreen.route) { TerminalFontScreen() }
         composable(SettingsRoutes.TerminalExtraKeys.route) { TerminalExtraKeys() }
         composable(SettingsRoutes.TerminalCheck.route) { TerminalCheckScreen() }
+        composable(SettingsRoutes.TerminalBackups.route) { TerminalBackupsScreen() }
     }
     }
 }

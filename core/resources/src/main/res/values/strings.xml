@@ -192,6 +192,10 @@
     <string name="backup">Backup</string>
     <string name="restore">Restore</string>
     <string name="auto_backup">Auto backup</string>
+    <string name="manage_backups">Manage backups</string>
+    <string name="manage_backups_desc">Browse, restore and prune terminal backups</string>
+    <string name="backup_now">Back up now</string>
+    <string name="no_backups_yet">No backups yet</string>
     <string name="auto_backup_desc">Back up the terminal environment when the service exits, keeping the last 3 backups</string>
     <string name="success">Success</string>
     <string name="failed">Failed</string>

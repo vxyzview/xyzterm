@@ -275,6 +275,13 @@ fun SettingsTerminalScreen(overrideNavController: NavController? = null) {
                 sideEffect = { Settings.auto_backup = it },
             )
 
+            NextScreenCard(
+                label = stringResource(strings.manage_backups),
+                description = stringResource(strings.manage_backups_desc),
+                navController = overrideNavController ?: settingsNavController.get(),
+                route = SettingsRoutes.TerminalBackups,
+            )
+
             SettingsItem(
                 label = stringResource(strings.uninstall),
                 default = false,
