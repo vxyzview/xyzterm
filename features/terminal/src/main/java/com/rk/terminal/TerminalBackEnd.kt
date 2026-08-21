@@ -1,11 +1,21 @@
 package com.rk.terminal
 
+import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
+import androidx.core.content.ContextCompat
 import com.blankj.utilcode.util.ClipboardUtils
 import com.blankj.utilcode.util.KeyboardUtils
 import com.rk.activities.terminal.Terminal
+import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
@@ -21,6 +31,10 @@ import com.termux.terminal.TerminalSessionClient
 import com.termux.view.TerminalViewClient
 
 private val URL_REGEX = Regex("""https?://[^\s"'<>]+|www\.[^\s"'<>]+""")
+
+private const val BELL_CHANNEL_ID = "terminal_bell"
+private const val BELL_NOTIFICATION_ID = 2
+private const val BELL_NOTIFY_THROTTLE_MS = 5_000L
 
 class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     override fun onTextChanged(changedSession: TerminalSession) {
@@ -47,6 +61,58 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
 
     override fun onBell(session: TerminalSession) {
         bellPulse = true
+        notifyBellInBackground(session)
+    }
+
+    // Throttle: a job that rings repeatedly (e.g. `while true; echo -e '\a'`)
+    // must not spam notifications.
+    private var lastBellNotifyAt = 0L
+
+    private fun notifyBellInBackground(session: TerminalSession) {
+        if (Terminal.isForeground) return
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastBellNotifyAt < BELL_NOTIFY_THROTTLE_MS) return
+        lastBellNotifyAt = now
+
+        val context = terminalView.get()?.context?.applicationContext ?: return
+
+        val nm = context.getSystemService(NotificationManager::class.java) ?: return
+        runCatching {
+            nm.createNotificationChannel(
+                NotificationChannel(
+                    BELL_CHANNEL_ID,
+                    strings.bell_notification.getString(),
+                    NotificationManager.IMPORTANCE_DEFAULT,
+                )
+            )
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        val intent = Intent(context, Terminal::class.java)
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                3,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+
+        val notification =
+            Notification.Builder(context, BELL_CHANNEL_ID)
+                .setSmallIcon(drawables.terminal)
+                .setContentTitle(strings.app_name.getString())
+                .setContentText(strings.bell_notification.getString())
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build()
+
+        runCatching { nm.notify(BELL_NOTIFICATION_ID, notification) }
     }
 
     override fun onColorsChanged(session: TerminalSession) {}

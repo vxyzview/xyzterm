@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.rk.activities.terminal.Terminal
 import com.rk.resources.drawables
+import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Preference
@@ -126,8 +127,16 @@ class SessionService : Service() {
                         }
                     }
                     restorePending = false
-                    if (currentSession.value == "main" && sessionList.isNotEmpty()) {
-                        currentSession.value = sessionList.last()
+                    if (sessionList.isNotEmpty()) {
+                        // Restore the session the user was actually using when
+                        // the app closed, not whichever restored last.
+                        val savedActive = Preference.getString(ACTIVE_SESSION_KEY, "")
+                        currentSession.value =
+                            if (savedActive in sessionList) {
+                                savedActive
+                            } else {
+                                sessionList.first()
+                            }
                     }
                     val callbacks = restoreCallbacks.toList()
                     restoreCallbacks.clear()
@@ -174,6 +183,10 @@ class SessionService : Service() {
 
             if (currentSession.value == oldId) {
                 currentSession.value = newId
+            }
+
+            if (Preference.getString(ACTIVE_SESSION_KEY, "") == oldId) {
+                Preference.setString(ACTIVE_SESSION_KEY, newId)
             }
 
             updateNotification()
@@ -327,9 +340,10 @@ class SessionService : Service() {
 
     private fun createNotificationChannel() {
         val channel =
-            NotificationChannel(CHANNEL_ID, "Session Service", NotificationManager.IMPORTANCE_LOW).apply {
-                description = "Notification for Terminal Service"
-            }
+            NotificationChannel(CHANNEL_ID, strings.notification_channel_name.getString(), NotificationManager.IMPORTANCE_LOW)
+                .apply {
+                    description = strings.notification_channel_desc.getString()
+                }
         notificationManager.createNotificationChannel(channel)
     }
 
@@ -342,14 +356,12 @@ class SessionService : Service() {
     }
 
     private fun getNotificationContentText(wakelock: Boolean): String {
-        val count = sessions.size
-        return "$count sessions running ${
-            if (wakelock) {
-                "(wake lock held)"
-            } else {
-                ""
-            }
-        }"
+        val base = strings.sessions_running.getFilledString(sessions.size)
+        return if (wakelock) {
+            "$base ${strings.wake_lock_active.getString()}"
+        } else {
+            base
+        }
     }
 
     private companion object {
@@ -382,5 +394,8 @@ class SessionService : Service() {
 typealias SessionId = String
 
 typealias SessionPwd = String
+
+/** Preference key holding the id of the last active session (restored on restart). */
+const val ACTIVE_SESSION_KEY = "active_session"
 
 data class SessionInfo(val id: SessionId, val pwd: SessionPwd, val session: TerminalSession)

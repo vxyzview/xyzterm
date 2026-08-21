@@ -140,6 +140,7 @@ class Terminal : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         instance = this
+        isForeground = true
     }
 
     fun handleIntent(intent: Intent) {
@@ -204,6 +205,7 @@ class Terminal : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        isForeground = false
         if (isBound) {
             unbindService(serviceConnection)
             isBound = false
@@ -223,6 +225,9 @@ class Terminal : AppCompatActivity() {
             private set(value) {
                 activityRef = WeakReference(value)
             }
+
+        /** True while the terminal UI is visible; gates bell notifications. */
+        var isForeground = false
     }
 
     private val notificationPermissionLauncher =

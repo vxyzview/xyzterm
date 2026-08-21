@@ -786,4 +786,9 @@
     <string name="keep_screen_on_desc">Prevent the screen from sleeping while a terminal is open</string>
     <string name="service_connection_error">Lost connection to the terminal service</string>
     <string name="retry">Retry</string>
+    <string name="notification_channel_name">Terminal sessions</string>
+    <string name="notification_channel_desc">Shows running terminal sessions</string>
+    <string name="sessions_running">%d sessions running</string>
+    <string name="wake_lock_active">(wake lock held)</string>
+    <string name="bell_notification">A terminal session needs your attention</string>
 </resources>

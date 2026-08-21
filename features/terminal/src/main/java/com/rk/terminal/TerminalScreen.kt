@@ -96,6 +96,7 @@ import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
+import com.rk.settings.Preference
 import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
 import com.rk.settings.editor.TerminalFontScreen
 import com.rk.settings.terminal.DEFAULT_TERMINAL_EXTRA_KEYS
@@ -631,15 +632,19 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController
                     }
                     terminalView.get()?.let {
                         val client = TerminalBackEnd()
-                        terminalActivity.sessionBinder
-                            ?.get()!!
-                            .createSession(
-                                generateUniqueString(
-                                    terminalActivity.sessionBinder?.get()!!.getService().sessionList
-                                ),
-                                client,
-                                terminalActivity,
-                            )
+                        val info =
+                            terminalActivity.sessionBinder
+                                ?.get()!!
+                                .createSession(
+                                    generateUniqueString(
+                                        terminalActivity.sessionBinder?.get()!!.getService().sessionList
+                                    ),
+                                    client,
+                                    terminalActivity,
+                                )
+                        // Switch to the new session immediately — creating it
+                        // silently in the background feels like a dead button.
+                        terminalActivity.changeSession(info.id)
                     }
                 },
             ) {
@@ -842,6 +847,7 @@ fun Terminal.changeSession(sessionId: String) {
     virtualKeysView.get()?.apply { virtualKeysViewClient = VirtualKeysListener(terminalView.mTermSession) }
 
     binder.getService().currentSession.value = sessionId
+    Preference.setString(ACTIVE_SESSION_KEY, sessionId)
 }
 
 // Colors last applied to the terminal, so applyTerminalColors can skip the
