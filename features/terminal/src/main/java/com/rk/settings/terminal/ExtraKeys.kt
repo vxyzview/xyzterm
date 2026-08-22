@@ -34,38 +34,11 @@ import com.rk.components.compose.preferences.base.LocalIsExpandedScreen
 import com.rk.components.compose.preferences.base.PreferenceScaffold
 import com.rk.resources.drawables
 import com.rk.resources.strings
+import com.rk.settings.DEFAULT_TERMINAL_EXTRA_KEYS
 import com.rk.settings.Preference
 import com.rk.settings.Settings
 import com.rk.theme.Typography
 import com.rk.utils.openUrl
-
-const val DEFAULT_TERMINAL_EXTRA_KEYS =
-    ("[" +
-        "\n  [" +
-        "\n    \"ESC\"," +
-        "\n    {" +
-        "\n      \"key\": \"/\"," +
-        "\n      \"popup\": \"\\\\\"" +
-        "\n    }," +
-        "\n    {" +
-        "\n      \"key\": \"-\"," +
-        "\n      \"popup\": \"|\"" +
-        "\n    }," +
-        "\n    \"HOME\"," +
-        "\n    \"UP\"," +
-        "\n    \"END\"," +
-        "\n    \"PGUP\"" +
-        "\n  ]," +
-        "\n  [" +
-        "\n    \"TAB\"," +
-        "\n    \"CTRL\"," +
-        "\n    \"ALT\"," +
-        "\n    \"LEFT\"," +
-        "\n    \"DOWN\"," +
-        "\n    \"RIGHT\"," +
-        "\n    \"PGDN\"" +
-        "\n  ]" +
-        "\n]")
 
 @Composable
 fun TerminalExtraKeys() {

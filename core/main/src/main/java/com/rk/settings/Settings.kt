@@ -9,17 +9,10 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import com.rk.commands.ToolbarConfiguration
 import com.rk.feature.FeatureRegistry
-import com.rk.utils.SortMode
-import com.rk.utils.DEFAULT_EXCLUDED_FILES_DRAWER
-import com.rk.utils.DEFAULT_EXCLUDED_FILES_SEARCH
-import com.rk.utils.DEFAULT_EXTRA_KEYS_COMMANDS
-import com.rk.utils.DEFAULT_EXTRA_KEYS_SYMBOLS
 import com.rk.theme.blueberry
 import com.rk.utils.application
-import com.rk.utils.hasHardwareKeyboard
 import com.xyzterm.BuildConfig
 import java.lang.ref.WeakReference
-import java.nio.charset.Charset
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -28,46 +21,13 @@ import kotlin.reflect.jvm.isAccessible
 
 // NOTE: USE snake_case FOR KEYS!
 object Settings {
-    var detect_bin_files by CachedPreference("detect_bin_files", true)
-    var oom_prediction by CachedPreference("disable_oom_prediction", false)
-
-    var read_only_default by CachedPreference("read_only_default", false)
     var shown_disclaimer by CachedPreference("shown_disclaimer", false)
-    var warn_extensions by CachedPreference("warn_extensions", true)
     var amoled by CachedPreference("amoled", false)
     var monet by CachedPreference("monet", false)
-    var pin_line_number by CachedPreference("pin_line_number", false)
-    var word_wrap_text by CachedPreference("word_wrap_text", true)
-    var word_wrap by CachedPreference("word_wrap", false)
-    var restore_sessions by CachedPreference("restore_sessions", true)
-    var cursor_animation by CachedPreference("cursor_animation", true)
-    var show_extra_keys by
-        CachedPreference(
-            "show_extra_keys",
-            hasHardwareKeyboard(application!!).not(),
-        )
-    var keep_drawer_locked by CachedPreference("drawer_lock", false)
-    var show_line_numbers by CachedPreference("show_line_number", true)
-    var render_whitespace by CachedPreference("render_whitespace", false)
-    var sticky_scroll by CachedPreference("sticky_scroll", true)
-    var quick_deletion by CachedPreference("fast_delete", true)
-    var auto_save by CachedPreference("auto_save", false)
-    var show_suggestions by CachedPreference("show_suggestions", false)
     var check_for_update by CachedPreference("check_update", false)
-    var is_editor_font_asset by CachedPreference("is_font_asset", false)
     var is_app_font_asset by CachedPreference("is_app_font_asset", false)
     var is_terminal_font_asset by CachedPreference("is_terminal_font_asset", false)
-    var smooth_tabs by CachedPreference("smooth_tab", false)
-    var actual_tabs by CachedPreference("actual_tab", false)
-    var hide_soft_keyboard_if_hardware by CachedPreference("always_show_soft_keyboard", true)
     var ignore_storage_permission by CachedPreference("ignore_storage_permission", false)
-    var github by CachedPreference("github", true)
-    var has_shown_private_data_dir_warning by
-        CachedPreference(
-            "has_shown_private_data_dir_warning",
-            false,
-        )
-    var has_shown_terminal_dir_warning by CachedPreference("has_shown_terminal_dir_warning", false)
     private var _anr_watchdog by CachedPreference("anr", BuildConfig.DEBUG)
     var anr_watchdog: Boolean
         get() = FeatureRegistry.isEnabled("debug_mode") && _anr_watchdog
@@ -94,8 +54,6 @@ object Settings {
     var auto_backup by CachedPreference("auto_backup", false)
     var donated by CachedPreference("donated", false)
     var sandbox by CachedPreference("sandbox", true)
-    var terminal_virus_notice by CachedPreference("terminal_virus_notice", false)
-    var textmate_suggestions by CachedPreference("textmate_suggestions", true)
     var seccomp_mode by CachedPreference("seccomp_mode", "unspecified")
     private var _desktop_mode by CachedPreference("desktop_mode", false)
     var desktop_mode: Boolean
@@ -110,31 +68,8 @@ object Settings {
         set(value) {
             _theme_flipper = value
         }
-    var format_on_save by CachedPreference("format_on_save", false)
-    var show_hidden_files_drawer by CachedPreference("show_hidden_files_drawer", true)
-    var compact_folders_drawer by CachedPreference("compact_folders_drawer", true)
-    var show_hidden_files_search by CachedPreference("show_hidden_files_search", false)
-    var show_tab_icons by CachedPreference("show_tab_icons", true)
-    var split_extra_keys by CachedPreference("split_extra_keys", false)
-    var extra_keys_bg by CachedPreference("extra_keys_bg", false)
-    var auto_open_new_files by CachedPreference("auto_open_new_files", true)
-    var complete_on_enter by CachedPreference("complete_on_enter", true)
-    var http_server_port by CachedPreference("http_server_port", 8357)
-    var launch_in_browser by CachedPreference("launch_in_browser", false)
-    var inject_eruda by CachedPreference("inject_eruda", true)
-    var auto_close_tags by CachedPreference("auto_close_tags", true)
-    var bullet_continuation by CachedPreference("bullet_continuation", true)
-    var insert_final_newline by CachedPreference("insert_final_newline", true)
-    var trim_trailing_whitespace by CachedPreference("trim_trailing_whitespace", true)
-    var enable_editorconfig by CachedPreference("enable_editorconfig", true)
-    var git_colorize_names by CachedPreference("git_colorize_names", true)
-    var git_submodules by CachedPreference("git_submodules", true)
-    var git_recursive_submodules by CachedPreference("git_recursive_submodules", true)
-    var always_index_projects by CachedPreference("always_index_projects", false)
     var fullscreen by CachedPreference("fullscreen", false)
     var smart_toolbar by CachedPreference("smart_toolbar", false)
-    var show_minimap by CachedPreference("show_minimap", false)
-    var auto_closing_bracket by CachedPreference("auto_closing_bracket", true)
     var confirm_exit by CachedPreference("confirm_exit", true)
     var terminal_keep_screen_on by CachedPreference("terminal_keep_screen_on", true)
     var terminal_show_extra_keys by CachedPreference("terminal_show_extra_keys", true)
@@ -149,8 +84,6 @@ object Settings {
         }
 
     // Int settings
-    var tab_size by CachedPreference("tab_size", 4)
-    var editor_text_size by CachedPreference("text_size", 14)
     var theme_mode by
         CachedPreference(
             "default_night_mode",
@@ -158,51 +91,20 @@ object Settings {
         )
     var terminal_font_size by CachedPreference("terminal_font_size", 13)
     var terminal_scrollback_buffer by CachedPreference("terminal_scrollback_buffer", 5000)
-    var auto_save_delay by CachedPreference("auto_save_delay", 400L)
-
-    var user_declined_value by CachedPreference("user_declined_value", false)
-    var user_said_maybe_later by CachedPreference("user_said_maybe_later", false)
-    var user_has_supported by CachedPreference("user_has_supported", false)
-    var donation_ask_count by CachedPreference("donation_ask_count", 0)
-    var saves by CachedPreference("saves", 0)
-    var runs by CachedPreference("runs", 0)
-    var last_donation_dialog_timestamp by CachedPreference("last_donation_dialog_timestamp", 0L)
-    var sort_mode by CachedPreference("sort_mode", SortMode.SORT_BY_NAME.ordinal)
 
     // String settings
-    var font_gson by CachedPreference("selected_font", "")
     var theme by CachedPreference("theme", blueberry.id)
     var icon_pack: String by CachedPreference("icon_pack", "")
-    var editor_font_path by CachedPreference("selected_font_path", "")
     var app_font_path by CachedPreference("app_font_path", "")
     var terminal_font_path by CachedPreference("terminal_font_path", "")
     var terminal_cursor_style by CachedPreference("terminal_cursor_style", "block")
     var terminal_extra_keys by CachedPreference("terminal_extra_keys", DEFAULT_TERMINAL_EXTRA_KEYS)
-    var encoding: String by CachedPreference("encoding", Charset.defaultCharset().name())
-    var line_ending by CachedPreference("line_ending", "lf")
     var current_lang: String by
         CachedPreference("current_lang", application!!.resources.configuration.locales[0].language)
-    var extra_keys_symbols by CachedPreference("extra_keys_symbols", DEFAULT_EXTRA_KEYS_SYMBOLS)
-    var extra_keys_commands by CachedPreference("extra_keys_commands", DEFAULT_EXTRA_KEYS_COMMANDS)
-    var git_username by CachedPreference("git_username", "")
-    var git_password by CachedPreference("git_password", "")
-    var git_name by CachedPreference("git_name", "")
-    var git_email by CachedPreference("git_email", "")
-    var excluded_files_search by
-        CachedPreference("excluded_files_search", DEFAULT_EXCLUDED_FILES_SEARCH.joinToString("\n"))
-    var excluded_files_drawer by
-        CachedPreference("excluded_files_drawer", DEFAULT_EXCLUDED_FILES_DRAWER.joinToString("\n"))
-    var file_mask by CachedPreference("file_mask", "")
-    var formatters by CachedPreference("formatters", "")
 
     // Long settings
-    var last_update_check_timestamp by CachedPreference("last_update", 0L)
     var last_version_code by CachedPreference("last_version_code", -1L)
 
-    // Float settings
-    var line_spacing by CachedPreference("line_spacing", 1f)
-
-    var last_used_command by CachedPreference("last_used_command", "")
     var action_items by
         CachedPreference(
             "action_items",
@@ -499,5 +401,5 @@ open class CachedPreference<T>(val key: String, val defaultValue: T) : ReadWrite
     }
 }
 
-private const val DEFAULT_TERMINAL_EXTRA_KEYS =
+const val DEFAULT_TERMINAL_EXTRA_KEYS =
     "[\n  [\n    \"ESC\",\n    {\n      \"key\": \"/\",\n      \"popup\": \"\\\\\"\n    },\n    {\n      \"key\": \"-\",\n      \"popup\": \"|\"\n    },\n    \"HOME\",\n    \"UP\",\n    \"END\",\n    \"PGUP\"\n  ],\n  [\n    \"TAB\",\n    \"CTRL\",\n    \"ALT\",\n    \"LEFT\",\n    \"DOWN\",\n    \"RIGHT\",\n    \"PGDN\"\n  ]\n]"

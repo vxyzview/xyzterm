@@ -5,8 +5,6 @@ sealed class SettingsRoutes(val route: String) {
 
     data object AppSettings : SettingsRoutes("app_settings")
 
-    data object EditorSettings : SettingsRoutes("editor_settings")
-
     data object Keybindings : SettingsRoutes("keybindings")
 
     data object TerminalSettings : SettingsRoutes("terminal_settings")
@@ -21,21 +19,7 @@ sealed class SettingsRoutes(val route: String) {
 
     data object About : SettingsRoutes("about")
 
-    data object EditorFontScreen : SettingsRoutes("editor_font_screen")
-
-    data object AppFontScreen : SettingsRoutes("app_font_screen")
-
     data object TerminalFontScreen : SettingsRoutes("terminal_font_screen")
-
-    data object DefaultEncoding : SettingsRoutes("default_encoding")
-
-    data object DefaultLineEnding : SettingsRoutes("default_line_ending")
-
-    data object ToolbarActions : SettingsRoutes("toolbar_actions")
-
-    data object ExtraKeys : SettingsRoutes("extra_keys")
-
-    data object ExcludeFiles : SettingsRoutes("exclude_files")
 
     data object DeveloperOptions : SettingsRoutes("developer_options")
 
@@ -44,8 +28,6 @@ sealed class SettingsRoutes(val route: String) {
     data object Support : SettingsRoutes("support")
 
     data object LanguageScreen : SettingsRoutes("language")
-
-    data object HtmlRunner : SettingsRoutes("html_preview")
 
     data object Themes : SettingsRoutes("theme")
 }

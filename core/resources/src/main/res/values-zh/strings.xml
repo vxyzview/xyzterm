@@ -610,6 +610,8 @@
     <string name="manifest_missing_fields">文件 manifest.json 缺少或包含无效属性：\n%s\n\n请检查该文件并重试。</string>
     <string name="manage_app_font">管理应用字体</string>
     <string name="manage_terminal_font">管理终端字体</string>
+    <string name="manage_terminal_font_desc">选择、导入或重置终端字体</string>
+    <string name="snippet_empty">暂无代码片段。添加一个后，点按即可插入到终端。</string>
     <string name="terminal_font_warning">位于 \'etc/font.ttf\' 的终端字体文件会覆盖下面设置的自定义字体。请删除终端沙盒中的字体文件以应用自定义字体。</string>
     <string name="ext_not_found">未找到扩展</string>
     <string name="ext_not_found_desc">此页面不可用。这可能是因为本地扩展已被卸载，或者商店扩展已被其所有者从注册表中移除。</string>

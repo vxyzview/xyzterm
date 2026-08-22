@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.rk.resources.strings
 import com.rk.settings.Settings
-import com.rk.settings.terminal.DEFAULT_TERMINAL_EXTRA_KEYS
+import com.rk.settings.DEFAULT_TERMINAL_EXTRA_KEYS
 import com.rk.terminal.virtualkeys.VirtualKeysConstants
 import com.rk.terminal.virtualkeys.VirtualKeysInfo
 import com.rk.terminal.virtualkeys.VirtualKeysListener

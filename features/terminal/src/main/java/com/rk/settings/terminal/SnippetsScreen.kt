@@ -91,7 +91,7 @@ fun SnippetsScreen() {
         if (snippets.isEmpty()) {
             item {
                 Text(
-                    text = stringResource(strings.snippet_add),
+                    text = stringResource(strings.snippet_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),

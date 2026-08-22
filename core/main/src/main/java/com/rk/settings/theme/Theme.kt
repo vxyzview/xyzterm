@@ -42,14 +42,10 @@ import com.rk.components.compose.preferences.base.PreferenceLayout
 import com.rk.components.compose.preferences.base.PreferenceTemplate
 import com.rk.events.AppEvent
 import com.rk.events.Events
-import com.rk.file.child
-import com.rk.file.themeDir
 import com.rk.icons.pack.currentIconPack
 import com.rk.resources.drawables
 import com.rk.resources.strings
 import com.rk.settings.Settings
-import com.rk.theme.blueberry
-import com.rk.theme.builtInThemes
 import com.rk.theme.currentTheme
 import kotlinx.coroutines.launch
 
@@ -111,29 +107,6 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                         val oldTheme = currentTheme.value
                         Settings.theme = theme.id
                         DefaultScope.launch { Events.publish(AppEvent.ThemeChanged(theme, oldTheme)) }
-                    },
-                    endWidget = {
-                        if (!builtInThemes.contains(theme)) {
-                            IconButton(
-                                onClick = {
-                                    if (currentTheme.value.id == theme.id) {
-                                        val oldTheme = currentTheme.value
-                                        Settings.theme = blueberry.id
-                                        DefaultScope.launch {
-                                            Events.publish(AppEvent.ThemeChanged(blueberry, oldTheme))
-                                        }
-                                    }
-
-                                    themeDir().child(theme.id).deleteRecursively()
-                                    themeManager.uninstallTheme(theme)
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Delete,
-                                    contentDescription = stringResource(strings.delete),
-                                )
-                            }
-                        }
                     },
                 )
             }

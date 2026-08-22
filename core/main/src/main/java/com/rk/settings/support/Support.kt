@@ -1,6 +1,5 @@
 package com.rk.settings.support
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -15,18 +14,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.rk.activities.settings.SettingsActivity
-import com.rk.activities.settings.SettingsRoutes
 import com.rk.components.SettingsItem
 import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.components.compose.preferences.base.PreferenceLayout
 import com.rk.resources.drawables
-import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
-import com.rk.utils.dialogRes
-import com.rk.utils.isDialogShowing
 import com.rk.utils.toast
 
 fun isUPISupported(context: Context): Boolean {
@@ -164,65 +158,3 @@ fun Support(modifier: Modifier = Modifier) {
     }
 }
 
-fun Activity.handleSupport() {
-    if (isDialogShowing) return
-
-    val currentTime = System.currentTimeMillis()
-
-    // Don't ask users who explicitly said they don't find value
-    if (Settings.user_declined_value) return
-
-    // Don't ask if they already supported
-    if (Settings.user_has_supported) return
-
-    // Calculate cooldown based on last response
-    val cooldownPeriod =
-        when {
-            Settings.user_said_maybe_later -> 7L * 24 * 60 * 60 * 1000 // 1 week
-            else -> 14L * 24 * 60 * 60 * 1000 // First time or other: 2 weeks
-        }
-
-    if (currentTime - Settings.last_donation_dialog_timestamp < cooldownPeriod) {
-        return
-    }
-
-    // Wait for meaningful engagement
-    val totalEngagement = Settings.saves + Settings.runs
-    val threshold =
-        when (Settings.donation_ask_count) {
-            0 -> 80 // First ask: wait for real usage
-            1 -> 200 // Second ask: they're a regular user
-            else -> 500 // Third+ ask: power user
-        }
-
-    if (totalEngagement < threshold) return
-
-    Settings.last_donation_dialog_timestamp = currentTime
-    Settings.donation_ask_count++
-
-    showCombinedDonationDialog()
-}
-
-private fun Activity.showCombinedDonationDialog() {
-    dialogRes(
-        activity = this,
-        title = strings.enjoying_xed.getString(),
-        msg = strings.support_message.getFilledString(Settings.saves.toString(), Settings.runs.toString()),
-        okRes = strings.yes_support,
-        cancelRes = strings.not_for_me,
-        cancelable = false,
-        onCancel = {
-            // User doesn't find value - stop asking
-            Settings.user_declined_value = true
-            Settings.user_said_maybe_later = false
-        },
-        onOk = {
-            // User clicked support
-            Settings.user_has_supported = true
-            Settings.user_said_maybe_later = false
-            val intent =
-                Intent(this, SettingsActivity::class.java).apply { putExtra("route", SettingsRoutes.Support.route) }
-            startActivity(intent)
-        },
-    )
-}

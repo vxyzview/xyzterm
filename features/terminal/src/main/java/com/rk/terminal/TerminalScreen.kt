@@ -72,14 +72,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.rk.activities.settings.SettingsActivity
-import com.rk.activities.settings.SettingsRoutes
 import com.rk.activities.terminal.Terminal
-import com.rk.animations.NavigationAnimationTransitions
 import com.rk.components.compose.preferences.base.ProvideIsExpandedScreen
 import com.rk.components.ResponsiveDrawer
 import com.rk.components.SingleInputDialog
@@ -94,12 +88,6 @@ import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.settings.Preference
 import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
-import com.rk.settings.editor.TerminalFontScreen
-import com.rk.settings.terminal.SettingsTerminalScreen
-import com.rk.settings.terminal.SnippetsScreen
-import com.rk.settings.terminal.TerminalBackupsScreen
-import com.rk.settings.terminal.TerminalCheckScreen
-import com.rk.settings.terminal.TerminalExtraKeys
 import com.rk.terminal.virtualkeys.VirtualKeysConstants
 import com.rk.terminal.virtualkeys.VirtualKeysInfo
 import com.rk.terminal.virtualkeys.VirtualKeysListener
@@ -124,32 +112,14 @@ var bellPulse by mutableStateOf(false)
 
 @Composable
 fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
-    val navController = rememberNavController()
     ProvideIsExpandedScreen {
-    NavHost(
-        navController = navController,
-        startDestination = "terminal",
-        enterTransition = { NavigationAnimationTransitions.enterTransition() },
-        exitTransition = { NavigationAnimationTransitions.exitTransition() },
-        popEnterTransition = { NavigationAnimationTransitions.popEnterTransition() },
-        popExitTransition = { NavigationAnimationTransitions.popExitTransition() },
-    ) {
-        composable("terminal") {
-            TerminalScreenInternal(terminalActivity = terminalActivity, navController = navController)
-        }
-        composable(SettingsRoutes.TerminalSettings.route) { SettingsTerminalScreen(navController) }
-        composable(SettingsRoutes.TerminalFontScreen.route) { TerminalFontScreen() }
-        composable(SettingsRoutes.TerminalExtraKeys.route) { TerminalExtraKeys() }
-        composable(SettingsRoutes.TerminalSnippets.route) { SnippetsScreen() }
-        composable(SettingsRoutes.TerminalCheck.route) { TerminalCheckScreen() }
-        composable(SettingsRoutes.TerminalBackups.route) { TerminalBackupsScreen() }
-    }
+        TerminalScreenInternal(terminalActivity = terminalActivity)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Terminal, navController: NavController) {
+fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Terminal) {
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val surfaceColor = MaterialTheme.colorScheme.surface.toArgb()
     // Use the app's theme-mode resolution (honors Settings.theme_mode), not the raw
@@ -237,7 +207,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                 }
             },
         ) {
-            TerminalDrawer(terminalActivity, navController)
+            TerminalDrawer(terminalActivity)
         }
     }
 }
@@ -394,7 +364,7 @@ private fun ColumnScope.TerminalView(
 }
 
 @Composable
-private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, navController: NavController) {
+private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
     var showRenameDialog by remember { mutableStateOf(false) }
     var showExitConfirm by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
