@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -214,7 +215,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                             },
                             actions = {
                                 IconButton(onClick = { showSearch = !showSearch }) {
-                                    Icon(Icons.Default.Search, stringResource(strings.search))
+                                    Icon(Icons.Rounded.Search, stringResource(strings.search))
                                 }
                             },
                         )

@@ -35,7 +35,7 @@ fun SnippetsRow() {
             SuggestionChip(
                 onClick = {
                     val session = terminalView.get()?.mTermSession ?: return@SuggestionChip
-                    session.write((snippet.command + "\n").toByteArray())
+                    session.write(snippet.command + "\n")
                     // Jump back to the live line so the effect is visible.
                     terminalView.get()?.setTopRow(0)
                 },

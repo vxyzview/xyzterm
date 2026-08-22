@@ -37,8 +37,6 @@ import com.rk.terminal.SnippetStore
 
 @Composable
 fun SnippetsScreen() {
-    val activity = LocalActivity.current as? AppCompatActivity
-
     var refreshTrigger by remember { mutableIntStateOf(0) }
     val snippets = remember(refreshTrigger) { SnippetStore.decode(Settings.terminal_snippets) }
 
