@@ -58,6 +58,7 @@
             android:exported="false" />
         <activity
             android:name="com.rk.activities.settings.SettingsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 </manifest>

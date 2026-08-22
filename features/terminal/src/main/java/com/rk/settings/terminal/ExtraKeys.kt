@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -114,8 +113,7 @@ fun TerminalExtraKeys() {
                     ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .imePadding(),
+                    .weight(1f),
                 textStyle =
                     TextStyle(
                         fontFamily = FontFamily.Monospace,
