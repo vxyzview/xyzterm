@@ -1,33 +1,34 @@
 Categories:
   - System
 License: GPL-3.0-or-later
+AuthorName: vxyzview
 SourceCode: https://github.com/vxyzview/xyzterm
 IssueTracker: https://github.com/vxyzview/xyzterm/issues
 Changelog: https://github.com/vxyzview/xyzterm/releases
 
 AutoName: xyzterm
-Summary: Terminal-only proot Ubuntu environment
-Description: |
-  Minimal terminal app providing a proot-based Ubuntu environment with a full
-  terminal emulator. Stripped-down fork of Xed-Editor keeping only the terminal
-  feature and shared infrastructure (settings, theming, crash handling).
 
 RepoType: git
 Repo: https://github.com/vxyzview/xyzterm
+
+AllowedAPKSigningKeys: f665fa36963b20cec9954399d2213331be522aca035ebf56cfa5a6abdf3e3de2
 
 Builds:
   - versionName: 1.0.0
     versionCode: 1
     # Release commit tagged v1.0.0 by CI.
     commit: 7392c97ffeeb14cee3d9beb6fd0149b82c0b85a3
+    subdir: app
     gradle:
-      - ':app:assembleRelease'
+      - yes
     prebuild:
-      - sed -r '/(foojay|toolchainVendor)/d' -i gradle/gradle-daemon-jvm.properties || true
-      - sed -ri '/foojay-resolver-convention/d' settings.gradle.kts || true
-      - sed -r '/signingConfigs.getByName/d' -i app/build.gradle.kts || true
+      - sed -r '/(foojay|toolchainVendor)/d' -i ../gradle/gradle-daemon-jvm.properties || true
+      - sed -ri '/foojay-resolver-convention/d' -i ../settings.gradle.kts || true
+      - sed -r '/signingConfigs.getByName/d' -i build.gradle.kts || true
 
 # CI tags every main-branch release as vX.Y.Z automatically, so upstream
 # metadata can rely on tags from here on.
 AutoUpdateMode: Version v%v
-UpdateCheckMode: Tags
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
