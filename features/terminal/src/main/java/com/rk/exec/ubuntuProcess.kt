@@ -75,6 +75,16 @@ fun getDefaultBindings(): List<Binding> {
         bind("${getTempDir().absolutePath}", "/dev/shm")
     }
 
+    // User-defined binds come last: built-in mounts keep priority, and any
+    // entry shadowing an existing outside path (or duplicating another user
+    // entry) is skipped rather than stacked.
+    val bound = list.map { it.outside }.toMutableSet()
+    UserBindings.decode(Settings.custom_bindings).forEach { binding ->
+        if (bound.add(binding.outside)) {
+            list.add(binding)
+        }
+    }
+
     return list
 }
 

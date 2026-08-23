@@ -55,6 +55,7 @@ object Settings {
     var donated by CachedPreference("donated", false)
     var sandbox by CachedPreference("sandbox", true)
     var seccomp_mode by CachedPreference("seccomp_mode", "unspecified")
+    var custom_bindings by CachedPreference("custom_bindings", "[]")
     private var _desktop_mode by CachedPreference("desktop_mode", false)
     var desktop_mode: Boolean
         get() = FeatureRegistry.isEnabled("debug_mode") && _desktop_mode

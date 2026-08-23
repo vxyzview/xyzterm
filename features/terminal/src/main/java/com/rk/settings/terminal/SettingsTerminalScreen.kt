@@ -281,6 +281,13 @@ fun SettingsTerminalScreen() {
                 route = SettingsRoutes.TerminalBackups,
             )
 
+            NextScreenCard(
+                label = stringResource(strings.custom_binds),
+                description = stringResource(strings.custom_binds_desc),
+                navController = settingsNavController.get(),
+                route = SettingsRoutes.TerminalBinds,
+            )
+
             SettingsItem(
                 label = stringResource(strings.uninstall),
                 default = false,

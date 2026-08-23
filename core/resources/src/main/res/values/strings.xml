@@ -43,6 +43,16 @@
     <string name="snippet_add">Add snippet</string>
     <string name="snippet_label">Label</string>
     <string name="snippet_command">Command</string>
+    <string name="custom_binds">Custom binds</string>
+    <string name="custom_binds_desc">Expose extra host folders inside the Ubuntu environment</string>
+    <string name="bind_add">Add bind</string>
+    <string name="custom_binds_empty">No custom binds. Added folders appear inside the Ubuntu filesystem.</string>
+    <string name="bind_host_path">Host path (e.g. /storage/emulated/0/Download)</string>
+    <string name="bind_guest_path">Guest path — optional, defaults to the host path</string>
+    <string name="bind_invalid_host">Host path must be absolute and must exist on the device</string>
+    <string name="bind_invalid_guest">Guest path must be absolute and must not be /</string>
+    <string name="bind_duplicate">This folder is already bound</string>
+    <string name="bind_warning">Binds are writable. Guest processes run as fake root and can modify these files.</string>
     <string name="previous">Previous</string>
     <string name="next">Next</string>
 <string name="terminal_output">Terminal output</string>
