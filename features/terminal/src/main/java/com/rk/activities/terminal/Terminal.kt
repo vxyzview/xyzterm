@@ -69,6 +69,9 @@ import com.rk.terminal.NEXT_STAGE
 import com.rk.terminal.ROOTFS_ARM
 import com.rk.terminal.ROOTFS_ARM64
 import com.rk.terminal.ROOTFS_X64
+import com.rk.terminal.ROOTFS_ARM_SHA256
+import com.rk.terminal.ROOTFS_ARM64_SHA256
+import com.rk.terminal.ROOTFS_X64_SHA256
 import com.rk.terminal.SessionService
 import com.rk.terminal.TerminalBackEnd
 import com.rk.terminal.TerminalScreen
@@ -89,6 +92,7 @@ import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
+import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -319,21 +323,23 @@ class Terminal : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.Main) {
                 val abi = Build.SUPPORTED_ABIS
 
+                val rootfs =
+                    when {
+                        abi.contains("x86_64") -> ROOTFS_X64 to ROOTFS_X64_SHA256
+                        abi.contains("arm64-v8a") -> ROOTFS_ARM64 to ROOTFS_ARM64_SHA256
+                        abi.contains("armeabi-v7a") -> ROOTFS_ARM to ROOTFS_ARM_SHA256
+                        else -> {
+                            unsupportedCpu = true
+                            return@launch
+                        }
+                    }
+
                 val filesToDownload =
                     mutableListOf(
                         DownloadFile(
-                            url =
-                                if (abi.contains("x86_64")) {
-                                    ROOTFS_X64
-                                } else if (abi.contains("arm64-v8a")) {
-                                    ROOTFS_ARM64
-                                } else if (abi.contains("armeabi-v7a")) {
-                                    ROOTFS_ARM
-                                } else {
-                                    unsupportedCpu = true
-                                    return@launch
-                                },
+                            url = rootfs.first,
                             outputFile = getTempDir().child("sandbox.tar.gz"),
+                            sha256 = rootfs.second,
                         ),
                     )
 
@@ -540,7 +546,7 @@ class Terminal : AppCompatActivity() {
         }
     }
 
-    data class DownloadFile(val url: String, val outputFile: File)
+    data class DownloadFile(val url: String, val outputFile: File, val sha256: String? = null)
 
     @OptIn(DelicateCoroutinesApi::class)
     private suspend fun setupEnvironment(
@@ -562,10 +568,15 @@ class Terminal : AppCompatActivity() {
 
                     outputFile.parentFile?.mkdirs()
 
-                    if (!outputFile.exists() || !isValidGzip(outputFile)) {
-                        // Existing file is a leftover from a killed download or a
-                        // pre-resume version: discard it, the download writes a
-                        // .part sibling and only renames it once verified.
+                    if (
+                        !outputFile.exists() ||
+                        !isValidGzip(outputFile) ||
+                        !sha256Matches(outputFile, file.sha256)
+                    ) {
+                        // Existing file is a leftover from a killed download, a
+                        // pre-resume version, or a stale rootfs from an older app
+                        // release (hash mismatch): discard it, the download writes
+                        // a .part sibling and only renames it once verified.
                         outputFile.delete()
                         downloadFile(
                             url = file.url,
@@ -577,6 +588,11 @@ class Terminal : AppCompatActivity() {
                         onProgress(file.outputFile.name, outputFile.length(), outputFile.length())
                     }
                     completedFiles++
+
+                    if (file.sha256 != null && !sha256Matches(outputFile, file.sha256)) {
+                        outputFile.delete()
+                        throw Exception("Rootfs checksum mismatch: ${outputFile.name}")
+                    }
 
                     runCatching { outputFile.setExecutable(true) }.onFailure { it.printStackTrace() }
                 }
@@ -693,4 +709,26 @@ class Terminal : AppCompatActivity() {
                 }
             }
         }.isSuccess
+
+    private fun sha256Matches(file: File, expectedSha256: String?): Boolean {
+        if (expectedSha256.isNullOrEmpty()) return true
+        return runCatching {
+            val digest = MessageDigest.getInstance("SHA-256")
+            file.inputStream().use { input ->
+                val buffer = ByteArray(8 * 1024)
+                var bytesRead: Int
+                while (input.read(buffer).also { bytesRead = it } != -1) {
+                    digest.update(buffer, 0, bytesRead)
+                }
+            }
+            digest
+                .digest()
+                .joinToString("") { "%02x".format(it) }
+                .equals(expectedSha256, ignoreCase = true)
+        }
+            .getOrElse {
+                it.printStackTrace()
+                false
+            }
+    }
 }
