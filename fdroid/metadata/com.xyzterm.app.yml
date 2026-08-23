@@ -18,8 +18,8 @@ Repo: https://github.com/vxyzview/xyzterm
 Builds:
   - versionName: 1.0.0
     versionCode: 1
-    # Filled in after CI publishes the v1.0.0 release for this commit.
-    commit: PENDING
+    # Release commit tagged v1.0.0 by CI.
+    commit: 7392c97ffeeb14cee3d9beb6fd0149b82c0b85a3
     gradle:
       - ':app:assembleRelease'
     prebuild:
