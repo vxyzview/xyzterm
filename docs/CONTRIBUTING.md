@@ -1,5 +1,11 @@
 # Contributing
 
+## Scope
+
+xyzterm is deliberately minimal: a terminal running a proot Ubuntu environment, and nothing else.
+Features that add editors, file managers, or extension marketplaces are out of scope — see the
+[README](/README.md) for the project's design goals.
+
 ## Build the project
 
 Please build the project and test your changes before contributing. You can find further information

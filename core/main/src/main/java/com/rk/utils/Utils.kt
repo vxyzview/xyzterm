@@ -135,10 +135,6 @@ fun <K> x(m: MutableCollection<K>, c: Int) {
     }
 }
 
-fun Context.openDocs(page: String) {
-    openUrl("https://xed-editor.github.io/Xed-Docs/docs/$page")
-}
-
 fun Context.openUrl(url: String) {
     val intent = Intent(Intent.ACTION_VIEW, url.toUri())
     startActivity(intent)
