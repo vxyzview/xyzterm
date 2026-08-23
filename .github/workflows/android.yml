@@ -59,12 +59,7 @@ jobs:
             # so updates install over each other and Play Protect reputation
             # accumulates on one certificate.
             echo "$KEYSTORE_BASE64" | base64 -d > /tmp/xyzterm.keystore
-            cat > /tmp/signing.properties <<EOF
-            storePassword=$KEYSTORE_PASSWORD
-            keyPassword=$KEYSTORE_PASSWORD
-            keyAlias=xyzterm
-            storeFile=/tmp/xyzterm.keystore
-            EOF
+            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$KEYSTORE_PASSWORD" > /tmp/signing.properties
             echo "Using persistent release signing key from repo secrets"
           else
             echo "::warning::KEYSTORE_BASE64 secret missing - generating an EPHEMERAL key; this build cannot update over any other build!"
@@ -75,12 +70,7 @@ jobs:
               -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass "$PASS" -keypass "$PASS" \
               -dname "CN=xyzterm, OU=xyzterm, O=xyzterm, L=, ST=, C=US"
-            cat > /tmp/signing.properties <<EOF
-            storePassword=$PASS
-            keyPassword=$PASS
-            keyAlias=xyzterm
-            storeFile=/tmp/xyzterm.keystore
-            EOF
+            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$PASS" > /tmp/signing.properties
           fi
 
       - name: Grant execute permission for gradlew
