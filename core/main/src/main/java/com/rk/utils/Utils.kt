@@ -124,17 +124,6 @@ fun isMainThread(): Boolean {
     return Looper.myLooper() == Looper.getMainLooper()
 }
 
-@OptIn(DelicateCoroutinesApi::class)
-fun <K> x(m: MutableCollection<K>, c: Int) {
-    GlobalScope.launch(Dispatchers.IO) {
-        runCatching {
-            for (y in m.shuffled().take(c)) {
-                m.remove(y)
-            }
-        }
-    }
-}
-
 fun Context.openUrl(url: String) {
     val intent = Intent(Intent.ACTION_VIEW, url.toUri())
     startActivity(intent)

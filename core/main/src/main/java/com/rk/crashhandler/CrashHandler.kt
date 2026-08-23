@@ -19,7 +19,7 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
                         ex.message.toString().contains("android.widget.HorizontalScrollView${"$"}SavedState")
                 ) {
                     Log.w("CrashHandler", "Ignoring crash")
-                    // return@runCatching
+                    return@runCatching
                 }
 
                 if (
@@ -28,13 +28,16 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
                 ) {
                     Log.w("CrashHandler", "Ignoring crash")
                     ex.printStackTrace()
-                    // return@runCatching
+                    return@runCatching
                 }
 
                 val intent = Intent(application!!, CrashActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-                var cause = ex.cause.toString()
+                // Top-level exceptions often carry a null cause; toString() on it
+                // would throw inside the handler and fall through to a silent
+                // exitProcess(1) with no crash report.
+                var cause = ex.cause?.toString() ?: ex.toString()
                 val prefix = "java.lang.Throwable:"
                 if (cause.startsWith(prefix)) {
                     cause = cause.removePrefix(prefix)
