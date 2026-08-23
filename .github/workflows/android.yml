@@ -49,22 +49,39 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Generate signing key
+      - name: Restore signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
-          PASS=$(openssl rand -hex 16)
-          keytool -genkeypair -v \
-            -keystore /tmp/xyzterm.keystore \
-            -alias xyzterm \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass "$PASS" -keypass "$PASS" \
-            -dname "CN=xyzterm, OU=xyzterm, O=xyzterm, L=, ST=, C=US"
-          cat > /tmp/signing.properties <<EOF
-          storePassword=$PASS
-          keyPassword=$PASS
-          keyAlias=xyzterm
-          storeFile=/tmp/xyzterm.keystore
-          EOF
-          echo "Generated fresh signing key (alias=xyzterm, store=$PASS)"
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            # Persistent release identity: every build signs with the same key,
+            # so updates install over each other and Play Protect reputation
+            # accumulates on one certificate.
+            echo "$KEYSTORE_BASE64" | base64 -d > /tmp/xyzterm.keystore
+            cat > /tmp/signing.properties <<EOF
+            storePassword=$KEYSTORE_PASSWORD
+            keyPassword=$KEYSTORE_PASSWORD
+            keyAlias=xyzterm
+            storeFile=/tmp/xyzterm.keystore
+            EOF
+            echo "Using persistent release signing key from repo secrets"
+          else
+            echo "::warning::KEYSTORE_BASE64 secret missing - generating an EPHEMERAL key; this build cannot update over any other build!"
+            PASS=$(openssl rand -hex 16)
+            keytool -genkeypair -v \
+              -keystore /tmp/xyzterm.keystore \
+              -alias xyzterm \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$PASS" -keypass "$PASS" \
+              -dname "CN=xyzterm, OU=xyzterm, O=xyzterm, L=, ST=, C=US"
+            cat > /tmp/signing.properties <<EOF
+            storePassword=$PASS
+            keyPassword=$PASS
+            keyAlias=xyzterm
+            storeFile=/tmp/xyzterm.keystore
+            EOF
+          fi
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
