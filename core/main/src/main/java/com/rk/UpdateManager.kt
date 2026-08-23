@@ -3,6 +3,7 @@ package com.rk
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.content.FileProvider
 import androidx.core.content.pm.PackageInfoCompat
 import com.rk.commands.KeybindingsManager
@@ -49,6 +50,25 @@ object UpdateManager {
         runCatching { application!!.packageManager.getPackageInfo(application!!.packageName, 0).versionName }.getOrNull()
 
     /**
+     * True when a store client (F-Droid, Droid-ify, Play, ...) installed the
+     * app. Those clients deliver updates themselves; an in-app updater would
+     * violate F-Droid policy and bypass the client's signature pinning. Only
+     * sideloaded APKs (null installer) get the self-update prompt.
+     */
+    @Suppress("DEPRECATION")
+    private fun installedFromStore(): Boolean =
+        runCatching {
+            val pm = application!!.packageManager
+            val installer =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    pm.getInstallSourceInfo(application!!.packageName).initiatingPackageName
+                } else {
+                    pm.getInstallerPackageName(application!!.packageName)
+                }
+            installer != null
+        }.getOrDefault(false)
+
+    /**
      * Checks the GitHub latest release against the installed app. Throttled to
      * once per day; only runs when the "Check for updates" setting is on.
      * If the installed app was built locally (same version as the release),
@@ -59,6 +79,7 @@ object UpdateManager {
     @OptIn(DelicateCoroutinesApi::class)
     fun checkForUpdates(activity: Activity) {
         if (!Settings.check_for_update) return
+        if (installedFromStore()) return
         val now = System.currentTimeMillis()
         if (now - Preference.getLong(LAST_UPDATE_CHECK_KEY, 0L) < UPDATE_INTERVAL_MS) return
         Preference.setLong(LAST_UPDATE_CHECK_KEY, now)
