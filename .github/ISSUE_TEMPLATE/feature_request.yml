@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest an idea or improvement for xyzterm
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        xyzterm aims to stay minimal — a terminal, nothing else. Requests are weighed against that goal.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What are you trying to do, and what gets in your way?
+      placeholder: I'm always frustrated when […]
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What you want to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other apps, workarounds, or designs you've tried or considered.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context

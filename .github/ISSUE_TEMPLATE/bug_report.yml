@@ -1,0 +1,68 @@
+name: Bug report
+description: Report a crash or broken behavior in xyzterm
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more detail you give, the faster it gets fixed.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what went wrong.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Tap …
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Keep the "App Version :" line exactly as formatted below — an automation uses it to detect duplicate reports.
+      placeholder: |
+        - Device: [e.g. Pixel 7]
+        - Android version: [e.g. 15]
+        - App Version : [e.g. 1.0.0]
+        - Install source: F-Droid / GitHub APK
+        - Ubuntu rootfs installed: yes / no
+    validations:
+      required: true
+
+  - type: textarea
+    id: crash-log
+    attributes:
+      label: Crash log
+      description: |
+        If the app crashed, paste the full report from Settings → App logs.
+        Keep the `Error StackTrace :` marker and everything after it — duplicate detection depends on it.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
