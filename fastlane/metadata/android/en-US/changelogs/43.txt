@@ -1,3 +1,0 @@
-Xed-Editor v2.9.7 (43)
-
-- Killed bugs 🔪🐛

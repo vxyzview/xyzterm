@@ -1,0 +1,8 @@
+First stable release of xyzterm as a standalone app.
+
+- Real Ubuntu 24.04 via proot - no root required, per-ABI rootfs
+- Full terminal emulator with custom fonts, colors, and extra-keys row
+- Multiple named sessions, persisted across restarts
+- AMOLED black theme and Material You dynamic color
+- Backup and restore of the terminal environment
+- Rootfs downloads verified with SHA-256 integrity checks

@@ -1,6 +1,0 @@
-xyzterm v3.4.8
-
-- Ubuntu is now optional: no forced download on first launch. Open the terminal immediately, or install Ubuntu when you're ready from the first-run screen or Terminal settings.
-- Ubuntu shell setup is smoother: Node.js auto-installs once in the background (no blocking the first prompt), and failed setups log to /.cache/.nodejs.log.
-- Terminal startup is more reliable on devices without /sdcard or external storage: missing paths are no longer bound to the sandbox.
-- Accessibility improvements: the Ubuntu-not-installed screen is grouped for TalkBack with a heading, and download progress is announced.

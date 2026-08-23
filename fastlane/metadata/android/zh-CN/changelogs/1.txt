@@ -1,0 +1,8 @@
+xyzterm 独立应用的首个稳定版本。
+
+- 通过 proot 运行真实 Ubuntu 24.04——无需 root，按 ABI 分发 rootfs
+- 完整终端模拟器，支持自定义字体、配色与附加按键行
+- 多命名会话，重启后保留
+- AMOLED 纯黑主题与 Material You 动态取色
+- 终端环境备份与恢复
+- rootfs 下载经 SHA-256 完整性校验

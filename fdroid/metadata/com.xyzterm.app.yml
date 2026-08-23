@@ -16,9 +16,10 @@ RepoType: git
 Repo: https://github.com/vxyzview/xyzterm
 
 Builds:
-  - versionName: 3.4.4
-    versionCode: 103
-    commit: 3fcf5cfa6d6eefc53e22bca24f8fe704ad74a828
+  - versionName: 1.0.0
+    versionCode: 1
+    # Filled in after CI publishes the v1.0.0 release for this commit.
+    commit: PENDING
     gradle:
       - ':app:assembleRelease'
     prebuild:
@@ -26,7 +27,7 @@ Builds:
       - sed -ri '/foojay-resolver-convention/d' settings.gradle.kts || true
       - sed -r '/signingConfigs.getByName/d' -i app/build.gradle.kts || true
 
-# No release tags exist yet; builds are added manually per release until
-# version-tagged releases are published. Set AutoUpdateMode: Version + a
-# UpdateCheckMode: Tags regex once the repo starts tagging vX.Y.Z.
-AutoUpdateMode: None
+# CI tags every main-branch release as vX.Y.Z automatically, so upstream
+# metadata can rely on tags from here on.
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
