@@ -8,7 +8,6 @@ pluginManagement {
         maven("https://jitpack.io")
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
-        maven("https://repo.eclipse.org/content/groups/releases/")
     }
 }
 
@@ -20,7 +19,6 @@ dependencyResolutionManagement {
         maven("https://jitpack.io")
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
-        maven("https://repo.eclipse.org/content/groups/releases/")
     }
 }
 
