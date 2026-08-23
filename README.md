@@ -42,13 +42,13 @@ $ pfetch
 <div align="center">
 <table>
   <tr>
-    <td align="center"><img src="https://i.postimg.cc/gJMhfDgJ/Screenshot-20260822-035331568.jpg" width="200" alt="Terminal running pfetch with extra-keys row" /><br /><sub><b>Real Ubuntu shell</b> · extra-keys row</sub></td>
-    <td align="center"><img src="https://i.postimg.cc/hjCmHr2J/Screenshot-20260822-035342335.jpg" width="200" alt="Terminal with hardware-style soft keyboard open" /><br /><sub><b>Type anywhere</b> · works with any keyboard</sub></td>
-    <td align="center"><img src="https://i.postimg.cc/NMNXW4dr/Screenshot-20260822-035403758.jpg" width="200" alt="Session drawer showing multiple named sessions" /><br /><sub><b>Named sessions</b> · switch, rename, delete</sub></td>
+    <td align="center"><img src="https://i.postimg.cc/WNV7qYrM/Screenshot-20260822-035331568.jpg" width="200" alt="Terminal running pfetch with extra-keys row" /><br /><sub><b>Real Ubuntu shell</b> · extra-keys row</sub></td>
+    <td align="center"><img src="https://i.postimg.cc/mL4S1pMS/Screenshot-20260822-035342335.jpg" width="200" alt="Terminal with hardware-style soft keyboard open" /><br /><sub><b>Type anywhere</b> · works with any keyboard</sub></td>
+    <td align="center"><img src="https://i.postimg.cc/jxThn3Nv/Screenshot-20260822-035403758.jpg" width="200" alt="Session drawer showing multiple named sessions" /><br /><sub><b>Named sessions</b> · switch, rename, delete</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="https://i.postimg.cc/xCsmWR6N/Screenshot-20260822-035411658.jpg" width="200" alt="Settings home screen" /><br /><sub><b>Clean settings</b> · only what matters</sub></td>
-    <td align="center"><img src="https://i.postimg.cc/nzdm6k3j/Screenshot-20260822-035423663.jpg" width="200" alt="Themes screen with AMOLED black theme and dynamic colors" /><br /><sub><b>Themes</b> · AMOLED + Material You</sub></td>
+    <td align="center"><img src="https://i.postimg.cc/9m2BwgTb/Screenshot-20260822-035411658.jpg" width="200" alt="Settings home screen" /><br /><sub><b>Clean settings</b> · only what matters</sub></td>
+    <td align="center"><img src="https://i.postimg.cc/dsF9ZNdB/Screenshot-20260822-035423663.jpg" width="200" alt="Themes screen with AMOLED black theme and dynamic colors" /><br /><sub><b>Themes</b> · AMOLED + Material You</sub></td>
     <td align="center"><img src="https://i.postimg.cc/k4jSkcTS/Screenshot-20260822-035427059.jpg" width="200" alt="Keybindings screen with searchable command list" /><br /><sub><b>Keybindings</b> · searchable, remappable</sub></td>
   </tr>
 </table>
