@@ -105,8 +105,11 @@ open class App : Application() {
                 }
             }
 
-            // wait until UpdateManager is done, it should only take few milliseconds
-            UpdateManager.inspect()
+            // Version migrations do recursive deletes and file copies; keep
+            // them off the main thread. Nothing during startup reads their
+            // results synchronously (strict_mode/keybind migrations only
+            // matter after first frame, and keybinds reload inside inspect).
+            launch(Dispatchers.IO) { UpdateManager.inspect() }
 
             // debug options
             startThemeFlipperIfNotRunning()
