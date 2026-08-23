@@ -34,11 +34,15 @@ import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.terminal.Snippet
 import com.rk.terminal.SnippetStore
+import com.rk.utils.toast
 
 @Composable
 fun SnippetsScreen() {
     var refreshTrigger by remember { mutableIntStateOf(0) }
-    val snippets = remember(refreshTrigger) { SnippetStore.decode(Settings.terminal_snippets) }
+    // distinctBy guards LazyColumn item keys (label+command): pairs persisted by
+    // older builds without the duplicate check would crash on first composition.
+    val snippets =
+        remember(refreshTrigger) { SnippetStore.decode(Settings.terminal_snippets).distinctBy { it.label + it.command } }
 
     // Index of the snippet being edited, or NO_ADDING sentinel values.
     var editIndex by remember { mutableStateOf<Int?>(null) }
@@ -66,7 +70,6 @@ fun SnippetsScreen() {
             val index = snippets.indexOf(snippet)
             PreferenceTemplate(
                 modifier = Modifier.clickable(onClick = { editIndex = index }),
-                verticalPadding = 10.dp,
                 title = {
                     Text(text = snippet.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 },
@@ -110,12 +113,19 @@ fun SnippetsScreen() {
             },
             onSave = { label, command ->
                 val list = snippets.toMutableList()
-                if (editing != null) {
-                    list[editIndex!!] = Snippet(label, command)
+                // Duplicate pairs would collide as LazyColumn item keys and crash.
+                val isDuplicate =
+                    list.withIndex().any { (i, s) -> s.label == label && s.command == command && i != editIndex }
+                if (isDuplicate) {
+                    toast(strings.failed)
                 } else {
-                    list.add(Snippet(label, command))
+                    if (editing != null) {
+                        list[editIndex!!] = Snippet(label, command)
+                    } else {
+                        list.add(Snippet(label, command))
+                    }
+                    persist(list)
                 }
-                persist(list)
                 editIndex = null
                 showAddDialog = false
             },

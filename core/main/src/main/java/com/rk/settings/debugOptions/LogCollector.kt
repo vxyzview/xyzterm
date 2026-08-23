@@ -68,6 +68,10 @@ object LogCollector {
 
     private fun appendEntry(logEntry: LogEntry, extensionId: String? = null) {
         logs.add(logEntry)
+        // Ring-buffer cap: unbounded growth leaks memory in long-lived sessions.
+        if (logs.size > MAX_LOGS) {
+            logs.subList(0, logs.size - MAX_LOGS).clear()
+        }
         DefaultScope.launch {
             Events.publish(AppEvent.LogEntryWritten(logEntry, extensionId))
         }
@@ -76,4 +80,6 @@ object LogCollector {
     fun clearLogs() {
         logs.clear()
     }
+
+    private const val MAX_LOGS = 1000
 }

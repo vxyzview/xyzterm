@@ -1,6 +1,5 @@
 package com.rk.settings.terminal
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,12 +57,11 @@ fun UserBindingsScreen() {
             )
         },
     ) {
-        item { InfoBlock(text = stringResource(strings.bind_warning)) }
+        item { InfoBlock(text = stringResource(strings.bind_warning), warning = true) }
 
         items(bindings, key = { it.outside + it.inside.orEmpty() }) { binding ->
             PreferenceTemplate(
-                modifier = Modifier.clickable(onClick = {}),
-                verticalPadding = 10.dp,
+                verticalPadding = 16.dp,
                 title = {
                     Text(text = binding.outside, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 },

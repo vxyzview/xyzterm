@@ -44,3 +44,8 @@ graphify-out/
 /DESIGN.md
 /.impeccable/
 /.opencode/
+# Signing secrets (never commit)
+*.keystore
+*.jks
+signing.properties
+*signing*.properties

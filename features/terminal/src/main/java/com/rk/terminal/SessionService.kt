@@ -212,6 +212,7 @@ class SessionService : Service() {
     override fun onDestroy() {
         sessions.forEach { s -> s.value.finishIfRunning() }
 
+        restoreScope.cancel()
         daemonRunning = false
         if (wakeLock?.isHeld == true) {
             wakeLock?.release()

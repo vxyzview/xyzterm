@@ -2,7 +2,6 @@ package com.rk.theme
 
 import android.os.Build
 import androidx.annotation.ChecksSdkIntAtLeast
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -93,22 +92,22 @@ fun harmonize(color: Long): Int {
 
 /**
  * AMOLED scheme: collapse the background/surface family to true black and derive the
- * container ramp by darkening the BASE scheme's own surface containers toward black.
- * This keeps the active theme's hue in AMOLED mode (instead of stamping a fixed
- * blue-gray ramp over, say, Lime or a Monet palette) while still achieving the
- * pure-black look the setting promises.
+ * container ramp by darkening each of the BASE scheme's own containers toward black.
+ * Each level scales from its ORIGINAL counterpart (copy() args evaluate against the
+ * receiver, not sibling params), which preserves the tone spacing and hue so cards
+ * stay distinguishable from the background while keeping the pure-black look.
  */
 private fun ColorScheme.amoledScheme(): ColorScheme =
     copy(
         background = Color.Black,
         surface = Color.Black,
         surfaceDim = Color.Black,
-        surfaceBright = surfaceContainer,
+        surfaceBright = surfaceContainerHighest.towardBlack(0.45f),
         surfaceContainerLowest = Color.Black,
-        surfaceContainerLow = surfaceContainerLowest.towardBlack(0.25f),
-        surfaceContainer = surfaceContainerLowest.towardBlack(0.15f),
-        surfaceContainerHigh = surfaceContainerLowest.towardBlack(0.0f),
-        surfaceContainerHighest = surfaceContainerLowest,
+        surfaceContainerLow = surfaceContainerLow.towardBlack(0.70f),
+        surfaceContainer = surfaceContainer.towardBlack(0.65f),
+        surfaceContainerHigh = surfaceContainerHigh.towardBlack(0.60f),
+        surfaceContainerHighest = surfaceContainerHighest.towardBlack(0.55f),
     )
 
 /** Blend [this] color toward black by [amount] (0f = unchanged, 1f = black). */
@@ -125,27 +124,27 @@ private fun Color.towardBlack(amount: Float): Color {
 
 // Custom warning colors
 val ColorScheme.warningSurface: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(harmonize(0xFF633F00)) else Color(harmonize(0xFFFFDDB4))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFF633F00)) else Color(harmonize(0xFFFFDDB4))
 
 val ColorScheme.onWarningSurface: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(harmonize(0xFFFFDDB4)) else Color(harmonize(0xFF633F00))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFFFFDDB4)) else Color(harmonize(0xFF633F00))
 
 // Status colors
 val ColorScheme.greenStatus: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(harmonize(0xFFA6DA95)) else Color(harmonize(0xFF44842E))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFFA6DA95)) else Color(harmonize(0xFF44842E))
 
 val ColorScheme.yellowStatus: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(harmonize(0xFFFFE082)) else Color(harmonize(0xFFE6AC00))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFFFFE082)) else Color(harmonize(0xFFE6AC00))
 
 // Git change colors
 val ColorScheme.gitAdded: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(harmonize(0xFF81C784)) else Color(harmonize(0xFF2E7D32))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFF81C784)) else Color(harmonize(0xFF2E7D32))
 
 val ColorScheme.gitModified: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(harmonize(0xFF64B5F6)) else Color(harmonize(0xFF1565C0))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFF64B5F6)) else Color(harmonize(0xFF1565C0))
 
 val ColorScheme.gitDeleted: Color
     get() = this.onSurface.copy(alpha = 0.6f)
 
 val ColorScheme.gitConflicted: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(harmonize(0xFFE57373)) else Color(harmonize(0xFFC62828))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFFE57373)) else Color(harmonize(0xFFC62828))

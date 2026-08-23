@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +30,7 @@ fun InfoBlock(
     modifier: Modifier = Modifier,
     text: String,
     icon: @Composable (() -> Unit)? = null,
-    shape: Shape = RoundedCornerShape(12.dp),
+    shape: Shape = MaterialTheme.shapes.large,
     warning: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
@@ -40,6 +39,7 @@ fun InfoBlock(
             modifier =
                 Modifier.semantics { role = Role.Button }
                     .clickable(enabled = onClick != null, onClick = { onClick?.invoke() })
+                    .padding(horizontal = 16.dp)
                     .fillMaxWidth(),
             shape = shape,
             colors =
@@ -48,13 +48,13 @@ fun InfoBlock(
         ) {
             Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (icon != null) {
-                    Box(modifier = Modifier.size(15.dp), contentAlignment = Alignment.Center) { icon() }
+                    Box(modifier = Modifier.size(24.dp), contentAlignment = Alignment.Center) { icon() }
                 }
                 Text(
                     text = text,
                     style = MaterialTheme.typography.bodySmall,
                     color = if (warning) MaterialTheme.colorScheme.onWarningSurface else Color.Unspecified,
-                    modifier = Modifier.padding(start = 8.dp),
+                    modifier = Modifier.padding(start = 12.dp),
                 )
             }
         }

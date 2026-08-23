@@ -33,6 +33,9 @@ import com.rk.components.compose.preferences.base.PreferenceTemplate
 import com.rk.icons.LucideCircleQuestionMark
 import com.rk.resources.strings
 import com.rk.theme.greenStatus
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 enum class CheckStatus {
     PENDING,
@@ -62,12 +65,18 @@ fun TerminalCheckScreen() {
 
             val success =
                 try {
-                    val result = check.run { log ->
-                        // Append log to the current check's logs
-                        checks[i] = checks[i].copy(logs = checks[i].logs + log)
-                    }
+                    // Health checks spawn processes / hit the network: never block main.
+                    val result =
+                        withContext(Dispatchers.IO) {
+                            check.run { log ->
+                                // Append log to the current check's logs
+                                checks[i] = checks[i].copy(logs = checks[i].logs + log)
+                            }
+                        }
 
                     result
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     checks[i] = checks[i].copy(logs = checks[i].logs + "Crash: ${e.localizedMessage}")
                     false

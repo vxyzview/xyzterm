@@ -1,14 +1,9 @@
 package com.rk
 
-import androidx.lifecycle.lifecycleScope
-import com.rk.activities.settings.SettingsActivity
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
-// same as SettingsActivity.lifeCycleScope
-@OptIn(DelicateCoroutinesApi::class)
-val DefaultScope: CoroutineScope
-    get() {
-        return SettingsActivity.instance?.lifecycleScope ?: GlobalScope
-    }
+// App-lifetime scope. Never tied to any activity lifecycle: work launched here
+// survives screen changes and is only cancelled when the process dies.
+val DefaultScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

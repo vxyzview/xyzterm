@@ -15,14 +15,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import android.text.format.Formatter
 import com.rk.DefaultScope
@@ -40,6 +41,7 @@ import java.io.File
 import java.text.DateFormat
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -50,13 +52,16 @@ fun TerminalBackupsScreen() {
 
     // Bumped after every create/delete/restore to re-list the backup directory.
     var refreshTrigger by remember { mutableIntStateOf(0) }
-    val backups =
-        remember(refreshTrigger) {
-            TerminalBackup.backupDir()
-                .listFiles { f -> f.name.startsWith("terminal-backup-") && f.name.endsWith(".tar.gz") }
-                ?.sortedByDescending { it.name }
-                .orEmpty()
-        }
+    var backups by remember { mutableStateOf(emptyList<File>()) }
+    LaunchedEffect(refreshTrigger) {
+        backups =
+            withContext(Dispatchers.IO) {
+                TerminalBackup.backupDir()
+                    .listFiles { f -> f.name.startsWith("terminal-backup-") && f.name.endsWith(".tar.gz") }
+                    ?.sortedByDescending { it.name }
+                    .orEmpty()
+            }
+    }
 
     PreferenceLayoutLazyColumn(label = stringResource(strings.manage_backups), backArrowVisible = true) {
         item {
@@ -72,7 +77,7 @@ fun TerminalBackupsScreen() {
                                     it.printStackTrace()
                                     false
                                 }
-                            withContext(Dispatchers.Main) {
+                            withContext(Dispatchers.Main + NonCancellable) {
                                 runCatching { loading.hide() }
                                 if (ok) {
                                     toast(strings.success)
@@ -119,7 +124,7 @@ fun TerminalBackupsScreen() {
                                 val error =
                                     runCatching { TerminalBackup.restore(backup) }
                                         .getOrElse { it.message ?: "restore failed" }
-                                withContext(Dispatchers.Main) {
+                                withContext(Dispatchers.Main + NonCancellable) {
                                     runCatching { loading.hide() }
                                     if (error == null) {
                                         // Running sessions keep the old rootfs mapped.
@@ -128,13 +133,19 @@ fun TerminalBackupsScreen() {
                                         toast(strings.setup_failed.getFilledString(error))
                                     }
                                 }
+                                refreshTrigger++
                             }
                         },
                     )
                 },
                 onDelete = {
-                    DefaultScope.launch(Dispatchers.IO) { backup.delete() }
-                    refreshTrigger++
+                    DefaultScope.launch(Dispatchers.IO) {
+                        val ok = runCatching { backup.delete() }.getOrDefault(false)
+                        withContext(Dispatchers.Main + NonCancellable) {
+                            toast(if (ok) strings.success else strings.failed)
+                        }
+                        refreshTrigger++
+                    }
                 },
             )
         }
@@ -156,7 +167,7 @@ private fun BackupItem(backup: File, onRestore: () -> Unit, onDelete: () -> Unit
         modifier = Modifier.clickable(onClick = onRestore),
         verticalPadding = 10.dp,
         title = {
-            Text(text = backup.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = backup.name)
         },
         description = { Text(text = details) },
         endWidget = {

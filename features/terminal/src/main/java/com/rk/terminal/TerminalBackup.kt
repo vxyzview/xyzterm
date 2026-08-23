@@ -6,12 +6,14 @@ import com.rk.file.localDir
 import com.rk.file.sandboxDir
 import com.rk.utils.getTempDir
 import java.io.File
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /** Creates and prunes terminal environment backups (sandbox tar.gz archives). */
 object TerminalBackup {
     private const val KEEP = 3
+    private const val TAR_TIMEOUT_MINUTES = 10L
 
     // NOTE: /home and /root are deliberately NOT excluded — they hold the user's
     // shell history, dotfiles and installed tool configs. Excluding them made
@@ -44,7 +46,26 @@ object TerminalBackup {
                     .directory(sandboxDir())
                     .redirectErrorStream(true)
                     .start()
-            process.waitFor() == 0
+            // Drain merged output on a side thread while tar runs; an undrained
+            // pipe deadlocks once tar writes more than the 64KB buffer, and a
+            // blocking drain here would make the timeout unreachable.
+            var createOk = false
+            val drain =
+                Thread {
+                    runCatching {
+                        process.inputStream.bufferedReader().useLines { lines -> lines.forEach { /* drain */ } }
+                    }
+                }
+            drain.start()
+            val timedOut = !process.waitFor(TAR_TIMEOUT_MINUTES, TimeUnit.MINUTES)
+            if (timedOut) {
+                process.destroyForcibly()
+            }
+            drain.join(5_000)
+            if (!timedOut) {
+                createOk = process.exitValue() == 0
+            }
+            createOk
         }
 
     /** Backs up the sandbox to a timestamped file in [backupDir], keeping the newest [KEEP]. */
@@ -88,11 +109,27 @@ object TerminalBackup {
                 val process =
                     ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", staging.absolutePath)
                         .start()
-                val code = process.waitFor()
-                val stderr =
-                    runCatching { process.errorStream.bufferedReader().use { it.readText() } }
-                        .getOrDefault("")
+                // Drain stderr concurrently; reading after waitFor() deadlocks if
+                // tar fills the pipe before exiting.
+                var stderr = ""
+                val stderrDrain =
+                    Thread {
+                        stderr =
+                            runCatching { process.errorStream.bufferedReader().use { it.readText() } }
+                                .getOrDefault("")
+                    }
+                stderrDrain.start()
+                val timedOut = !process.waitFor(TAR_TIMEOUT_MINUTES, TimeUnit.MINUTES)
+                if (timedOut) {
+                    process.destroyForcibly()
+                }
+                stderrDrain.join(5_000)
 
+                if (timedOut) {
+                    return@withContext "tar timed out"
+                }
+
+                val code = process.exitValue()
                 if (code != 0) {
                     return@withContext (
                         stderr.lineSequence().firstOrNull { it.isNotBlank() }

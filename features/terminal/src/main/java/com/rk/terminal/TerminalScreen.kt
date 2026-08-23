@@ -58,7 +58,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -94,6 +93,7 @@ import com.rk.terminal.virtualkeys.VirtualKeysListener
 import com.rk.terminal.virtualkeys.VirtualKeysView
 import com.rk.theme.LocalThemeHolder
 import com.rk.theme.ThemeHolder
+import com.rk.theme.yellowStatus
 import com.rk.utils.dpToPx
 import com.rk.utils.toast
 import com.termux.terminal.TerminalColors
@@ -168,7 +168,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                                 .size(8.dp)
                                                 .background(
                                                     if (bellPulse) {
-                                                        Color(0xFFFFB300)
+                                                        MaterialTheme.colorScheme.yellowStatus
                                                     } else {
                                                         MaterialTheme.colorScheme.primary
                                                     },

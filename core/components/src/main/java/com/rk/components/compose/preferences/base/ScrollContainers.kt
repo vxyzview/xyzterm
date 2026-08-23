@@ -70,6 +70,7 @@ fun PreferenceLazyColumn(
     isChild: Boolean = false,
     state: LazyListState = rememberLazyListState(),
     stretchEnabled: Boolean = true,
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
     content: LazyListScope.() -> Unit,
 ) {
     if (!enabled) {
@@ -81,6 +82,7 @@ fun PreferenceLazyColumn(
         LazyColumn(
             modifier = Modifier.addIf(!isChild) { fillMaxHeight() },
             contentPadding = contentPadding,
+            verticalArrangement = verticalArrangement,
             state = state,
             content = content,
         )

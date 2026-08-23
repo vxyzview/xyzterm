@@ -48,8 +48,10 @@ import com.rk.utils.dpToPx
 import com.rk.utils.getTempDir
 import com.rk.utils.toast
 import com.termux.terminal.TerminalEmulator
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileOutputStream
@@ -188,7 +190,7 @@ fun SettingsTerminalScreen() {
                             // the live sandbox is only replaced on success.
                             val error = TerminalBackup.restore(tempFile)
 
-                            withContext(Dispatchers.Main) {
+                            withContext(Dispatchers.Main + NonCancellable) {
                                 runCatching { loading.hide() }
                                 if (error == null) {
                                     toast(strings.success)
@@ -196,13 +198,15 @@ fun SettingsTerminalScreen() {
                                     toast(strings.setup_failed.getFilledString(error))
                                 }
                             }
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
-                            withContext(Dispatchers.Main) {
+                            withContext(Dispatchers.Main + NonCancellable) {
                                 runCatching { loading.hide() }
                                 toast(strings.setup_failed.getFilledString(e.message))
                             }
                         } finally {
-                            tempFile.delete()
+                            withContext(NonCancellable) { tempFile.delete() }
                         }
                     }
                 }
@@ -213,45 +217,47 @@ fun SettingsTerminalScreen() {
                 showSwitch = false,
                 default = false,
                 sideEffect = {
-                    val fileManager = SettingsActivity.instance!!.fileManager
+                    (activity as? SettingsActivity)?.fileManager?.let { fileManager ->
+                        fileManager.createNewFile(
+                            mimeType = "application/octet-stream",
+                            title = "terminal-backup.tar.gz",
+                        ) { fileObject ->
+                            DefaultScope.launch(Dispatchers.IO) {
+                                if (fileObject != null) {
+                                    val targetFile = getTempDir().child("terminal-backup.tar.gz")
 
-                    fileManager.createNewFile(
-                        mimeType = "application/octet-stream",
-                        title = "terminal-backup.tar.gz",
-                    ) { fileObject ->
-                        DefaultScope.launch(Dispatchers.IO) {
-                            if (fileObject != null) {
-                                val targetFile = getTempDir().child("terminal-backup.tar.gz")
+                                    val loading = LoadingPopup(activity, null)
+                                    withContext(Dispatchers.Main) { runCatching { loading.show() } }
 
-                                val loading = LoadingPopup(activity, null)
-                                withContext(Dispatchers.Main) { runCatching { loading.show() } }
+                                    try {
+                                        val ok = TerminalBackup.create(targetFile)
 
-                                try {
-                                    val ok = TerminalBackup.create(targetFile)
-
-                                    withContext(Dispatchers.Main) {
-                                        runCatching { loading.hide() }
-                                        if (ok) {
-                                            toast(strings.success)
-                                        } else {
-                                            toast(strings.failed)
-                                        }
-                                    }
-
-                                    if (ok) {
-                                        targetFile.inputStream().use { inputStream ->
-                                            fileObject.getOutputStream(false).use { outputStream ->
-                                                inputStream.copyTo(outputStream)
+                                        withContext(Dispatchers.Main + NonCancellable) {
+                                            runCatching { loading.hide() }
+                                            if (ok) {
+                                                toast(strings.success)
+                                            } else {
+                                                toast(strings.failed)
                                             }
                                         }
+
+                                        if (ok) {
+                                            targetFile.inputStream().use { inputStream ->
+                                                fileObject.getOutputStream(false).use { outputStream ->
+                                                    inputStream.copyTo(outputStream)
+                                                }
+                                            }
+                                        }
+                                    } catch (e: CancellationException) {
+                                        throw e
+                                    } catch (e: Exception) {
+                                        withContext(Dispatchers.Main + NonCancellable) {
+                                            runCatching { loading.hide() }
+                                            toast(strings.setup_failed.getFilledString(e.message))
+                                        }
+                                    } finally {
+                                        withContext(NonCancellable) { targetFile.delete() }
                                     }
-                                } catch (e: Exception) {
-                                    withContext(Dispatchers.Main) {
-                                        runCatching { loading.hide() }
-                                        toast(strings.setup_failed.getFilledString(e.message))
-                                    }
-                                } finally {
-                                    targetFile.delete()
                                 }
                             }
                         }
@@ -310,7 +316,10 @@ fun SettingsTerminalScreen() {
                                     sandboxDir().deleteRecursively()
                                     localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
                                 }
-                                withContext(Dispatchers.Main) { runCatching { loading.hide() } }
+                                withContext(Dispatchers.Main + NonCancellable) {
+                                    runCatching { loading.hide() }
+                                    toast(strings.success)
+                                }
                             }
                         },
                     )
