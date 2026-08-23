@@ -19,7 +19,14 @@ object UserBindings {
                 val outside = obj.optString("outside").trim()
                 val inside = obj.optString("inside").trim().ifEmpty { null }
 
-                if (!isValid(outside, inside)) {
+                // Shape check only: a host path that is currently missing
+                // (storage unmounted, permission revoked) must survive the
+                // roundtrip, otherwise saving the list would silently delete
+                // it. attachTo() skips missing paths at launch time anyway.
+                if (!isWellFormedHost(outside)) {
+                    return@mapNotNull null
+                }
+                if (inside != null && !isValidGuestPath(inside)) {
                     return@mapNotNull null
                 }
                 Binding(outside, inside)
@@ -39,7 +46,10 @@ object UserBindings {
     fun isValid(outside: String, inside: String?): Boolean =
         isValidHostPath(outside) && (inside == null || isValidGuestPath(inside))
 
-    fun isValidHostPath(path: String): Boolean = path.startsWith("/") && path.length > 1 && java.io.File(path).exists()
+    /** Add-time validation: the host folder must exist right now. */
+    fun isValidHostPath(path: String): Boolean = isWellFormedHost(path) && java.io.File(path).exists()
 
     fun isValidGuestPath(path: String): Boolean = path.startsWith("/") && path.length > 1
+
+    private fun isWellFormedHost(path: String): Boolean = path.startsWith("/") && path.length > 1
 }
