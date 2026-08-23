@@ -60,7 +60,6 @@ import com.rk.exec.isTerminalInstalled
 import com.rk.file.FilePermission
 import com.rk.file.child
 import com.rk.file.localBinDir
-import com.rk.file.sandboxDir
 import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
@@ -381,7 +380,12 @@ class Terminal : AppCompatActivity() {
                                         }
 
                                         if (file?.name == "sandbox.tar.gz") {
-                                            sandboxDir().deleteRecursively()
+                                            // Drop only the bad tarball so the retry
+                                            // starts clean. Never wipe sandboxDir()
+                                            // here: it may hold a working rootfs
+                                            // from an earlier successful install,
+                                            // and a transient download failure must
+                                            // not destroy it.
                                             File(getTempDir(), "sandbox.tar.gz").delete()
                                         }
                                     }
