@@ -57,35 +57,8 @@ fun Support(modifier: Modifier = Modifier) {
 
         PreferenceGroup {
             SettingsItem(
-                label = "GitHub Sponsors",
-                
-                isEnabled = true,
-                showSwitch = false,
-                default = false,
-                startWidget = {
-                    Icon(
-                        modifier = Modifier.padding(start = 16.dp, top = 4.dp, bottom = 4.dp),
-                        painter = painterResource(drawables.github),
-                        contentDescription = null,
-                    )
-                },
-                endWidget = {
-                    Icon(
-                        modifier = Modifier.padding(16.dp),
-                        painter = painterResource(drawables.open_in_new),
-                        contentDescription = null,
-                    )
-                },
-                sideEffect = {
-                    val url = "https://github.com/sponsors/RohitKushvaha01"
-                    val intent = Intent(Intent.ACTION_VIEW).apply { data = url.toUri() }
-                    context.startActivity(intent)
-                    Settings.donated = true
-                },
-            )
-            SettingsItem(
-                label = "Buy Me a Coffee",
-                
+                label = "Ko-fi",
+
                 isEnabled = true,
                 showSwitch = false,
                 default = false,
@@ -104,7 +77,7 @@ fun Support(modifier: Modifier = Modifier) {
                     )
                 },
                 sideEffect = {
-                    val url = "https://buymeacoffee.com/rohitkushvaha01"
+                    val url = "https://ko-fi.com/vxyzview"
                     val intent = Intent(Intent.ACTION_VIEW).apply { data = url.toUri() }
                     context.startActivity(intent)
                     Settings.donated = true
