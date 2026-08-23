@@ -61,6 +61,7 @@ jobs:
             echo "$KEYSTORE_BASE64" | base64 -d > /tmp/xyzterm.keystore
             printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$KEYSTORE_PASSWORD" > /tmp/signing.properties
             echo "Using persistent release signing key from repo secrets"
+            echo "DEBUG b64len=${#KEYSTORE_BASE64} passlen=${#KEYSTORE_PASSWORD} b64sha=$(printf '%s' "$KEYSTORE_BASE64" | sha256sum | cut -c1-16) kshead=$(printf '%s' "$KEYSTORE_BASE64" | base64 -d 2>/dev/null | head -c4 | xxd -p)"
           else
             echo "::warning::KEYSTORE_BASE64 secret missing - generating an EPHEMERAL key; this build cannot update over any other build!"
             PASS=$(openssl rand -hex 16)
