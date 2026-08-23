@@ -10,7 +10,7 @@ terminal-only · no root · no telemetry · no tracking
 
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 [![F-Droid](https://img.shields.io/badge/available%20on-F--Droid-1976D2.svg)](https://f-droid.org/)
-[![Platform](https://img.shields.io/badge/platform-Android%207.0%2B-3DDC84.svg)](https://www.android.com/)
+[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B-3DDC84.svg)](https://www.android.com/)
 [![CI](https://github.com/vxyzview/xyzterm/actions/workflows/android.yml/badge.svg)](https://github.com/vxyzview/xyzterm/actions/workflows/android.yml)
 [![Reproducible](https://img.shields.io/badge/builds-reproducible-success.svg)](.github/workflows/reproducible.yml)
 
@@ -69,6 +69,7 @@ $ pfetch
 ### Sessions & data
 
 - **Multiple named sessions** — add, rename, delete, switch from the drawer; sessions persist across restarts and survive backgrounding.
+- **Custom binds** — expose any host folder inside the Ubuntu environment at a guest path of your choosing (Settings → Terminal → Custom binds).
 - **Backup & restore** — export your whole sandbox (`home`, packages included) as a `.tar.gz` archive and restore it on a new device. Auto-backup supported, managed archives pruned automatically.
 - **Expose to other apps** — optional SAF document provider so file managers can reach the sandbox.
 
@@ -81,14 +82,16 @@ $ pfetch
 ### Trust
 
 - **Zero telemetry** — no analytics, no crash reporting to third parties, no network calls you didn't make yourself.
-- **F-Droid only** — distributed exclusively through [F-Droid](https://f-droid.org/).
+- **SHA-256–verified downloads** — rootfs archives are checksum-pinned and re-verified on every launch; stale or corrupted downloads are re-fetched automatically.
+- **Stable release signing** — every GitHub release is signed with the same key, so updates install in place.
+- **F-Droid first** — submitted to [F-Droid](https://f-droid.org/); releases also published on [GitHub Releases](https://github.com/vxyzview/xyzterm/releases).
 - **Reproducible builds** — verify our APKs match the source with [apksigcopier + diffoscope](docs/CONTRIBUTING.md).
 
 ---
 
 ## Getting started
 
-1. Install from [F-Droid](https://f-droid.org/) (or [build it yourself](#build))
+1. Install from [GitHub Releases](https://github.com/vxyzview/xyzterm/releases) (F-Droid submission in progress), or [build it yourself](#build)
 2. Open **xyzterm** and start typing immediately — or tap *Install Ubuntu* for the full environment (a one-time rootfs download sized for your device)
 3. You're in a real Ubuntu shell. `apt update && apt upgrade` if that's your thing
 
@@ -153,9 +156,14 @@ out/debug/app-debug.apk
 
 ## Privacy
 
-xyzterm is built for the F-Droid-first crowd. The APK ships **only** through
-[F-Droid](https://f-droid.org/), is licensed **GPL-3.0-or-later**, and contains
-**no telemetry** and **no third-party analytics**. Your shell is your business.
+xyzterm is built for the privacy-first crowd. It is licensed **GPL-3.0-or-later**
+and contains **no telemetry** and **no third-party analytics**. Your shell is your business.
+
+---
+
+## Support the project
+
+If xyzterm is useful to you, consider [buying me a coffee on Ko-fi](https://ko-fi.com/vxyzview).
 
 ---
 

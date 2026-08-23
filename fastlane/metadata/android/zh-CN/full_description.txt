@@ -14,4 +14,4 @@ xyzterm 是一款极简的纯终端 Android 应用，运行真实的 proot Ubunt
 - 从终端设置备份和恢复终端环境
 
 隐私
-xyzterm 仅通过 F-Droid 分发，采用 GPL-3.0-or-later 许可证，不含任何遥测和第三方分析。您的 shell 只属于您。
+xyzterm 采用 GPL-3.0-or-later 许可证，不含任何遥测和第三方分析。可通过 F-Droid 与 GitHub Releases 获取。您的 shell 只属于您。

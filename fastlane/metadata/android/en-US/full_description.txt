@@ -14,4 +14,4 @@ Features
 - Backup and restore of the terminal environment from terminal settings
 
 Privacy
-xyzterm is distributed only through F-Droid, is licensed GPL-3.0-or-later, and contains no telemetry and no third-party analytics. Your shell is your business.
+xyzterm is licensed GPL-3.0-or-later and contains no telemetry and no third-party analytics. Available on F-Droid and GitHub Releases. Your shell is your business.
