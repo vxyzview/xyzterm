@@ -59,7 +59,7 @@ jobs:
             # so updates install over each other and Play Protect reputation
             # accumulates on one certificate.
             echo "$KEYSTORE_BASE64" | base64 -d > /tmp/xyzterm.keystore
-            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$KEYSTORE_PASSWORD" > /tmp/signing.properties
+            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$KEYSTORE_PASSWORD" "$KEYSTORE_PASSWORD" > /tmp/signing.properties
             echo "Using persistent release signing key from repo secrets"
           else
             echo "::warning::KEYSTORE_BASE64 secret missing - generating an EPHEMERAL key; this build cannot update over any other build!"
@@ -70,16 +70,8 @@ jobs:
               -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass "$PASS" -keypass "$PASS" \
               -dname "CN=xyzterm, OU=xyzterm, O=xyzterm, L=, ST=, C=US"
-            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$PASS" > /tmp/signing.properties
+            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$PASS" "$PASS" > /tmp/signing.properties
           fi
-          export PATH="/usr/lib/jvm/java-21-openjdk-amd64/bin:$PATH"
-          SHA=$(sha256sum /tmp/xyzterm.keystore | cut -c1-16)
-          AL=$(grep '^keyAlias=' /tmp/signing.properties | cut -d= -f2)
-          SP=$(grep '^storePassword=' /tmp/signing.properties | cut -d= -f2)
-          KP=$(grep '^keyPassword=' /tmp/signing.properties | cut -d= -f2)
-          echo "DEBUG ks-sha=$SHA alias-len=${#AL} sp-len=${#SP} kp-len=${#KP} sp==kp=$([ "$SP" = "$KP" ] && echo yes || echo NO)"
-          if keytool -list -keystore /tmp/xyzterm.keystore -storepass "$SP" >/dev/null 2>&1; then echo "DEBUG store-open=OK"; else echo "DEBUG store-open=FAIL"; fi
-          if keytool -list -keystore /tmp/xyzterm.keystore -alias "$AL" -storepass "$SP" >/dev/null 2>&1; then echo "DEBUG key-entry=OK"; else echo "DEBUG key-entry=FAIL"; fi
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
