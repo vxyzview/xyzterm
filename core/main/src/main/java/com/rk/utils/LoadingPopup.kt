@@ -36,7 +36,7 @@ class LoadingPopup(private val activity: AppCompatActivity?, hideAfterMillis: Lo
 
         hideAfterMillis?.let { delayMillis ->
             show()
-            activity?.lifecycleScope.launch {
+            activity?.lifecycleScope?.launch {
                 delay(delayMillis)
                 hide()
             }
