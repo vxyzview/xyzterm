@@ -37,6 +37,7 @@ object UpdateManager {
     private const val UPDATE_REPO = "xyzterm"
     private const val UPDATE_INTERVAL_MS = 24 * 60 * 60 * 1000L
     private const val LAST_UPDATE_CHECK_KEY = "last_update_check"
+    private const val MIN_APK_BYTES = 1024L * 1024L
 
     /** Compares "vX.Y.Z" (or "X.Y.Z") tags. Returns true if [latest] > [installed]. */
     private fun isNewer(latest: String, installed: String): Boolean {
@@ -127,6 +128,11 @@ object UpdateManager {
                 return@launch
             }
 
+            if (file.length() < MIN_APK_BYTES) {
+                toast(strings.update_download_failed.getString())
+                return@launch
+            }
+
             if (!signatureMatches(file.absolutePath)) {
                 toast(strings.update_signature_mismatch.getString())
                 return@launch
@@ -147,11 +153,11 @@ object UpdateManager {
     /** True when the release APK is signed with the same key as the installed app. */
     @Suppress("DEPRECATION")
     private fun signatureMatches(apkPath: String): Boolean {
-        val app = application ?: return true
+        val app = application ?: return false
         val pm = app.packageManager
-        val installed = runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return true
+        val installed = runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return false
         val archive = runCatching { pm.getPackageArchiveInfo(apkPath, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return false
-        val a = installed.signatures?.firstOrNull() ?: return true
+        val a = installed.signatures?.firstOrNull() ?: return false
         val b = archive.signatures?.firstOrNull() ?: return false
         return a == b
     }

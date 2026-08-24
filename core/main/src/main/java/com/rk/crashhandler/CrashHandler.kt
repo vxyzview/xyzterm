@@ -2,6 +2,7 @@ package com.rk.crashhandler
 
 import android.content.Intent
 import android.os.Looper
+import android.os.Process
 import android.util.Log
 import com.rk.file.child
 import com.rk.file.createFileIfNot
@@ -9,10 +10,18 @@ import com.rk.settings.debugOptions.HarmlessException
 import com.rk.utils.application
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
 object CrashHandler : Thread.UncaughtExceptionHandler {
+    private val handlingCrash = AtomicBoolean(false)
+
     override fun uncaughtException(thread: Thread, ex: Throwable) {
+        if (!handlingCrash.compareAndSet(false, true)) {
+            Process.killProcess(Process.myPid())
+            exitProcess(1)
+        }
+
         runCatching {
                 if (
                     ex.message.toString().contains("android.view.View${"$"}BaseSavedState") ||
@@ -80,10 +89,17 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
     }
 
     fun logErrorOrExit(throwable: Throwable) {
-        runCatching { application!!.filesDir.child("crash.log").createFileIfNot().appendText(throwable.toString()) }
+        runCatching {
+                val logFile = application!!.filesDir.child("crash.log").createFileIfNot()
+                if (logFile.length() < MAX_LOG_BYTES) {
+                    logFile.appendText(throwable.toString())
+                }
+            }
             .onFailure {
                 it.printStackTrace()
                 exitProcess(-1)
             }
     }
+
+    private const val MAX_LOG_BYTES = 512 * 1024
 }

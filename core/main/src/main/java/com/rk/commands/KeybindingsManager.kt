@@ -97,6 +97,7 @@ object KeybindingsManager {
         keybindingsFile.writeText(json.encodeToString(serializer, customKeybinds))
     }
 
+    @Synchronized
     fun loadKeybindings() {
         if (!keybindingsFile.exists()) return
 

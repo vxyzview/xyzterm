@@ -78,14 +78,8 @@ open class App : Application() {
                 CommandProvider.buildCommands()
                 KeybindingsManager.loadKeybindings()
             }
-            launch(Dispatchers.IO) {
-                iconPackManager.indexLocalPacks()
-                iconPackManager.indexStoreIconPacks()
-            }
-            launch(Dispatchers.IO) {
-                themeManager.indexLocalThemes()
-                themeManager.indexStoreThemes()
-            }
+            launch(Dispatchers.IO) { iconPackManager.indexLocalPacks() }
+            launch(Dispatchers.IO) { themeManager.indexLocalThemes() }
 
             launch(Dispatchers.IO) {
                 val appFontPath = Settings.app_font_path.ifEmpty { DEFAULT_APP_FONT_PATH }

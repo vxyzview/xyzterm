@@ -7,14 +7,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.graphics.Color
-import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.graphics.toColorInt
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.rk.activities.settings.SettingsActivity
-import com.rk.common.XedPackage
-import com.rk.extension.manager.StoreManager
 import com.rk.extension.model.PackageCache
 import com.rk.file.FileOperations
 import com.rk.file.FileWrapper
@@ -23,19 +19,13 @@ import com.rk.file.themeDir
 import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
-import com.rk.utils.application
-import com.rk.utils.dialogRes
-import com.rk.utils.errorDialog
 import com.rk.utils.logError
 import com.rk.utils.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -129,101 +119,6 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
         }
     }
 
-    suspend fun installTheme(file: File) {
-        withContext(Dispatchers.IO) {
-            val tempDir = File(application!!.cacheDir, "theme_temp_${System.currentTimeMillis()}")
-            tempDir.mkdirs()
-
-            try {
-                if (file.extension == "json") {
-                    // Legacy single-file JSON
-                    val manifest = validateManifestJson(file.readText())
-                    manifest?.let {
-                        installThemeFromData(it, null)
-                    }
-                    return@withContext
-                }
-
-                XedPackage.extract(file, tempDir)
-
-                val manifestFile = File(tempDir, "manifest.json")
-                val themeFile = File(tempDir, "theme.json")
-
-                val jsonText =
-                    when {
-                        manifestFile.exists() -> manifestFile.readText()
-                        themeFile.exists() -> themeFile.readText()
-                        else -> {
-                            withContext(Dispatchers.Main) { toast("Neither manifest.json nor theme.json found") }
-                            return@withContext
-                        }
-                    }
-
-                jsonText.let {
-                    val manifest = validateManifestJson(it) ?: return@let
-                    installThemeFromData(manifest, tempDir)
-                }
-            } catch (e: Exception) {
-                errorDialog(e)
-            } finally {
-                tempDir.deleteRecursively()
-            }
-        }
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    internal fun validateManifestJson(text: String): ThemeManifest? {
-        return runCatching {
-            json.decodeFromString<ThemeManifest>(text)
-        }
-            .getOrElse { e ->
-                if (e is MissingFieldException) {
-                    val fields = e.missingFields.joinToString("\n") { "• $it" }
-                    dialogRes(
-                        SettingsActivity.instance,
-                        strings.theme_install_failed.getString(),
-                        strings.manifest_missing_fields.getFilledString(fields),
-                        cancelable = false,
-                    )
-                    return null
-                }
-                dialogRes(
-                    SettingsActivity.instance,
-                    strings.theme_install_failed.getString(),
-                    e.localizedMessage ?: strings.unknown_err.getString(),
-                    cancelable = false,
-                )
-                return null
-            }
-    }
-
-    private suspend fun installThemeFromData(manifest: ThemeManifest, sourceDir: File?) =
-        withContext(Dispatchers.IO) {
-            val packageName = application!!.packageName
-            val packageManager = application!!.packageManager
-            val currentVersionCode = PackageInfoCompat.getLongVersionCode(packageManager.getPackageInfo(packageName, 0))
-
-            if (manifest.minAppVersion != null && manifest.minAppVersion.toLong() > currentVersionCode) {
-                dialogRes(
-                    activity = SettingsActivity.instance,
-                    title = strings.warning.getString(),
-                    msg = strings.incompatible_theme_warning.getString(),
-                    cancelRes = strings.cancel,
-                    okRes = strings.continue_action,
-                    onOk = {
-                        launch(Dispatchers.IO) {
-                            finishThemeInstall(manifest, sourceDir)
-                            indexLocalThemes()
-                        }
-                    },
-                )
-                return@withContext
-            }
-
-            finishThemeInstall(manifest, sourceDir)
-            indexLocalThemes()
-        }
-
     private suspend fun finishThemeInstall(manifest: ThemeManifest, sourceDir: File?) {
         val installDir = themeDir().child(manifest.id).also { if (!it.exists()) it.mkdirs() }
 
@@ -250,16 +145,6 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
             )
         writeCache(installDir, newCache)
     }
-
-    suspend fun indexStoreThemes() =
-        withContext(Dispatchers.IO) {
-            val themesList = runCatching { StoreManager.fetchThemes() }.getOrNull() ?: return@withContext
-            val newThemes = themesList.associateBy({ it.id }, { StoreTheme(it) })
-            withContext(Dispatchers.Main) {
-                storeThemes.clear()
-                storeThemes.putAll(newThemes)
-            }
-        }
 
     @Suppress("DEPRECATION") // migration path uses deprecated legacy theme APIs
     suspend fun indexLocalThemes() = mutex.withLock {
