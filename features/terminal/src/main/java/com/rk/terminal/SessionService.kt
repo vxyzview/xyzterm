@@ -16,8 +16,9 @@ import androidx.core.app.NotificationCompat
 import com.rk.DefaultScope
 import com.rk.activities.terminal.Terminal
 import com.rk.resources.drawables
-import com.rk.resources.getFilledString
+import com.rk.resources.getQuantityString
 import com.rk.resources.getString
+import com.rk.resources.plurals
 import com.rk.resources.strings
 import com.rk.settings.Preference
 import com.rk.settings.Settings
@@ -43,6 +44,8 @@ class SessionService : Service() {
     private val restoreCallbacks = mutableListOf<() -> Unit>()
     private val restoreScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var daemonRunning = false
+    private val sessionLock = Any()
+    private val wakeLockLock = Any()
 
     inner class SessionBinder : Binder() {
         fun getService(): SessionService {
@@ -64,17 +67,31 @@ class SessionService : Service() {
                 )
                 .let {
                     val (session, pwd) = it
-                    sessions[id] = session
-                    sessionWorkDirs[id] = pwd
-                    sessionList.add(id)
-                    saveSession(id, pwd)
+                    val uniqueId =
+                        synchronized(sessionLock) {
+                            var candidate = id
+                            var suffix = 1
+                            while (candidate in sessions || candidate in sessionList) {
+                                candidate = "$id-$suffix"
+                                suffix++
+                            }
+                            sessions[candidate] = session
+                            sessionWorkDirs[candidate] = pwd
+                            sessionList.add(candidate)
+                            saveSession(candidate, pwd)
+                            candidate
+                        }
                     updateNotification()
-                    SessionInfo(id, pwd, session)
+                    SessionInfo(uniqueId, pwd, session)
                 }
         }
 
         fun getSession(id: SessionId): TerminalSession? {
             return sessions[id]
+        }
+
+        fun getSessionId(session: TerminalSession): SessionId? {
+            return sessions.entries.firstOrNull { it.value == session }?.key
         }
 
         fun getSessionInfoByPwd(pwd: SessionPwd): SessionInfo? {
@@ -101,7 +118,7 @@ class SessionService : Service() {
                     saved
                         .map { (id, pwd) ->
                             async {
-                                runCatching { MkSession.createSession(activity, TerminalBackEnd(), id, false, pwd) }
+                                runCatching { MkSession.createSession(applicationContext, TerminalBackEnd(), id, false, pwd) }
                                     .getOrNull()
                                     ?.let { id to it }
                             }
@@ -148,11 +165,7 @@ class SessionService : Service() {
         }
 
         fun terminateSession(id: SessionId) {
-            sessions[id]?.apply {
-                if (emulator != null) {
-                    sessions[id]?.finishIfRunning()
-                }
-            }
+            sessions[id]?.finishIfRunning()
             sessions.remove(id)
             sessionList.remove(id)
             sessionWorkDirs.remove(id)
@@ -192,6 +205,10 @@ class SessionService : Service() {
 
             updateNotification()
         }
+
+        fun setWakeLock(enabled: Boolean) {
+            this@SessionService.setWakeLock(enabled)
+        }
     }
 
     private val binder = SessionBinder()
@@ -218,6 +235,7 @@ class SessionService : Service() {
         if (wakeLock?.isHeld == true) {
             wakeLock?.release()
         }
+        wakeLockHeld = false
         if (Settings.auto_backup) {
             // IO dispatcher: tar blocks for minutes; Default pool is for CPU.
             DefaultScope.launch(Dispatchers.IO) { runCatching { TerminalBackup.autoBackup() } }
@@ -262,6 +280,25 @@ class SessionService : Service() {
 
     var wakeLock: PowerManager.WakeLock? = null
 
+    @Volatile
+    private var wakeLockHeld = false
+
+    fun setWakeLock(enabled: Boolean) {
+        synchronized(wakeLockLock) {
+            val lock = wakeLock ?: return
+            if (enabled == wakeLockHeld) return
+            if (enabled) {
+                lock.acquire()
+            } else {
+                if (lock.isHeld) {
+                    lock.release()
+                }
+            }
+            wakeLockHeld = enabled
+        }
+        updateNotification()
+    }
+
     fun actionExit() {
         sessions.forEach { s -> s.value.finishIfRunning() }
         if (daemonRunning) {
@@ -278,12 +315,7 @@ class SessionService : Service() {
             }
 
             "ACTION_WAKE_LOCK" -> {
-                if (wakeLock?.isHeld == true) {
-                    wakeLock?.release()
-                } else {
-                    wakeLock?.acquire()
-                }
-                updateNotification()
+                setWakeLock(!wakeLockHeld)
             }
         }
         return START_NOT_STICKY
@@ -318,14 +350,14 @@ class SessionService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(strings.notification_title.getString())
-            .setContentText(getNotificationContentText(wakeLock?.isHeld == true))
+            .setContentText(getNotificationContentText(wakeLockHeld))
             .setSmallIcon(drawables.terminal)
             .setContentIntent(pendingIntent)
             .addAction(NotificationCompat.Action.Builder(null, strings.exit.getString(), exitPendingIntent).build())
             .addAction(
                 NotificationCompat.Action.Builder(
                         null,
-                        if (wakeLock?.isHeld == true) {
+                        if (wakeLockHeld) {
                             strings.release_wakelock.getString()
                         } else {
                             strings.acquire_wakelock.getString()
@@ -358,7 +390,7 @@ class SessionService : Service() {
     }
 
     private fun getNotificationContentText(wakelock: Boolean): String {
-        val base = strings.sessions_running.getFilledString(sessions.size)
+        val base = plurals.sessions_running.getQuantityString(sessions.size, sessions.size)
         return if (wakelock) {
             "$base ${strings.wake_lock_active.getString()}"
         } else {

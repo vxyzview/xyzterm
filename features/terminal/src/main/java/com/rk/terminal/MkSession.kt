@@ -103,7 +103,7 @@ object MkSession {
                 mutableListOf("-c", setupSH.absolutePath, *args).toTypedArray()
             } else {
                 actualShell = shell
-                arrayOf("-c", *args)
+                if (args.isEmpty()) arrayOf() else arrayOf("-c", *args)
             }
 
         pendingCommand = null

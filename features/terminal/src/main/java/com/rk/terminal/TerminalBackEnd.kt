@@ -9,6 +9,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
@@ -38,6 +40,7 @@ private val URL_REGEX = Regex("""https?://[^\s"'<>]+|www\.[^\s"'<>]+""")
 private const val BELL_CHANNEL_ID = "terminal_bell"
 private const val BELL_NOTIFICATION_ID = 2
 private const val BELL_NOTIFY_THROTTLE_MS = 5_000L
+private const val FONT_SIZE_PERSIST_DELAY_MS = 300L
 
 class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     override fun onTextChanged(changedSession: TerminalSession) {
@@ -181,12 +184,19 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         if (fontSizeDp < 0f) fontSizeDp = Settings.terminal_font_size.toFloat()
         val newSize = (fontSizeDp * scale).coerceIn(10f, 20f)
         fontSizeDp = newSize
-        Settings.terminal_font_size = newSize.toInt()
         view.setTextSize(dpToPx(newSize, view.context))
+        fontSizePersistHandler.removeCallbacks(persistFontSize)
+        fontSizePersistHandler.postDelayed(persistFontSize, FONT_SIZE_PERSIST_DELAY_MS)
         return 1f
     }
 
     private var fontSizeDp = -1f
+    private val fontSizePersistHandler = Handler(Looper.getMainLooper())
+    private val persistFontSize = Runnable {
+        if (fontSizeDp >= 0f) {
+            Settings.terminal_font_size = fontSizeDp.toInt()
+        }
+    }
 
     override fun onSingleTapUp(e: MotionEvent) {
         val view = terminalView.get()
@@ -271,7 +281,8 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         if (keyCode == KeyEvent.KEYCODE_ENTER && !session.isRunning) {
             val activity = Terminal.instance ?: return false
             val sessionBinder = activity.sessionBinder?.get() ?: return false
-            sessionBinder.terminateSession(sessionBinder.getService().currentSession.value)
+            val finishedId = sessionBinder.getSessionId(session) ?: return false
+            sessionBinder.terminateSession(finishedId)
             if (sessionBinder.getService().sessionList.isEmpty()) {
                 activity.finish()
             } else {

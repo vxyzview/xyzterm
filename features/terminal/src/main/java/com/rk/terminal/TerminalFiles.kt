@@ -11,6 +11,7 @@ import com.rk.utils.application
 // spawn is pure waste. Reset to false if manual file deletion ever matters.
 private var terminalFilesInstalled = false
 
+@Synchronized
 fun setupTerminalFiles() {
     if (terminalFilesInstalled) return
     if (sandboxDir().exists().not() || localBinDir().exists().not()) return
