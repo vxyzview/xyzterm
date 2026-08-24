@@ -12,18 +12,17 @@ object CommandProvider {
     val commandList: List<Command>
         get() = _commandList
 
-    lateinit var DocumentationCommand: DocumentationCommand
-    lateinit var SettingsCommand: SettingsCommand
+    val DocumentationCommand: DocumentationCommand by lazy { DocumentationCommand() }
+    val SettingsCommand: SettingsCommand by lazy { SettingsCommand() }
 
     fun buildCommands() =
         synchronized(this) {
-            registerBuiltin(DocumentationCommand()) { DocumentationCommand = it }
-            registerBuiltin(SettingsCommand()) { SettingsCommand = it }
+            registerBuiltin(DocumentationCommand)
+            registerBuiltin(SettingsCommand)
         }
 
-    private fun <T : Command> registerBuiltin(command: T, assign: (T) -> Unit) {
+    private fun <T : Command> registerBuiltin(command: T) {
         if (_commandList.contains(command)) return
-        assign(command)
         _commandList.add(command)
         KeybindingsManager.invalidate()
     }
