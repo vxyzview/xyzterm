@@ -26,22 +26,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileInputStream
 import java.io.ObjectInputStream
 import java.util.Properties
 import kotlinx.serialization.json.JsonElement as KJsonElement
-
-@Serializable
-data class ThemeEntry(
-    val id: String,
-    val manifest: ThemeManifest,
-    val size: Long? = null,
-    val createdAt: Long,
-    val updatedAt: Long,
-)
 
 class ThemeManager(private val context: Application) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private val mutex = Mutex()
@@ -52,26 +42,8 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
 
     val loadedThemes = mutableStateListOf<ThemeHolder>().apply { addAll(builtInThemes) }
     val localThemes = mutableStateMapOf<String, LocalTheme>()
-    val storeThemes = mutableStateMapOf<String, StoreTheme>()
 
     fun isInstalled(id: String) = localThemes.containsKey(id)
-
-    fun getTheme(id: String): ThemePackage? {
-        val local = localThemes[id]
-        val store = storeThemes[id]
-
-        return when {
-            (local != null && store != null) -> UpdatableTheme(local, store)
-            local != null -> local
-            store != null -> store
-            else -> null
-        }
-    }
-
-    fun getSyncedThemes(): List<ThemePackage> {
-        val allIds = localThemes.keys + storeThemes.keys
-        return allIds.mapNotNull { getTheme(it) }
-    }
 
     fun uninstallTheme(theme: ThemeHolder) {
         val localTheme = localThemes[theme.id] ?: return
@@ -105,8 +77,6 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
     }
 
     suspend fun invalidateSize(pkg: ThemePackage) {
-        if (pkg is StoreTheme) return
-
         withContext(Dispatchers.IO) {
             val dir = themeDir().resolve(pkg.id)
             val cache = resolveCache(dir)

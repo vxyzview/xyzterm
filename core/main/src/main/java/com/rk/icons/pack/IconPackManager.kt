@@ -16,18 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
-
-@Serializable
-data class IconPackEntry(
-    val id: String,
-    val manifest: IconPackManifest,
-    val size: Long? = null,
-    val createdAt: Long,
-    val updatedAt: Long,
-)
 
 val currentIconPack = mutableStateOf<LocalIconPack?>(null)
 val iconPackDir = localDir().child("icon_pack").also { it.createDirIfNot() }
@@ -40,26 +30,8 @@ class IconPackManager(context: Application) : CoroutineScope by CoroutineScope(D
     }
 
     val localIconPacks = mutableStateMapOf<String, LocalIconPack>()
-    val storeIconPacks = mutableStateMapOf<String, StoreIconPack>()
 
     fun isInstalled(id: String) = localIconPacks.containsKey(id)
-
-    fun getIconPackPackage(id: String): IconPackPackage? {
-        val local = localIconPacks[id]
-        val store = storeIconPacks[id]
-
-        return when {
-            local != null && store != null -> UpdatableIconPack(local, store)
-            local != null -> local
-            store != null -> store
-            else -> null
-        }
-    }
-
-    fun getSyncedIconPacks(): List<IconPackPackage> {
-        val allIds = localIconPacks.keys + storeIconPacks.keys
-        return allIds.mapNotNull { getIconPackPackage(it) }
-    }
 
     private suspend fun calcSize(dir: File): Long {
         return FileOperations.calculateContent(FileWrapper(dir)).totalSize
@@ -86,8 +58,6 @@ class IconPackManager(context: Application) : CoroutineScope by CoroutineScope(D
     }
 
     suspend fun invalidateSize(pkg: IconPackPackage) {
-        if (pkg is StoreIconPack) return
-
         withContext(Dispatchers.IO) {
             val dir = iconPackDir.resolve(pkg.id)
             val cache = resolveCache(dir)

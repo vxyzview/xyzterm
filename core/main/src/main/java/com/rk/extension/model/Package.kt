@@ -40,8 +40,3 @@ interface Package {
     suspend fun getReviews(): List<Review>
 }
 
-interface UpdatablePackage : Package {
-    val newVersion: String
-
-    fun hasUpdate(): Boolean
-}
