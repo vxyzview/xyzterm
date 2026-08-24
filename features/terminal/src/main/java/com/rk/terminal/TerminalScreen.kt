@@ -281,17 +281,19 @@ private fun ColumnScope.TerminalView(
 
                     if (FontCache.peekTypeface(fontPath) == null) {
                         scope.launch {
-                            FontCache.loadFont(context, fontPath, isAsset)
                             val resolved =
-                                FontCache.peekTypeface(fontPath)
-                                    ?: run {
-                                        if (fontPath == DEFAULT_TERMINAL_FONT_PATH) {
-                                            null
-                                        } else {
-                                            FontCache.loadFont(context, DEFAULT_TERMINAL_FONT_PATH, true)
-                                            FontCache.peekTypeface(DEFAULT_TERMINAL_FONT_PATH)
+                                withContext(Dispatchers.IO) {
+                                    FontCache.loadFont(context, fontPath, isAsset)
+                                    FontCache.peekTypeface(fontPath)
+                                        ?: run {
+                                            if (fontPath == DEFAULT_TERMINAL_FONT_PATH) {
+                                                null
+                                            } else {
+                                                FontCache.loadFont(context, DEFAULT_TERMINAL_FONT_PATH, true)
+                                                FontCache.peekTypeface(DEFAULT_TERMINAL_FONT_PATH)
+                                            }
                                         }
-                                    }
+                                }
                             val typeface = resolved ?: Typeface.MONOSPACE
                             withContext(Dispatchers.Main) {
                                 terminalView.get()?.apply {
@@ -668,7 +670,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
         // ── Footer actions ─────────────────────────────────────────────
         val activeSession = service?.currentSession?.value
 
-        var keepDeviceAwake by remember(service) { mutableStateOf(service?.wakeLock?.isHeld == true) }
+        val keepDeviceAwake = service?.wakeLock?.isHeld == true
 
         Surface(
             shape = MaterialTheme.shapes.large,
@@ -690,7 +692,6 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     onCheckedChange = { enabled ->
                         val binder = terminalActivity.sessionBinder?.get() ?: return@Switch
                         binder.setWakeLock(enabled)
-                        keepDeviceAwake = enabled
                     },
                 )
             }

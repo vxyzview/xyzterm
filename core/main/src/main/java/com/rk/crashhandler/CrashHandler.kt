@@ -28,6 +28,7 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
                         ex.message.toString().contains("android.widget.HorizontalScrollView${"$"}SavedState")
                 ) {
                     Log.w("CrashHandler", "Ignoring crash")
+                    handlingCrash.set(false)
                     return@runCatching
                 }
 
@@ -37,6 +38,7 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
                 ) {
                     Log.w("CrashHandler", "Ignoring crash")
                     ex.printStackTrace()
+                    handlingCrash.set(false)
                     return@runCatching
                 }
 

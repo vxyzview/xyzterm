@@ -46,7 +46,7 @@ fun SnippetsScreen() {
 
     // Index of the snippet being edited, or NO_ADDING sentinel values.
     var editIndex by remember { mutableStateOf<Int?>(null) }
-    var deleteIndex by remember { mutableStateOf<Int?>(null) }
+    var deleteSnippet by remember { mutableStateOf<Snippet?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
 
     fun persist(list: List<Snippet>) {
@@ -83,7 +83,7 @@ fun SnippetsScreen() {
                     )
                 },
                 endWidget = {
-                    IconButton(onClick = { deleteIndex = index }) {
+                    IconButton(onClick = { deleteSnippet = snippet }) {
                         Icon(imageVector = Icons.Outlined.Delete, contentDescription = stringResource(strings.delete))
                     }
                 },
@@ -102,24 +102,24 @@ fun SnippetsScreen() {
         }
     }
 
-    if (deleteIndex != null) {
+    if (deleteSnippet != null) {
         AlertDialog(
-            onDismissRequest = { deleteIndex = null },
+            onDismissRequest = { deleteSnippet = null },
             title = { Text(stringResource(strings.delete)) },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        deleteIndex?.let { index ->
-                            persist(snippets.toMutableList().apply { removeAt(index) })
+                        deleteSnippet?.let { target ->
+                            persist(snippets.filterNot { it == target })
                         }
-                        deleteIndex = null
+                        deleteSnippet = null
                     },
                 ) {
                     Text(text = stringResource(strings.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { deleteIndex = null }) { Text(text = stringResource(strings.cancel)) }
+                TextButton(onClick = { deleteSnippet = null }) { Text(text = stringResource(strings.cancel)) }
             },
         )
     }

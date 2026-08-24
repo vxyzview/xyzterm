@@ -157,6 +157,8 @@ class Terminal : AppCompatActivity() {
     }
 
     fun handleIntent(intent: Intent) {
+        if (intent === lastHandledIntent) return
+        lastHandledIntent = intent
         this.intent = intent
 
         if (intent.data?.scheme == "xyzterm") {
@@ -252,7 +254,9 @@ class Terminal : AppCompatActivity() {
         /** True while the terminal UI is visible; gates bell notifications. */
         var isForeground = false
 
-        internal val SESSION_NAME_REGEX = Regex("^[A-Za-z0-9_-]+$")
+private var lastHandledIntent: Intent? = null
+
+            internal val SESSION_NAME_REGEX = Regex("^[A-Za-z0-9_-]+$")
     }
 
     private val notificationPermissionLauncher =
@@ -345,10 +349,10 @@ class Terminal : AppCompatActivity() {
         var totalBytes by remember { mutableLongStateOf(0L) }
         var unsupportedCpu by remember { mutableStateOf(false) }
         var downloadStarted by remember { mutableStateOf(false) }
-        var ubuntuInstalled by
-            produceState(initialValue = false) {
-                value = withContext(Dispatchers.IO) { isTerminalInstalled() }
-            }
+        var ubuntuInstalled by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            ubuntuInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() }
+        }
 
         // Helper function to format bytes to MB string
         fun formatBytesToMB(bytes: Long): String {
@@ -512,20 +516,26 @@ class Terminal : AppCompatActivity() {
                             return@LaunchedEffect
                         }
 
-                        val sessionId = binder.getService().currentSession.value
-                        val extractionId =
-                            binder.getSession(sessionId)?.id
-                                ?: binder.createSession(sessionId, TerminalBackEnd(), this@Terminal).id
+                        val extractionId = binder.getService().currentSession.value
+                        if (binder.getSession(extractionId) == null) {
+                            binder.createSession(extractionId, TerminalBackEnd(), this@Terminal)
+                        }
 
                         while (true) {
                             if (withContext(Dispatchers.IO) { isTerminalInstalled() }) {
                                 installNextStage = NEXT_STAGE.NONE
+                                downloadStarted = false
                                 break
                             }
 
                             val session = binder.getSession(extractionId)
                             if (session != null && !session.isRunning) {
-                                errorDialog(strings.setup_failed.getFilledString("extraction failed"))
+                                errorDialog(
+                                    msg =
+                                        strings.setup_failed.getFilledString(
+                                            "extraction failed"
+                                        )
+                                )
                                 installNextStage = null
                                 ubuntuInstalled = false
                                 downloadStarted = false

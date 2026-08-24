@@ -36,8 +36,8 @@ object ShellUtils {
                 process.destroyForcibly()
             }
 
-            outputThread.join(10, TimeUnit.SECONDS)
-            errorThread.join(10, TimeUnit.SECONDS)
+            outputThread.join(TimeUnit.SECONDS.toMillis(10))
+            errorThread.join(TimeUnit.SECONDS.toMillis(10))
 
             Result(
                 exitCode = if (timedOut) -1 else process.exitValue(),
@@ -76,8 +76,8 @@ object ShellUtils {
                 process.destroyForcibly()
             }
 
-            outputThread.join(10, TimeUnit.SECONDS)
-            errorThread.join(10, TimeUnit.SECONDS)
+            outputThread.join(TimeUnit.SECONDS.toMillis(10))
+            errorThread.join(TimeUnit.SECONDS.toMillis(10))
 
             Result(
                 exitCode = if (timedOut) -1 else process.exitValue(),
