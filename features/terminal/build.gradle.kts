@@ -50,4 +50,5 @@ dependencies {
     implementation("com.github.termux.termux-app:terminal-view:v0.118.3")
     implementation("com.github.termux.termux-app:terminal-emulator:v0.118.3")
 
+    testImplementation(libs.junit)
 }

@@ -252,7 +252,7 @@ class Terminal : AppCompatActivity() {
         /** True while the terminal UI is visible; gates bell notifications. */
         var isForeground = false
 
-        private val SESSION_NAME_REGEX = Regex("^[A-Za-z0-9_-]+$")
+        internal val SESSION_NAME_REGEX = Regex("^[A-Za-z0-9_-]+$")
     }
 
     private val notificationPermissionLauncher =

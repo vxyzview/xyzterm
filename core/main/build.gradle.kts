@@ -144,6 +144,8 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines)
 
+    testImplementation(libs.junit)
+
     // Modules
     implementation(project(":core:resources"))
     implementation(project(":core:components"))
