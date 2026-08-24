@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -248,6 +249,8 @@ fun dialog(
     onOk: (AlertDialog?) -> Unit = {},
     onCancel: ((AlertDialog?) -> Unit)? = null,
     cancelable: Boolean = true,
+    neutralText: String? = null,
+    onNeutral: ((AlertDialog?) -> Unit)? = null,
 ) {
     if (activity == null) {
         toast(strings.unknown_error)
@@ -280,6 +283,16 @@ fun dialog(
                                 onCancel.invoke(null)
                             }
                         },
+                    neutralString = neutralText,
+                    onNeutral =
+                        if (onNeutral == null) {
+                            null
+                        } else {
+                            {
+                                DialogHost.remove(id)
+                                onNeutral.invoke(null)
+                            }
+                        },
                 )
             }
         }
@@ -294,12 +307,16 @@ private fun DialogContent(
     okString: String,
     onOk: () -> Unit,
     onCancel: (() -> Unit)? = null,
+    neutralString: String? = null,
+    onNeutral: (() -> Unit)? = null,
 ) {
     Column(modifier = Modifier.padding(24.dp)) {
         if (title != null) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(bottom = 16.dp),
             )
         }
@@ -313,6 +330,20 @@ private fun DialogContent(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (onNeutral != null && neutralString != null) {
+                TextButton(
+                    onClick = {
+                        onNeutral()
+                    }
+                ) {
+                    Text(neutralString)
+                }
+            }
+
+            if (onNeutral != null && neutralString != null) {
+                Spacer(modifier = Modifier.weight(1f))
+            }
+
             if (onCancel != null) {
                 TextButton(
                     onClick = {

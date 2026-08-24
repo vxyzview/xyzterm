@@ -25,6 +25,7 @@ import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.settings.terminal.TerminalCursorStyle
 import com.rk.terminal.virtualkeys.SpecialButton
+import com.rk.utils.copyToClipboard
 import com.rk.utils.dialog
 import com.rk.utils.dpToPx
 import com.rk.utils.openUrl
@@ -221,7 +222,9 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
             title = url,
             msg = strings.open_url_msg.getString(),
             okText = strings.open.getString(),
+            neutralText = strings.copy.getString(),
             onOk = { activity.openUrl(target) },
+            onNeutral = { copyToClipboard(target) },
         )
     }
 
