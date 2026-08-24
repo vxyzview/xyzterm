@@ -10,7 +10,6 @@ AutoName: xyzterm
 
 RepoType: git
 Repo: https://github.com/vxyzview/xyzterm
-
 Binaries: https://github.com/vxyzview/xyzterm/releases/download/v%v/xyzterm-%v.apk
 
 Builds:
