@@ -38,7 +38,10 @@ fun ResponsiveDrawer(
     mainContent: @Composable () -> Unit,
     sheetContent: @Composable ColumnScope.() -> Unit,
 ) {
-    val screenWidthDp = LocalWindowInfo.current.containerSize.width.dp
+    // containerSize is PIXELS: convert via density or the threshold fires on
+    // ordinary phones (1080px ≈ 400dp) instead of real tablets.
+    val density = LocalDensity.current
+    val screenWidthDp = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
     val isPermanentDrawer =
         remember(screenWidthDp, Settings.desktop_mode) {
             Settings.desktop_mode && screenWidthDp >= 1080.dp

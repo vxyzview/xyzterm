@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.rk.DefaultScope
 import com.rk.components.InfoBlock
 import com.rk.components.ResetButton
 import com.rk.components.compose.preferences.base.LocalIsExpandedScreen
@@ -37,6 +38,8 @@ import com.rk.utils.FontCache
 import com.rk.utils.toast
 import java.io.File
 import java.io.FileOutputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun TerminalFontScreen() {
@@ -60,38 +63,42 @@ fun TerminalFontScreen() {
             contract = ActivityResultContracts.GetContent(),
             onResult = { uri: Uri? ->
                 if (uri != null) {
-                    runCatching {
-                        var fileName = "terminal-font.ttf"
+                    // Font files can be multi-MB: copy off the main thread.
+                    DefaultScope.launch(Dispatchers.IO) {
+                        runCatching {
+                            var fileName = "terminal-font.ttf"
 
-                        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                            if (cursor.moveToFirst()) {
-                                val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-                                if (nameIndex != -1) {
-                                    fileName = cursor.getString(nameIndex)
+                            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                                if (cursor.moveToFirst()) {
+                                    val nameIndex =
+                                        cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                                    if (nameIndex != -1) {
+                                        fileName = cursor.getString(nameIndex)
+                                    }
                                 }
                             }
-                        }
 
-                        val destinationFile = File(context.filesDir, "fonts/$fileName")
-                        destinationFile.parentFile?.mkdirs()
-                        // A re-picked font often lands on the same path — drop the
-                        // stale cache entry or the preview keeps the old glyphs.
-                        FontCache.invalidate(destinationFile.absolutePath)
-                        if (destinationFile.exists().not()) {
-                            destinationFile.createNewFile()
-                        }
-                        context.contentResolver.openInputStream(uri).use { inputStream ->
-                            FileOutputStream(destinationFile).use { outputStream ->
-                                inputStream?.copyTo(outputStream)
+                            val destinationFile = File(context.filesDir, "fonts/$fileName")
+                            destinationFile.parentFile?.mkdirs()
+                            // A re-picked font often lands on the same path — drop the
+                            // stale cache entry or the preview keeps the old glyphs.
+                            FontCache.invalidate(destinationFile.absolutePath)
+                            if (destinationFile.exists().not()) {
+                                destinationFile.createNewFile()
                             }
-                        }
+                            context.contentResolver.openInputStream(uri).use { inputStream ->
+                                FileOutputStream(destinationFile).use { outputStream ->
+                                    inputStream?.copyTo(outputStream)
+                                }
+                            }
 
-                        Settings.terminal_font_path = destinationFile.absolutePath
-                        Settings.is_terminal_font_asset = false
-                        fontPath = destinationFile.absolutePath
-                    }.onFailure {
-                        it.printStackTrace()
-                        toast(strings.failed)
+                            Settings.terminal_font_path = destinationFile.absolutePath
+                            Settings.is_terminal_font_asset = false
+                            withContext(Dispatchers.Main) { fontPath = destinationFile.absolutePath }
+                        }.onFailure {
+                            it.printStackTrace()
+                            toast(strings.failed)
+                        }
                     }
                 }
             },

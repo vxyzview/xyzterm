@@ -67,14 +67,17 @@ open class App : Application() {
         application = this
         Res.application = this
 
-        CommandProvider.buildCommands()
-        KeybindingsManager.loadKeybindings()
-
         val currentLocale = Locale.forLanguageTag(Settings.current_lang)
         val appLocale = LocaleListCompat.create(currentLocale)
         AppCompatDelegate.setApplicationLocales(appLocale)
 
         GlobalScope.launch(Dispatchers.IO) {
+            // Command/keybind registration only needs to land before the first
+            // settings screen opens; keep it off the critical startup path.
+            launch(Dispatchers.IO) {
+                CommandProvider.buildCommands()
+                KeybindingsManager.loadKeybindings()
+            }
             launch(Dispatchers.IO) {
                 iconPackManager.indexLocalPacks()
                 iconPackManager.indexStoreIconPacks()

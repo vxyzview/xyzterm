@@ -170,7 +170,7 @@ class CrashActivity : ComponentActivity() {
                                                     } else {
                                                         Icons.AutoMirrored.Filled.ArrowBack
                                                     },
-                                                contentDescription = "Back",
+                                                contentDescription = strings.close.getString(),
                                             )
                                         }
                                     },

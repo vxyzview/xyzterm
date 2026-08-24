@@ -88,6 +88,8 @@ object UpdateManager {
             val latest = GithubReleasesApi(UPDATE_OWNER, UPDATE_REPO).fetchLatestVersion() ?: return@launch
             val installed = installedVersionName() ?: return@launch
             if (!isNewer(latest, installed)) return@launch
+            // The activity may be gone by the time the network call returns.
+            if (activity.isFinishing || activity.isDestroyed) return@launch
 
             val version = latest.removePrefix("v")
             dialogRes(
@@ -131,6 +133,8 @@ object UpdateManager {
             }
 
             val uri = FileProvider.getUriForFile(application!!, "${application!!.packageName}.fileprovider", file)
+            // Multi-MB download may outlive the prompt activity.
+            if (activity.isFinishing || activity.isDestroyed) return@launch
             val intent =
                 Intent(Intent.ACTION_VIEW).apply {
                     setDataAndType(uri, "application/vnd.android.package-archive")

@@ -15,6 +15,10 @@ import com.rk.resources.strings
 import com.rk.utils.application
 import com.rk.utils.getTempDir
 import java.io.File
+import java.util.concurrent.TimeUnit
+
+/** Upper bound for every spawned probe; a hung proot must not wedge the screen. */
+private const val CHECK_TIMEOUT_SECONDS = 15L
 
 /** These checks are intended for troubleshooting terminal issues */
 @Composable
@@ -56,7 +60,14 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                                 }
                                 .start()
 
-                        exitCode = process.waitFor()
+                        exitCode =
+                            if (process.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                                process.exitValue()
+                            } else {
+                                process.destroyForcibly()
+                                printLog("PRoot timed out after ${CHECK_TIMEOUT_SECONDS}s")
+                                124
+                            }
 
                         printLog("Exit code: $exitCode")
 
@@ -155,7 +166,14 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     var working = false
                     try {
                         val process = ubuntuProcess(command = listOf("true"))
-                        val exitCode = process.waitFor()
+                        val exitCode =
+                            if (process.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                                process.exitValue()
+                            } else {
+                                process.destroyForcibly()
+                                printLog("Execution timed out after ${CHECK_TIMEOUT_SECONDS}s")
+                                124
+                            }
                         val stderr = process.readStderr().trim()
 
                         printLog("Exit code: $exitCode")
@@ -180,7 +198,14 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     printLog("Checking DNS resolution (google.com)...")
                     try {
                         val dnsProcess = ubuntuProcess(command = listOf("getent", "hosts", "google.com"))
-                        val dnsExitCode = dnsProcess.waitFor()
+                        val dnsExitCode =
+                            if (dnsProcess.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                                dnsProcess.exitValue()
+                            } else {
+                                dnsProcess.destroyForcibly()
+                                printLog("DNS check timed out after ${CHECK_TIMEOUT_SECONDS}s")
+                                124
+                            }
                         if (dnsExitCode == 0) {
                             printLog("DNS resolution works.")
                         } else {
@@ -212,8 +237,10 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
 
                     try {
                         val process = ubuntuProcess(command = listOf("touch", "/tmp/.test_xed"))
-                        if (process.waitFor() == 0) {
-                            ubuntuProcess(command = listOf("rm", "/tmp/.test_xed")).waitFor()
+                        val touchOk = process.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                        if (touchOk && process.exitValue() == 0) {
+                            ubuntuProcess(command = listOf("rm", "/tmp/.test_xed"))
+                                .waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                         } else {
                             printLog("Abnormality: /tmp is not writable inside sandbox.")
                             abnormalities++

@@ -13,6 +13,7 @@ import android.os.PowerManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
+import com.rk.DefaultScope
 import com.rk.activities.terminal.Terminal
 import com.rk.resources.drawables
 import com.rk.resources.getFilledString
@@ -25,8 +26,6 @@ import com.termux.terminal.TerminalSessionClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -219,8 +218,8 @@ class SessionService : Service() {
             wakeLock?.release()
         }
         if (Settings.auto_backup) {
-            @OptIn(DelicateCoroutinesApi::class)
-            GlobalScope.launch { runCatching { TerminalBackup.autoBackup() } }
+            // IO dispatcher: tar blocks for minutes; Default pool is for CPU.
+            DefaultScope.launch(Dispatchers.IO) { runCatching { TerminalBackup.autoBackup() } }
         }
         super.onDestroy()
     }

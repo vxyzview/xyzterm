@@ -145,9 +145,12 @@ fun origin(): String {
     }
 }
 
-val isV =
+// lazy: origin() touches application!! which is only set in App.onCreate;
+// class-init order must never depend on that.
+val isV by lazy {
     byteArrayOf(99, 111, 109, 46, 97, 110, 100, 114, 111, 105, 100, 46, 118, 101, 110, 100, 105, 110, 103)
         .toString(Charsets.UTF_8) == origin()
+}
 
 fun copyToClipboard(label: String, text: String, showToast: Boolean = true) {
     val clipboard = application!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

@@ -6,7 +6,8 @@ import androidx.compose.ui.text.font.Font
 import java.io.File
 
 object FontCache {
-    private val cachedFonts = mutableMapOf<String, CachedFont>()
+    // Written from IO preload, read from main thread: must be concurrent.
+    private val cachedFonts = java.util.concurrent.ConcurrentHashMap<String, CachedFont>()
 
     data class CachedFont(val typeface: Typeface, val composeFont: Font)
 

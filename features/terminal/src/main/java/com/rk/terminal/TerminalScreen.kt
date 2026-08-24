@@ -262,15 +262,15 @@ private fun ColumnScope.TerminalView(
 
                 val session =
                     if (pendingCommand != null) {
-                        terminalActivity.sessionBinder?.get()!!.getService().currentSession.value =
-                            pendingCommand!!.id
-                        terminalActivity.sessionBinder?.get()!!.getSession(pendingCommand!!.id)
-                            ?: terminalActivity.sessionBinder
-                                ?.get()!!
-                                .createSession(pendingCommand!!.id, client, terminalActivity)
-                                .session
+                        val binder =
+                            terminalActivity.sessionBinder?.get()
+                                ?: return@AndroidView this // service unbound mid-recreate
+                        binder.getService().currentSession.value = pendingCommand!!.id
+                        binder.getSession(pendingCommand!!.id)
+                            ?: binder.createSession(pendingCommand!!.id, client, terminalActivity).session
                     } else {
-                        val binder = terminalActivity.sessionBinder?.get()!!
+                        val binder =
+                            terminalActivity.sessionBinder?.get() ?: return@AndroidView this
                         val service = binder.getService()
                         val current = service.currentSession.value
                         binder.getSession(current)
@@ -280,8 +280,10 @@ private fun ColumnScope.TerminalView(
                                 // session to this view when it lands.
                                 service.onRestored {
                                     if (terminalView.get()?.mTermSession != null) return@onRestored
+                                    val restoredBinder =
+                                        terminalActivity.sessionBinder?.get() ?: return@onRestored
                                     terminalActivity.changeSession(
-                                        terminalActivity.sessionBinder?.get()!!.getService().currentSession.value
+                                        restoredBinder.getService().currentSession.value
                                     )
                                 }
                                 null
@@ -365,13 +367,14 @@ private fun ColumnScope.TerminalView(
 
 @Composable
 private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
-    var showRenameDialog by remember { mutableStateOf(false) }
-    var showExitConfirm by remember { mutableStateOf(false) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
-    var sessionToDelete by remember { mutableStateOf<String?>(null) }
-    var sessionToRename by remember { mutableStateOf("") }
-    var renameValue by remember { mutableStateOf("") }
-    var renameError by remember { mutableStateOf<String?>(null) }
+    // Saveable: rotation must not close a mid-action confirm/rename dialog.
+    var showRenameDialog by rememberSaveable { mutableStateOf(false) }
+    var showExitConfirm by rememberSaveable { mutableStateOf(false) }
+    var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
+    var sessionToDelete by rememberSaveable { mutableStateOf<String?>(null) }
+    var sessionToRename by rememberSaveable { mutableStateOf("") }
+    var renameValue by rememberSaveable { mutableStateOf("") }
+    var renameError by rememberSaveable { mutableStateOf<String?>(null) }
 
     if (showRenameDialog) {
         val service = terminalActivity.sessionBinder?.get()?.getService()
@@ -526,17 +529,14 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                         return newString
                     }
                     terminalView.get()?.let {
+                        val binder = terminalActivity.sessionBinder?.get() ?: return@let
                         val client = TerminalBackEnd()
                         val info =
-                            terminalActivity.sessionBinder
-                                ?.get()!!
-                                .createSession(
-                                    generateUniqueString(
-                                        terminalActivity.sessionBinder?.get()!!.getService().sessionList
-                                    ),
-                                    client,
-                                    terminalActivity,
-                                )
+                            binder.createSession(
+                                generateUniqueString(binder.getService().sessionList),
+                                client,
+                                terminalActivity,
+                            )
                         // Switch to the new session immediately — creating it
                         // silently in the background feels like a dead button.
                         terminalActivity.changeSession(info.id)
@@ -612,7 +612,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                                     renameError = null
                                     showRenameDialog = true
                                 },
-                                modifier = Modifier.size(40.dp),
+                                modifier = Modifier.size(48.dp),
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Edit,
@@ -757,7 +757,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
 
 fun Terminal.changeSession(sessionId: String) {
     val terminalView = terminalView.get() ?: return
-    val binder = sessionBinder!!.get()!!
+    val binder = sessionBinder?.get() ?: return
 
     val client = TerminalBackEnd()
     val session = binder.getSession(sessionId) ?: binder.createSession(sessionId, client, this).session
@@ -779,23 +779,25 @@ fun Terminal.changeSession(sessionId: String) {
     Preference.setString(ACTIVE_SESSION_KEY, sessionId)
 }
 
-// Colors last applied to the terminal, so applyTerminalColors can skip the
-// expensive reset + full repaint when nothing changed. Both the AndroidView
-// update block and the layout-change listener fire on every recomposition
-// and every resize frame (e.g. the IME show/hide animation), where a
-// redundant palette reset + invalidate would double every redraw.
-private var lastAppliedColors: Properties? = null
-private var lastAppliedSurface = 0
-private var lastAppliedOnSurface = 0
+// Signature of colors last applied to a given TerminalView, stored on the view
+// itself (tag) so applyTerminalColors can skip the expensive reset + full
+// repaint when nothing changed. Per-view storage matters: after activity
+// recreation the fresh TerminalView has no signature yet, so its first apply
+// always runs — a process-global cache here would let the new view inherit a
+// stale "already applied" verdict and render with default palette colors.
+private data class TerminalColorSignature(
+    val colors: Properties?,
+    val surface: Int,
+    val onSurface: Int,
+)
 
 private fun TerminalView.applyTerminalColors(onSurfaceColor: Int, surfaceColor: Int, terminalColors: Properties) {
     if (mEmulator == null) return
-    if (terminalColors == lastAppliedColors && onSurfaceColor == lastAppliedOnSurface && surfaceColor == lastAppliedSurface) {
+    val last = tag as? TerminalColorSignature
+    if (last?.colors == terminalColors && last.surface == surfaceColor && last.onSurface == onSurfaceColor) {
         return
     }
-    lastAppliedColors = terminalColors
-    lastAppliedSurface = surfaceColor
-    lastAppliedOnSurface = onSurfaceColor
+    tag = TerminalColorSignature(terminalColors, surfaceColor, onSurfaceColor)
 
     this.onScreenUpdated()
 
