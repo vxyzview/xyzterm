@@ -88,11 +88,9 @@ class LoadingPopup(private val activity: AppCompatActivity?, hideAfterMillis: Lo
     }
 
     fun hide() {
-        if (activity == null) {
-            return
-        }
-        if (activity.isFinishing || activity.isDestroyed) return
-
+        val activity = activity ?: return
+        // Dismiss even while finishing: skipping the dismiss leaks the dialog
+        // window (WindowLeaked). Callers already wrap hide() in runCatching.
         activity.runOnUiThread { dialog?.let { if (it.isShowing) it.dismiss() } }
     }
 }

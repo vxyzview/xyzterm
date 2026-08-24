@@ -152,6 +152,15 @@ object KeybindingsManager {
         return customKeybinds[command.id] ?: command.defaultKeybinds
     }
 
+    /**
+     * Resolves a pressed key combination to its bound command, if any. This is
+     * the runtime half of the keybindings screen: without it, saved binds are
+     * persisted but nothing ever fires them.
+     */
+    fun findCommandForKey(keyCombination: KeyCombination): Command? {
+        val commandId = keybindMap[keyCombination] ?: return null
+        return CommandProvider.commandList.firstOrNull { it.id == commandId }
+    }
 }
 
 @Deprecated("Only used for migration from the old keybindings format.")

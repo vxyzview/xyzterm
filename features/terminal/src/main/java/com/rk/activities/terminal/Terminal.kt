@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.view.KeyEvent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -56,6 +57,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.rk.UpdateManager
 import com.rk.activities.settings.DisclaimerScreen
+import com.rk.commands.ActionContext
+import com.rk.commands.KeyCombination
+import com.rk.commands.KeybindingsManager
 import com.rk.exec.isTerminalInstalled
 import com.rk.file.FilePermission
 import com.rk.file.child
@@ -281,6 +285,21 @@ class Terminal : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        // Runtime keybinding dispatch. Hooked at activity level: the native
+        // TerminalView consumes hardware keys in its own dispatch path, so
+        // Compose-level onPreviewKeyEvent would never see them. Only exact
+        // matches fire, and auto-repeat is ignored.
+        if (event != null && event.repeatCount == 0) {
+            val command = KeybindingsManager.findCommandForKey(KeyCombination.fromEvent(event))
+            if (command != null && command.isEnabled() && command.isSupported()) {
+                command.performCommand(ActionContext(this))
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onDestroy() {

@@ -214,7 +214,9 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
 
 @Composable
 private fun SessionTitle(terminalActivity: Terminal) {
-    val name = terminalActivity.sessionBinder?.get()?.getService()?.currentSession?.value ?: "main"
+    val name =
+        terminalActivity.sessionBinder?.get()?.getService()?.currentSession?.value
+            ?: stringResource(strings.default_session_name)
     Text(
         text = name,
         style = MaterialTheme.typography.titleMedium,
@@ -522,7 +524,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                         var newString: String
 
                         do {
-                            newString = "main #$index"
+                            newString = strings.default_session_numbered.getString().format(index)
                             index++
                         } while (newString in existingStrings)
 
