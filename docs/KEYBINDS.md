@@ -31,7 +31,7 @@ Rebindable in **Settings → Keybindings**.
 
 ## Pinch to zoom
 
-Pinch on the terminal to scale the font (11–45 px).
+Pinch on the terminal to scale the font (10–20 dp).
 
 ## Text selection
 

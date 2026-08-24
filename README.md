@@ -69,6 +69,8 @@ $ pfetch
 ### Sessions & data
 
 - **Multiple named sessions** — add, rename, delete, switch from the drawer; sessions persist across restarts and survive backgrounding.
+- **Keep device awake** — optional wakelock toggle in the drawer so long jobs survive Doze.
+- **Deep links & sharing** — `xyzterm://` links and share-to-terminal always show a confirmation before any text reaches your shell.
 - **Custom binds** — expose any host folder inside the Ubuntu environment at a guest path of your choosing (Settings → Terminal → Custom binds).
 - **Backup & restore** — export your whole sandbox (`home`, packages included) as a `.tar.gz` archive and restore it on a new device. Auto-backup supported, managed archives pruned automatically.
 - **Expose to other apps** — optional SAF document provider so file managers can reach the sandbox.

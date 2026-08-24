@@ -57,19 +57,6 @@ class IconPackManager(context: Application) : CoroutineScope by CoroutineScope(D
         cacheFile.writeText(json.encodeToString(cache))
     }
 
-    suspend fun invalidateSize(pkg: IconPackPackage) {
-        withContext(Dispatchers.IO) {
-            val dir = iconPackDir.resolve(pkg.id)
-            val cache = resolveCache(dir)
-            val newSize = calcSize(dir)
-            writeCache(dir, cache.copy(size = newSize))
-
-            withContext(Dispatchers.Main) {
-                localIconPacks[pkg.id]?.size = newSize
-            }
-        }
-    }
-
     fun uninstallIconPack(iconPackId: String) {
         val iconPack = localIconPacks[iconPackId] ?: return
         File(iconPack.installPath).deleteRecursively()

@@ -1,0 +1,122 @@
+name: Test Build
+
+# Build validation only: compiles the release APK and uploads it to
+# PixelDrain. Never creates tags or GitHub releases - those stay exclusive
+# to Android CI on version tags.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      use_cache:
+        description: 'Use cache for Gradle'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  test-build:
+    name: Build + PixelDrain Upload
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: ${{ github.event.inputs.use_cache != 'false' && 'gradle' || '' }}
+
+      - name: Cache Gradle Build Files
+        if: ${{ github.event.inputs.use_cache != 'false' }}
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Restore signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > /tmp/xyzterm.keystore
+            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$KEYSTORE_PASSWORD" "$KEYSTORE_PASSWORD" > /tmp/signing.properties
+            echo "Using persistent release signing key from repo secrets"
+          else
+            echo "::warning::KEYSTORE_BASE64 secret missing - generating an EPHEMERAL key; this build cannot update over any other build!"
+            PASS=$(openssl rand -hex 16)
+            keytool -genkeypair -v \
+              -keystore /tmp/xyzterm.keystore \
+              -alias xyzterm \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$PASS" -keypass "$PASS" \
+              -dname "CN=xyzterm, OU=xyzterm, O=xyzterm, L=, ST=, C=US"
+            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$PASS" "$PASS" > /tmp/signing.properties
+          fi
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Accept Android SDK licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+      - name: Build with Gradle
+        run: ./gradlew assembleRelease --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-test.apk
+        env:
+          KEYSTORE_FILE: /tmp/xyzterm.keystore
+          SIGNING_PROPERTIES_FILE: /tmp/signing.properties
+
+      - name: Extract version and commit
+        run: |
+          VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          SHORT=$(git rev-parse --short HEAD)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "SHORT=$SHORT" >> "$GITHUB_ENV"
+          mv app/xyzterm-test.apk "app/xyzterm-$VERSION-$SHORT-test.apk"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xyzterm-apk
+          path: app/xyzterm-*.apk
+          retention-days: 14
+
+      - name: Upload APK to PixelDrain
+        if: ${{ success() }}
+        timeout-minutes: 15
+        env:
+          PIXELDRAIN_API_KEY: ${{ secrets.PIXELDRAIN_API_KEY }}
+          VERSION: ${{ env.VERSION }}
+          SHORT: ${{ env.SHORT }}
+        run: |
+          APK=$(ls app/xyzterm-*.apk)
+          RESP=$(curl -s -T "$APK" \
+            -u ":$PIXELDRAIN_API_KEY" \
+            -H "X-Pixeldrain-Name: xyzterm-$VERSION-$SHORT-test.apk" \
+            "https://pixeldrain.com/api/file/")
+          echo "PixelDrain response: $RESP"
+          ID=$(echo "$RESP" | jq -r '.id // empty')
+          if [ -n "$ID" ]; then
+            echo "APK uploaded: https://pixeldrain.com/u/$ID"
+            {
+              echo "### Test build uploaded"
+              echo "- Version: \`$VERSION\`"
+              echo "- Commit: \`$SHORT\`"
+              echo "- Download: https://pixeldrain.com/u/$ID"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::PixelDrain upload failed: $RESP"
+          fi

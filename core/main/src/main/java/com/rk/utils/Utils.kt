@@ -20,8 +20,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -50,7 +48,6 @@ import com.rk.settings.Settings
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -222,31 +219,6 @@ fun Spanned.toAnnotatedString(): AnnotatedString {
     }
     return builder.toAnnotatedString()
 }
-
-// Helper function copied from
-// https://github.com/MohamedRejeb/compose-dnd/blob/65d48ed0f0bd83a0b01263b7e046864bdd4a9048/sample/common/src/commonMain/kotlin/utils/ScrollUtils.kt
-suspend fun handleLazyListScroll(lazyListState: LazyListState, dropIndex: Int): Unit = coroutineScope {
-    val firstVisibleItemIndex = lazyListState.firstVisibleItemIndex
-    val firstVisibleItemScrollOffset = lazyListState.firstVisibleItemScrollOffset
-
-    // Workaround to fix scroll issue when dragging the first item
-    if (dropIndex == 0 || dropIndex == 1) {
-        launch { lazyListState.scrollToItem(firstVisibleItemIndex, firstVisibleItemScrollOffset) }
-    }
-
-    // Animate scroll when entering the first or last item
-    val lastVisibleItemIndex = lazyListState.firstVisibleItemIndex + lazyListState.layoutInfo.visibleItemsInfo.lastIndex
-
-    val firstVisibleItem = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull() ?: return@coroutineScope
-    val scrollAmount = firstVisibleItem.size * 2f
-
-    if (dropIndex <= firstVisibleItemIndex + 1) {
-        launch { lazyListState.animateScrollBy(-scrollAmount) }
-    } else if (dropIndex == lastVisibleItemIndex) {
-        launch { lazyListState.animateScrollBy(scrollAmount) }
-    }
-}
-
 
 fun hasBinaryChars(text: String): Boolean {
     val threshold = 0.3

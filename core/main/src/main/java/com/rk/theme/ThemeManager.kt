@@ -76,19 +76,6 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
         cacheFile.writeText(json.encodeToString(cache))
     }
 
-    suspend fun invalidateSize(pkg: ThemePackage) {
-        withContext(Dispatchers.IO) {
-            val dir = themeDir().resolve(pkg.id)
-            val cache = resolveCache(dir)
-            val newSize = calcSize(dir)
-            writeCache(dir, cache.copy(size = newSize))
-
-            withContext(Dispatchers.Main) {
-                localThemes[pkg.id]?.size = newSize
-            }
-        }
-    }
-
     private suspend fun finishThemeInstall(manifest: ThemeManifest, sourceDir: File?) {
         val installDir = themeDir().child(manifest.id).also { if (!it.exists()) it.mkdirs() }
 

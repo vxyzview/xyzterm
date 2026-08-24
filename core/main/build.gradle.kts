@@ -3,7 +3,6 @@ import groovy.json.JsonOutput
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktfmt)
 }
@@ -133,20 +132,15 @@ dependencies {
     implementation(libs.commons.net)
     implementation(libs.okhttp)
     implementation(libs.material.motion.compose)
-    implementation(libs.photoview)
     implementation(libs.anrwatchdog)
     implementation(libs.kotlin.reflect)
     implementation(libs.androidx.documentfile)
-    implementation(libs.compose.dnd)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidsvg.aar)
     implementation(libs.ec4j.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.semver)
     debugImplementation(libs.leakcanary)
-
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
 
     implementation(libs.kotlinx.coroutines)
 
