@@ -107,16 +107,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="v${{ env.VERSION }}"
-          # Create or update the release for this version tag.
+          # Published releases are immutable: each version is tagged and
+          # uploaded exactly once, from the exact commit that built it.
+          # Reproducible-build verification (F-Droid Binaries) depends on
+          # the asset never changing after publication.
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release $TAG already published - skipping (immutable)."
+            exit 0
+          fi
+          git tag -f "$TAG" "${{ env.COMMIT_HASH }}"
+          git push origin "refs/tags/$TAG"
           gh release create "$TAG" \
             "app/xyzterm-${{ env.VERSION }}.apk" \
             --title "xyzterm ${{ env.VERSION }}" \
             --notes "Automated build of commit \`${{ env.COMMIT_HASH }}\`.**APK:** \`xyzterm-${{ env.VERSION }}.apk\`F-Droid: built from source via [metadata](fdroid/metadata/com.xyzterm.app.yml)." \
-            --repo "${{ github.repository }}" \
-            --generate-notes || \
-          gh release upload "$TAG" \
-            "app/xyzterm-${{ env.VERSION }}.apk" \
-            --clobber \
             --repo "${{ github.repository }}"
 
       - name: Upload APK to PixelDrain
