@@ -11,6 +11,10 @@ AutoName: xyzterm
 RepoType: git
 Repo: https://github.com/vxyzview/xyzterm
 
+# Upstream CI-signed release APKs; lets F-Droid verify its source build
+# matches upstream byte-for-byte (reproducible build). %v = versionName.
+Binaries: https://github.com/vxyzview/xyzterm/releases/download/v%v/xyzterm-%v.apk
+
 AllowedAPKSigningKeys: f665fa36963b20cec9954399d2213331be522aca035ebf56cfa5a6abdf3e3de2
 
 Builds:
@@ -22,9 +26,9 @@ Builds:
     gradle:
       - yes
     prebuild:
-      - sed -r '/(foojay|toolchainVendor)/d' -i ../gradle/gradle-daemon-jvm.properties || true
-      - sed -ri '/foojay-resolver-convention/d' -i ../settings.gradle.kts || true
-      - sed -r '/signingConfigs.getByName/d' -i build.gradle.kts || true
+      - sed -r '/(foojay|toolchainVendor)/d' -i ../gradle/gradle-daemon-jvm.properties
+      - sed -ri '/foojay-resolver-convention/d' -i ../settings.gradle.kts
+      - sed -r '/signingConfigs.getByName/d' -i build.gradle.kts
 
 # CI tags every main-branch release as vX.Y.Z automatically, so upstream
 # metadata can rely on tags from here on.
