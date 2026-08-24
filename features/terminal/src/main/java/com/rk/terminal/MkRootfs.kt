@@ -1,7 +1,8 @@
 package com.rk.terminal
 
 import android.content.Context
-import android.os.Process
+import android.os.Handler
+import android.os.Looper
 import android.system.Os
 import com.rk.exec.TarExtractor
 import com.rk.file.child
@@ -56,8 +57,9 @@ suspend fun extractRootfs(onProgress: (Float) -> Unit) =
         val sandbox = sandboxDir()
         val tarball = File(getTempDir(), "sandbox.tar.gz")
 
+        val mainHandler = Handler(Looper.getMainLooper())
         TarExtractor.extract(tarball, sandbox) { fraction ->
-            withContext(Dispatchers.Main.immediate) { onProgress(fraction) }
+            mainHandler.post { onProgress(fraction) }
         }
 
         val etc = sandbox.child("etc")
@@ -96,7 +98,7 @@ suspend fun extractRootfs(onProgress: (Float) -> Unit) =
     }
 
 private fun appendAndroidGroups(groupFile: File) {
-    val aid = Process.myGid()
+    val aid = Os.getgid()
     val candidates =
         listOf(
             "inet:x:3003",
