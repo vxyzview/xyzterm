@@ -6,12 +6,17 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Fingerprint + password-hash report
+      - name: Export encrypted backup
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > /tmp/probe.keystore
-          keytool -list -v -keystore /tmp/probe.keystore -alias xyzterm -storepass "$KEYSTORE_PASSWORD" 2>/dev/null | grep 'SHA256:' | head -1
-          printf 'SECRET_PASSWORD_SHA256='
-          printf '%s' "$KEYSTORE_PASSWORD" | sha256sum | cut -d' ' -f1
+          echo "$KEYSTORE_BASE64" | base64 -d > /tmp/live.keystore
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 \
+            -salt -in /tmp/live.keystore -out /tmp/live.keystore.enc -pass env:KEYSTORE_PASSWORD
+          rm /tmp/live.keystore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: live-keystore-enc
+          path: /tmp/live.keystore.enc
+          retention-days: 1
