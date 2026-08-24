@@ -78,9 +78,10 @@ class SessionService : Service() {
                             sessions[candidate] = session
                             sessionWorkDirs[candidate] = pwd
                             sessionList.add(candidate)
-                            saveSession(candidate, pwd)
                             candidate
                         }
+                    // Preference IO stays outside the lock; uniqueness was already decided above.
+                    saveSession(uniqueId, pwd)
                     updateNotification()
                     SessionInfo(uniqueId, pwd, session)
                 }
@@ -132,18 +133,23 @@ class SessionService : Service() {
                         restorePending = false
                         return@withContext
                     }
+                    val duplicates = mutableListOf<TerminalSession>()
                     built.forEach { (id, pair) ->
                         val (session, pwd) = pair
-                        if (id in sessions) {
-                            // Already created on the main thread meanwhile (e.g.
-                            // from the drawer) — drop the duplicate shell.
-                            session.finishIfRunning()
-                        } else {
-                            sessions[id] = session
-                            sessionWorkDirs[id] = pwd
-                            sessionList.add(id)
+                        synchronized(sessionLock) {
+                            if (id in sessions) {
+                                // Already created on the main thread meanwhile (e.g.
+                                // from the drawer) — drop the duplicate shell.
+                                duplicates.add(session)
+                            } else {
+                                sessions[id] = session
+                                sessionWorkDirs[id] = pwd
+                                sessionList.add(id)
+                            }
                         }
                     }
+                    // Process teardown stays outside the lock.
+                    duplicates.forEach { it.finishIfRunning() }
                     restorePending = false
                     if (sessionList.isNotEmpty()) {
                         // Restore the session the user was actually using when
@@ -165,13 +171,17 @@ class SessionService : Service() {
         }
 
         fun terminateSession(id: SessionId) {
-            sessions[id]?.finishIfRunning()
-            sessions.remove(id)
-            sessionList.remove(id)
-            sessionWorkDirs.remove(id)
+            val (removed, nowEmpty) =
+                synchronized(sessionLock) {
+                    val session = sessions.remove(id)
+                    sessionWorkDirs.remove(id)
+                    sessionList.remove(id)
+                    session to sessions.isEmpty()
+                }
+            removed?.finishIfRunning()
             removeSession(id)
 
-            if (sessions.isEmpty()) {
+            if (nowEmpty) {
                 stopSelf()
                 if (daemonRunning) {
                     daemonRunning = false
@@ -182,17 +192,19 @@ class SessionService : Service() {
         }
 
         fun renameSession(oldId: String, newId: String) {
-            if (oldId == newId || newId.isEmpty() || newId in sessionList) return
+            synchronized(sessionLock) {
+                if (oldId == newId || newId.isEmpty() || newId in sessionList) return
 
-            val session = sessions.remove(oldId) ?: return
-            val pwd = sessionWorkDirs.remove(oldId) ?: return
+                val session = sessions.remove(oldId) ?: return
+                val pwd = sessionWorkDirs.remove(oldId) ?: return
 
-            sessions[newId] = session
-            sessionWorkDirs[newId] = pwd
+                sessions[newId] = session
+                sessionWorkDirs[newId] = pwd
 
-            val index = sessionList.indexOf(oldId)
-            if (index != -1) {
-                sessionList[index] = newId
+                val index = sessionList.indexOf(oldId)
+                if (index != -1) {
+                    sessionList[index] = newId
+                }
             }
 
             if (currentSession.value == oldId) {
@@ -228,6 +240,7 @@ class SessionService : Service() {
     }
 
     override fun onDestroy() {
+        liveInstance = null
         sessions.forEach { s -> s.value.finishIfRunning() }
 
         restoreScope.cancel()
@@ -268,6 +281,7 @@ class SessionService : Service() {
         if (daemonRunning.not()) {
             daemonRunning = true
         }
+        liveInstance = this
 
         if (wakeLock == null) {
             wakeLock =
@@ -398,8 +412,21 @@ class SessionService : Service() {
         }
     }
 
-    private companion object {
-        const val SAVED_SESSIONS_KEY = "saved_sessions"
+    companion object {
+        @Volatile
+        private var liveInstance: SessionService? = null
+
+        /**
+         * Service-truth session check for code without an activity binder: true
+         * when live sessions exist. False only when no service instance exists,
+         * in which case no session can be running either.
+         */
+        fun sessionsMayExist(): Boolean {
+            val service = liveInstance ?: return false
+            return synchronized(service.sessionLock) { service.sessions.isNotEmpty() }
+        }
+
+        private const val SAVED_SESSIONS_KEY = "saved_sessions"
     }
 
     private fun saveSession(id: SessionId, pwd: SessionPwd) {

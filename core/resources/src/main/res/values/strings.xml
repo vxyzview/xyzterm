@@ -334,6 +334,10 @@
     <string name="compressing">Compressing…</string>
     <string name="extracting">Extracting…</string>
     <string name="moving_into_place">Moving into place…</string>
+    <string name="close_sessions_first">Close all terminal sessions first</string>
+    <string name="backup_swap_old_failed">Could not back up current sandbox</string>
+    <string name="backup_swap_failed">Could not move new sandbox into place — original restored</string>
+    <string name="deleting">Deleting %1$s…</string>
     <plurals name="sessions_running">
         <item quantity="one">%d session running</item>
         <item quantity="other">%d sessions running</item>

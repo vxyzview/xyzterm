@@ -328,8 +328,11 @@ fun SettingsTerminalScreen() {
                                 val loading = LoadingPopup(activity, null)
                                 withContext(Dispatchers.Main) { runCatching { loading.show() } }
                                 runCatching {
+                                    loading.setMessage(strings.deleting.getFilledString("binaries"))
                                     localBinDir().deleteRecursively()
+                                    loading.setMessage(strings.deleting.getFilledString("libraries"))
                                     localLibDir().deleteRecursively()
+                                    loading.setMessage(strings.deleting.getFilledString("sandbox"))
                                     sandboxDir().deleteRecursively()
                                     localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
                                 }

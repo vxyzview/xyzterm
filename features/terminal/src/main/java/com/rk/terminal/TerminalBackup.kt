@@ -12,20 +12,32 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/** Distinct swap failure modes, so callers can show a specific message. */
+internal enum class SwapFailure {
+    /** The pre-swap backup of the current sandbox could not be prepared. */
+    OLD_FAILED,
+
+    /** Staging could not replace the live sandbox; the original was restored. */
+    MOVE_FAILED,
+}
+
 /**
  * Atomically replaces [liveDir] with [stagingDir]: clears a stale [oldDir],
  * moves the live directory aside, renames staging into place and removes the
  * old copy. On any failure the previous live directory is restored untouched.
  */
-internal fun swapSandbox(liveDir: File, stagingDir: File, oldDir: File): Boolean {
-    if (oldDir.exists() && !oldDir.deleteRecursively()) return false
-    if (liveDir.exists() && !liveDir.renameTo(oldDir)) return false
+internal fun swapSandbox(liveDir: File, stagingDir: File, oldDir: File): Boolean =
+    swapSandboxChecked(liveDir, stagingDir, oldDir) == null
+
+internal fun swapSandboxChecked(liveDir: File, stagingDir: File, oldDir: File): SwapFailure? {
+    if (oldDir.exists() && !oldDir.deleteRecursively()) return SwapFailure.OLD_FAILED
+    if (liveDir.exists() && !liveDir.renameTo(oldDir)) return SwapFailure.OLD_FAILED
     if (!stagingDir.renameTo(liveDir)) {
         oldDir.renameTo(liveDir)
-        return false
+        return SwapFailure.MOVE_FAILED
     }
     oldDir.deleteRecursively()
-    return true
+    return null
 }
 
 /** Creates and prunes terminal environment backups (sandbox tar.gz archives). */
@@ -164,8 +176,12 @@ object TerminalBackup {
                 val local = localDir()
                 val sandboxPath = local.child("sandbox")
                 val oldSandbox = local.child("sandbox.old")
-                if (!swapSandbox(sandboxPath, staging, oldSandbox)) {
-                    return@withContext "could not swap sandbox into place"
+                when (swapSandboxChecked(sandboxPath, staging, oldSandbox)) {
+                    null -> {}
+                    SwapFailure.OLD_FAILED ->
+                        return@withContext strings.backup_swap_old_failed.getString()
+                    SwapFailure.MOVE_FAILED ->
+                        return@withContext strings.backup_swap_failed.getString()
                 }
 
                 localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()

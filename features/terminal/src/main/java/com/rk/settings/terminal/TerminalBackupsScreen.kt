@@ -34,6 +34,7 @@ import com.rk.components.compose.preferences.base.PreferenceTemplate
 import com.rk.resources.getString
 import com.rk.resources.getFilledString
 import com.rk.resources.strings
+import com.rk.terminal.SessionService
 import com.rk.terminal.TerminalBackup
 import com.rk.utils.LoadingPopup
 import com.rk.utils.dialogRes
@@ -116,12 +117,16 @@ fun TerminalBackupsScreen() {
             BackupItem(
                 backup = backup,
                 onRestore = {
-                    val service = Terminal.instance?.sessionBinder?.get()?.getService()
-                    if (service != null && service.sessionList.isNotEmpty()) {
+                    // Binder path is vacuous when the activity died but the
+                    // daemon lives on; fall back to service truth, failing safe.
+                    val hasSessions =
+                        Terminal.instance?.sessionBinder?.get()?.getService()?.sessionList?.isNotEmpty()
+                            ?: SessionService.sessionsMayExist()
+                    if (hasSessions) {
                         dialogRes(
                             activity = activity,
                             title = strings.attention.getString(),
-                            msg = "Close all sessions first",
+                            msg = strings.close_sessions_first.getString(),
                             onCancel = {},
                         )
                     } else {
