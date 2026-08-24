@@ -49,7 +49,7 @@ class SessionService : Service() {
             return this@SessionService
         }
 
-        fun createSession(
+        suspend fun createSession(
             id: SessionId,
             client: TerminalSessionClient,
             activity: Terminal,

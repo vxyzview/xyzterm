@@ -11,16 +11,46 @@ import com.rk.file.sandboxHomeDir
 import com.rk.settings.Settings
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object MkSession {
 
-    fun createSession(
+    /** Everything the [TerminalSession] constructor needs, assembled off the main thread. */
+    private class Prepared(
+        val workingDir: String,
+        val processCwd: String,
+        val shell: String,
+        val args: Array<String>,
+        val env: List<String>,
+    )
+
+    suspend fun createSession(
         context: Context,
         sessionClient: TerminalSessionClient,
         sessionId: String,
         isExtraction: Boolean = false,
         cwd: String? = null,
     ): Pair<TerminalSession, SessionPwd> {
+        val prepared =
+            withContext(Dispatchers.IO) { prepareEnvironment(context, sessionId, isExtraction, cwd) }
+
+        return withContext(Dispatchers.Main.immediate) {
+            val session =
+                TerminalSession(
+                    prepared.shell,
+                    prepared.processCwd,
+                    prepared.args,
+                    prepared.env.toTypedArray(),
+                    Settings.terminal_scrollback_buffer,
+                    sessionClient,
+                )
+            session to prepared.workingDir
+        }
+    }
+
+    /** All disk I/O and environment assembly; must not run on the main thread. */
+    private fun prepareEnvironment(context: Context, sessionId: String, isExtraction: Boolean, cwd: String?): Prepared {
         val workingDir = cwd ?: getPwd(context)
 
         val tmpDir = localDir().child("tmp").child(sessionId)
@@ -78,14 +108,13 @@ object MkSession {
 
         pendingCommand = null
 
-        return TerminalSession(
-            actualShell,
-            localDir(context).absolutePath,
-            actualArgs,
-            env.toTypedArray(),
-            Settings.terminal_scrollback_buffer,
-            sessionClient,
-        ) to workingDir
+        return Prepared(
+            workingDir = workingDir,
+            processCwd = localDir(context).absolutePath,
+            shell = actualShell,
+            args = actualArgs,
+            env = env,
+        )
     }
 }
 
