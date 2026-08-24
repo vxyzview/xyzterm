@@ -42,6 +42,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -100,8 +101,10 @@ import com.termux.terminal.TerminalColors
 import com.termux.terminal.TextStyle
 import com.termux.view.TerminalView
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.util.Properties
 
@@ -163,6 +166,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                             bellPulse = false
                                         }
                                     }
+                                    val bellRingLabel = stringResource(strings.bell_ring)
                                     Box(
                                         modifier =
                                             Modifier
@@ -174,7 +178,8 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                                         MaterialTheme.colorScheme.primary
                                                     },
                                                     CircleShape,
-                                                ),
+                                                )
+                                                .semantics { contentDescription = bellRingLabel },
                                     )
                                     SessionTitle(terminalActivity)
                                 }
@@ -269,16 +274,33 @@ private fun ColumnScope.TerminalView(
                 if (fontFile.exists()) {
                     setTypeface(Typeface.createFromFile(fontFile))
                 } else {
-                    val fontPath = Settings.terminal_font_path
-                    val font =
-                        if (fontPath.isNotEmpty()) {
-                            FontCache.getTypeface(context, fontPath, Settings.is_terminal_font_asset)
-                                ?: FontCache.getTypeface(context, DEFAULT_TERMINAL_FONT_PATH, true)
-                        } else {
-                            FontCache.getTypeface(context, DEFAULT_TERMINAL_FONT_PATH, true)
-                        }
+                    val customPath = Settings.terminal_font_path
+                    val fontPath = customPath.ifEmpty { DEFAULT_TERMINAL_FONT_PATH }
+                    val isAsset = customPath.isEmpty() || Settings.is_terminal_font_asset
+                    setTypeface(FontCache.peekTypeface(fontPath) ?: Typeface.MONOSPACE)
 
-                    setTypeface(font)
+                    if (FontCache.peekTypeface(fontPath) == null) {
+                        scope.launch {
+                            FontCache.loadFont(context, fontPath, isAsset)
+                            val resolved =
+                                FontCache.peekTypeface(fontPath)
+                                    ?: run {
+                                        if (fontPath == DEFAULT_TERMINAL_FONT_PATH) {
+                                            null
+                                        } else {
+                                            FontCache.loadFont(context, DEFAULT_TERMINAL_FONT_PATH, true)
+                                            FontCache.peekTypeface(DEFAULT_TERMINAL_FONT_PATH)
+                                        }
+                                    }
+                            val typeface = resolved ?: Typeface.MONOSPACE
+                            withContext(Dispatchers.Main) {
+                                terminalView.get()?.apply {
+                                    setTypeface(typeface)
+                                    invalidate()
+                                }
+                            }
+                        }
+                    }
                 }
 
                 addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
@@ -645,6 +667,34 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
 
         // ── Footer actions ─────────────────────────────────────────────
         val activeSession = service?.currentSession?.value
+
+        var keepDeviceAwake by remember(service) { mutableStateOf(service?.wakeLock?.isHeld == true) }
+
+        Surface(
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp),
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(strings.keep_device_awake),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f).padding(vertical = 14.dp),
+                )
+                Switch(
+                    checked = keepDeviceAwake,
+                    onCheckedChange = { enabled ->
+                        val binder = terminalActivity.sessionBinder?.get() ?: return@Switch
+                        binder.setWakeLock(enabled)
+                        keepDeviceAwake = enabled
+                    },
+                )
+            }
+        }
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Surface(

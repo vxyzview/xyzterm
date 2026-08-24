@@ -1,12 +1,16 @@
 package com.rk.terminal
 
 import android.view.KeyEvent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -183,6 +187,28 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
 
                 LaunchedEffect(Unit) { focusRequester.requestFocus() }
             }
+        }
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+    ) {
+        repeat(pagerState.pageCount) { page ->
+            Box(
+                modifier =
+                    Modifier
+                        .size(6.dp)
+                        .background(
+                            color =
+                                if (pagerState.currentPage == page) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerHighest
+                                },
+                            shape = CircleShape,
+                        ),
+            )
         }
     }
 

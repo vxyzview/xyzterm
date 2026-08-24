@@ -46,6 +46,7 @@ fun SnippetsScreen() {
 
     // Index of the snippet being edited, or NO_ADDING sentinel values.
     var editIndex by remember { mutableStateOf<Int?>(null) }
+    var deleteIndex by remember { mutableStateOf<Int?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
 
     fun persist(list: List<Snippet>) {
@@ -82,9 +83,7 @@ fun SnippetsScreen() {
                     )
                 },
                 endWidget = {
-                    IconButton(onClick = {
-                        persist(snippets.toMutableList().apply { removeAt(index) })
-                    }) {
+                    IconButton(onClick = { deleteIndex = index }) {
                         Icon(imageVector = Icons.Outlined.Delete, contentDescription = stringResource(strings.delete))
                     }
                 },
@@ -101,6 +100,28 @@ fun SnippetsScreen() {
                 )
             }
         }
+    }
+
+    if (deleteIndex != null) {
+        AlertDialog(
+            onDismissRequest = { deleteIndex = null },
+            title = { Text(stringResource(strings.delete)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        deleteIndex?.let { index ->
+                            persist(snippets.toMutableList().apply { removeAt(index) })
+                        }
+                        deleteIndex = null
+                    },
+                ) {
+                    Text(text = stringResource(strings.delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteIndex = null }) { Text(text = stringResource(strings.cancel)) }
+            },
+        )
     }
 
     val editing = editIndex?.let { snippets.getOrNull(it) }

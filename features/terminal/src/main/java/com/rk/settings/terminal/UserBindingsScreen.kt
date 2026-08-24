@@ -40,6 +40,7 @@ fun UserBindingsScreen() {
     val bindings = remember(refreshTrigger) { UserBindings.decode(Settings.custom_bindings) }
 
     var showAddDialog by remember { mutableStateOf(false) }
+    var bindingToDelete by remember { mutableStateOf<Binding?>(null) }
 
     fun persist(list: List<Binding>) {
         Settings.custom_bindings = UserBindings.encode(list)
@@ -74,7 +75,7 @@ fun UserBindingsScreen() {
                     )
                 },
                 endWidget = {
-                    IconButton(onClick = { persist(bindings.toMutableList().apply { remove(binding) }) }) {
+                    IconButton(onClick = { bindingToDelete = binding }) {
                         Icon(imageVector = Icons.Outlined.Delete, contentDescription = stringResource(strings.delete))
                     }
                 },
@@ -91,6 +92,28 @@ fun UserBindingsScreen() {
                 )
             }
         }
+    }
+
+    if (bindingToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { bindingToDelete = null },
+            title = { Text(stringResource(strings.delete)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        bindingToDelete?.let { binding ->
+                            persist(bindings.toMutableList().apply { remove(binding) })
+                        }
+                        bindingToDelete = null
+                    },
+                ) {
+                    Text(text = stringResource(strings.delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { bindingToDelete = null }) { Text(text = stringResource(strings.cancel)) }
+            },
+        )
     }
 
     if (showAddDialog) {

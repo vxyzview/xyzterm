@@ -323,4 +323,14 @@
     <string name="show_extra_keys">Show extra keys</string>
     <string name="show_extra_keys_desc">Show the extra keys row below the terminal</string>
     <string name="font_preview">AaBbCc 0123 ~$ ls -la | grep xyz</string>
+    <string name="search_matches">Matches: %1$d of %2$d</string>
+    <string name="search_no_results">No matches</string>
+    <string name="bell_ring">Terminal bell</string>
+    <string name="keep_device_awake">Keep device awake</string>
+    <string name="install_extracting_title">Extracting Ubuntu…</string>
+    <string name="install_extracting_warning">Keep the app open until extraction finishes</string>
+    <plurals name="sessions_running">
+        <item quantity="one">%d session running</item>
+        <item quantity="other">%d sessions running</item>
+    </plurals>
 </resources>

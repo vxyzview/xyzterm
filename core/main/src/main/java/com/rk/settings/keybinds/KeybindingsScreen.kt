@@ -72,6 +72,7 @@ import com.rk.theme.Typography
 fun KeybindingsScreen() {
     var editCommandKeybinds by remember { mutableStateOf<Command?>(null) }
     var refreshTrigger by remember { mutableIntStateOf(0) }
+    var showResetConfirm by remember { mutableStateOf(false) }
     val searchQuery = rememberTextFieldState("")
 
     val commands = CommandProvider.commandList
@@ -98,10 +99,7 @@ fun KeybindingsScreen() {
         label = stringResource(id = strings.keybindings),
         backArrowVisible = true,
         actions = {
-            ResetButton {
-                KeybindingsManager.resetAllKeys()
-                refreshTrigger++
-            }
+            ResetButton { showResetConfirm = true }
         },
     ) {
         item { InfoBlock(text = stringResource(id = strings.keybinds_info)) }
@@ -158,6 +156,27 @@ fun KeybindingsScreen() {
         }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
+    }
+
+    if (showResetConfirm) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirm = false },
+            title = { Text(text = stringResource(strings.reset_all)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showResetConfirm = false
+                        KeybindingsManager.resetAllKeys()
+                        refreshTrigger++
+                    },
+                ) {
+                    Text(text = stringResource(strings.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetConfirm = false }) { Text(text = stringResource(strings.cancel)) }
+            },
+        )
     }
 
     editCommandKeybinds?.let { command ->

@@ -56,6 +56,10 @@ object FontCache {
         return getCachedFont(context, path, isAsset)?.typeface
     }
 
+    fun peekTypeface(path: String): Typeface? {
+        return cachedFonts[path]?.typeface
+    }
+
     fun getFont(context: Context, path: String, isAsset: Boolean): Font? {
         return getCachedFont(context, path, isAsset)?.composeFont
     }
