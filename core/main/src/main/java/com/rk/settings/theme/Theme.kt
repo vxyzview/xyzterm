@@ -46,6 +46,7 @@ import com.rk.icons.pack.currentIconPack
 import com.rk.resources.drawables
 import com.rk.resources.strings
 import com.rk.settings.Settings
+import com.rk.theme.blueberry
 import com.rk.theme.currentTheme
 import kotlinx.coroutines.launch
 
@@ -89,6 +90,7 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
 
         PreferenceGroup(heading = stringResource(strings.themes)) {
             themeManager.loadedThemes.forEach { theme ->
+                val installed = themeManager.isInstalled(theme.id)
                 SettingsItem(
                     isEnabled = !Settings.monet,
                     label = theme.name,
@@ -108,6 +110,33 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                         Settings.theme = theme.id
                         DefaultScope.launch { Events.publish(AppEvent.ThemeChanged(theme, oldTheme)) }
                     },
+                    endWidget =
+                        if (installed) {
+                            {
+                                IconButton(
+                                    enabled = !Settings.monet,
+                                    onClick = {
+                                        if (currentTheme.value.id == theme.id) {
+                                            val oldTheme = currentTheme.value
+                                            // Fall back to the built-in theme so the
+                                            // app never points at a deleted package.
+                                            Settings.theme = blueberry.id
+                                            DefaultScope.launch {
+                                                Events.publish(AppEvent.ThemeChanged(blueberry, oldTheme))
+                                            }
+                                        }
+                                        themeManager.uninstallTheme(theme)
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Delete,
+                                        contentDescription = stringResource(strings.delete),
+                                    )
+                                }
+                            }
+                        } else {
+                            null
+                        },
                 )
             }
 

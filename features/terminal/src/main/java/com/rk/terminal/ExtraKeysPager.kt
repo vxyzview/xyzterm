@@ -73,6 +73,9 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
     ) { page ->
         when (page) {
             0 -> {
+                // Tracks the last key matrix applied to the view so the update
+                // block only reloads when the setting actually changed.
+                var appliedExtraKeys by remember { mutableStateOf(Settings.terminal_extra_keys) }
                 AndroidView(
                     factory = { context ->
                         VirtualKeysView(context, null).apply {
@@ -94,6 +97,27 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                 .onFailure {
                                     toast(strings.invalid_terminal_extra_keys)
                                     reload(
+                                        VirtualKeysInfo(
+                                            DEFAULT_TERMINAL_EXTRA_KEYS,
+                                            "",
+                                            VirtualKeysConstants.CONTROL_CHARS_ALIASES,
+                                        )
+                                    )
+                                }
+                        }
+                    },
+                    update = { view ->
+                        val current = Settings.terminal_extra_keys
+                        if (current != appliedExtraKeys) {
+                            appliedExtraKeys = current
+                            runCatching {
+                                view.reload(
+                                    VirtualKeysInfo(current, "", VirtualKeysConstants.CONTROL_CHARS_ALIASES)
+                                )
+                            }
+                                .onFailure {
+                                    toast(strings.invalid_terminal_extra_keys)
+                                    view.reload(
                                         VirtualKeysInfo(
                                             DEFAULT_TERMINAL_EXTRA_KEYS,
                                             "",

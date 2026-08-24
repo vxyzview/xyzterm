@@ -7,6 +7,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -98,7 +99,7 @@ fun RoundedValueSlider(
         enabled = enabled,
         min = sliderMin,
         max = max,
-        default = default.coerceAtLeast(min),
+        default = default.coerceIn(min, max),
         steps = ((max - sliderMin) / stepSize).coerceAtLeast(1) - 1,
         valueMapper = { value ->
             value.toInt().coerceAtLeast(min)
@@ -117,7 +118,7 @@ private fun roundedSliderMin(min: Int): Int {
     }
 
     val rounded = (min / magnitude) * magnitude
-    return if (rounded == magnitude) 0 else rounded
+    return rounded
 }
 
 @Composable
@@ -136,7 +137,16 @@ private fun ValueSliderImpl(
 ) {
     val scope = rememberCoroutineScope()
     var job by remember { mutableStateOf<Job?>(null) }
-    var sliderPosition by remember { mutableIntStateOf(default) }
+    var sliderPosition by remember(default) { mutableIntStateOf(default) }
+
+    // Flush pending debounced writes when leaving the screen, otherwise the
+    // last drag is silently dropped.
+    DisposableEffect(Unit) {
+        onDispose {
+            job?.cancel()
+            onValueChanged(sliderPosition)
+        }
+    }
 
     Surface(
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -177,7 +187,8 @@ private fun ValueSliderImpl(
                     },
                     enabled = enabled,
                     steps = steps,
-                    valueRange = min.toFloat()..max.toFloat(),
+                    valueRange =
+                        if (max > min) min.toFloat()..max.toFloat() else min.toFloat()..(min + 1).toFloat(),
                 )
             }
         }

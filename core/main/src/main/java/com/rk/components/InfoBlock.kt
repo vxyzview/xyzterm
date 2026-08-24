@@ -38,8 +38,8 @@ fun InfoBlock(
         Card(
             modifier =
                 Modifier.semantics { role = Role.Button }
-                    .clickable(enabled = onClick != null, onClick = { onClick?.invoke() })
                     .padding(horizontal = 16.dp)
+                    .clickable(enabled = onClick != null, onClick = { onClick?.invoke() })
                     .fillMaxWidth(),
             shape = shape,
             colors =

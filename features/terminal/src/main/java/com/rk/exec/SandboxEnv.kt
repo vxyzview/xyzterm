@@ -75,6 +75,15 @@ object SandboxEnv {
             "no" -> env["PROOT_NO_SECCOMP"] = "1"
         }
 
+        // sandbox.sh builds its own proot args and never runs getDefaultBindings(),
+        // so hand it the user's custom binds here. Newline-separated entries of
+        // "outside" or "outside:inside"; the script drops missing sources.
+        env["CUSTOM_BINDS"] =
+            UserBindings.decode(Settings.custom_bindings)
+                .joinToString("\n") { binding ->
+                    if (binding.inside.isNullOrBlank()) binding.outside else "${binding.outside}:${binding.inside}"
+                }
+
         val loader32 = "$nativeLibDir/libloader32.so"
         if (File(loader32).exists()) {
             env["PROOT_LOADER_32"] = loader32

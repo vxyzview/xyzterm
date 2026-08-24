@@ -46,7 +46,9 @@ fun LogScreen(
     flow: Flow<String>? = null,
     toolbarButtons: @Composable RowScope.() -> Unit,
 ) {
-    var logs by remember { mutableStateOf(logText) }
+    // Keyed on logText so a new filter level replaces the buffer instead of
+    // the screen keeping the stale initial text forever.
+    var logs by remember(logText) { mutableStateOf(logText) }
 
     LaunchedEffect(flow) {
         flow?.collect { newLine ->

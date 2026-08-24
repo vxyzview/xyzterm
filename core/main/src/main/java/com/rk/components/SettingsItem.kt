@@ -46,7 +46,7 @@ fun SettingsItem(
     modifier: Modifier = Modifier,
     label: String,
     default: Boolean,
-    state: MutableState<Boolean> = remember { mutableStateOf(default) },
+    state: MutableState<Boolean> = remember(default) { mutableStateOf(default) },
     description: String? = null,
     singleLineDescription: Boolean = false,
     reactiveSideEffect: ((checked: Boolean) -> Boolean)? = null,
@@ -65,12 +65,17 @@ fun SettingsItem(
             onClick = onClick,
             onLongClick = onLongClick,
             onCheckedChange = {
-                if (isSwitchLocked.not()) {
-                    state.value = !state.value
-                }
+                val target = if (isSwitchLocked) state.value else !state.value
                 if (reactiveSideEffect != null) {
-                    state.value = reactiveSideEffect.invoke(state.value) == true
+                    // Validator decides: approved applies the target value,
+                    // denied keeps the current one.
+                    if (reactiveSideEffect.invoke(target)) {
+                        state.value = target
+                    }
                 } else {
+                    if (isSwitchLocked.not()) {
+                        state.value = target
+                    }
                     sideEffect?.invoke(state.value)
                 }
             },

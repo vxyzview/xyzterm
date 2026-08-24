@@ -48,7 +48,10 @@ fun NextScreenCard(
         icon = icon,
         iconRes = iconRes,
         startIconTint = startIconTint,
-        onClick = { navController?.navigate(route.route) },
+        onClick = {
+            // Unregistered route or torn-down nav controller must never crash.
+            runCatching { navController?.navigate(route.route) }
+        },
     )
 }
 

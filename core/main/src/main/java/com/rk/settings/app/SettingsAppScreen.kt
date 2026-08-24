@@ -200,22 +200,31 @@ fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) 
                                 val content = uri.toFileObject(true).readText()
                                 val json: Map<String, Any> = gson.fromJson(content, type)
 
-                                Preference.clearData()
+                                // Coerce and validate BEFORE wiping current settings:
+                                // an unknown key or mismatched type must be skipped,
+                                // never crash after clearData() (partial restore +
+                                // lost settings).
+                                val coerced = mutableMapOf<String, Any>()
                                 json.forEach { (key, value) ->
-                                    val expectedType = Preference.preferenceTypes[key]
+                                    if (value !is Number && value !is Boolean && value !is String) {
+                                        return@forEach
+                                    }
 
                                     val fixedValue =
-                                        when (expectedType) {
+                                        when (Preference.preferenceTypes[key]) {
                                             Float::class -> (value as Number).toFloat()
                                             Int::class -> (value as Number).toInt()
                                             Long::class -> (value as Number).toLong()
-                                            Boolean::class -> value as Boolean
-                                            String::class -> value as String
-                                            else -> value
+                                            Boolean::class -> value as? Boolean ?: return@forEach
+                                            String::class -> value as? String ?: return@forEach
+                                            else -> return@forEach
                                         }
 
-                                    Preference.put(key, fixedValue)
+                                    coerced[key] = fixedValue
                                 }
+
+                                Preference.clearData()
+                                coerced.forEach { (key, value) -> Preference.put(key, value) }
 
                                 // Update theme in the UI if the setting changed
                                 withContext(Dispatchers.Main) {

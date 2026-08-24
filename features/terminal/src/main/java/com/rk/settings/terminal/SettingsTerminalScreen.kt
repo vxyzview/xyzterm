@@ -74,6 +74,8 @@ fun SettingsTerminalScreen() {
     PreferenceLayout(label = stringResource(id = strings.terminal), backArrowVisible = true) {
         val context = LocalContext.current
         val activity = LocalActivity.current as? AppCompatActivity
+        // State-backed so uninstall/restore updates the card immediately.
+        var terminalInstalled by remember { mutableStateOf(isTerminalInstalled()) }
 
         PreferenceGroup(heading = stringResource(strings.advanced)) {
             if (FeatureRegistry.isEnabled("debug_mode")) {
@@ -155,7 +157,7 @@ fun SettingsTerminalScreen() {
         PreferenceGroup(heading = stringResource(strings.user_data)) {
             // Ubuntu install is optional now: show a one-tap entry that opens the
             // terminal's opt-in install screen instead of forcing the download.
-            if (isTerminalInstalled().not()) {
+            if (!terminalInstalled) {
                 SettingsItem(
                     label = stringResource(strings.install),
                     description = stringResource(strings.install_ubuntu_optional_desc),
@@ -193,7 +195,9 @@ fun SettingsTerminalScreen() {
                             withContext(Dispatchers.Main + NonCancellable) {
                                 runCatching { loading.hide() }
                                 if (error == null) {
-                                    toast(strings.success)
+                                    terminalInstalled = isTerminalInstalled()
+                                    // Running sessions keep the old rootfs mapped.
+                                    toast(strings.restart_required)
                                 } else {
                                     toast(strings.setup_failed.getFilledString(error))
                                 }
@@ -232,20 +236,28 @@ fun SettingsTerminalScreen() {
                                     try {
                                         val ok = TerminalBackup.create(targetFile)
 
-                                        withContext(Dispatchers.Main + NonCancellable) {
-                                            runCatching { loading.hide() }
-                                            if (ok) {
-                                                toast(strings.success)
-                                            } else {
-                                                toast(strings.failed)
-                                            }
+                                        // Copy into the SAF target first, then toast:
+                                        // success must mean the archive actually landed.
+                                        var copied = false
+                                        if (ok) {
+                                            copied =
+                                                runCatching {
+                                                    targetFile.inputStream().use { inputStream ->
+                                                        fileObject.getOutputStream(false).use { outputStream ->
+                                                            inputStream.copyTo(outputStream)
+                                                        }
+                                                    }
+                                                }
+                                                    .onFailure { it.printStackTrace() }
+                                                    .isSuccess
                                         }
 
-                                        if (ok) {
-                                            targetFile.inputStream().use { inputStream ->
-                                                fileObject.getOutputStream(false).use { outputStream ->
-                                                    inputStream.copyTo(outputStream)
-                                                }
+                                        withContext(Dispatchers.Main + NonCancellable) {
+                                            runCatching { loading.hide() }
+                                            when {
+                                                ok && copied -> toast(strings.success)
+                                                ok -> toast(strings.export_failed)
+                                                else -> toast(strings.failed)
                                             }
                                         }
                                     } catch (e: CancellationException) {
@@ -270,7 +282,7 @@ fun SettingsTerminalScreen() {
                 description = stringResource(strings.restore_terminal),
                 showSwitch = false,
                 default = false,
-                sideEffect = { restore.launch("application/gzip") },
+                sideEffect = { restore.launch("*/*") },
             )
 
             SettingsItem(
@@ -316,6 +328,7 @@ fun SettingsTerminalScreen() {
                                     sandboxDir().deleteRecursively()
                                     localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
                                 }
+                                terminalInstalled = false
                                 withContext(Dispatchers.Main + NonCancellable) {
                                     runCatching { loading.hide() }
                                     toast(strings.success)

@@ -65,7 +65,8 @@ fun TerminalBackupsScreen() {
 
     PreferenceLayoutLazyColumn(label = stringResource(strings.manage_backups), backArrowVisible = true) {
         item {
-            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            // Horizontal only: the lazy layout already spaces items 8dp apart.
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {

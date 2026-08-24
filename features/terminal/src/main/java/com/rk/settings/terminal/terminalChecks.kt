@@ -98,13 +98,9 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                         printLog("Error while running shell: ${e.message}")
                     }
 
-                    exitcode == 0 &&
-                        shell.exists() &&
-                        shell1.exists() &&
-                        shell.canRead() &&
-                        shell1.canRead() &&
-                        shell.canExecute() &&
-                        shell1.canExecute()
+                    // /bin/sh does not exist on most modern Android; only
+                    // /system/bin/sh is required for the shell to work.
+                    exitcode == 0 && shell.exists() && shell.canRead() && shell.canExecute()
                 },
             ),
             Check(

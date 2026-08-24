@@ -30,6 +30,16 @@ bind_if_exists /dev
 # getDefaultBindings() in ubuntuProcess.kt. Failsafe mode keeps the binding.
 [ "$SANDBOX" = "true" ] || bind_if_exists /data
 bind_if_exists /dev/urandom:/dev/random
+
+# User-defined binds from the Custom Binds setting (CUSTOM_BINDS env var,
+# newline-separated entries of "outside" or "outside:inside"). Sources that
+# do not exist are skipped, matching bind_if_exists behavior above.
+while IFS= read -r user_bind || [ -n "$user_bind" ]; do
+  [ -n "$user_bind" ] && bind_if_exists "$user_bind"
+done <<__CUSTOM_BINDS__
+$CUSTOM_BINDS
+__CUSTOM_BINDS__
+
 bind_if_exists /proc
 [ -e "$EXT_HOME" ] && ARGS="$ARGS -b $EXT_HOME:/home"
 [ -e "$EXT_HOME" ] && ARGS="$ARGS -b $EXT_HOME:/root"

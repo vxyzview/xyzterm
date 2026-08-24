@@ -10,13 +10,16 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
 import com.rk.components.StyledTextField
@@ -34,8 +37,9 @@ import kotlinx.coroutines.withContext
 fun AppLogs() {
     var logLevel by remember { mutableStateOf(LogLevel.INFO) }
     var logText by remember { mutableStateOf(strings.loading.getString()) }
+    var refreshTrigger by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(logLevel) {
+    LaunchedEffect(logLevel, refreshTrigger) {
         withContext(Dispatchers.IO) {
             logText = buildLogs(logLevel)
         }
@@ -52,6 +56,16 @@ fun AppLogs() {
 
     LogScreen(logText, "App Logs Report", "app_logs", flow = logFlow) {
         LogLevelDropdown(logLevel, { logLevel = it })
+
+        TextButton(
+            onClick = {
+                LogCollector.clearLogs()
+                synchronized(LogcatService.logcatLogs) { LogcatService.logcatLogs.clear() }
+                refreshTrigger++
+            },
+        ) {
+            Text(stringResource(strings.delete))
+        }
     }
 }
 

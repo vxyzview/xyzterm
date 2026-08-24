@@ -109,7 +109,8 @@ fun KeybindingsScreen() {
         item {
             SearchBarDefaults.InputField(
                 modifier =
-                    Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
+                    // No bottom padding: lazy layout already gaps items 8dp.
+                    Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
                         .fillMaxWidth()
                         .onPreviewKeyEvent { keyEvent ->
                             if (KeyUtils.isModifierKey(keyEvent)) {
