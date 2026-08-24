@@ -6,11 +6,8 @@ name: Android CI
 
 on:
   push:
-    branches:
-      - main
-      - dev
-    paths-ignore:
-      - "**/*.md"
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       use_cache:
@@ -122,26 +119,4 @@ jobs:
             --title "xyzterm ${{ env.VERSION }}" \
             --notes "Automated build of commit \`${{ env.COMMIT_HASH }}\`.**APK:** \`xyzterm-${{ env.VERSION }}.apk\`F-Droid: built from source via [metadata](fdroid/metadata/com.xyzterm.app.yml)." \
             --repo "${{ github.repository }}"
-
-      - name: Upload APK to PixelDrain
-        if: ${{ success() }}
-        timeout-minutes: 15
-        env:
-          PIXELDRAIN_API_KEY: ${{ secrets.PIXELDRAIN_API_KEY }}
-          COMMIT_MSG: ${{ github.event.head_commit.message }}
-          VERSION: ${{ env.VERSION }}
-        run: |
-          RESP=$(curl -s -T "app/xyzterm-$VERSION.apk" \
-            -u ":$PIXELDRAIN_API_KEY" \
-            "https://pixeldrain.com/api/file/")
-          echo "PixelDrain response: $RESP"
-          ID=$(echo "$RESP" | jq -r '.id // empty')
-          if [ -n "$ID" ]; then
-            echo "APK uploaded: https://pixeldrain.com/u/$ID"
-            echo "Version: $VERSION"
-            echo "Commit: $COMMIT_MSG"
-          else
-            echo "Upload failed: $RESP" >&2
-            exit 1
-          fi
 
