@@ -82,6 +82,7 @@ import com.rk.terminal.changeSession
 import com.rk.terminal.getNextStage
 import com.rk.terminal.terminalView
 import com.rk.theme.XedTheme
+import com.rk.utils.AppDialogHost
 import com.rk.utils.errorDialog
 import com.rk.utils.getTempDir
 import com.rk.utils.toast
@@ -254,6 +255,8 @@ class Terminal : AppCompatActivity() {
 
         setContent {
             XedTheme {
+                AppDialogHost()
+
                 Surface {
                     var disclaimerAccepted by remember { mutableStateOf(Settings.shown_disclaimer) }
 

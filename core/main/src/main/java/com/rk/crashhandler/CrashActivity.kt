@@ -36,6 +36,7 @@ import com.rk.crashhandler.CrashHandler.logErrorOrExit
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.theme.XedTheme
+import com.rk.utils.AppDialogHost
 import com.rk.utils.SourceCodeProvider
 import com.rk.utils.copyToClipboard
 import com.rk.utils.openUrl
@@ -140,6 +141,8 @@ class CrashActivity : ComponentActivity() {
                 val context = LocalContext.current
 
                 XedTheme {
+                    AppDialogHost()
+
                     Scaffold(
                         topBar = {
                             Column {

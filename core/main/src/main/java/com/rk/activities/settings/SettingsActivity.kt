@@ -14,6 +14,7 @@ import com.rk.components.compose.preferences.base.ProvideIsExpandedScreen
 import com.rk.file.FileManager
 import com.rk.resources.strings
 import com.rk.theme.XedTheme
+import com.rk.utils.AppDialogHost
 import com.rk.utils.toast
 import java.lang.ref.WeakReference
 
@@ -38,6 +39,8 @@ class SettingsActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             XedTheme {
+                AppDialogHost()
+
                 Surface {
                     ProvideIsExpandedScreen {
                     val navController = rememberNavController()

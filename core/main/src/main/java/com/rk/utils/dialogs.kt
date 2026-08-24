@@ -18,17 +18,130 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.rk.extension.ActivityProvider
 import com.rk.extension.api.XedExtensionPoint
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.theme.XedTheme
+import java.util.concurrent.atomic.AtomicLong
+import kotlinx.coroutines.delay
+
+// Requests outlive configuration changes by design; this caps orphans left behind
+// when no host ever renders them again.
+private const val REQUEST_TTL_MS = 5 * 60 * 1000L
+
+class DialogRequest(
+    val id: Long,
+    val createdAt: Long,
+    val cancelable: Boolean,
+    val content: @Composable () -> Unit,
+)
+
+/**
+ * Process-singleton store for state-hoisted dialogs. [dialog], [composableDialog] and
+ * [LoadingPopup] push requests here; every activity root must compose [AppDialogHost]
+ * once so the requests render.
+ */
+object DialogHost {
+    val dialogs = mutableStateListOf<DialogRequest>()
+    val loadings = mutableStateListOf<DialogRequest>()
+
+    private val idCounter = AtomicLong()
+
+    fun nextId(): Long = idCounter.getAndIncrement()
+
+    fun push(request: DialogRequest) {
+        dialogs.add(request)
+        isDialogShowing = true
+    }
+
+    fun pushLoading(request: DialogRequest) {
+        loadings.add(request)
+    }
+
+    fun remove(id: Long) {
+        val removed = dialogs.removeAll { it.id == id } or loadings.removeAll { it.id == id }
+        if (removed && dialogs.isEmpty() && loadings.isEmpty()) {
+            isDialogShowing = false
+        }
+    }
+}
+
+/** Renders every pending [DialogHost] request. Compose once per activity root, inside XedTheme. */
+@Composable
+fun AppDialogHost() {
+    if (!rememberHostResumed()) {
+        // Paused hosts stay silent so a request is only visible in the foreground
+        // activity, matching the old window-attached behaviour.
+        return
+    }
+
+    DialogHost.dialogs.forEach { HostEntry(it) }
+
+    DialogHost.loadings.forEach { HostEntry(it) }
+}
+
+@Composable
+private fun rememberHostResumed(): Boolean {
+    val lifecycleOwner = LocalContext.current as? LifecycleOwner
+    val resumed =
+        remember {
+            mutableStateOf(
+                lifecycleOwner?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.RESUMED) ?: true
+            )
+        }
+    DisposableEffect(lifecycleOwner) {
+        if (lifecycleOwner == null) {
+            onDispose {}
+        } else {
+            val observer =
+                LifecycleEventObserver { _, event ->
+                    resumed.value = event == Lifecycle.Event.ON_RESUME
+                }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
+    }
+    return resumed.value
+}
+
+@Composable
+private fun HostEntry(request: DialogRequest) {
+    LaunchedEffect(request.id) {
+        val remaining = REQUEST_TTL_MS - (System.currentTimeMillis() - request.createdAt)
+        if (remaining > 0) {
+            delay(remaining)
+        }
+        DialogHost.remove(request.id)
+    }
+
+    Dialog(
+        onDismissRequest = { DialogHost.remove(request.id) },
+        properties =
+            DialogProperties(
+                usePlatformDefaultWidth = true,
+                dismissOnBackPress = request.cancelable,
+                dismissOnClickOutside = request.cancelable,
+            ),
+    ) {
+        XedTheme { request.content() }
+    }
+}
 
 fun errorDialog(
     activity: Activity? = ActivityProvider.currentActivity,
@@ -118,6 +231,13 @@ fun dialogRes(
     )
 }
 
+/**
+ * Shows a confirm dialog that survives configuration changes.
+ *
+ * The callbacks receive `null` instead of an [AlertDialog]: there is no AppCompat handle
+ * anymore. Callers must treat the parameter as nullable-and-always-null (existing
+ * `?.dismiss()` style call sites are unaffected).
+ */
 @XedExtensionPoint
 fun dialog(
     activity: Activity? = ActivityProvider.currentActivity,
@@ -133,51 +253,41 @@ fun dialog(
         toast(strings.unknown_error)
         return
     }
-    var alertDialog: AlertDialog? = null
-    runOnUiThread {
-        MaterialAlertDialogBuilder(activity).apply {
-            setOnCancelListener { isDialogShowing = false }
-
-            setView(
-                ComposeView(activity).apply {
-                    setContent {
-                        XedTheme {
-                            Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) {
-                                alertDialog?.setCancelable(cancelable)
-                                DialogContent(
-                                    alertDialog = alertDialog,
-                                    title = title,
-                                    msg = msg,
-                                    cancelString = cancelText,
-                                    okString = okText,
-                                    onOk = { onOk(alertDialog) },
-                                    onCancel =
-                                        if (onCancel == null) {
-                                            null
-                                        } else {
-                                            { onCancel.invoke(alertDialog) }
-                                        },
-                                )
-                            }
-                        }
-                    }
-                }
-            )
-
-            if (activity.isFinishing || activity.isDestroyed) {
-                toast(msg)
-                return@runOnUiThread
-            }
-
-            alertDialog = show()
-            isDialogShowing = true
-        }
+    if (activity.isFinishing || activity.isDestroyed) {
+        toast(msg)
+        return
     }
+
+    val id = DialogHost.nextId()
+    DialogHost.push(
+        DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = cancelable) {
+            Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) {
+                DialogContent(
+                    title = title,
+                    msg = msg,
+                    cancelString = cancelText,
+                    okString = okText,
+                    onOk = {
+                        DialogHost.remove(id)
+                        onOk(null)
+                    },
+                    onCancel =
+                        if (onCancel == null) {
+                            null
+                        } else {
+                            {
+                                DialogHost.remove(id)
+                                onCancel.invoke(null)
+                            }
+                        },
+                )
+            }
+        }
+    )
 }
 
 @Composable
 private fun DialogContent(
-    alertDialog: AlertDialog?,
     title: String?,
     msg: String,
     cancelString: String,
@@ -206,7 +316,6 @@ private fun DialogContent(
             if (onCancel != null) {
                 TextButton(
                     onClick = {
-                        alertDialog?.dismiss()
                         onCancel()
                     }
                 ) {
@@ -218,7 +327,6 @@ private fun DialogContent(
 
             TextButton(
                 onClick = {
-                    alertDialog?.dismiss()
                     onOk()
                 }
             ) {
@@ -228,6 +336,12 @@ private fun DialogContent(
     }
 }
 
+/**
+ * Shows a custom composable dialog that survives configuration changes.
+ *
+ * The composable receives `null` instead of an [AlertDialog]; there is no AppCompat
+ * handle anymore. Callers must treat the parameter as nullable-and-always-null.
+ */
 @XedExtensionPoint
 fun composableDialog(
     activity: Activity? = ActivityProvider.currentActivity,
@@ -238,26 +352,10 @@ fun composableDialog(
         toast(strings.unknown_error)
         return
     }
-    var alertDialog: AlertDialog? = null
-    runOnUiThread {
-        MaterialAlertDialogBuilder(activity).apply {
-            setOnCancelListener { isDialogShowing = false }
-
-            setView(
-                ComposeView(activity).apply {
-                    setContent {
-                        XedTheme {
-                            Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) {
-                                alertDialog?.setCancelable(cancelable)
-                                composable(alertDialog)
-                            }
-                        }
-                    }
-                }
-            )
-
-            alertDialog = show()
-            isDialogShowing = true
+    val id = DialogHost.nextId()
+    DialogHost.push(
+        DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = cancelable) {
+            Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) { composable(null) }
         }
-    }
+    )
 }
