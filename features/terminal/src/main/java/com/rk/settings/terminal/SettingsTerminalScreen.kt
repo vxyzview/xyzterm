@@ -44,6 +44,11 @@ import com.rk.terminal.TerminalBackup
 import com.rk.terminal.terminalView
 import com.rk.utils.LoadingPopup
 import com.rk.utils.dialogRes
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.rk.utils.dpToPx
 import com.rk.utils.getTempDir
 import com.rk.utils.toast
