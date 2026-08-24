@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -80,6 +81,7 @@ import com.rk.terminal.SessionService
 import com.rk.terminal.TerminalBackEnd
 import com.rk.terminal.TerminalScreen
 import com.rk.terminal.changeSession
+import com.rk.terminal.extractRootfs
 import com.rk.terminal.getNextStage
 import com.rk.terminal.terminalView
 import com.rk.theme.XedTheme
@@ -91,7 +93,6 @@ import com.rk.utils.toast
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -506,43 +507,23 @@ private var lastHandledIntent: Intent? = null
                 }
 
                 installNextStage == NEXT_STAGE.EXTRACTION -> {
+                    var extractProgress by remember { mutableFloatStateOf(0f) }
+
                     LaunchedEffect(Unit) {
-                        val binder = sessionBinder?.get()
-                        if (binder == null) {
-                            errorDialog(strings.unknown_error)
+                        val failure = runCatching {
+                            extractRootfs { fraction -> extractProgress = fraction }
+                        }.exceptionOrNull()
+
+                        if (failure != null) {
+                            failure.printStackTrace()
+                            errorDialog(msg = strings.setup_failed.getFilledString(failure.message))
                             installNextStage = null
                             ubuntuInstalled = false
-                            downloadStarted = false
-                            return@LaunchedEffect
+                        } else {
+                            installNextStage = NEXT_STAGE.NONE
+                            ubuntuInstalled = true
                         }
-
-                        val extractionId = binder.getService().currentSession.value
-                        if (binder.getSession(extractionId) == null) {
-                            binder.createSession(extractionId, TerminalBackEnd(), this@Terminal)
-                        }
-
-                        while (true) {
-                            if (withContext(Dispatchers.IO) { isTerminalInstalled() }) {
-                                installNextStage = NEXT_STAGE.NONE
-                                downloadStarted = false
-                                break
-                            }
-
-                            val session = binder.getSession(extractionId)
-                            if (session != null && !session.isRunning) {
-                                errorDialog(
-                                    msg =
-                                        strings.setup_failed.getFilledString(
-                                            "extraction failed"
-                                        )
-                                )
-                                installNextStage = null
-                                ubuntuInstalled = false
-                                downloadStarted = false
-                                break
-                            }
-                            delay(500)
-                        }
+                        downloadStarted = false
                     }
 
                     Column(
@@ -564,7 +545,22 @@ private var lastHandledIntent: Intent? = null
                             textAlign = TextAlign.Center,
                         )
                         Spacer(modifier = Modifier.height(24.dp))
-                        LinearProgressIndicator()
+                        LinearProgressIndicator(
+                            progress = { extractProgress },
+                            modifier = Modifier.fillMaxWidth(0.8f),
+                        )
+                        Text(
+                            text =
+                                stringResource(
+                                    strings.install_extracting_progress,
+                                    (extractProgress * 100).toInt(),
+                                ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier =
+                                Modifier
+                                    .padding(top = 8.dp)
+                                    .semantics { liveRegion = LiveRegionMode.Polite },
+                        )
                     }
                 }
 

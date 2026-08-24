@@ -330,6 +330,7 @@
     <string name="theme_low_contrast_msg">This theme\'s text/background contrast is below 3:1 and may be hard to read.</string>
     <string name="install_extracting_title">Extracting Ubuntu…</string>
     <string name="install_extracting_warning">Keep the app open until extraction finishes</string>
+    <string name="install_extracting_progress">Extracting… %1$d%%</string>
     <string name="reading_files">Reading files…</string>
     <string name="compressing">Compressing…</string>
     <string name="extracting">Extracting…</string>

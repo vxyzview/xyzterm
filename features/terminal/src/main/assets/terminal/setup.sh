@@ -1,5 +1,10 @@
 set -e
 
+# NOTE: the install pipeline now extracts the rootfs natively in Kotlin
+# (TarExtractor + MkRootfs.extractRootfs) before any shell session runs, so
+# the tar step below is legacy. This script is kept for manual/fallback use;
+# its post-tar configuration steps are idempotent.
+
 source "$LOCAL/bin/utils"
 
 info "Extracting the Ubuntu container…"
