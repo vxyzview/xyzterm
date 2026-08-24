@@ -18,7 +18,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 /** Upper bound for every spawned probe; a hung proot must not wedge the screen. */
-private const val CHECK_TIMEOUT_SECONDS = 15L
+const val CHECK_TIMEOUT_SECONDS = 15L
 
 /** These checks are intended for troubleshooting terminal issues */
 @Composable
