@@ -326,8 +326,14 @@
     <string name="search_no_results">No matches</string>
     <string name="bell_ring">Terminal bell</string>
     <string name="keep_device_awake">Keep device awake</string>
+    <string name="theme_low_contrast_title">Low contrast</string>
+    <string name="theme_low_contrast_msg">This theme\'s text/background contrast is below 3:1 and may be hard to read.</string>
     <string name="install_extracting_title">Extracting Ubuntu…</string>
     <string name="install_extracting_warning">Keep the app open until extraction finishes</string>
+    <string name="reading_files">Reading files…</string>
+    <string name="compressing">Compressing…</string>
+    <string name="extracting">Extracting…</string>
+    <string name="moving_into_place">Moving into place…</string>
     <plurals name="sessions_running">
         <item quantity="one">%d session running</item>
         <item quantity="other">%d sessions running</item>

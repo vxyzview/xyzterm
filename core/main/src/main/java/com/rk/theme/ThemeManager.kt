@@ -19,6 +19,8 @@ import com.rk.file.themeDir
 import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
+import com.rk.utils.ContrastUtils
+import com.rk.utils.errorDialog
 import com.rk.utils.logError
 import com.rk.utils.toast
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +34,19 @@ import java.io.FileInputStream
 import java.io.ObjectInputStream
 import java.util.Properties
 import kotlinx.serialization.json.JsonElement as KJsonElement
+
+internal const val THEME_MIN_CONTRAST_RATIO = 3.0
+
+internal fun themeContrastRatio(manifest: ThemeManifest): Double? =
+    listOfNotNull(manifest.light, manifest.dark)
+        .mapNotNull { palette ->
+            val bgHex = palette.terminalColors?.get("background") ?: palette.baseColors?.background
+            val fgHex = palette.terminalColors?.get("foreground") ?: palette.baseColors?.onBackground
+            val bg = bgHex?.let { runCatching { it.toColorInt() }.getOrNull() } ?: return@mapNotNull null
+            val fg = fgHex?.let { runCatching { it.toColorInt() }.getOrNull() } ?: return@mapNotNull null
+            ContrastUtils.ratio(fg, bg)
+        }
+        .minOrNull()
 
 class ThemeManager(private val context: Application) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private val mutex = Mutex()
@@ -101,6 +116,14 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
                 size = size,
             )
         writeCache(installDir, newCache)
+
+        val ratio = themeContrastRatio(manifest)
+        if (ratio != null && ratio < THEME_MIN_CONTRAST_RATIO) {
+            errorDialog(
+                title = strings.theme_low_contrast_title.getString(),
+                msg = strings.theme_low_contrast_msg.getString(),
+            )
+        }
     }
 
     @Suppress("DEPRECATION") // migration path uses deprecated legacy theme APIs
