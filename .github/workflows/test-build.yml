@@ -74,7 +74,7 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build with Gradle
-        run: ./gradlew assembleRelease --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-test.apk
+        run: ./gradlew assembleRelease testReleaseUnitTest --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-test.apk
         env:
           KEYSTORE_FILE: /tmp/xyzterm.keystore
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
