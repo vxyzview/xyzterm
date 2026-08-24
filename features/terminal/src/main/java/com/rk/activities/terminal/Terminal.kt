@@ -41,6 +41,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -83,12 +84,14 @@ import com.rk.terminal.getNextStage
 import com.rk.terminal.terminalView
 import com.rk.theme.XedTheme
 import com.rk.utils.AppDialogHost
+import com.rk.utils.dialogRes
 import com.rk.utils.errorDialog
 import com.rk.utils.getTempDir
 import com.rk.utils.toast
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -163,11 +166,7 @@ class Terminal : AppCompatActivity() {
 
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
-            val binder = sessionBinder?.get() ?: return
-            lifecycleScope.launch(Dispatchers.Main) {
-                val session = binder.getSession(binder.getService().currentSession.value)
-                session?.write(text)
-            }
+            confirmAndRunCommand(text)
             return
         }
 
@@ -197,20 +196,33 @@ class Terminal : AppCompatActivity() {
             when (uri.host) {
                 "run" -> {
                     val cmd = uri.getQueryParameter("cmd") ?: return@launch
-                    binder.getSession(binder.getService().currentSession.value)?.write("$cmd\n")
+                    confirmAndRunCommand("$cmd\n")
                 }
 
                 "session" -> {
                     val name = uri.lastPathSegment?.trim().orEmpty()
-                    if (name.isEmpty()) return@launch
+                    if (!SESSION_NAME_REGEX.matches(name)) return@launch
                     if (name !in binder.getService().sessionList) {
                         binder.createSession(name, TerminalBackEnd(), this@Terminal)
                     }
                     this@Terminal.changeSession(name)
-                    uri.getQueryParameter("cmd")?.let { cmd -> binder.getSession(name)?.write("$cmd\n") }
+                    uri.getQueryParameter("cmd")?.let { cmd -> confirmAndRunCommand("$cmd\n", name) }
                 }
             }
         }
+    }
+
+    private fun confirmAndRunCommand(payload: String, sessionId: String? = null) {
+        dialogRes(
+            activity = this,
+            title = strings.warning.getString(),
+            msg = payload.trimEnd('\n'),
+            onOk = {
+                val binder = sessionBinder?.get() ?: return@dialogRes
+                val target = sessionId ?: binder.getService().currentSession.value
+                binder.getSession(target)?.write(payload)
+            },
+        )
     }
 
     override fun onStop() {
@@ -238,6 +250,8 @@ class Terminal : AppCompatActivity() {
 
         /** True while the terminal UI is visible; gates bell notifications. */
         var isForeground = false
+
+        private val SESSION_NAME_REGEX = Regex("^[A-Za-z0-9_-]+$")
     }
 
     private val notificationPermissionLauncher =
@@ -330,7 +344,10 @@ class Terminal : AppCompatActivity() {
         var totalBytes by remember { mutableLongStateOf(0L) }
         var unsupportedCpu by remember { mutableStateOf(false) }
         var downloadStarted by remember { mutableStateOf(false) }
-        var ubuntuInstalled by remember { mutableStateOf(isTerminalInstalled()) }
+        var ubuntuInstalled by
+            produceState(initialValue = false) {
+                value = withContext(Dispatchers.IO) { isTerminalInstalled() }
+            }
 
         // Helper function to format bytes to MB string
         fun formatBytesToMB(bytes: Long): String {
@@ -483,6 +500,63 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
+                installNextStage == NEXT_STAGE.EXTRACTION -> {
+                    LaunchedEffect(Unit) {
+                        val binder = sessionBinder?.get()
+                        if (binder == null) {
+                            errorDialog(strings.unknown_error)
+                            installNextStage = null
+                            ubuntuInstalled = false
+                            downloadStarted = false
+                            return@LaunchedEffect
+                        }
+
+                        val sessionId = binder.getService().currentSession.value
+                        val extractionId =
+                            binder.getSession(sessionId)?.id
+                                ?: binder.createSession(sessionId, TerminalBackEnd(), this@Terminal).id
+
+                        while (true) {
+                            if (withContext(Dispatchers.IO) { isTerminalInstalled() }) {
+                                installNextStage = NEXT_STAGE.NONE
+                                break
+                            }
+
+                            val session = binder.getSession(extractionId)
+                            if (session != null && !session.isRunning) {
+                                errorDialog(strings.setup_failed.getFilledString("extraction failed"))
+                                installNextStage = null
+                                ubuntuInstalled = false
+                                downloadStarted = false
+                                break
+                            }
+                            delay(500)
+                        }
+                    }
+
+                    Column(
+                        modifier =
+                            Modifier.fillMaxSize().padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            text = stringResource(strings.install_extracting_title),
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.semantics { heading() },
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(strings.install_extracting_warning),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        LinearProgressIndicator()
+                    }
+                }
+
                 installNextStage != null && (installNextStage != NEXT_STAGE.NONE || ubuntuInstalled) -> {
                     TerminalScreen(terminalActivity = this@Terminal)
                 }
@@ -563,7 +637,7 @@ class Terminal : AppCompatActivity() {
                             Text(text = stringResource(strings.install))
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        TextButton(onClick = { finishAffinity() }) {
+                        TextButton(onClick = { finish() }) {
                             Text(text = stringResource(strings.not_now))
                         }
                     }
@@ -662,7 +736,8 @@ class Terminal : AppCompatActivity() {
                     .apply { if (rangeStart > 0) header("Range", "bytes=$rangeStart-") }
                     .build()
 
-            var startedAt = 0L
+            var startedAt = rangeStart
+            var skipDownload = false
             client.newCall(request).execute().use { response ->
                 when (response.code) {
                     206 -> startedAt = rangeStart
@@ -673,6 +748,7 @@ class Terminal : AppCompatActivity() {
                     416 -> {
                         // Server reports nothing past what we already have: the
                         // partial is complete, integrity is verified below.
+                        skipDownload = true
                     }
                     else -> {
                         // e.g. 404 after a re-release: the partial is stale, drop
@@ -682,32 +758,34 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
-                val body = response.body ?: throw Exception("Empty response body")
-                val totalBytes = startedAt + body.contentLength()
+                if (!skipDownload) {
+                    val body = response.body ?: throw Exception("Empty response body")
+                    val totalBytes = startedAt + body.contentLength()
 
-                var downloadedBytes = startedAt
-                // Throttle progress: hopping to the main thread and recomposing the
-                // progress UI on every 8 KiB block (tens of thousands of times for a
-                // 200-400 MB rootfs) janks the setup screen. Emit at most every ~250ms
-                // and always send the final 100% update.
-                val THROTTLE_MS = 250L
-                var lastEmit = 0L
+                    var downloadedBytes = startedAt
+                    // Throttle progress: hopping to the main thread and recomposing the
+                    // progress UI on every 8 KiB block (tens of thousands of times for a
+                    // 200-400 MB rootfs) janks the setup screen. Emit at most every ~250ms
+                    // and always send the final 100% update.
+                    val THROTTLE_MS = 250L
+                    var lastEmit = 0L
 
-                FileOutputStream(partFile, startedAt > 0).use { output ->
-                    body.byteStream().use { input ->
-                        val buffer = ByteArray(8 * 1024)
-                        var bytesRead: Int
+                    FileOutputStream(partFile, startedAt > 0).use { output ->
+                        body.byteStream().use { input ->
+                            val buffer = ByteArray(8 * 1024)
+                            var bytesRead: Int
 
-                        while (input.read(buffer).also { bytesRead = it } != -1) {
-                            output.write(buffer, 0, bytesRead)
-                            downloadedBytes += bytesRead
-                            val now = SystemClock.elapsedRealtime()
-                            if (now - lastEmit >= THROTTLE_MS) {
-                                lastEmit = now
-                                withContext(Dispatchers.Main) { onProgress(downloadedBytes, totalBytes) }
+                            while (input.read(buffer).also { bytesRead = it } != -1) {
+                                output.write(buffer, 0, bytesRead)
+                                downloadedBytes += bytesRead
+                                val now = SystemClock.elapsedRealtime()
+                                if (now - lastEmit >= THROTTLE_MS) {
+                                    lastEmit = now
+                                    withContext(Dispatchers.Main) { onProgress(downloadedBytes, totalBytes) }
+                                }
                             }
+                            withContext(Dispatchers.Main) { onProgress(downloadedBytes, totalBytes) }
                         }
-                        withContext(Dispatchers.Main) { onProgress(downloadedBytes, totalBytes) }
                     }
                 }
             }
