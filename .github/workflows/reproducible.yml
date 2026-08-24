@@ -42,8 +42,11 @@ jobs:
 
       - name: Detect NDK Version
         run: |
-          # Dynamically extract NDK version from build files
-          NDK_VERSION=$(grep -rnw . -e "ndkVersion" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo "29.0.13846066")
+          # The build files minify the ndkVersion assignment; read the version
+          # string straight out of the native module configs instead.
+          NDK_VERSION=$(grep -rhoE '"[0-9]+\.[0-9]+\.[0-9]+"' features/terminal/link2symlink/build.gradle.kts | tr -d '"' | head -n1)
+          [ -n "$NDK_VERSION" ] || NDK_VERSION=28.2.13676358
+          echo "Detected NDK version: $NDK_VERSION"
           echo "Detected NDK version: $NDK_VERSION"
           echo "NDK_VERSION=$NDK_VERSION" >> $GITHUB_ENV
 
@@ -187,6 +190,18 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Generate signing material
+        run: |
+          # Both builds must sign identically so apkdiff compares content only.
+          PASS=$(openssl rand -hex 16)
+          keytool -genkeypair -v \
+            -keystore /tmp/xyzterm.keystore \
+            -alias xyzterm \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$PASS" -keypass "$PASS" \
+            -dname "CN=xyzterm, OU=xyzterm, O=xyzterm, L=, ST=, C=US"
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=xyzterm\nstoreFile=/tmp/xyzterm.keystore\n' "$PASS" "$PASS" > /tmp/signing.properties
 
       - name: Build First APK
         run: |
