@@ -21,7 +21,6 @@ Builds:
     gradle:
       - yes
     prebuild:
-      - sed -r '/(foojay|toolchainVendor)/d' -i ../gradle/gradle-daemon-jvm.properties
       - sed -ri '/foojay-resolver-convention/d' -i ../settings.gradle.kts
       - sed -r '/signingConfigs.getByName/d' -i build.gradle.kts
 
