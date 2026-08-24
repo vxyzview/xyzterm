@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import android.text.format.Formatter
 import com.rk.DefaultScope
+import com.rk.activities.terminal.Terminal
 import com.rk.components.InfoBlock
 import com.rk.components.compose.preferences.base.PreferenceLayoutLazyColumn
 import com.rk.components.compose.preferences.base.PreferenceTemplate
@@ -112,41 +113,60 @@ fun TerminalBackupsScreen() {
             BackupItem(
                 backup = backup,
                 onRestore = {
+                    val service = Terminal.instance?.sessionBinder?.get()?.getService()
+                    if (service != null && service.sessionList.isNotEmpty()) {
+                        dialogRes(
+                            activity = activity,
+                            title = strings.attention.getString(),
+                            msg = "Close all sessions first",
+                            onCancel = {},
+                        )
+                    } else {
+                        dialogRes(
+                            activity = activity,
+                            title = strings.restore.getString(),
+                            msg = backup.name,
+                            okRes = strings.restore,
+                            onCancel = {},
+                            onOk = {
+                                val loading = LoadingPopup(activity, null)
+                                loading.show()
+                                DefaultScope.launch(Dispatchers.IO) {
+                                    val error =
+                                        runCatching { TerminalBackup.restore(backup) }
+                                            .getOrElse { it.message ?: "restore failed" }
+                                    withContext(Dispatchers.Main + NonCancellable) {
+                                        runCatching { loading.hide() }
+                                        if (error == null) {
+                                            // Running sessions keep the old rootfs mapped.
+                                            toast(strings.restart_required)
+                                        } else {
+                                            toast(strings.setup_failed.getFilledString(error))
+                                        }
+                                    }
+                                    refreshTrigger++
+                                }
+                            },
+                        )
+                    }
+                },
+                onDelete = {
                     dialogRes(
                         activity = activity,
-                        title = strings.restore.getString(),
+                        title = strings.delete.getString(),
                         msg = backup.name,
-                        okRes = strings.restore,
+                        okRes = strings.delete,
                         onCancel = {},
                         onOk = {
-                            val loading = LoadingPopup(activity, null)
-                            loading.show()
                             DefaultScope.launch(Dispatchers.IO) {
-                                val error =
-                                    runCatching { TerminalBackup.restore(backup) }
-                                        .getOrElse { it.message ?: "restore failed" }
+                                val ok = runCatching { backup.delete() }.getOrDefault(false)
                                 withContext(Dispatchers.Main + NonCancellable) {
-                                    runCatching { loading.hide() }
-                                    if (error == null) {
-                                        // Running sessions keep the old rootfs mapped.
-                                        toast(strings.restart_required)
-                                    } else {
-                                        toast(strings.setup_failed.getFilledString(error))
-                                    }
+                                    toast(if (ok) strings.success else strings.failed)
                                 }
                                 refreshTrigger++
                             }
                         },
                     )
-                },
-                onDelete = {
-                    DefaultScope.launch(Dispatchers.IO) {
-                        val ok = runCatching { backup.delete() }.getOrDefault(false)
-                        withContext(Dispatchers.Main + NonCancellable) {
-                            toast(if (ok) strings.success else strings.failed)
-                        }
-                        refreshTrigger++
-                    }
                 },
             )
         }

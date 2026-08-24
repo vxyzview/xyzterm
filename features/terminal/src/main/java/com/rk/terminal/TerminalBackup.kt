@@ -139,11 +139,20 @@ object TerminalBackup {
 
                 // Raw child path: the sandboxDir() getter auto-creates the
                 // directory, which would block the rename below.
-                val sandboxPath = localDir().child("sandbox")
-                sandboxPath.deleteRecursively()
+                val local = localDir()
+                val sandboxPath = local.child("sandbox")
+                val oldSandbox = local.child("sandbox.old")
+                if (oldSandbox.exists() && !oldSandbox.deleteRecursively()) {
+                    return@withContext "could not clear stale sandbox.old"
+                }
+                if (sandboxPath.exists() && !sandboxPath.renameTo(oldSandbox)) {
+                    return@withContext "could not move current rootfs aside"
+                }
                 if (!staging.renameTo(sandboxPath)) {
+                    oldSandbox.renameTo(sandboxPath)
                     return@withContext "could not move extracted files into place"
                 }
+                oldSandbox.deleteRecursively()
 
                 localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
                 null
