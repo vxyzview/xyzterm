@@ -175,6 +175,7 @@ class Terminal : AppCompatActivity() {
         terminalView.get() ?: return
 
         val sessionId = File(pwd).name
+        if (!SESSION_NAME_REGEX.matches(sessionId)) return
 
         lifecycleScope.launch(Dispatchers.Main) {
             val client = TerminalBackEnd()
