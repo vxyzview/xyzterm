@@ -369,6 +369,8 @@ fun SettingsTerminalScreen() {
                 sideEffect = { Settings.terminal_clipboard_keybindings = it },
             )
 
+            var scrollbackInitial by remember { mutableStateOf(Settings.terminal_scrollback_buffer) }
+            var scrollbackChanged by remember { mutableStateOf(false) }
             RoundedValueSlider(
                 label = stringResource(strings.scrollback_buffer),
                 description = stringResource(strings.scrollback_buffer_desc),
@@ -378,7 +380,16 @@ fun SettingsTerminalScreen() {
                 stepSize = 5_000,
             ) {
                 Settings.terminal_scrollback_buffer = it
-                toast(strings.restart_required)
+                scrollbackChanged = it != scrollbackInitial
+            }
+
+            if (scrollbackChanged) {
+                Text(
+                    text = stringResource(strings.restart_required),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
             }
 
             SettingsItem(
