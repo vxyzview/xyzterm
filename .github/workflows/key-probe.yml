@@ -6,10 +6,12 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Fingerprint secret keystore
+      - name: Fingerprint + password-hash report
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           echo "$KEYSTORE_BASE64" | base64 -d > /tmp/probe.keystore
-          PASS=$(grep -oP 'storePassword=\K.*' /tmp/signing.properties 2>/dev/null || true)
-          keytool -list -v -keystore /tmp/probe.keystore -alias xyzterm -storepass "${{ secrets.KEYSTORE_PASSWORD }}" 2>/dev/null | grep -E 'SHA256:' | head -2
+          keytool -list -v -keystore /tmp/probe.keystore -alias xyzterm -storepass "$KEYSTORE_PASSWORD" 2>/dev/null | grep 'SHA256:' | head -1
+          printf 'SECRET_PASSWORD_SHA256='
+          printf '%s' "$KEYSTORE_PASSWORD" | sha256sum | cut -d' ' -f1
