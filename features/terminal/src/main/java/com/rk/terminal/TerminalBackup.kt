@@ -4,11 +4,29 @@ import com.rk.file.child
 import com.rk.file.createFileIfNot
 import com.rk.file.localDir
 import com.rk.file.sandboxDir
+import com.rk.resources.getString
+import com.rk.resources.strings
 import com.rk.utils.getTempDir
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+/**
+ * Atomically replaces [liveDir] with [stagingDir]: clears a stale [oldDir],
+ * moves the live directory aside, renames staging into place and removes the
+ * old copy. On any failure the previous live directory is restored untouched.
+ */
+internal fun swapSandbox(liveDir: File, stagingDir: File, oldDir: File): Boolean {
+    if (oldDir.exists() && !oldDir.deleteRecursively()) return false
+    if (liveDir.exists() && !liveDir.renameTo(oldDir)) return false
+    if (!stagingDir.renameTo(liveDir)) {
+        oldDir.renameTo(liveDir)
+        return false
+    }
+    oldDir.deleteRecursively()
+    return true
+}
 
 /** Creates and prunes terminal environment backups (sandbox tar.gz archives). */
 object TerminalBackup {
@@ -69,17 +87,19 @@ object TerminalBackup {
         }
 
     /** Backs up the sandbox to a timestamped file in [backupDir], keeping the newest [KEEP]. */
-    suspend fun autoBackup(): Boolean {
+    suspend fun autoBackup(onPhase: (String) -> Unit = {}): Boolean {
         val dir = backupDir()
         dir.mkdirs()
         val target = File(dir, "terminal-backup-${System.currentTimeMillis()}.tar.gz")
         // Write to a temp name first so an interrupted run never leaves a
         // truncated archive that a later restore would choke on.
         val partial = File(dir, target.name + ".part")
+        onPhase(strings.reading_files.getString())
         if (!create(partial)) {
             partial.delete()
             return false
         }
+        onPhase(strings.compressing.getString())
         if (!partial.renameTo(target)) {
             partial.delete()
             return false
@@ -98,7 +118,7 @@ object TerminalBackup {
      *
      * Returns null on success, otherwise a human-readable error string.
      */
-    suspend fun restore(archive: File): String? =
+    suspend fun restore(archive: File, onPhase: (String) -> Unit = {}): String? =
         withContext(Dispatchers.IO) {
             val staging = getTempDir().child("terminal-restore-staging")
             try {
@@ -106,6 +126,7 @@ object TerminalBackup {
                 staging.mkdirs()
 
                 // -z is explicit: some toybox builds don't sniff gzip.
+                onPhase(strings.extracting.getString())
                 val process =
                     ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", staging.absolutePath)
                         .start()
@@ -139,20 +160,13 @@ object TerminalBackup {
 
                 // Raw child path: the sandboxDir() getter auto-creates the
                 // directory, which would block the rename below.
+                onPhase(strings.moving_into_place.getString())
                 val local = localDir()
                 val sandboxPath = local.child("sandbox")
                 val oldSandbox = local.child("sandbox.old")
-                if (oldSandbox.exists() && !oldSandbox.deleteRecursively()) {
-                    return@withContext "could not clear stale sandbox.old"
+                if (!swapSandbox(sandboxPath, staging, oldSandbox)) {
+                    return@withContext "could not swap sandbox into place"
                 }
-                if (sandboxPath.exists() && !sandboxPath.renameTo(oldSandbox)) {
-                    return@withContext "could not move current rootfs aside"
-                }
-                if (!staging.renameTo(sandboxPath)) {
-                    oldSandbox.renameTo(sandboxPath)
-                    return@withContext "could not move extracted files into place"
-                }
-                oldSandbox.deleteRecursively()
 
                 localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
                 null

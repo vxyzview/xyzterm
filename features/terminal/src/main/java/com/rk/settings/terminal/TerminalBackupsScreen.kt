@@ -75,10 +75,13 @@ fun TerminalBackupsScreen() {
                         loading.show()
                         DefaultScope.launch(Dispatchers.IO) {
                             val ok =
-                                runCatching { TerminalBackup.autoBackup() }.getOrElse {
-                                    it.printStackTrace()
-                                    false
-                                }
+                                runCatching {
+                                        TerminalBackup.autoBackup { msg -> loading.setMessage(msg) }
+                                    }
+                                    .getOrElse {
+                                        it.printStackTrace()
+                                        false
+                                    }
                             withContext(Dispatchers.Main + NonCancellable) {
                                 runCatching { loading.hide() }
                                 if (ok) {
@@ -133,7 +136,11 @@ fun TerminalBackupsScreen() {
                                 loading.show()
                                 DefaultScope.launch(Dispatchers.IO) {
                                     val error =
-                                        runCatching { TerminalBackup.restore(backup) }
+                                        runCatching {
+                                                TerminalBackup.restore(backup) { msg ->
+                                                    loading.setMessage(msg)
+                                                }
+                                            }
                                             .getOrElse { it.message ?: "restore failed" }
                                     withContext(Dispatchers.Main + NonCancellable) {
                                         runCatching { loading.hide() }
