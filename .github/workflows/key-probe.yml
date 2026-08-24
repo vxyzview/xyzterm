@@ -1,0 +1,15 @@
+name: Key Probe
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fingerprint secret keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > /tmp/probe.keystore
+          PASS=$(grep -oP 'storePassword=\K.*' /tmp/signing.properties 2>/dev/null || true)
+          keytool -list -v -keystore /tmp/probe.keystore -alias xyzterm -storepass "${{ secrets.KEYSTORE_PASSWORD }}" 2>/dev/null | grep -E 'SHA256:' | head -2
