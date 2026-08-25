@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.system.Os
+import android.util.Log
 import com.rk.exec.TarExtractor
 import com.rk.file.TERMINAL_SETUP_OK_MARKER
 import com.rk.file.child
@@ -23,6 +24,8 @@ enum class NEXT_STAGE {
     NONE,
     EXTRACTION,
 }
+
+private const val TAG = "TerminalInstall"
 
 suspend fun CoroutineScope.getNextStage(context: Context): NEXT_STAGE = withContext(Dispatchers.IO) {
     if (isMainThread()) {
@@ -61,34 +64,38 @@ suspend fun extractRootfs(onProgress: (Float) -> Unit) =
         val sandbox = sandboxDir()
         val tarball = File(getTempDir(), "sandbox.tar.gz")
 
+        Log.w(TAG, "extract start: ${tarball.absolutePath} bytes=${tarball.length()}")
+
         val mainHandler = Handler(Looper.getMainLooper())
         TarExtractor.extract(tarball, sandbox) { fraction ->
             mainHandler.post { onProgress(fraction) }
         }
+        Log.w(TAG, "tar extract ok, applying rootfs config")
 
         val etc = sandbox.child("etc")
         etc.mkdirs()
 
-        etc.child("hostname").writeText("xyz\n")
+        writeRootfsFile(etc.child("hostname"), "xyz\n")
 
-        etc.child("resolv.conf").writeText(
+        writeRootfsFile(
+            etc.child("resolv.conf"),
             """
             nameserver 8.8.8.8
             nameserver 8.8.4.4
             """.trimIndent(),
         )
 
-        etc.child("hosts").writeText(HOSTS.trimIndent())
+        writeRootfsFile(etc.child("hosts"), HOSTS.trimIndent())
 
         appendAndroidGroups(etc.child("group"))
 
         val aptConfDir = sandbox.child("etc/apt/apt.conf.d")
         aptConfDir.mkdirs()
-        aptConfDir.child("99node-hook").writeText(NODE_APT_HOOK.trimIndent())
+        writeRootfsFile(aptConfDir.child("99node-hook"), NODE_APT_HOOK.trimIndent())
 
         val nodeHook = sandbox.child("usr/local/bin/node-postinstall.sh")
         nodeHook.parentFile?.mkdirs()
-        nodeHook.writeText(NODE_POSTINSTALL.trimIndent())
+        writeRootfsFile(nodeHook, NODE_POSTINSTALL.trimIndent())
         Os.chmod(nodeHook.path, Integer.parseInt("755", 8))
 
         val tmpDir = sandbox.child("tmp")
@@ -99,9 +106,24 @@ suspend fun extractRootfs(onProgress: (Float) -> Unit) =
         // first leaves a window where a kill loses the complete rootfs.
         // DO NOT REMOVE THIS FILE JUST DON'T, TRUST ME (same contract as setup.sh)
         localDir().child(TERMINAL_SETUP_OK_MARKER).createFileIfNot()
+        Log.w(TAG, "install marker written, removing tarball")
 
         tarball.delete()
     }
+
+/**
+ * Rootfs archives ship some directories with restrictive modes; a plain
+ * writeText into one fails with EACCES. Open the parent once and retry before
+ * giving up (the extractor's deferred chmod pass only covers its own run).
+ */
+private fun writeRootfsFile(file: File, content: String) {
+    try {
+        file.writeText(content)
+    } catch (e: IOException) {
+        file.parentFile?.let { parent -> runCatching { Os.chmod(parent.path, Integer.parseInt("755", 8)) } }
+        file.writeText(content)
+    }
+}
 
 private fun appendAndroidGroups(groupFile: File) {
     val aid = Os.getgid()

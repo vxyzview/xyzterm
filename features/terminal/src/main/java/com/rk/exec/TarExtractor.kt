@@ -3,23 +3,26 @@ package com.rk.exec
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import android.util.Log
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FilterInputStream
 import java.io.IOException
 import java.io.InputStream
+import java.io.RandomAccessFile
 import java.util.zip.GZIPInputStream
 
 /**
  * Pure-Kotlin .tar.gz extractor (no external deps, no proot/ptrace overhead).
  * Supports regular files, dirs, symlinks, hardlinks (link2symlink fallback),
- * PAX and GNU longname/longlink headers, base-256 sizes; skips device/fifo
- * entries. Rejects absolute paths and ".." segments, and refuses to write
- * through a symlinked parent that escapes [destDir].
+ * GNU old-format sparse files, PAX and GNU longname/longlink headers, base-256
+ * sizes; skips device/fifo entries. Rejects absolute paths and ".." segments,
+ * and refuses to write through a symlinked parent that escapes [destDir].
  */
 object TarExtractor {
 
+    private const val TAG = "TerminalInstall"
     private const val BLOCK = 512
     private const val COPY_BUFFER = 64 * 1024
     private const val MAX_METADATA = 1048576
@@ -43,104 +46,145 @@ object TarExtractor {
             val dirModes = ArrayList<Pair<File, Int>>()
             val madeDirs = HashSet<String>()
             val canonicalCache = HashMap<String, String>()
+            var entryCount = 0
+            var fileCount = 0
+            var dirCount = 0
+            var linkCount = 0
 
-            while (true) {
-                if (!readBlock(gzip, header)) break
-                if (isZeroBlock(header)) break
+            Log.w(TAG, "tar extract start: ${tarGz.name} bytes=$total")
 
-                var name = parseString(header, 0, 100)
-                var size = parseSize(header, 124)
-                val mode = parseOctal(header, 100, 8)
-                val type = header[156].toInt().toChar()
-                var linkName = parseString(header, 157, 100)
+            try {
+                while (true) {
+                    if (!readBlock(gzip, header)) break
+                    if (isZeroBlock(header)) break
 
-                if (parseString(header, 257, 6).startsWith("ustar")) {
-                    val prefix = parseString(header, 345, 155)
-                    if (prefix.isNotEmpty()) name = "$prefix/$name"
-                }
+                    var name = parseString(header, 0, 100)
+                    var size = parseSize(header, 124)
+                    val mode = parseOctal(header, 100, 8)
+                    val type = header[156].toInt().toChar()
+                    var linkName = parseString(header, 157, 100)
 
-                when (type) {
-                    'x' -> { pendingPax = parsePax(payload(gzip, size)); skipPadding(gzip, size, buf) }
-                    'g' -> { globalPax.putAll(parsePax(payload(gzip, size))); skipPadding(gzip, size, buf) }
-                    'L' -> {
-                        longName = String(payload(gzip, size), Charsets.UTF_8).trimEnd('\u0000')
-                        skipPadding(gzip, size, buf)
+                    if (parseString(header, 257, 6).startsWith("ustar")) {
+                        val prefix = parseString(header, 345, 155)
+                        if (prefix.isNotEmpty()) name = "$prefix/$name"
                     }
-                    'K' -> {
-                        longLink = String(payload(gzip, size), Charsets.UTF_8).trimEnd('\u0000')
-                        skipPadding(gzip, size, buf)
-                    }
-                    else -> {
-                        fun pax(key: String): String? = pendingPax[key] ?: globalPax[key]
 
-                        val entryName = pax("path") ?: longName ?: name
-                        val entryLink = pax("linkpath") ?: longLink ?: linkName
-                        pax("size")?.let {
-                            size =
-                                it.toLongOrNull()?.takeIf { s -> s >= 0 }
-                                    ?: throw IOException("Malformed PAX size: $it")
+                    when (type) {
+                        'x' -> { pendingPax = parsePax(payload(gzip, size)); skipPadding(gzip, size, buf) }
+                        'g' -> { globalPax.putAll(parsePax(payload(gzip, size))); skipPadding(gzip, size, buf) }
+                        'L' -> {
+                            longName = String(payload(gzip, size), Charsets.UTF_8).trimEnd('\u0000')
+                            skipPadding(gzip, size, buf)
                         }
-                        longName = null
-                        longLink = null
-                        pendingPax = emptyMap()
+                        'K' -> {
+                            longLink = String(payload(gzip, size), Charsets.UTF_8).trimEnd('\u0000')
+                            skipPadding(gzip, size, buf)
+                        }
+                        else -> {
+                            fun pax(key: String): String? = pendingPax[key] ?: globalPax[key]
 
-                        val target = resolveSecure(root, entryName, canonicalCache)
+                            val entryName = pax("path") ?: longName ?: name
+                            val entryLink = pax("linkpath") ?: longLink ?: linkName
+                            pax("size")?.let {
+                                size =
+                                    it.toLongOrNull()?.takeIf { s -> s >= 0 }
+                                        ?: throw IOException("Malformed PAX size: $it")
+                            }
+                            if (
+                                pendingPax.keys.any { it.startsWith("GNU.sparse.") } ||
+                                globalPax.keys.any { it.startsWith("GNU.sparse.") }
+                            ) {
+                                // PAX sparse variants (GNU.sparse.size/map/...) store chunked
+                                // payloads we do not reassemble; failing loudly beats silently
+                                // desyncing the stream and truncating the rootfs.
+                                throw IOException("Unsupported PAX sparse archive entry: $entryName")
+                            }
+                            longName = null
+                            longLink = null
+                            pendingPax = emptyMap()
+                            entryCount++
 
-                        when (type) {
-                            '0', '\u0000', '7' -> {
-                                ensureParentDir(target, madeDirs)
-                                if (target.exists()) target.delete()
-                                FileOutputStream(target).use { out ->
-                                    var remaining = size
-                                    while (remaining > 0) {
-                                        val n = gzip.read(buf, 0, minOf(buf.size.toLong(), remaining).toInt())
-                                        if (n < 0) throw IOException("Truncated archive at ${target.name}")
-                                        out.write(buf, 0, n)
-                                        remaining -= n
+                            val target = resolveSecure(root, entryName, canonicalCache)
+
+                            when (type) {
+                                '0', '\u0000', '7' -> {
+                                    fileCount++
+                                    ensureParentDir(target, madeDirs)
+                                    unlinkExisting(target)
+                                    FileOutputStream(target).use { out ->
+                                        var remaining = size
+                                        while (remaining > 0) {
+                                            val n = gzip.read(buf, 0, minOf(buf.size.toLong(), remaining).toInt())
+                                            if (n < 0) throw IOException("Truncated archive at ${target.name}")
+                                            out.write(buf, 0, n)
+                                            remaining -= n
+                                        }
                                     }
+                                    skipPadding(gzip, size, buf)
+                                    Os.chmod(target.path, mode and MODE_MASK)
                                 }
-                                skipPadding(gzip, size, buf)
-                                Os.chmod(target.path, mode and MODE_MASK)
-                            }
 
-                            '5' -> {
-                                skipPayload(gzip, size, buf)
-                                ensureParentDir(target, madeDirs)
-                                target.mkdirs()
-                                dirModes.add(target to (mode and MODE_MASK))
-                            }
+                                'S' -> {
+                                    fileCount++
+                                    ensureParentDir(target, madeDirs)
+                                    unlinkExisting(target)
+                                    extractGnuSparse(gzip, header, buf, target, size, mode)
+                                }
 
-                            '2' -> {
-                                skipPayload(gzip, size, buf)
-                                ensureParentDir(target, madeDirs)
-                                if (target.exists()) target.delete()
-                                Os.symlink(entryLink, target.path)
-                                // A new symlink changes what canonical paths resolve
-                                // to; drop the whole cache rather than track subtrees.
-                                canonicalCache.clear()
-                            }
+                                'M' ->
+                                    throw IOException(
+                                        "Multi-volume tar entry '$entryName': archive is split across volumes",
+                                    )
 
-                            '1' -> {
-                                skipPayload(gzip, size, buf)
-                                ensureParentDir(target, madeDirs)
-                                val linkTarget = resolveSecure(root, entryLink, canonicalCache)
-                                try {
-                                    Os.link(linkTarget.path, target.path)
-                                } catch (e: ErrnoException) {
-                                    if (e.errno != OsConstants.EXDEV) throw e
-                                    // Mirrors proot --link2symlink: hardlinks fail across
-                                    // mounts/devices, fall back to a symlink to the target.
-                                    if (target.exists()) target.delete()
-                                    Os.symlink(linkTarget.path, target.path)
+                                '5' -> {
+                                    dirCount++
+                                    skipPayload(gzip, size, buf)
+                                    ensureParentDir(target, madeDirs)
+                                    if (target.exists() && !target.isDirectory) unlinkExisting(target)
+                                    target.mkdirs()
+                                    dirModes.add(target to (mode and MODE_MASK))
+                                }
+
+                                '2' -> {
+                                    linkCount++
+                                    skipPayload(gzip, size, buf)
+                                    ensureParentDir(target, madeDirs)
+                                    unlinkExisting(target)
+                                    Os.symlink(entryLink, target.path)
+                                    // A new symlink changes what canonical paths resolve
+                                    // to; drop the whole cache rather than track subtrees.
                                     canonicalCache.clear()
                                 }
-                            }
 
-                            else -> skipPayload(gzip, size, buf)
+                                '1' -> {
+                                    linkCount++
+                                    skipPayload(gzip, size, buf)
+                                    ensureParentDir(target, madeDirs)
+                                    unlinkExisting(target)
+                                    val linkTarget = resolveSecure(root, entryLink, canonicalCache)
+                                    try {
+                                        Os.link(linkTarget.path, target.path)
+                                    } catch (e: ErrnoException) {
+                                        if (e.errno != OsConstants.EXDEV) throw e
+                                        // Mirrors proot --link2symlink: hardlinks fail across
+                                        // mounts/devices, fall back to a symlink to the target.
+                                        unlinkExisting(target)
+                                        Os.symlink(linkTarget.path, target.path)
+                                        canonicalCache.clear()
+                                    }
+                                }
+
+                                else -> skipPayload(gzip, size, buf)
+                            }
                         }
                     }
                 }
+            } catch (e: Exception) {
+                Log.w(TAG, "tar extract FAILED after $entryCount entries: ${e.message}")
+                throw e
             }
+
+            Log.w(TAG, "tar extract done: $entryCount entries ($fileCount files, $dirCount dirs, $linkCount links)")
 
             // Applied last so restrictive directory modes cannot block children.
             dirModes.forEach { (dir, dirMode) -> Os.chmod(dir.path, dirMode) }
@@ -227,7 +271,83 @@ object TarExtractor {
     /** Memoized mkdirs: parent dirs repeat across tens of thousands of entries. */
     private fun ensureParentDir(target: File, madeDirs: MutableSet<String>) {
         val parent = target.parentFile ?: return
-        if (madeDirs.add(parent.path)) parent.mkdirs()
+        if (madeDirs.add(parent.path)) {
+            parent.mkdirs()
+            // Restrictive directory modes are deferred to the final pass, but a
+            // pre-existing unwritable parent (rootfs ships mode-0000 dirs) would
+            // block every child write into it right now.
+            if (!parent.canWrite()) {
+                runCatching { Os.chmod(parent.path, Integer.parseInt("755", 8)) }
+            }
+        }
+    }
+
+    /**
+     * Unlinks whatever currently sits at [target] — including a DANGLING
+     * symlink, which [File.exists] cannot see (it resolves links). Writing
+     * through an unremoved link escapes destDir (FileOutputStream follows
+     * symlinks) or collides with EEXIST (Os.symlink/Os.link).
+     */
+    private fun unlinkExisting(target: File) {
+        try {
+            Os.lstat(target.path)
+        } catch (e: ErrnoException) {
+            if (e.errno == OsConstants.ENOENT) return
+            throw e
+        }
+        target.delete()
+    }
+
+    /**
+     * Old-GNU sparse member ('S'): the header's size field is the file's REAL
+     * (logical) size while the payload holds only the non-zero chunks listed in
+     * the sparse map — 4 x 24-byte entries at offset 386 plus an isextended flag
+     * at 482, extended by 512-byte blocks of 21 entries each (flag at 504).
+     * Treating the logical size as payload length desyncs the whole stream.
+     */
+    private fun extractGnuSparse(
+        input: InputStream,
+        header: ByteArray,
+        buf: ByteArray,
+        target: File,
+        realSize: Long,
+        mode: Int,
+    ) {
+        val chunks = ArrayList<LongArray>()
+        for (i in 0 until 4) {
+            val length = parseSize(header, 386 + i * 24 + 12)
+            if (length > 0) chunks.add(longArrayOf(parseSize(header, 386 + i * 24), length))
+        }
+        var extraBlocks = 0L
+        while (parseString(header, 482, 1) == "1") {
+            if (!readBlock(input, header)) throw IOException("Truncated sparse extension header")
+            extraBlocks++
+            for (i in 0 until 21) {
+                val length = parseSize(header, i * 24 + 12)
+                if (length > 0) chunks.add(longArrayOf(parseSize(header, i * 24), length))
+            }
+        }
+
+        val storedBytes = extraBlocks * BLOCK + chunks.sumOf { it[1] }
+        if (chunks.sumOf { it[0] + it[1] } > realSize) {
+            throw IOException("Corrupt GNU sparse map for ${target.name}")
+        }
+
+        RandomAccessFile(target, "rw").use { out ->
+            out.setLength(realSize)
+            for ((offset, length) in chunks) {
+                out.seek(offset)
+                var remaining = length
+                while (remaining > 0) {
+                    val n = input.read(buf, 0, minOf(buf.size.toLong(), remaining).toInt())
+                    if (n < 0) throw IOException("Truncated sparse entry at ${target.name}")
+                    out.write(buf, 0, n)
+                    remaining -= n
+                }
+            }
+        }
+        skipPadding(input, storedBytes, buf)
+        Os.chmod(target.path, mode and MODE_MASK)
     }
 
     private fun resolveSecure(root: File, name: String, canonicalCache: MutableMap<String, String>): File {

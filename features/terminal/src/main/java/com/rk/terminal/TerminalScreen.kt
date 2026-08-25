@@ -2,6 +2,7 @@ package com.rk.terminal
 
 import android.content.Intent
 import android.graphics.Typeface
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -84,6 +85,7 @@ import com.rk.exec.pendingCommand
 import com.rk.file.child
 import com.rk.file.sandboxDir
 import com.rk.resources.drawables
+import com.rk.resources.getFilledString
 import com.rk.resources.getQuantityString
 import com.rk.resources.getString
 import com.rk.resources.plurals
@@ -91,6 +93,7 @@ import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.settings.Preference
 import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
+import com.rk.utils.errorDialog
 import com.rk.terminal.virtualkeys.VirtualKeysConstants
 import com.rk.terminal.virtualkeys.VirtualKeysInfo
 import com.rk.terminal.virtualkeys.VirtualKeysListener
@@ -402,6 +405,16 @@ private suspend fun TerminalView.attachOrCreateSession(
         session.updateTerminalSessionClient(client)
         attachSession(session)
         setTerminalViewClient(client)
+
+        // Broken-rootfs symptom: a shell that dies within seconds of spawn
+        // (missing/corrupt /bin/bash, proot failure) leaves a blank screen with
+        // only a fleeting toast. Surface a visible error instead.
+        scope.launch {
+            delay(3000)
+            if (session.isRunning || terminalView.get()?.mTermSession !== session) return@launch
+            Log.w("TerminalInstall", "session exited within 3s of spawn; rootfs likely broken")
+            errorDialog(msg = strings.setup_failed.getFilledString(strings.session_ended.getString()))
+        }
     }
 }
 

@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.net.Uri
 import android.os.SystemClock
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -96,8 +97,13 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
@@ -260,6 +266,12 @@ class Terminal : AppCompatActivity() {
 private var lastHandledIntent: Intent? = null
 
             internal val SESSION_NAME_REGEX = Regex("^[A-Za-z0-9_-]+$")
+
+        private const val INSTALL_TAG = "TerminalInstall"
+
+        /** Extraction must finish, and keep emitting progress, within these bounds. */
+        private const val EXTRACT_HARD_TIMEOUT_MS = 15 * 60 * 1000L
+        private const val EXTRACT_STALL_TIMEOUT_MS = 60_000L
     }
 
     private val notificationPermissionLauncher =
@@ -524,8 +536,34 @@ private var lastHandledIntent: Intent? = null
                         // the disk state may already be complete.
                         val failure =
                             try {
-                                extractRootfs { fraction -> extractProgress = fraction }
+                                var lastProgressAt = SystemClock.elapsedRealtime()
+                                withTimeout(EXTRACT_HARD_TIMEOUT_MS) {
+                                    coroutineScope {
+                                        val watchdog =
+                                            launch {
+                                                while (true) {
+                                                    delay(5000)
+                                                    if (SystemClock.elapsedRealtime() - lastProgressAt > EXTRACT_STALL_TIMEOUT_MS) {
+                                                        throw IOException("Extraction stalled: no progress in ${EXTRACT_STALL_TIMEOUT_MS / 1000}s")
+                                                    }
+                                                }
+                                            }
+                                        try {
+                                            extractRootfs { fraction ->
+                                                lastProgressAt = SystemClock.elapsedRealtime()
+                                                extractProgress = fraction
+                                            }
+                                        } finally {
+                                            watchdog.cancel()
+                                        }
+                                    }
+                                }
                                 null
+                            } catch (e: TimeoutCancellationException) {
+                                // Our own cancel (activity destroyed) also surfaces as TCE;
+                                // only report a timeout when this coroutine is still alive.
+                                if (!isActive) throw e
+                                IOException("Extraction exceeded ${EXTRACT_HARD_TIMEOUT_MS / 60000} min")
                             } catch (e: CancellationException) {
                                 throw e
                             } catch (e: Exception) {
@@ -534,6 +572,7 @@ private var lastHandledIntent: Intent? = null
 
                         if (failure != null) {
                             failure.printStackTrace()
+                            Log.w(INSTALL_TAG, "extraction failed: ${failure.message}")
                             errorDialog(msg = strings.setup_failed.getFilledString(failure.message))
                             installNextStage = null
                             ubuntuInstalled = false
@@ -720,13 +759,20 @@ private var lastHandledIntent: Intent? = null
                         throw Exception("Rootfs checksum mismatch: ${outputFile.name}")
                     }
 
+                    Log.w(
+                        INSTALL_TAG,
+                        "download ok: ${outputFile.name} bytes=${outputFile.length()} shaVerified=${file.sha256 != null}",
+                    )
+
                     runCatching { outputFile.setExecutable(true) }.onFailure { it.printStackTrace() }
                 }
 
                 val stage = getNextStage(this@Terminal)
+                Log.w(INSTALL_TAG, "next stage: $stage")
                 onComplete(stage)
             } catch (e: Exception) {
                 e.printStackTrace()
+                Log.w(INSTALL_TAG, "setup failed before extraction: ${e.message}")
                 withContext(Dispatchers.Main) { onError(e, currentFile) }
                 if (currentFile?.exists() == true) {
                     currentFile.delete()
