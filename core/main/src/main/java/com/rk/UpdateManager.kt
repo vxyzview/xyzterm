@@ -84,10 +84,12 @@ object UpdateManager {
         if (installedFromStore()) return
         val now = System.currentTimeMillis()
         if (now - Preference.getLong(LAST_UPDATE_CHECK_KEY, 0L) < UPDATE_INTERVAL_MS) return
-        Preference.setLong(LAST_UPDATE_CHECK_KEY, now)
 
         GlobalScope.launch(Dispatchers.Main) {
+            // Stamp only after a successful fetch: a failed check must not
+            // consume the day's single attempt.
             val latest = GithubReleasesApi(UPDATE_OWNER, UPDATE_REPO).fetchLatestVersion() ?: return@launch
+            Preference.setLong(LAST_UPDATE_CHECK_KEY, now)
             val installed = installedVersionName() ?: return@launch
             if (!isNewer(latest, installed)) return@launch
             // The activity may be gone by the time the network call returns.
@@ -107,34 +109,42 @@ object UpdateManager {
     private fun downloadAndInstall(activity: Activity, version: String) {
         toast(strings.update_downloading.getString())
         GlobalScope.launch(Dispatchers.Main) {
+            val apkFile = File(application!!.filesDir, "update/xyzterm-$version.apk")
             val file =
                 runCatching {
                     withContext(Dispatchers.IO) {
-                        val target = File(application!!.filesDir, "update/xyzterm-$version.apk")
-                        target.parentFile?.mkdirs()
+                        // Purge leftovers from cancelled installs or earlier
+                        // versions before writing the fresh download.
+                        apkFile.parentFile?.let { parent ->
+                            parent.mkdirs()
+                            parent.listFiles()?.forEach { it.delete() }
+                        }
                         val request =
                             Request.Builder()
                                 .url("https://github.com/$UPDATE_OWNER/$UPDATE_REPO/releases/latest/download/xyzterm-$version.apk")
                                 .build()
                         okHttpClient.newCall(request).execute().use { response ->
                             if (!response.isSuccessful) error("download failed: ${response.code}")
-                            target.outputStream().use { response.body!!.byteStream().copyTo(it) }
+                            apkFile.outputStream().use { response.body!!.byteStream().copyTo(it) }
                         }
-                        target
+                        apkFile
                     }
                 }.getOrNull()
 
             if (file == null) {
+                withContext(Dispatchers.IO) { apkFile.delete() }
                 toast(strings.update_download_failed.getString())
                 return@launch
             }
 
             if (file.length() < MIN_APK_BYTES) {
+                file.delete()
                 toast(strings.update_download_failed.getString())
                 return@launch
             }
 
             if (!signatureMatches(file.absolutePath)) {
+                file.delete()
                 toast(strings.update_signature_mismatch.getString())
                 return@launch
             }

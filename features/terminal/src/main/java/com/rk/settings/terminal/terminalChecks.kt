@@ -60,6 +60,18 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                                 }
                                 .start()
 
+                        // Drain stderr concurrently: a surviving tracee can hold
+                        // the pipe open, and a blocking read after waitFor()
+                        // would wedge past the timeout.
+                        var stderr = ""
+                        val stderrDrain =
+                            Thread {
+                                stderr =
+                                    runCatching { process.errorStream.bufferedReader().use { it.readText() } }
+                                        .getOrDefault("")
+                            }
+                        stderrDrain.start()
+
                         exitCode =
                             if (process.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                                 process.exitValue()
@@ -72,7 +84,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                         printLog("Exit code: $exitCode")
 
                         if (exitCode != 0) {
-                            val stderr = process.errorStream.bufferedReader().use { it.readText() }
+                            stderrDrain.join(5_000)
 
                             if (stderr.isNotBlank()) {
                                 printLog("stderr:")

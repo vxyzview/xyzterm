@@ -1,6 +1,7 @@
 package com.rk.file
 
 import java.io.File
+import java.io.IOException
 import java.util.zip.ZipFile
 
 fun File.child(fileName: String): File {
@@ -54,9 +55,19 @@ fun File.unzipTo(destDir: File) {
     if (!destDir.exists()) {
         destDir.mkdirs()
     }
+    val root = destDir.canonicalFile
     ZipFile(this).use { zip ->
         zip.entries().asSequence().forEach { entry ->
-            val target = File(destDir, entry.name)
+            val segments = entry.name.split('/').filter { it.isNotEmpty() && it != "." }
+            if (segments.isEmpty() || ".." in segments) {
+                throw IOException("Illegal zip entry path: ${entry.name}")
+            }
+            val target = File(root, segments.joinToString("/"))
+            // Canonical containment guards symlinked parents escaping [destDir].
+            val canonical = target.canonicalFile
+            if (canonical != root && !canonical.path.startsWith(root.path + File.separator)) {
+                throw IOException("Zip entry escapes destination: ${entry.name}")
+            }
             if (entry.isDirectory) {
                 target.mkdirs()
             } else {

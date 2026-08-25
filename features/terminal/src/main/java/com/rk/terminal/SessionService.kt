@@ -256,7 +256,7 @@ class SessionService : Service() {
             }
             wakeLockHeld = false
         }
-        if (Settings.auto_backup) {
+        if (Settings.auto_backup && com.rk.exec.isTerminalInstalled()) {
             // IO dispatcher: tar blocks for minutes; Default pool is for CPU.
             DefaultScope.launch(Dispatchers.IO) { runCatching { TerminalBackup.autoBackup() } }
         }
@@ -450,6 +450,12 @@ class SessionService : Service() {
         fun sessionsMayExist(): Boolean {
             val service = liveInstance ?: return false
             return synchronized(service.sessionLock) { service.sessions.isNotEmpty() }
+        }
+
+        /** Clears persisted session restore state; used when the rootfs is wiped. */
+        fun clearSavedSessions() {
+            Preference.removeKey(SAVED_SESSIONS_KEY)
+            Preference.removeKey(ACTIVE_SESSION_KEY)
         }
 
         private const val SAVED_SESSIONS_KEY = "saved_sessions"

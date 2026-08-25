@@ -169,6 +169,16 @@ fun SettingsTerminalScreen() {
                     loading.show()
 
                     DefaultScope.launch(Dispatchers.IO) {
+                        // Re-check at execution time: the picker was open while
+                        // sessions could have been spawned elsewhere.
+                        if (SessionService.sessionsMayExist()) {
+                            withContext(Dispatchers.Main + NonCancellable) {
+                                runCatching { loading.hide() }
+                                toast(strings.close_sessions_first)
+                            }
+                            return@launch
+                        }
+
                         val fileObject = uri.toFileObject(expectedIsFile = true)
 
                         val tempFile = getTempDir().child("terminal-backup.tar.gz")
@@ -275,16 +285,25 @@ fun SettingsTerminalScreen() {
                 showSwitch = false,
                 default = false,
                 sideEffect = {
-                    // Same confirm gate as the backups screen: restoring replaces
-                    // the whole sandbox, so never launch the picker silently.
-                    dialogRes(
-                        activity = activity,
-                        title = strings.restore.getString(),
-                        msg = strings.restore_terminal.getString(),
-                        okRes = strings.restore,
-                        onCancel = {},
-                        onOk = { restore.launch("*/*") },
-                    )
+                    // Same session guard as the backups screen: restoring replaces
+                    // the whole sandbox, so never launch the picker with live sessions.
+                    if (SessionService.sessionsMayExist()) {
+                        dialogRes(
+                            activity = activity,
+                            title = strings.attention.getString(),
+                            msg = strings.close_sessions_first.getString(),
+                            onCancel = {},
+                        )
+                    } else {
+                        dialogRes(
+                            activity = activity,
+                            title = strings.restore.getString(),
+                            msg = strings.restore_terminal.getString(),
+                            okRes = strings.restore,
+                            onCancel = {},
+                            onOk = { restore.launch("*/*") },
+                        )
+                    }
                 },
             )
 
@@ -343,6 +362,17 @@ fun SettingsTerminalScreen() {
                             onCancel = {},
                             okRes = strings.uninstall,
                             onOk = {
+                                // Re-check at execution time: the confirm dialog
+                                // was open while sessions could have been spawned.
+                                if (SessionService.sessionsMayExist()) {
+                                    dialogRes(
+                                        activity = activity,
+                                        title = strings.attention.getString(),
+                                        msg = strings.close_sessions_first.getString(),
+                                        onCancel = {},
+                                    )
+                                    return@onOk
+                                }
                                 DefaultScope.launch(Dispatchers.IO) {
                                     val loading = LoadingPopup(activity, null)
                                     withContext(Dispatchers.Main) { runCatching { loading.show() } }
@@ -354,6 +384,9 @@ fun SettingsTerminalScreen() {
                                         loading.setMessage(strings.deleting.getFilledString("sandbox"))
                                         sandboxDir().deleteRecursively()
                                         localDir().child(TERMINAL_SETUP_OK_MARKER).delete()
+                                        // Saved sessions would restore dead cwds
+                                        // into a future reinstall.
+                                        SessionService.clearSavedSessions()
                                     }
                                     terminalInstalled = false
                                     withContext(Dispatchers.Main + NonCancellable) {

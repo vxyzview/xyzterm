@@ -137,6 +137,17 @@ fun TerminalBackupsScreen() {
                             okRes = strings.restore,
                             onCancel = {},
                             onOk = {
+                                // Re-check at execution time: the confirm dialog
+                                // was open while sessions could have been spawned.
+                                if (SessionService.sessionsMayExist()) {
+                                    dialogRes(
+                                        activity = activity,
+                                        title = strings.attention.getString(),
+                                        msg = strings.close_sessions_first.getString(),
+                                        onCancel = {},
+                                    )
+                                    return@onOk
+                                }
                                 val loading = LoadingPopup(activity, null)
                                 loading.show()
                                 DefaultScope.launch(Dispatchers.IO) {
