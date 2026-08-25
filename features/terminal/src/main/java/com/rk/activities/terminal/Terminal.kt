@@ -508,7 +508,7 @@ private var lastHandledIntent: Intent? = null
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                         Button(onClick = { finishAffinity() }) {
                             Text(text = stringResource(strings.ok))
                         }
@@ -588,14 +588,14 @@ private var lastHandledIntent: Intent? = null
                 }
 
                 downloadStarted -> {
-                    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
                         Column(
                             modifier = Modifier.align(Alignment.Center),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(text = progressText, style = MaterialTheme.typography.bodyLarge)
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
 
                             LinearProgressIndicator(
                                 progress = { if (totalBytes > 0) downloadedBytes.toFloat() / totalBytes else 0f },

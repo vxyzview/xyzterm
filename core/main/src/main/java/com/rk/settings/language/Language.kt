@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
@@ -117,7 +116,6 @@ fun LanguageScreen(modifier: Modifier = Modifier) {
                         isEnabled = localeInfo.isInstalled,
                         startWidget = {
                             RadioButton(
-                                modifier = Modifier.padding(start = 16.dp),
                                 selected = selectedLocaleInfo == localeInfo,
                                 onClick = { setAppLanguage(localeInfo.locale, currentLocale) },
                             )

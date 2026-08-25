@@ -158,7 +158,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                             title = {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
                                     // Session indicator: solid while live, flashes
                                     // amber for 2s when the shell rings the bell
@@ -489,7 +489,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     )
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column {
                     Text(
@@ -546,7 +546,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
 
         // ── Sessions ───────────────────────────────────────────────────
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -690,16 +690,20 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                                 terminalActivity.sessionBinder?.get()?.setWakeLock(enabled)
                             },
                         )
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = stringResource(strings.keep_device_awake),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f).padding(vertical = 14.dp),
+                    modifier = Modifier.weight(1f),
                 )
-                Switch(checked = keepDeviceAwake, onCheckedChange = null)
+                Switch(
+                    checked = keepDeviceAwake,
+                    onCheckedChange = null,
+                    modifier = Modifier.padding(start = 12.dp),
+                )
             }
         }
 
