@@ -124,6 +124,10 @@ private fun rememberHostResumed(): Boolean {
 @Composable
 private fun HostEntry(request: DialogRequest) {
     LaunchedEffect(request.id) {
+        // Non-cancelable dialogs are mandatory prompts (e.g. storage
+        // permission): expiring them without invoking onOk/onCancel wedges the
+        // flow that pushed them. Only orphans of cancelable requests expire.
+        if (!request.cancelable) return@LaunchedEffect
         val remaining = REQUEST_TTL_MS - (System.currentTimeMillis() - request.createdAt)
         if (remaining > 0) {
             delay(remaining)

@@ -10,6 +10,7 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.rk.commands.CommandProvider
 import com.rk.commands.KeybindingsManager
 import com.rk.crashhandler.CrashHandler
+import com.rk.extension.ActivityProvider
 import com.rk.utils.FontCache
 import com.rk.icons.pack.IconPackManager
 import com.rk.resources.Res
@@ -66,6 +67,16 @@ open class App : Application() {
         super.onCreate()
         application = this
         Res.application = this
+
+        // Track the foreground activity so toast()/default-hosted dialogs can
+        // resolve a UI context. Without this registration currentActivity is
+        // permanently null and every toast and default-param dialog is silent.
+        registerActivityLifecycleCallbacks(ActivityProvider)
+
+        // Re-apply the persisted day/night mode at process start; without this
+        // AppCompat falls back to FOLLOW_SYSTEM while Compose honours the stored
+        // mode, producing a wrong-palette launch frame and inverted status bar.
+        AppCompatDelegate.setDefaultNightMode(Settings.theme_mode)
 
         val currentLocale = Locale.forLanguageTag(Settings.current_lang)
         val appLocale = LocaleListCompat.create(currentLocale)
