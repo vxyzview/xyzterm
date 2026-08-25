@@ -168,16 +168,24 @@ class Terminal : AppCompatActivity() {
 
     fun handleIntent(intent: Intent) {
         if (intent === lastHandledIntent) return
-        lastHandledIntent = intent
-        this.intent = intent
+
+        // Only stamp an intent as handled once we actually act on it. Bailing
+        // below (view not composed yet, binder gone) leaves it unmarked so a
+        // later call can retry instead of silently dropping the request.
+        fun markHandled() {
+            lastHandledIntent = intent
+            this.intent = intent
+        }
 
         if (intent.data?.scheme == "xyzterm") {
+            markHandled()
             handleDeepLink(intent.data ?: return)
             return
         }
 
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
+            markHandled()
             confirmAndRunCommand(text)
             return
         }
@@ -185,6 +193,7 @@ class Terminal : AppCompatActivity() {
         val pwd = intent.getStringExtra("cwd") ?: return
         val binder = sessionBinder?.get() ?: return
         terminalView.get() ?: return
+        markHandled()
 
         val sessionId = File(pwd).name
         if (!SESSION_NAME_REGEX.matches(sessionId)) return

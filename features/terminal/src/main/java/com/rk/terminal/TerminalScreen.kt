@@ -373,12 +373,13 @@ private suspend fun TerminalView.attachOrCreateSession(
     client: TerminalBackEnd,
     terminalActivity: Terminal,
 ) {
+    val pendingCommandSnapshot = pendingCommand
     val session =
-        if (pendingCommand != null) {
+        if (pendingCommandSnapshot != null) {
             val binder = terminalActivity.sessionBinder?.get() ?: return // service unbound mid-recreate
-            binder.getService().currentSession.value = pendingCommand!!.id
-            binder.getSession(pendingCommand!!.id)
-                ?: binder.createSession(pendingCommand!!.id, client, terminalActivity).session
+            binder.getService().currentSession.value = pendingCommandSnapshot.id
+            binder.getSession(pendingCommandSnapshot.id)
+                ?: binder.createSession(pendingCommandSnapshot.id, client, terminalActivity).session
         } else {
             val binder = terminalActivity.sessionBinder?.get() ?: return
             val service = binder.getService()
@@ -405,6 +406,10 @@ private suspend fun TerminalView.attachOrCreateSession(
         session.updateTerminalSessionClient(client)
         attachSession(session)
         setTerminalViewClient(client)
+        // The extra-keys row binds its client at composition time, when the
+        // session is not attached yet (async). Bind here so CTRL/ESC/arrows
+        // work on first launch and after recreation without a session switch.
+        virtualKeysView.get()?.apply { virtualKeysViewClient = VirtualKeysListener(session) }
 
         // Broken-rootfs symptom: a shell that dies within seconds of spawn
         // (missing/corrupt /bin/bash, proot failure) leaves a blank screen with

@@ -113,6 +113,13 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                         }
                     },
                     update = { view ->
+                        // Defensive rebind: the factory ran before any session was
+                        // attached, so the client can still be null here.
+                        if (view.virtualKeysViewClient == null) {
+                            terminalView.get()?.mTermSession?.let {
+                                view.virtualKeysViewClient = VirtualKeysListener(it)
+                            }
+                        }
                         val current = Settings.terminal_extra_keys
                         if (current != appliedExtraKeys) {
                             appliedExtraKeys = current

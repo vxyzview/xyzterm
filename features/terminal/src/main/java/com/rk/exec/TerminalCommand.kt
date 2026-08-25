@@ -1,6 +1,24 @@
 package com.rk.exec
 
-var pendingCommand: TerminalCommand? = null
+import java.util.concurrent.atomic.AtomicReference
+
+private val pendingRef = AtomicReference<TerminalCommand?>(null)
+
+var pendingCommand: TerminalCommand?
+    get() = pendingRef.get()
+    set(value) {
+        pendingRef.set(value)
+    }
+
+/**
+ * Atomically clears and returns the pending launch command.
+ *
+ * Session creation runs concurrently (parallel restore, drawer, external
+ * launches), so read-then-clear sequences on a plain var raced: every restored
+ * shell could observe and re-execute the same command, or a clear between two
+ * reads threw NPEs. Consume exactly once via this function instead.
+ */
+fun consumePendingCommand(): TerminalCommand? = pendingRef.getAndSet(null)
 
 data class TerminalCommand(
     val sandbox: Boolean = true,

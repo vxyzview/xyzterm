@@ -2,8 +2,8 @@ package com.rk.terminal
 
 import android.app.Activity
 import android.content.Context
+import com.rk.exec.consumePendingCommand
 import com.rk.exec.SandboxEnv
-import com.rk.exec.pendingCommand
 import com.rk.file.child
 import com.rk.file.localBinDir
 import com.rk.file.localDir
@@ -51,7 +51,11 @@ object MkSession {
 
     /** All disk I/O and environment assembly; must not run on the main thread. */
     private fun prepareEnvironment(context: Context, sessionId: String, isExtraction: Boolean, cwd: String?): Prepared {
-        val workingDir = cwd ?: getPwd(context)
+        // Single atomic snapshot: parallel session creation (restore) or a
+        // racing consumer must never observe a half-consumed command.
+        val pending = consumePendingCommand()
+
+        val workingDir = cwd ?: pending?.workingDir ?: getPwd(context)
 
         val tmpDir = localDir().child("tmp").child(sessionId)
 
@@ -67,7 +71,7 @@ object MkSession {
 
         val env = envMap.map { "${it.key}=${it.value}" }.toMutableList()
 
-        pendingCommand?.env?.let { env.addAll(it) }
+        pending?.env?.let { env.addAll(it) }
 
         setupTerminalFiles()
 
@@ -77,7 +81,7 @@ object MkSession {
         val args: Array<String>
 
         val shell =
-            if (pendingCommand == null) {
+            if (pending == null) {
                 args =
                     if (Settings.sandbox) {
                         arrayOf(sandboxSH.absolutePath)
@@ -85,13 +89,11 @@ object MkSession {
                         arrayOf()
                     }
                 "/system/bin/sh"
-            } else if (pendingCommand!!.sandbox.not()) {
-                args = pendingCommand!!.args
-                pendingCommand!!.exe
+            } else if (pending.sandbox.not()) {
+                args = pending.args
+                pending.exe
             } else {
-                args =
-                    mutableListOf(sandboxSH.absolutePath, pendingCommand!!.exe, *pendingCommand!!.args)
-                        .toTypedArray<String>()
+                args = mutableListOf(sandboxSH.absolutePath, pending.exe, *pending.args).toTypedArray<String>()
 
                 "/system/bin/sh"
             }
@@ -106,8 +108,6 @@ object MkSession {
                 if (args.isEmpty()) arrayOf() else arrayOf("-c", *args)
             }
 
-        pendingCommand = null
-
         return Prepared(
             workingDir = workingDir,
             processCwd = localDir(context).absolutePath,
@@ -119,11 +119,6 @@ object MkSession {
 }
 
 fun getPwd(context: Context): String {
-    val pendingWorkingDir = pendingCommand?.workingDir
-    if (pendingWorkingDir != null) {
-        return pendingWorkingDir
-    }
-
     if (context is Activity && context.intent.hasExtra("cwd")) {
         return context.intent.getStringExtra("cwd").toString()
     }
