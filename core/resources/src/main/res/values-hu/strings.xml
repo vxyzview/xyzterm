@@ -134,7 +134,7 @@
     <string name="uninstall_terminal">Terminál eltávolítása</string>
     <string name="restore_terminal">Terminál-biztonsági mentés visszaállítása</string>
     <string name="terminal_backup">Terminál biztonsági mentés</string>
-    <string name="seccomp_desc">"function not implemented" hiba javítása egyes eszközökön</string>
+    <string name="seccomp_desc">\"function not implemented\" hiba javítása egyes eszközökön</string>
     <string name="seccomp_unspecified">Nem megadott</string>
     <string name="seccomp_no_seccomp">Nincs seccomp</string>
     <string name="seccomp_seccomp">Seccomp</string>
@@ -255,7 +255,7 @@ Ellenőrizze a fájlt, és próbálja újra.</string>
     <string name="manage_terminal_font">Terminálbetűkészletek kezelése</string>
     <string name="manage_terminal_font_desc">A terminál betűkészletének kiválasztása, importálása vagy visszaállítása</string>
     <string name="snippet_empty">Még nincsenek kódrészletek. Vegyen fel egyet, hogy egy koppintással beszúrja a terminálba.</string>
-    <string name="terminal_font_warning">A(z) 'etc/font.ttf' helyen lévő terminálbetűkészlet-fájl felülbírálja az alább beállított egyéni betűkészletet. Az egyéni betűkészletek érvényesítéséhez törölje a fájlt a terminál sandboxjából.</string>
+    <string name="terminal_font_warning">A(z) \'etc/font.ttf\' helyen lévő terminálbetűkészlet-fájl felülbírálja az alább beállított egyéni betűkészletet. Az egyéni betűkészletek érvényesítéséhez törölje a fájlt a terminál sandboxjából.</string>
     <string name="view_github">Megtekintés GitHubon</string>
     <string name="view_gitlab">Megtekintés GitLabon</string>
     <string name="view_bitbucket">Megtekintés BitBucketen</string>

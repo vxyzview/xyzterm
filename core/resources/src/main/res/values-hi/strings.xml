@@ -137,7 +137,7 @@
     <string name="uninstall_terminal">टर्मिनल अनइंस्टॉल करें</string>
     <string name="restore_terminal">टर्मिनल बैकअप पुनर्स्थापित करें</string>
     <string name="terminal_backup">टर्मिनल बैकअप</string>
-    <string name="seccomp_desc">कुछ डिवाइसों पर "function not implemented" त्रुटि ठीक करें</string>
+    <string name="seccomp_desc">कुछ डिवाइसों पर \"function not implemented\" त्रुटि ठीक करें</string>
     <string name="seccomp_unspecified">अनिर्दिष्ट</string>
     <string name="seccomp_no_seccomp">कोई seccomp नहीं</string>
     <string name="seccomp_seccomp">Seccomp</string>
@@ -198,10 +198,10 @@
 
 आप जो कमांड निष्पादित करते हैं और उनकी संभावित परिणामों को समझने के लिए आप ज़िम्मेदार हैं।</string>
     <string name="no_warranty">कोई वारंटी नहीं</string>
-    <string name="no_warranty_content">यह सॉफ़्टवेयर GNU General Public License v3.0 के अंतर्गत वितरित किया जाता है और "जैसा है" प्रदान किया जाता है, किसी भी प्रकार की वारंटी के बिना, चाहे व्यक्त हो या निहित, जिसमें शामिल हैं परंतु सीमित नहीं: विक्रय-योग्यता, किसी विशेष उद्देश्य के लिए उपयुक्तता, और अलंघनता की वारंटियाँ।</string>
+    <string name="no_warranty_content">यह सॉफ़्टवेयर GNU General Public License v3.0 के अंतर्गत वितरित किया जाता है और \"जैसा है\" प्रदान किया जाता है, किसी भी प्रकार की वारंटी के बिना, चाहे व्यक्त हो या निहित, जिसमें शामिल हैं परंतु सीमित नहीं: विक्रय-योग्यता, किसी विशेष उद्देश्य के लिए उपयुक्तता, और अलंघनता की वारंटियाँ।</string>
     <string name="not_liable">दायित्व की सीमा</string>
     <string name="not_liable_content">इस सॉफ़्टवेयर के उपयोग से उत्पन्न किसी भी दावे, क्षति या हानि के लिए डेवलपर या कॉपीराइट धारक किसी भी स्थिति में उत्तरदायी नहीं होंगे। इसमें शामिल है, बिना सीमा के: डेटा हानि, सिस्टम खराबी, राजस्व हानि, या कोई भी आकस्मिक या परिणामी क्षति, भले ही ऐसी क्षति की संभावना की सूचना दी गई हो।</string>
-    <string name="consent_statement">"मैं स्वीकार करता हूँ" पर क्लिक करके, आप स्वीकार करते हैं कि आपने इन शर्तों को पढ़ लिया है, समझ लिया है और उनसे सहमत हैं।</string>
+    <string name="consent_statement">\"मैं स्वीकार करता हूँ\" पर क्लिक करके, आप स्वीकार करते हैं कि आपने इन शर्तों को पढ़ लिया है, समझ लिया है और उनसे सहमत हैं।</string>
     <string name="decline">अस्वीकार करें</string>
     <string name="i_accept">मैं स्वीकार करता हूँ</string>
     <string name="keybindings">कीबाइंडिंग</string>
@@ -257,7 +257,7 @@
     <string name="manage_terminal_font">टर्मिनल फ़ॉन्ट प्रबंधित करें</string>
     <string name="manage_terminal_font_desc">टर्मिनल फ़ॉन्ट चुनें, आयात करें या रीसेट करें</string>
     <string name="snippet_empty">अभी तक कोई स्निपेट नहीं। एक टैप से इसे टर्मिनल में डालने के लिए जोड़ें।</string>
-    <string name="terminal_font_warning">'etc/font.ttf' पर टर्मिनल फ़ॉन्ट फ़ाइल नीचे सेट किए गए कस्टम फ़ॉन्ट को ओवरराइड करती है। कस्टम फ़ॉन्ट लागू करने के लिए टर्मिनल सैंडबॉक्स में फ़ाइल को हटाएँ।</string>
+    <string name="terminal_font_warning">\'etc/font.ttf\' पर टर्मिनल फ़ॉन्ट फ़ाइल नीचे सेट किए गए कस्टम फ़ॉन्ट को ओवरराइड करती है। कस्टम फ़ॉन्ट लागू करने के लिए टर्मिनल सैंडबॉक्स में फ़ाइल को हटाएँ।</string>
     <string name="view_github">GitHub पर देखें</string>
     <string name="view_gitlab">GitLab पर देखें</string>
     <string name="view_bitbucket">BitBucket पर देखें</string>

@@ -136,7 +136,7 @@
     <string name="uninstall_terminal_warning">Ubuntu برای همیشه حذف نصب شود؟ این عمل قابل بازگشت نیست.</string>
     <string name="restore_terminal">بازیابی نسخه پشتیبان ترمینال</string>
     <string name="terminal_backup">نسخه پشتیبان ترمینال</string>
-    <string name="seccomp_desc">رفع خطای "function not implemented" روی برخی دستگاه‌ها</string>
+    <string name="seccomp_desc">رفع خطای \"function not implemented\" روی برخی دستگاه‌ها</string>
     <string name="seccomp_unspecified">نامشخص</string>
     <string name="seccomp_no_seccomp">بدون seccomp</string>
     <string name="seccomp_seccomp">Seccomp</string>
@@ -255,7 +255,7 @@
     <string name="manage_terminal_font">مدیریت فونت‌های ترمینال</string>
     <string name="manage_terminal_font_desc">انتخاب، وارد کردن یا بازنشانی فونت ترمینال</string>
     <string name="snippet_empty">هنوز قطعه‌کدی وجود ندارد. یکی اضافه کنید تا با یک ضربه در ترمینال درج شود.</string>
-    <string name="terminal_font_warning">فایل فونت ترمینال در مسیر 'etc/font.ttf' فونت سفارشی تنظیم‌شده در زیر را نادیده می‌گیرد. برای اعمال فونت‌های سفارشی، فایل را در sandbox ترمینال حذف کنید.</string>
+    <string name="terminal_font_warning">فایل فونت ترمینال در مسیر \'etc/font.ttf\' فونت سفارشی تنظیم‌شده در زیر را نادیده می‌گیرد. برای اعمال فونت‌های سفارشی، فایل را در sandbox ترمینال حذف کنید.</string>
     <string name="view_github">مشاهده در GitHub</string>
     <string name="view_gitlab">مشاهده در GitLab</string>
     <string name="view_bitbucket">مشاهده در BitBucket</string>

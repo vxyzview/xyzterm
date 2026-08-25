@@ -135,7 +135,7 @@
     <string name="uninstall_terminal">টার্মিনাল আনইনস্টল</string>
     <string name="restore_terminal">টার্মিনাল ব্যাকআপ পুনরুদ্ধার</string>
     <string name="terminal_backup">টার্মিনাল ব্যাকআপ</string>
-    <string name="seccomp_desc">কিছু ডিভাইসে "function not implemented" ত্রুটি ঠিক করুন</string>
+    <string name="seccomp_desc">কিছু ডিভাইসে \"function not implemented\" ত্রুটি ঠিক করুন</string>
     <string name="seccomp_unspecified">অনির্দিষ্ট</string>
     <string name="seccomp_no_seccomp">seccomp নেই</string>
     <string name="seccomp_seccomp">Seccomp</string>
@@ -196,10 +196,10 @@
 
 আপনি যে কমান্ড চালান এবং তার সম্ভাব্য পরিণতি বোঝার দায়িত্ব আপনার।</string>
     <string name="no_warranty">কোনো ওয়ারেন্টি নেই</string>
-    <string name="no_warranty_content">এই সফটওয়্যার GNU General Public License v3.0-এর অধীনে বিতরণ করা হয় এবং "যেমন আছে তেমন" দেওয়া হয়, বিক্রয়যোগ্যতা, নির্দিষ্ট উদ্দেশ্যে উপযুক্ততা ও লঙ্ঘনহীনতার ওয়ারেন্টি সহ কোনো ধরনের ওয়ারেন্টি ছাড়াই — স্পষ্ট বা অন্তর্নিহিত।</string>
+    <string name="no_warranty_content">এই সফটওয়্যার GNU General Public License v3.0-এর অধীনে বিতরণ করা হয় এবং \"যেমন আছে তেমন\" দেওয়া হয়, বিক্রয়যোগ্যতা, নির্দিষ্ট উদ্দেশ্যে উপযুক্ততা ও লঙ্ঘনহীনতার ওয়ারেন্টি সহ কোনো ধরনের ওয়ারেন্টি ছাড়াই — স্পষ্ট বা অন্তর্নিহিত।</string>
     <string name="not_liable">দায়বদ্ধতার সীমা</string>
     <string name="not_liable_content">এই সফটওয়্যারের ব্যবহার থেকে উদ্ভূত কোনো দাবি, ক্ষতি বা ক্ষয়ের জন্য বিকাশকারী বা কপিরাইট ধারকরা কোনোভাবেই দায়ী থাকবেন না। এর মধ্যে, সীমাবদ্ধ নয়: ডেটা হারানো, সিস্টেম ত্রুটি, আয় হারানো বা এমন ক্ষতির সম্ভাবনা সম্পর্কে জানানো হলেও যেকোনো আকস্মিক বা পরিণতিজনিত ক্ষতি।</string>
-    <string name="consent_statement">"আমি সম্মত" ক্লিক করার মাধ্যমে, আপনি স্বীকার করছেন যে আপনি এই শর্তগুলি পড়েছেন, বুঝেছেন এবং সম্মত হয়েছেন।</string>
+    <string name="consent_statement">\"আমি সম্মত\" ক্লিক করার মাধ্যমে, আপনি স্বীকার করছেন যে আপনি এই শর্তগুলি পড়েছেন, বুঝেছেন এবং সম্মত হয়েছেন।</string>
     <string name="decline">প্রত্যাখ্যান</string>
     <string name="i_accept">আমি সম্মত</string>
     <string name="keybindings">কীবাইন্ডিং</string>
@@ -255,7 +255,7 @@
     <string name="manage_terminal_font">টার্মিনাল ফন্ট পরিচালনা</string>
     <string name="manage_terminal_font_desc">টার্মিনাল ফন্ট বেছে নিন, ইমপোর্ট বা রিসেট করুন</string>
     <string name="snippet_empty">এখনও কোনো স্নিপেট নেই। এক ট্যাপে টার্মিনালে বসাতে একটি যোগ করুন।</string>
-    <string name="terminal_font_warning">'etc/font.ttf'-এ থাকা টার্মিনাল ফন্ট ফাইল নিচে সেট করা কাস্টম ফন্টকে ওভাররাইড করে। কাস্টম ফন্ট প্রয়োগ করতে টার্মিনাল স্যান্ডবক্সে ফাইলটি মুছুন।</string>
+    <string name="terminal_font_warning">\'etc/font.ttf\'-এ থাকা টার্মিনাল ফন্ট ফাইল নিচে সেট করা কাস্টম ফন্টকে ওভাররাইড করে। কাস্টম ফন্ট প্রয়োগ করতে টার্মিনাল স্যান্ডবক্সে ফাইলটি মুছুন।</string>
     <string name="view_github">GitHub-এ দেখুন</string>
     <string name="view_gitlab">GitLab-এ দেখুন</string>
     <string name="view_bitbucket">BitBucket-এ দেখুন</string>

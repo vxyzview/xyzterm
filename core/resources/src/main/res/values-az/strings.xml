@@ -134,7 +134,7 @@
     <string name="uninstall_terminal">Terminalı sil</string>
     <string name="restore_terminal">Terminal ehtiyat nüsxəsini bərpa et</string>
     <string name="terminal_backup">Terminal ehtiyat nüsxəsi</string>
-    <string name="seccomp_desc">Bəzi cihazlarda "function not implemented" xətasını düzəlt</string>
+    <string name="seccomp_desc">Bəzi cihazlarda \"function not implemented\" xətasını düzəlt</string>
     <string name="seccomp_unspecified">Göstərilməyib</string>
     <string name="seccomp_no_seccomp">Seccomp yoxdur</string>
     <string name="seccomp_seccomp">Seccomp</string>
@@ -196,10 +196,10 @@
 
 İcrа etdiyiniz əmrləri və onların potensial nəticələrini anlamaqdan siz məsuliyyət daşıyırsınız.</string>
     <string name="no_warranty">Zəmanət Yoxdur</string>
-    <string name="no_warranty_content">Bu proqram GNU Ümumi İctimai Lisenziyası v3.0 əsasında yayılır və "OLDUĞU KİMİ" təqdim olunur; açıq və ya dolayı heç bir zəmanət verilmir, o cümlədən satılabilirlik, müəyyən məqsədə uyğunluq və pozuntusuzluq zəmanətləri.</string>
+    <string name="no_warranty_content">Bu proqram GNU Ümumi İctimai Lisenziyası v3.0 əsasında yayılır və \"OLDUĞU KİMİ\" təqdim olunur; açıq və ya dolayı heç bir zəmanət verilmir, o cümlədən satılabilirlik, müəyyən məqsədə uyğunluq və pozuntusuzluq zəmanətləri.</string>
     <string name="not_liable">Məsuliyyətin Məhdudlaşdırılması</string>
     <string name="not_liable_content">Tərtibatçılar və ya müəllif hüququ sahibləri bu proqramın istifadəsindən yaranan heç bir iddia, zərər və ya itki üçün məsul deyil. Buraya, digərləri arasında: məlumat itkisi, sistem nasazlıqları, gəlir itkisi və ya belə zərərin ehtimalı barədə xəbərdar edilsə belə, hər hansı təsadüfi və ya ardıcıl zərərlər daxildir.</string>
-    <string name="consent_statement">"Qəbul edirəm" düyməsinə basmaqla, bu şərtləri oxuduğunuzu, anladığınızı və qəbul etdiyinizi təsdiqləyirsiniz.</string>
+    <string name="consent_statement">\"Qəbul edirəm\" düyməsinə basmaqla, bu şərtləri oxuduğunuzu, anladığınızı və qəbul etdiyinizi təsdiqləyirsiniz.</string>
     <string name="decline">Rədd et</string>
     <string name="i_accept">Qəbul edirəm</string>
     <string name="keybindings">Düymə kombinasiyaları</string>
@@ -255,7 +255,7 @@ Faylı yoxlayıb yenidən cəhd edin.</string>
     <string name="manage_terminal_font">Terminal şriftlərini idarə et</string>
     <string name="manage_terminal_font_desc">Terminal şriftini seç, idxal et və ya sıfırla</string>
     <string name="snippet_empty">Hələ parça yoxdur. Bir toxunuşla terminala yeritmək üçün əlavə edin.</string>
-    <string name="terminal_font_warning">'etc/font.ttf' ünvanındaki terminal şrift faylı aşağıda seçilən fərdi şrifti əvəz edir. Fərdi şriftlərin tətbiqi üçün faylı terminal sandbox-ında silin.</string>
+    <string name="terminal_font_warning">\'etc/font.ttf\' ünvanındaki terminal şrift faylı aşağıda seçilən fərdi şrifti əvəz edir. Fərdi şriftlərin tətbiqi üçün faylı terminal sandbox-ında silin.</string>
     <string name="view_github">GitHub-da bax</string>
     <string name="view_gitlab">GitLab-da bax</string>
     <string name="view_bitbucket">BitBucket-də bax</string>

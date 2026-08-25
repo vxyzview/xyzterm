@@ -134,7 +134,7 @@
     <string name="uninstall_terminal">Poista pääte</string>
     <string name="restore_terminal">Palauta päätteen varmuuskopio</string>
     <string name="terminal_backup">Päätteen varmuuskopio</string>
-    <string name="seccomp_desc">Korjaa "function not implemented" -virhe joillakin laitteilla</string>
+    <string name="seccomp_desc">Korjaa \"function not implemented\" -virhe joillakin laitteilla</string>
     <string name="seccomp_unspecified">Määrittelemätön</string>
     <string name="seccomp_no_seccomp">Ei seccompia</string>
     <string name="seccomp_seccomp">Seccomp</string>
@@ -196,10 +196,10 @@
 
 Vastaat itse suorittamiesi komentojen ymmärtämisestä ja niiden mahdollisista seurauksista.</string>
     <string name="no_warranty">Ei takuuta</string>
-    <string name="no_warranty_content">Tämä ohjelmisto jaetaan GNU General Public License v3.0 -lisenssin alaisena ja toimitetaan "sellaisenaan", ILMAN MINKÄÄNLAISTA TAKUUTA, joko ilmaistuna tai epäsuorana, mukaan lukien mutta ei rajoittuen kaupallisuus-, tarkoitukseen sopivuus- ja loukkaamattomuustakuuihin.</string>
+    <string name="no_warranty_content">Tämä ohjelmisto jaetaan GNU General Public License v3.0 -lisenssin alaisena ja toimitetaan \"sellaisenaan\", ILMAN MINKÄÄNLAISTA TAKUUTA, joko ilmaistuna tai epäsuorana, mukaan lukien mutta ei rajoittuen kaupallisuus-, tarkoitukseen sopivuus- ja loukkaamattomuustakuuihin.</string>
     <string name="not_liable">Vastuurajoitus</string>
     <string name="not_liable_content">Kehittäjät tai tekijänoikeudenhaltijat eivät missään tapauksessa ole vastuussa mistään vaatimuksista, vahingoista tai menetyksistä, jotka aiheutuvat tämän ohjelmiston käytöstä. Tähän sisältyy muun muassa: tietojen menetys, järjestelmähäiriöt, tulosten menetys tai tahattomat tai välilliset vahingot, myös silloin, kun tällaisen vahingon mahdollisuudesta on ilmoitettu.</string>
-    <string name="consent_statement">Napsauttamalla "Hyväksyn" vahvistat, että olet lukenut nämä ehdot, ymmärtänyt ne ja hyväksyyt ne.</string>
+    <string name="consent_statement">Napsauttamalla \"Hyväksyn\" vahvistat, että olet lukenut nämä ehdot, ymmärtänyt ne ja hyväksyyt ne.</string>
     <string name="decline">Hylkää</string>
     <string name="i_accept">Hyväksyn</string>
     <string name="keybindings">Pikanäppäimet</string>
@@ -255,7 +255,7 @@ Tarkista tiedosto ja yritä uudelleen.</string>
     <string name="manage_terminal_font">Hallitse päätteen fontteja</string>
     <string name="manage_terminal_font_desc">Valitse, tuo tai nollaa päätteen fontti</string>
     <string name="snippet_empty">Ei vielä katkelmia. Lisää sellainen, niin voit syöttää sen päätteeseen yhdellä napautuksella.</string>
-    <string name="terminal_font_warning">'etc/font.ttf'-polussa oleva pätefontti ohittaa alla määritetyn mukautetun fontin. Poista tiedosto pätesandboxista ottaaksesi mukautetut fontit käyttöön.</string>
+    <string name="terminal_font_warning">\'etc/font.ttf\'-polussa oleva pätefontti ohittaa alla määritetyn mukautetun fontin. Poista tiedosto pätesandboxista ottaaksesi mukautetut fontit käyttöön.</string>
     <string name="view_github">Näytä GitHubissa</string>
     <string name="view_gitlab">Näytä GitLabissa</string>
     <string name="view_bitbucket">Näytä BitBucketissa</string>

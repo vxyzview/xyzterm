@@ -270,7 +270,7 @@
     <string name="snippet_label">Etichetta</string>
     <string name="snippet_command">Comando</string>
     <string name="custom_binds">Bind personalizzati</string>
-    <string name="custom_binds_desc">Espone cartelle host aggiuntive all'interno dell'ambiente Ubuntu</string>
+    <string name="custom_binds_desc">Espone cartelle host aggiuntive all\'interno dell\'ambiente Ubuntu</string>
     <string name="bind_add">Aggiungi bind</string>
     <string name="custom_binds_empty">Nessun bind personalizzato. Le cartelle aggiunte compaiono nel filesystem di Ubuntu.</string>
     <string name="bind_host_path">Percorso host (es. /storage/emulated/0/Download)</string>
@@ -284,15 +284,15 @@
     <string name="terminal_output">Output del terminale</string>
     <string name="update_available">Aggiornamento disponibile</string>
     <string name="update_available_msg">È disponibile una nuova versione (v%s). Scaricarla e installarla ora?</string>
-    <string name="update_downloading">Download dell'aggiornamento…</string>
-    <string name="update_download_failed">Download dell'aggiornamento non riuscito</string>
-    <string name="update_signature_mismatch">La build di rilascio è firmata con una chiave diversa dall'app installata, quindi non può essere installata sopra di essa. Disinstalla prima l'app attuale oppure compila dai sorgenti.</string>
+    <string name="update_downloading">Download dell\'aggiornamento…</string>
+    <string name="update_download_failed">Download dell\'aggiornamento non riuscito</string>
+    <string name="update_signature_mismatch">La build di rilascio è firmata con una chiave diversa dall\'app installata, quindi non può essere installata sopra di essa. Disinstalla prima l\'app attuale oppure compila dai sorgenti.</string>
     <string name="auto_backup">Backup automatico</string>
     <string name="manage_backups">Gestisci backup</string>
     <string name="manage_backups_desc">Sfoglia, ripristina e riduci i backup del terminale</string>
     <string name="backup_now">Esegui backup ora</string>
     <string name="no_backups_yet">Nessun backup ancora</string>
-    <string name="auto_backup_desc">Esegui il backup dell'ambiente terminale all'uscita del servizio, mantenendo gli ultimi 3 backup</string>
+    <string name="auto_backup_desc">Esegui il backup dell\'ambiente terminale all\'uscita del servizio, mantenendo gli ultimi 3 backup</string>
     <string name="install_ubuntu_optional">Ubuntu non è installato</string>
     <string name="install_ubuntu_optional_desc">Installa Ubuntu per ottenere un ambiente Linux completo. Puoi farlo ora o più tardi dalle impostazioni del Terminale.</string>
     <string name="not_now">Non ora</string>
@@ -330,7 +330,7 @@
     <string name="theme_low_contrast_title">Contrasto basso</string>
     <string name="theme_low_contrast_msg">Il contrasto testo/sfondo di questo tema è inferiore a 3:1 e potrebbe essere difficile da leggere.</string>
     <string name="install_extracting_title">Estrazione di Ubuntu…</string>
-    <string name="install_extracting_warning">Tieni l'app aperta finché l'estrazione non è completata</string>
+    <string name="install_extracting_warning">Tieni l\'app aperta finché l\'estrazione non è completata</string>
     <string name="install_extracting_progress">Estrazione… %1$d%%</string>
     <string name="reading_files">Lettura dei file…</string>
     <string name="compressing">Compressione…</string>
@@ -338,7 +338,7 @@
     <string name="moving_into_place">Spostamento al posto giusto…</string>
     <string name="close_sessions_first">Chiudi prima tutte le sessioni del terminale</string>
     <string name="backup_swap_old_failed">Impossibile eseguire il backup della sandbox attuale</string>
-    <string name="backup_swap_failed">Impossibile spostare la nuova sandbox al suo posto — ripristinata l'originale</string>
+    <string name="backup_swap_failed">Impossibile spostare la nuova sandbox al suo posto — ripristinata l\'originale</string>
     <string name="deleting">Eliminazione di %1$s…</string>
     <string name="backup_swap_rollback_failed">Il ripristino non è riuscito e la sandbox precedente non è stato possibile recuperarla</string>
     <plurals name="sessions_running">
