@@ -49,3 +49,5 @@ graphify-out/
 *.jks
 signing.properties
 *signing*.properties
+
+tmp/
