@@ -13,6 +13,7 @@ import com.rk.file.sandboxHomeDir
 import com.rk.utils.getTempDir
 import com.rk.utils.isMainThread
 import java.io.File
+import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,7 +42,11 @@ suspend fun CoroutineScope.getNextStage(context: Context): NEXT_STAGE = withCont
             // Rootfs files without the success marker mean a previous attempt
             // died mid-extraction; wipe so the retry starts clean instead of
             // being mistaken for an installed system.
-            rootfsFiles.forEach { it.deleteRecursively() }
+            rootfsFiles.forEach {
+                if (!it.deleteRecursively()) {
+                    throw IOException("Failed to wipe incomplete rootfs: ${it.absolutePath}")
+                }
+            }
             if (sandboxFile.exists()) NEXT_STAGE.EXTRACTION else NEXT_STAGE.NONE
         }
     }
@@ -91,10 +96,12 @@ suspend fun extractRootfs(onProgress: (Float) -> Unit) =
         tmpDir.mkdirs()
         Os.chmod(tmpDir.path, Integer.parseInt("1777", 8))
 
-        tarball.delete()
-
+        // Marker goes down before the tarball is deleted: deleting the tarball
+        // first leaves a window where a kill loses the complete rootfs.
         // DO NOT REMOVE THIS FILE JUST DON'T, TRUST ME (same contract as setup.sh)
         localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
+
+        tarball.delete()
     }
 
 private fun appendAndroidGroups(groupFile: File) {

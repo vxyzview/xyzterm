@@ -14,6 +14,7 @@ import android.os.IBinder
 import android.net.Uri
 import android.os.SystemClock
 import android.view.WindowManager
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -90,6 +91,7 @@ import com.rk.utils.dialogRes
 import com.rk.utils.errorDialog
 import com.rk.utils.getTempDir
 import com.rk.utils.toast
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -355,6 +357,9 @@ private var lastHandledIntent: Intent? = null
             ubuntuInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() }
         }
 
+        // Swallowing back during install would abandon a half-installed rootfs.
+        BackHandler(enabled = downloadStarted || installNextStage == NEXT_STAGE.EXTRACTION) {}
+
         // Helper function to format bytes to MB string
         fun formatBytesToMB(bytes: Long): String {
             return "%.2f".format(bytes / (1024.0 * 1024.0))
@@ -510,9 +515,18 @@ private var lastHandledIntent: Intent? = null
                     var extractProgress by remember { mutableFloatStateOf(0f) }
 
                     LaunchedEffect(Unit) {
-                        val failure = runCatching {
-                            extractRootfs { fraction -> extractProgress = fraction }
-                        }.exceptionOrNull()
+                        // CancellationException must propagate: swallowing it turns a
+                        // rotation/back mid-extract into a bogus "Setup failed" while
+                        // the disk state may already be complete.
+                        val failure =
+                            try {
+                                extractRootfs { fraction -> extractProgress = fraction }
+                                null
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                e
+                            }
 
                         if (failure != null) {
                             failure.printStackTrace()
@@ -542,6 +556,7 @@ private var lastHandledIntent: Intent? = null
                         Text(
                             text = stringResource(strings.install_extracting_warning),
                             style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
                             textAlign = TextAlign.Center,
                         )
                         Spacer(modifier = Modifier.height(24.dp))

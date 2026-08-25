@@ -1,6 +1,8 @@
 package com.rk.exec
 
+import android.system.ErrnoException
 import android.system.Os
+import android.system.OsConstants
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -31,11 +33,16 @@ object TarExtractor {
 
         GZIPInputStream(ProgressStream(FileInputStream(tarGz), total, onProgress), COPY_BUFFER).use { gzip ->
             val header = ByteArray(BLOCK)
+            // Hoisted out of the per-entry loop: reallocating a 64KB buffer for
+            // each of ~30k entries churns gigabytes of garbage.
+            val buf = ByteArray(COPY_BUFFER)
             var pendingPax: Map<String, String> = emptyMap()
             val globalPax = HashMap<String, String>()
             var longName: String? = null
             var longLink: String? = null
             val dirModes = ArrayList<Pair<File, Int>>()
+            val madeDirs = HashSet<String>()
+            val canonicalCache = HashMap<String, String>()
 
             while (true) {
                 if (!readBlock(gzip, header)) break
@@ -53,35 +60,38 @@ object TarExtractor {
                 }
 
                 when (type) {
-                    'x' -> { pendingPax = parsePax(payload(gzip, size)); skipPadding(gzip, size) }
-                    'g' -> { globalPax.putAll(parsePax(payload(gzip, size))); skipPadding(gzip, size) }
+                    'x' -> { pendingPax = parsePax(payload(gzip, size)); skipPadding(gzip, size, buf) }
+                    'g' -> { globalPax.putAll(parsePax(payload(gzip, size))); skipPadding(gzip, size, buf) }
                     'L' -> {
                         longName = String(payload(gzip, size), Charsets.UTF_8).trimEnd('\u0000')
-                        skipPadding(gzip, size)
+                        skipPadding(gzip, size, buf)
                     }
                     'K' -> {
                         longLink = String(payload(gzip, size), Charsets.UTF_8).trimEnd('\u0000')
-                        skipPadding(gzip, size)
+                        skipPadding(gzip, size, buf)
                     }
                     else -> {
                         fun pax(key: String): String? = pendingPax[key] ?: globalPax[key]
 
                         val entryName = pax("path") ?: longName ?: name
                         val entryLink = pax("linkpath") ?: longLink ?: linkName
-                        pax("size")?.let { size = it.toLong() }
+                        pax("size")?.let {
+                            size =
+                                it.toLongOrNull()?.takeIf { s -> s >= 0 }
+                                    ?: throw IOException("Malformed PAX size: $it")
+                        }
                         longName = null
                         longLink = null
                         pendingPax = emptyMap()
 
-                        val target = resolveSecure(root, entryName)
+                        val target = resolveSecure(root, entryName, canonicalCache)
 
                         when (type) {
                             '0', '\u0000', '7' -> {
-                                target.parentFile?.mkdirs()
-                                target.delete()
+                                ensureParentDir(target, madeDirs)
+                                if (target.exists()) target.delete()
                                 FileOutputStream(target).use { out ->
                                     var remaining = size
-                                    val buf = ByteArray(COPY_BUFFER)
                                     while (remaining > 0) {
                                         val n = gzip.read(buf, 0, minOf(buf.size.toLong(), remaining).toInt())
                                         if (n < 0) throw IOException("Truncated archive at ${target.name}")
@@ -89,37 +99,44 @@ object TarExtractor {
                                         remaining -= n
                                     }
                                 }
-                                skipPadding(gzip, size)
+                                skipPadding(gzip, size, buf)
                                 Os.chmod(target.path, mode and MODE_MASK)
                             }
 
                             '5' -> {
-                                skipPayload(gzip, size)
-                                target.parentFile?.mkdirs()
+                                skipPayload(gzip, size, buf)
+                                ensureParentDir(target, madeDirs)
                                 target.mkdirs()
                                 dirModes.add(target to (mode and MODE_MASK))
                             }
 
                             '2' -> {
-                                skipPayload(gzip, size)
-                                target.delete()
+                                skipPayload(gzip, size, buf)
+                                ensureParentDir(target, madeDirs)
+                                if (target.exists()) target.delete()
                                 Os.symlink(entryLink, target.path)
+                                // A new symlink changes what canonical paths resolve
+                                // to; drop the whole cache rather than track subtrees.
+                                canonicalCache.clear()
                             }
 
                             '1' -> {
-                                skipPayload(gzip, size)
-                                val linkTarget = resolveSecure(root, entryLink)
+                                skipPayload(gzip, size, buf)
+                                ensureParentDir(target, madeDirs)
+                                val linkTarget = resolveSecure(root, entryLink, canonicalCache)
                                 try {
                                     Os.link(linkTarget.path, target.path)
-                                } catch (_: Exception) {
+                                } catch (e: ErrnoException) {
+                                    if (e.errno != OsConstants.EXDEV) throw e
                                     // Mirrors proot --link2symlink: hardlinks fail across
                                     // mounts/devices, fall back to a symlink to the target.
-                                    target.delete()
+                                    if (target.exists()) target.delete()
                                     Os.symlink(linkTarget.path, target.path)
+                                    canonicalCache.clear()
                                 }
                             }
 
-                            else -> skipPayload(gzip, size)
+                            else -> skipPayload(gzip, size, buf)
                         }
                     }
                 }
@@ -187,40 +204,46 @@ object TarExtractor {
         return out
     }
 
-    private fun skipPayload(input: InputStream, size: Long) {
+    private fun skipPayload(input: InputStream, size: Long, buf: ByteArray) {
         var remaining = size
-        val buf = ByteArray(COPY_BUFFER)
         while (remaining > 0) {
             val n = input.read(buf, 0, minOf(buf.size.toLong(), remaining).toInt())
             if (n < 0) throw IOException("Truncated archive entry")
             remaining -= n
         }
-        skipPadding(input, size)
+        skipPadding(input, size, buf)
     }
 
     /** Tar pads every entry payload to a 512-byte block boundary. */
-    private fun skipPadding(input: InputStream, size: Long) {
+    private fun skipPadding(input: InputStream, size: Long, buf: ByteArray) {
         var padding = (BLOCK - (size % BLOCK)) % BLOCK
         while (padding > 0) {
-            val n = input.read(ByteArray(padding.toInt()))
+            val n = input.read(buf, 0, minOf(padding, buf.size.toLong()).toInt())
             if (n < 0) throw IOException("Truncated archive padding")
             padding -= n
         }
     }
 
-    private fun resolveSecure(root: File, name: String): File {
+    /** Memoized mkdirs: parent dirs repeat across tens of thousands of entries. */
+    private fun ensureParentDir(target: File, madeDirs: MutableSet<String>) {
+        val parent = target.parentFile ?: return
+        if (madeDirs.add(parent.path)) parent.mkdirs()
+    }
+
+    private fun resolveSecure(root: File, name: String, canonicalCache: MutableMap<String, String>): File {
         if (name.isEmpty() || name.startsWith("/")) throw IOException("Illegal tar entry name: $name")
         val segments = name.split('/').filter { it.isNotEmpty() && it != "." }
         if (".." in segments) throw IOException("Illegal tar entry path: $name")
         val resolved = File(root, segments.joinToString("/"))
-        val parent = resolved.parentFile
+        val parent = resolved.parentFile ?: return resolved
         val rootPath = root.path + File.separator
-        if (
-            parent != null &&
-            parent.exists() &&
-            parent.canonicalPath != root.path &&
-            !parent.canonicalPath.startsWith(rootPath)
-        ) {
+        // realpath per unique parent only; the cache is dropped wholesale when a
+        // symlink is created since it changes resolution for its subtree.
+        val canonical =
+            canonicalCache.getOrPut(parent.path) {
+                if (parent.exists()) parent.canonicalPath else ""
+            }
+        if (canonical.isNotEmpty() && canonical != root.path && !canonical.startsWith(rootPath)) {
             throw IOException("Tar entry escapes destination via symlinked parent: $name")
         }
         return resolved
