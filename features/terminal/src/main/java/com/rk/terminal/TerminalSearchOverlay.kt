@@ -3,6 +3,8 @@ package com.rk.terminal
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -28,6 +30,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.rk.resources.strings
 import com.termux.terminal.TerminalEmulator
@@ -60,6 +63,12 @@ fun TerminalSearchOverlay(onClose: () -> Unit) {
                 continue
             }
             runCatching { active.advance(emulator) }
+            // Jump to the first hit as soon as the scan finds one, so the
+            // counter reads "1 of N" instead of "0 of N" while scanning.
+            if (selectedHit == -1 && active.hits.isNotEmpty()) {
+                selectedHit = 0
+                terminalView.get()?.let { active.scrollToRow(it, 0) }
+            }
             if (!active.done) delay(SCAN_SLICE_MS)
         }
     }
@@ -81,6 +90,8 @@ fun TerminalSearchOverlay(onClose: () -> Unit) {
                 onValueChange = { query = it },
                 singleLine = true,
                 placeholder = { Text(stringResource(strings.search)) },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { stepSelection(1) }),
                 colors =
                     TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,

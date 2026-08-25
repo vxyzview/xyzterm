@@ -326,6 +326,7 @@
     <string name="search_no_results">No matches</string>
     <string name="bell_ring">Terminal bell</string>
     <string name="keep_device_awake">Keep device awake</string>
+    <string name="pager_page_of">Page %1$d of %2$d</string>
     <string name="theme_low_contrast_title">Low contrast</string>
     <string name="theme_low_contrast_msg">This theme\'s text/background contrast is below 3:1 and may be hard to read.</string>
     <string name="install_extracting_title">Extracting Ubuntu…</string>

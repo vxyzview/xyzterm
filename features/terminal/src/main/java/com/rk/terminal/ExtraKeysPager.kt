@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -191,8 +192,27 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
         }
     }
 
+    PagerDots(pagerState)
+
+    // Refocus the terminal when swiping back from the input page so typing
+    // resumes without an extra tap.
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage == 0) {
+            terminalView.get()?.requestFocus()
+        }
+    }
+}
+
+/** Isolated so [androidx.compose.foundation.pager.PagerState.currentPage] changes only recompose the dots. */
+@Composable
+private fun PagerDots(pagerState: PagerState) {
+    val pageLabel = stringResource(strings.pager_page_of, pagerState.currentPage + 1, pagerState.pageCount)
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp)
+                .semantics { contentDescription = pageLabel },
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
     ) {
         repeat(pagerState.pageCount) { page ->
@@ -210,14 +230,6 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                             shape = CircleShape,
                         ),
             )
-        }
-    }
-
-    // Refocus the terminal when swiping back from the input page so typing
-    // resumes without an extra tap.
-    LaunchedEffect(pagerState.currentPage) {
-        if (pagerState.currentPage == 0) {
-            terminalView.get()?.requestFocus()
         }
     }
 }

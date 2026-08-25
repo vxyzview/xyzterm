@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
-import android.view.WindowManager
 import com.rk.activities.terminal.Terminal
 import com.rk.exec.isTerminalInstalled
 import androidx.compose.runtime.Composable
@@ -40,11 +39,16 @@ import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
+import com.rk.terminal.SessionService
 import com.rk.terminal.TerminalBackup
 import com.rk.terminal.terminalView
 import com.rk.utils.LoadingPopup
 import com.rk.utils.dialogRes
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
@@ -138,24 +142,6 @@ fun SettingsTerminalScreen() {
                 items = TerminalCursorStyle.entries.map { it to stringResource(it.stringRes) },
                 selectedItem = TerminalCursorStyle.fromString(Settings.terminal_cursor_style),
                 onItemSelected = { Settings.terminal_cursor_style = it.value },
-            )
-
-            SettingsItem(
-                label = stringResource(strings.keep_screen_on),
-                description = stringResource(strings.keep_screen_on_desc),
-                default = Settings.terminal_keep_screen_on,
-                sideEffect = {
-                    Settings.terminal_keep_screen_on = it
-                    // Apply live: both the view flag and the window flag set by
-                    // the terminal host must follow, not just after a restart.
-                    val window = Terminal.instance?.window
-                    if (it) {
-                        window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                    } else {
-                        window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                    }
-                    terminalView.get()?.keepScreenOn = it
-                },
             )
         }
 
@@ -287,7 +273,18 @@ fun SettingsTerminalScreen() {
                 description = stringResource(strings.restore_terminal),
                 showSwitch = false,
                 default = false,
-                sideEffect = { restore.launch("*/*") },
+                sideEffect = {
+                    // Same confirm gate as the backups screen: restoring replaces
+                    // the whole sandbox, so never launch the picker silently.
+                    dialogRes(
+                        activity = activity,
+                        title = strings.restore.getString(),
+                        msg = strings.restore_terminal.getString(),
+                        okRes = strings.restore,
+                        onCancel = {},
+                        onOk = { restore.launch("*/*") },
+                    )
+                },
             )
 
             SettingsItem(
@@ -310,40 +307,62 @@ fun SettingsTerminalScreen() {
                 navController = settingsNavController.get(),
                 route = SettingsRoutes.TerminalBinds,
             )
+        }
 
+        // Destructive: visually separated from the data rows above.
+        PreferenceGroup {
             SettingsItem(
                 label = stringResource(strings.uninstall),
                 default = false,
                 description = stringResource(strings.uninstall_terminal),
                 showSwitch = false,
-                sideEffect = {
-                    dialogRes(
-                        activity = activity,
-                        title = strings.attention.getString(),
-                        msg = strings.uninstall_terminal_warning.getString(),
-                        onCancel = {},
-                        okRes = strings.delete,
-                        onOk = {
-                            DefaultScope.launch(Dispatchers.IO) {
-                                val loading = LoadingPopup(activity, null)
-                                withContext(Dispatchers.Main) { runCatching { loading.show() } }
-                                runCatching {
-                                    loading.setMessage(strings.deleting.getFilledString("binaries"))
-                                    localBinDir().deleteRecursively()
-                                    loading.setMessage(strings.deleting.getFilledString("libraries"))
-                                    localLibDir().deleteRecursively()
-                                    loading.setMessage(strings.deleting.getFilledString("sandbox"))
-                                    sandboxDir().deleteRecursively()
-                                    localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
-                                }
-                                terminalInstalled = false
-                                withContext(Dispatchers.Main + NonCancellable) {
-                                    runCatching { loading.hide() }
-                                    toast(strings.success)
-                                }
-                            }
-                        },
+                startWidget = {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
                     )
+                },
+                sideEffect = {
+                    val hasSessions =
+                        Terminal.instance?.sessionBinder?.get()?.getService()?.sessionList?.isNotEmpty()
+                            ?: SessionService.sessionsMayExist()
+                    if (hasSessions) {
+                        dialogRes(
+                            activity = activity,
+                            title = strings.attention.getString(),
+                            msg = strings.close_sessions_first.getString(),
+                            onCancel = {},
+                        )
+                    } else {
+                        dialogRes(
+                            activity = activity,
+                            title = strings.attention.getString(),
+                            msg = strings.uninstall_terminal_warning.getString(),
+                            onCancel = {},
+                            okRes = strings.uninstall,
+                            onOk = {
+                                DefaultScope.launch(Dispatchers.IO) {
+                                    val loading = LoadingPopup(activity, null)
+                                    withContext(Dispatchers.Main) { runCatching { loading.show() } }
+                                    runCatching {
+                                        loading.setMessage(strings.deleting.getFilledString("binaries"))
+                                        localBinDir().deleteRecursively()
+                                        loading.setMessage(strings.deleting.getFilledString("libraries"))
+                                        localLibDir().deleteRecursively()
+                                        loading.setMessage(strings.deleting.getFilledString("sandbox"))
+                                        sandboxDir().deleteRecursively()
+                                        localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
+                                    }
+                                    terminalInstalled = false
+                                    withContext(Dispatchers.Main + NonCancellable) {
+                                        runCatching { loading.hide() }
+                                        toast(strings.success)
+                                    }
+                                }
+                            },
+                        )
+                    }
                 },
             )
         }

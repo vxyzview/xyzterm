@@ -10,6 +10,7 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
+import android.view.WindowManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
@@ -296,6 +297,11 @@ class SessionService : Service() {
                     "${strings.app_name.getString()}::${this::class.java.simpleName}",
                 )
         }
+
+        // Re-apply the persisted "keep device awake" choice on service start.
+        if (Settings.keep_device_awake) {
+            setWakeLock(true)
+        }
     }
 
     var wakeLock: PowerManager.WakeLock? = null
@@ -316,6 +322,17 @@ class SessionService : Service() {
             }
             wakeLockHeld = enabled
         }
+        // Single source of truth: the wakelock, the activity window flag and the
+        // persisted setting all follow this one toggle (drawer switch, notification
+        // action or service start). The window flag is applied through the live
+        // activity when bound; Terminal.kt re-applies it from the setting on resume.
+        val window = Terminal.instance?.window
+        if (enabled) {
+            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        Settings.keep_device_awake = enabled
         updateNotification()
     }
 

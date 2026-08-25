@@ -463,8 +463,8 @@ private var lastHandledIntent: Intent? = null
             val context = LocalContext.current
             val activity = context as? Activity
 
-            DisposableEffect(Settings.fullscreen) {
-                if (Settings.terminal_keep_screen_on) {
+            DisposableEffect(Settings.fullscreen, Settings.keep_device_awake) {
+                if (Settings.keep_device_awake) {
                     activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 }
 

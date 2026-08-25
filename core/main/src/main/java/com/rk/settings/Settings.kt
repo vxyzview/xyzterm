@@ -72,7 +72,7 @@ object Settings {
     var fullscreen by CachedPreference("fullscreen", false)
     var smart_toolbar by CachedPreference("smart_toolbar", false)
     var confirm_exit by CachedPreference("confirm_exit", true)
-    var terminal_keep_screen_on by CachedPreference("terminal_keep_screen_on", true)
+    var keep_device_awake by CachedPreference("keep_device_awake", false)
     var terminal_show_extra_keys by CachedPreference("terminal_show_extra_keys", true)
     var terminal_clipboard_keybindings by CachedPreference("terminal_clipboard_keybindings", true)
     var terminal_snippets by CachedPreference("terminal_snippets", "[]")

@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -83,7 +84,9 @@ import com.rk.exec.pendingCommand
 import com.rk.file.child
 import com.rk.file.sandboxDir
 import com.rk.resources.drawables
+import com.rk.resources.getQuantityString
 import com.rk.resources.getString
+import com.rk.resources.plurals
 import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.settings.Preference
@@ -327,7 +330,7 @@ private fun ColumnScope.TerminalView(
                 }
 
                 post {
-                    if (Settings.terminal_keep_screen_on) keepScreenOn = true
+                    if (Settings.keep_device_awake) keepScreenOn = true
                     isFocusableInTouchMode = true
                     requestFocus()
                 }
@@ -670,7 +673,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
         // ── Footer actions ─────────────────────────────────────────────
         val activeSession = service?.currentSession?.value
 
-        val keepDeviceAwake = service?.wakeLock?.isHeld == true
+        val keepDeviceAwake = service?.wakeLock?.isHeld == true || Settings.keep_device_awake
 
         Surface(
             shape = MaterialTheme.shapes.large,
@@ -678,7 +681,17 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp),
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .toggleable(
+                            value = keepDeviceAwake,
+                            role = Role.Switch,
+                            onValueChange = { enabled ->
+                                terminalActivity.sessionBinder?.get()?.setWakeLock(enabled)
+                            },
+                        )
+                        .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
@@ -687,13 +700,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f).padding(vertical = 14.dp),
                 )
-                Switch(
-                    checked = keepDeviceAwake,
-                    onCheckedChange = { enabled ->
-                        val binder = terminalActivity.sessionBinder?.get() ?: return@Switch
-                        binder.setWakeLock(enabled)
-                    },
-                )
+                Switch(checked = keepDeviceAwake, onCheckedChange = null)
             }
         }
 
@@ -715,7 +722,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Delete,
-                        contentDescription = stringResource(strings.delete_session),
+                        contentDescription = null,
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.error,
                     )
@@ -749,7 +756,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                        contentDescription = stringResource(strings.logout),
+                        contentDescription = null,
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.primary,
                     )
@@ -800,9 +807,13 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
     }
 
     if (showExitConfirm) {
+        val runningCount = service?.sessionList?.size ?: 0
         AlertDialog(
             onDismissRequest = { showExitConfirm = false },
             title = { Text(text = stringResource(strings.confirm_exit)) },
+            text = {
+                Text(text = plurals.sessions_running.getQuantityString(runningCount, runningCount))
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -835,7 +846,7 @@ suspend fun Terminal.changeSession(sessionId: String) {
 
     terminalView.apply {
         post {
-            if (Settings.terminal_keep_screen_on) keepScreenOn = true
+            if (Settings.keep_device_awake) keepScreenOn = true
             isFocusableInTouchMode = true
             requestFocus()
         }
