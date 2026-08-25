@@ -3,7 +3,6 @@ package com.rk.theme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
-import com.google.gson.JsonArray
 import com.rk.color.toHex
 import com.rk.resources.getString
 import com.rk.resources.strings
@@ -78,8 +77,6 @@ val blueberry =
                 outlineVariant = Color(0xFF44474F),
                 scrim = Color(0xFF000000),
             ),
-        lightTokenColors = JsonArray(),
-        darkTokenColors = JsonArray(),
         lightTerminalColors =
             Properties().also {
                 it["foreground"] = Color(0xFF1A1B20).toHex()
@@ -233,8 +230,6 @@ val lime =
                 surfaceContainerHigh = Color(0xFF282B24),
                 surfaceContainerHighest = Color(0xFF33362E),
             ),
-        lightTokenColors = JsonArray(),
-        darkTokenColors = JsonArray(),
         lightTerminalColors =
             Properties().also {
                 it["foreground"] = Color(0xFF1A1C16).toHex()

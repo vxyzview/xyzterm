@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.edit
-import com.rk.commands.ToolbarConfiguration
 import com.rk.feature.FeatureRegistry
 import com.rk.theme.blueberry
 import com.rk.utils.application
@@ -105,12 +104,6 @@ object Settings {
 
     // Long settings
     var last_version_code by CachedPreference("last_version_code", -1L)
-
-    var action_items by
-        CachedPreference(
-            "action_items",
-            ToolbarConfiguration.DEFAULT_EDITOR_TOOLBAR_COMMANDS,
-        )
 }
 
 object Preference {

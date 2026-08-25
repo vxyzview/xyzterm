@@ -1,7 +1,6 @@
 package com.rk.crashhandler
 
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Process
@@ -42,8 +41,6 @@ import com.rk.utils.copyToClipboard
 import com.rk.utils.openUrl
 import com.rk.utils.origin
 import com.xyzterm.BuildConfig
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -85,43 +82,6 @@ class CrashActivity : ComponentActivity() {
                 }
             }
             return true
-        }
-
-        fun start(
-            context: Context,
-            extensionId: String,
-            extensionName: String,
-            extensionVersion: String,
-            extensionAuthor: String,
-            repository: String?,
-            error: Throwable,
-        ) {
-            val intent =
-                Intent(context, CrashActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    putExtra("is_extension_crash", true)
-                    putExtra("extension_id", extensionId)
-                    putExtra("extension_name", extensionName)
-                    putExtra("extension_version", extensionVersion)
-                    putExtra("extension_author", extensionAuthor)
-                    putExtra("repository", repository)
-                    putExtra("thread", Thread.currentThread().name)
-                    putExtra("force_crash", false)
-                    putExtra("msg", error.message)
-
-                    var cause = error.cause?.toString() ?: error.toString()
-                    val prefix = "java.lang.Throwable:"
-                    if (cause.startsWith(prefix)) {
-                        cause = cause.removePrefix(prefix)
-                    }
-                    putExtra("error_cause", cause)
-
-                    val stringWriter = StringWriter()
-                    val printWriter = PrintWriter(stringWriter)
-                    error.printStackTrace(printWriter)
-                    putExtra("stacktrace", stringWriter.toString())
-                }
-            context.startActivity(intent)
         }
     }
 

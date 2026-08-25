@@ -28,6 +28,7 @@ import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.components.compose.preferences.base.PreferenceLayout
 import com.rk.components.compose.preferences.switch.PreferenceSwitch
 import com.rk.feature.FeatureRegistry
+import com.rk.file.TERMINAL_SETUP_OK_MARKER
 import com.rk.file.child
 import com.rk.file.createFileIfNot
 import com.rk.file.localBinDir
@@ -352,7 +353,7 @@ fun SettingsTerminalScreen() {
                                         localLibDir().deleteRecursively()
                                         loading.setMessage(strings.deleting.getFilledString("sandbox"))
                                         sandboxDir().deleteRecursively()
-                                        localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
+                                        localDir().child(TERMINAL_SETUP_OK_MARKER).delete()
                                     }
                                     terminalInstalled = false
                                     withContext(Dispatchers.Main + NonCancellable) {

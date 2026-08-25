@@ -2,7 +2,6 @@ package com.rk.theme
 
 import androidx.annotation.Keep
 import androidx.compose.material3.ColorScheme
-import com.google.gson.JsonArray
 import java.util.Properties
 
 @Keep
@@ -14,6 +13,4 @@ data class ThemeHolder(
     val darkScheme: ColorScheme,
     val lightTerminalColors: Properties,
     val darkTerminalColors: Properties,
-    val lightTokenColors: JsonArray,
-    val darkTokenColors: JsonArray,
 )

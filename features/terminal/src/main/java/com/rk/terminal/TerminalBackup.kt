@@ -1,6 +1,7 @@
 package com.rk.terminal
 
 import com.rk.file.child
+import com.rk.file.TERMINAL_SETUP_OK_MARKER
 import com.rk.file.createFileIfNot
 import com.rk.file.localDir
 import com.rk.file.sandboxDir
@@ -191,7 +192,7 @@ object TerminalBackup {
                         return@withContext strings.backup_swap_rollback_failed.getString()
                 }
 
-                localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
+                localDir().child(TERMINAL_SETUP_OK_MARKER).createFileIfNot()
                 null
             } catch (e: Exception) {
                 e.message ?: "restore failed"

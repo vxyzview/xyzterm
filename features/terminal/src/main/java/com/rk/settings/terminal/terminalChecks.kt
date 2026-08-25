@@ -236,10 +236,10 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     var abnormalities = 0
 
                     try {
-                        val process = ubuntuProcess(command = listOf("touch", "/tmp/.test_xed"))
+                        val process = ubuntuProcess(command = listOf("touch", "/tmp/.test_xyzterm"))
                         val touchOk = process.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                         if (touchOk && process.exitValue() == 0) {
-                            ubuntuProcess(command = listOf("rm", "/tmp/.test_xed"))
+                            ubuntuProcess(command = listOf("rm", "/tmp/.test_xyzterm"))
                                 .waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                         } else {
                             printLog("Abnormality: /tmp is not writable inside sandbox.")

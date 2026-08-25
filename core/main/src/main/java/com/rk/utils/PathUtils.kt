@@ -11,11 +11,6 @@ object PathUtils {
         return path.replace("/document", "/storage").replace(":", "/")
     }
 
-    private fun convertUriToPath(context: Context, uri: Uri?): String {
-        val path = internalConvertUriToPath(context, uri)
-        return path.replace("/document", "/storage").replace(":", "/")
-    }
-
     private fun internalConvertUriToPath(context: Context, uri: Uri?): String {
         uri?.let {
             when {

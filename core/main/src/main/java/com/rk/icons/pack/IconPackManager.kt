@@ -3,9 +3,6 @@ package com.rk.icons.pack
 import android.app.Application
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import com.rk.extension.model.PackageCache
-import com.rk.file.FileOperations
-import com.rk.file.FileWrapper
 import com.rk.file.child
 import com.rk.file.createDirIfNot
 import com.rk.file.localDir
@@ -20,7 +17,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 val currentIconPack = mutableStateOf<LocalIconPack?>(null)
-val iconPackDir = localDir().child("icon_pack").also { it.createDirIfNot() }
+val iconPackDir: File by lazy { localDir().child("icon_pack").also { it.createDirIfNot() } }
 
 class IconPackManager(context: Application) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private val mutex = Mutex()
@@ -32,30 +29,6 @@ class IconPackManager(context: Application) : CoroutineScope by CoroutineScope(D
     val localIconPacks = mutableStateMapOf<String, LocalIconPack>()
 
     fun isInstalled(id: String) = localIconPacks.containsKey(id)
-
-    private suspend fun calcSize(dir: File): Long {
-        return FileOperations.calculateContent(FileWrapper(dir)).totalSize
-    }
-
-    private fun resolveCache(dir: File): PackageCache {
-        val cacheFile = dir.resolve("cache.json")
-
-        if (!cacheFile.exists() || !cacheFile.isFile) {
-            return PackageCache()
-        }
-
-        return runCatching {
-            json.decodeFromString<PackageCache>(cacheFile.readText())
-        }
-            .getOrElse {
-                PackageCache()
-            }
-    }
-
-    private fun writeCache(dir: File, cache: PackageCache) {
-        val cacheFile = dir.resolve("cache.json")
-        cacheFile.writeText(json.encodeToString(cache))
-    }
 
     fun uninstallIconPack(iconPackId: String) {
         val iconPack = localIconPacks[iconPackId] ?: return
@@ -72,16 +45,11 @@ class IconPackManager(context: Application) : CoroutineScope by CoroutineScope(D
                     if (manifestJson.exists()) {
                         runCatching {
                             val iconPackManifest = json.decodeFromString<IconPackManifest>(manifestJson.readText())
-                            val cache = resolveCache(dir)
-                            val size = cache.size ?: calcSize(dir).also { writeCache(dir, cache.copy(size = it)) }
 
                             val iconPack =
                                 LocalIconPack(
                                     manifest = iconPackManifest,
                                     installPath = dir.absolutePath,
-                                    createdAt = cache.createdAt,
-                                    updatedAt = cache.updatedAt,
-                                    initSize = size,
                                 )
                             newLocal[iconPackManifest.id] = iconPack
                         }

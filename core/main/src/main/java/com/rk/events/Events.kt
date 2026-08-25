@@ -1,6 +1,5 @@
 package com.rk.events
 
-import com.rk.extension.api.XedExtensionPoint
 import com.rk.file.FileObject
 import com.rk.icons.pack.LocalIconPack
 import com.rk.settings.debugOptions.LogEntry
@@ -56,40 +55,10 @@ sealed interface AppEvent : Event {
     data class LogEntryWritten(val logEntry: LogEntry, val extensionId: String?) : AppEvent
 }
 
-/** Represents a subscription to an event. */
-interface EventSubscription {
-    /** Unsubscribes from the event. */
-    fun unsubscribe()
-}
-
 /** Central event bus for the application. */
 object Events {
 
-    @PublishedApi internal val listeners = mutableMapOf<KClass<out Event>, MutableList<suspend (Event) -> Unit>>()
-
-    /**
-     * Subscribes to events of type [T].
-     *
-     * @param T The type of [Event] to subscribe to.
-     * @param listener The listener function to be called when the event is published.
-     * @return An [EventSubscription] object that can be used to unsubscribe.
-     */
-    @XedExtensionPoint
-    inline fun <reified T : Event> subscribe(noinline listener: suspend (T) -> Unit): EventSubscription {
-        val list = listeners.getOrPut(T::class) { mutableListOf() }
-
-        val wrapper: suspend (Event) -> Unit = {
-            listener(it as T)
-        }
-
-        list += wrapper
-
-        return object : EventSubscription {
-            override fun unsubscribe() {
-                list -= wrapper
-            }
-        }
-    }
+    internal val listeners = mutableMapOf<KClass<out Event>, MutableList<suspend (Event) -> Unit>>()
 
     /**
      * Triggers an event for all subscribed listeners.

@@ -90,6 +90,7 @@ import com.rk.utils.AppDialogHost
 import com.rk.utils.dialogRes
 import com.rk.utils.errorDialog
 import com.rk.utils.getTempDir
+import com.rk.utils.okHttpClient
 import com.rk.utils.toast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -97,7 +98,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
@@ -738,7 +738,8 @@ private var lastHandledIntent: Intent? = null
     ) {
         withContext(Dispatchers.IO) {
             val client =
-                OkHttpClient.Builder()
+                okHttpClient
+                    .newBuilder()
                     .connectTimeout(1, TimeUnit.MINUTES)
                     .readTimeout(1, TimeUnit.MINUTES)
                     .writeTimeout(1, TimeUnit.MINUTES)

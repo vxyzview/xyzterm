@@ -7,11 +7,12 @@ import android.os.Build
 import androidx.core.content.FileProvider
 import androidx.core.content.pm.PackageInfoCompat
 import com.rk.commands.KeybindingsManager
+import com.rk.file.TERMINAL_SETUP_OK_MARKER
 import com.rk.file.child
 import com.rk.file.localBinDir
 import com.rk.file.localDir
+import com.rk.file.rootfsFiles
 import com.rk.file.sandboxDir
-import com.rk.file.sandboxHomeDir
 import com.rk.file.toFileWrapper
 import com.rk.resources.getString
 import com.rk.resources.getFilledString
@@ -21,6 +22,7 @@ import com.rk.settings.Settings
 import com.rk.utils.GithubReleasesApi
 import com.rk.utils.application
 import com.rk.utils.dialogRes
+import com.rk.utils.okHttpClient
 import com.rk.utils.toast
 import com.xyzterm.BuildConfig
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -28,7 +30,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 
@@ -115,7 +116,7 @@ object UpdateManager {
                             Request.Builder()
                                 .url("https://github.com/$UPDATE_OWNER/$UPDATE_REPO/releases/latest/download/xyzterm-$version.apk")
                                 .build()
-                        OkHttpClient().newCall(request).execute().use { response ->
+                        okHttpClient.newCall(request).execute().use { response ->
                             if (!response.isSuccessful) error("download failed: ${response.code}")
                             target.outputStream().use { response.body!!.byteStream().copyTo(it) }
                         }
@@ -191,14 +192,10 @@ object UpdateManager {
                 }
 
                 if (lastVersionCode <= 68L) {
-                    val rootfs =
-                        sandboxDir().listFiles()?.filter {
-                            it.absolutePath != sandboxHomeDir().absolutePath &&
-                                it.absolutePath != sandboxDir().child("tmp").absolutePath
-                        } ?: emptyList()
+                    val rootfs = rootfsFiles()
 
                     if (rootfs.isNotEmpty()) {
-                        localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createNewFile()
+                        localDir().child(TERMINAL_SETUP_OK_MARKER).createNewFile()
                     }
                 }
 

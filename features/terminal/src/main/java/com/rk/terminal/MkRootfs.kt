@@ -5,11 +5,12 @@ import android.os.Handler
 import android.os.Looper
 import android.system.Os
 import com.rk.exec.TarExtractor
+import com.rk.file.TERMINAL_SETUP_OK_MARKER
 import com.rk.file.child
 import com.rk.file.createFileIfNot
 import com.rk.file.localDir
+import com.rk.file.rootfsFiles
 import com.rk.file.sandboxDir
-import com.rk.file.sandboxHomeDir
 import com.rk.utils.getTempDir
 import com.rk.utils.isMainThread
 import java.io.File
@@ -29,15 +30,13 @@ suspend fun CoroutineScope.getNextStage(context: Context): NEXT_STAGE = withCont
     }
 
     val sandboxFile = File(getTempDir(), "sandbox.tar.gz")
-    val excluded =
-        setOf(sandboxHomeDir().absolutePath, sandboxDir().child("tmp").absolutePath)
-    val rootfsFiles = sandboxDir().listFiles()?.filter { it.absolutePath !in excluded } ?: emptyList()
+    val rootfsFiles = rootfsFiles()
 
     return@withContext when {
         // Fresh extraction: verified tarball present, nothing extracted yet.
         rootfsFiles.isEmpty() && sandboxFile.exists() -> NEXT_STAGE.EXTRACTION
         rootfsFiles.isEmpty() -> NEXT_STAGE.NONE
-        localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").exists() -> NEXT_STAGE.NONE
+        localDir().child(TERMINAL_SETUP_OK_MARKER).exists() -> NEXT_STAGE.NONE
         else -> {
             // Rootfs files without the success marker mean a previous attempt
             // died mid-extraction; wipe so the retry starts clean instead of
@@ -99,7 +98,7 @@ suspend fun extractRootfs(onProgress: (Float) -> Unit) =
         // Marker goes down before the tarball is deleted: deleting the tarball
         // first leaves a window where a kill loses the complete rootfs.
         // DO NOT REMOVE THIS FILE JUST DON'T, TRUST ME (same contract as setup.sh)
-        localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
+        localDir().child(TERMINAL_SETUP_OK_MARKER).createFileIfNot()
 
         tarball.delete()
     }

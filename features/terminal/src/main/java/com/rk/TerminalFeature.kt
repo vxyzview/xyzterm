@@ -5,7 +5,6 @@ import android.content.Intent
 import com.rk.activities.settings.SettingsRoutes
 import com.rk.activities.terminal.Terminal
 import com.rk.commands.CommandProvider
-import com.rk.commands.ToolbarConfiguration
 import com.rk.commands.global.TerminalCommand
 import com.rk.exec.pendingCommand
 import com.rk.exec.ubuntuProcess
@@ -93,10 +92,6 @@ class TerminalFeature : Feature {
 
         // Register global command
         CommandProvider.registerCommand(TerminalCommand)
-
-        // Assuming there's at least one item already there
-        ToolbarConfiguration.addGlobalToolbarCommand(TerminalCommand, index = 1)
-
     }
 
     override fun dispose(application: Application) {
@@ -107,6 +102,5 @@ class TerminalFeature : Feature {
         TerminalLauncher.handler = null
         SandboxedProcessRegistry.provider = null
         CommandProvider.unregisterCommand(TerminalCommand)
-        ToolbarConfiguration.removeGlobalToolbarCommand(TerminalCommand)
     }
 }

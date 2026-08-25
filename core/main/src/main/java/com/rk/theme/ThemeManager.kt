@@ -8,12 +8,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.rk.extension.model.PackageCache
-import com.rk.file.FileOperations
-import com.rk.file.FileWrapper
+import com.rk.extension.model.PackageCacheStore
 import com.rk.file.child
 import com.rk.file.themeDir
 import com.rk.resources.getFilledString
@@ -33,7 +29,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.ObjectInputStream
 import java.util.Properties
-import kotlinx.serialization.json.JsonElement as KJsonElement
 
 internal const val THEME_MIN_CONTRAST_RATIO = 3.0
 
@@ -67,36 +62,12 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
         loadedThemes.remove(theme)
     }
 
-    private suspend fun calcSize(dir: File): Long {
-        return FileOperations.calculateContent(FileWrapper(dir)).totalSize
-    }
-
-    private fun resolveCache(dir: File): PackageCache {
-        val cacheFile = dir.resolve("cache.json")
-
-        if (!cacheFile.exists() || !cacheFile.isFile) {
-            return PackageCache()
-        }
-
-        return runCatching {
-            json.decodeFromString<PackageCache>(cacheFile.readText())
-        }
-            .getOrElse {
-                PackageCache()
-            }
-    }
-
-    private fun writeCache(dir: File, cache: PackageCache) {
-        val cacheFile = dir.resolve("cache.json")
-        cacheFile.writeText(json.encodeToString(cache))
-    }
-
     private suspend fun finishThemeInstall(manifest: ThemeManifest, sourceDir: File?) {
         val installDir = themeDir().child(manifest.id).also { if (!it.exists()) it.mkdirs() }
 
         var oldCreatedAt: Long? = null
         if (installDir.exists()) {
-            oldCreatedAt = resolveCache(installDir).createdAt
+            oldCreatedAt = PackageCacheStore.resolveCache(installDir).createdAt
         }
 
         val manifestFile = installDir.resolve("manifest.json")
@@ -108,14 +79,14 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
             }
         }
 
-        val size = calcSize(installDir)
+        val size = PackageCacheStore.calcSize(installDir)
         val newCache =
             PackageCache(
                 createdAt = oldCreatedAt ?: System.currentTimeMillis(),
                 updatedAt = System.currentTimeMillis(),
                 size = size,
             )
-        writeCache(installDir, newCache)
+        PackageCacheStore.writeCache(installDir, newCache)
 
         val ratio = themeContrastRatio(manifest)
         if (ratio != null && ratio < THEME_MIN_CONTRAST_RATIO) {
@@ -144,16 +115,10 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
                             val manifest = json.decodeFromString<ThemeManifest>(manifestFile.readText())
                             newLoadedThemes.add(manifest.build())
 
-                            val cache = resolveCache(dir)
-                            val size = cache.size ?: calcSize(dir).also { writeCache(dir, cache.copy(size = it)) }
-
                             val theme =
                                 LocalTheme(
                                     manifest = manifest,
                                     installPath = dir.absolutePath,
-                                    createdAt = cache.createdAt,
-                                    updatedAt = cache.updatedAt,
-                                    initSize = size,
                                 )
 
                             newLocalThemes[manifest.id] = theme
@@ -236,9 +201,6 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
             return props
         }
 
-        val lightTokenColors = light?.tokenColors.toTokenColorArray()
-        val darkTokenColors = dark?.tokenColors.toTokenColorArray()
-
         return ThemeHolder(
             id = id,
             name = name,
@@ -247,33 +209,7 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
             darkScheme = dark?.build(isDarkTheme = true) ?: blueberry.darkScheme,
             lightTerminalColors = light?.terminalColors?.toProperties() ?: Properties(),
             darkTerminalColors = dark?.terminalColors?.toProperties() ?: Properties(),
-            lightTokenColors = lightTokenColors,
-            darkTokenColors = darkTokenColors,
         )
-    }
-
-    private fun KJsonElement?.toTokenColorArray(): JsonArray {
-        if (this == null) return JsonArray()
-
-        val gsonElement = JsonParser.parseString(this.toString())
-        if (gsonElement.isJsonArray) return gsonElement.asJsonArray
-
-        if (gsonElement.isJsonObject) {
-            val convertedArray = JsonArray()
-            for ((scope, colorHex) in gsonElement.asJsonObject.entrySet()) {
-                val item =
-                    JsonObject().apply {
-                        addProperty("scope", scope)
-                        val settings = JsonObject()
-                        settings.addProperty("foreground", colorHex.asString)
-                        add("settings", settings)
-                    }
-                convertedArray.add(item)
-            }
-            return convertedArray
-        }
-
-        return JsonArray()
     }
 
     fun ThemePaletteNew.build(isDarkTheme: Boolean): ColorScheme {

@@ -32,11 +32,17 @@ fun sandboxHomeDir(context: Context = application!!): File {
     return localDir(context).child("home").createDirIfNot()
 }
 
+/** Marker file whose presence proves the rootfs finished extracting successfully. */
+const val TERMINAL_SETUP_OK_MARKER = ".terminal_setup_ok_DO_NOT_REMOVE"
+
+/** Entries under [sandboxDir] that make up an extracted rootfs, excluding the bundled home dir and tmp. */
+internal fun rootfsFiles(context: Context = application!!): List<File> =
+    sandboxDir(context)
+        .listFiles()
+        ?.filter { it.absolutePath !in setOf(sandboxHomeDir(context).absolutePath, sandboxDir(context).child("tmp").absolutePath) }
+        ?: emptyList()
+
 
 fun themeDir(context: Context = application!!): File {
     return localDir(context).child("themes").createDirIfNot()
-}
-
-fun persistentTempDir(context: Context = application!!): File {
-    return getCacheDir(context).child("tempFiles").createDirIfNot()
 }

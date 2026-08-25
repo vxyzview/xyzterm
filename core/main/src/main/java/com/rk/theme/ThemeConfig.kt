@@ -59,7 +59,6 @@ data class BaseColors(
 data class ThemePalette(
     val baseColors: BaseColors?,
     val terminalColors: Map<String, String>? = null,
-    val editorColors: Map<String, String>? = null,
     @Transient var tokenColors: com.google.gson.JsonElement? = null,
 ) : java.io.Serializable {
     @Serial
@@ -81,7 +80,6 @@ data class ThemePalette(
 data class ThemePaletteNew(
     val baseColors: BaseColors?,
     val terminalColors: Map<String, String>? = null,
-    val editorColors: Map<String, String>? = null,
     /**
      * Can be either a JsonArray or a JsonObject.
      *
@@ -126,7 +124,6 @@ data class ThemePaletteNew(
             return ThemePaletteNew(
                 baseColors = palette.baseColors,
                 terminalColors = palette.terminalColors,
-                editorColors = palette.editorColors,
                 tokenColors = palette.tokenColors?.toKotlinxJsonElement(),
             )
         }

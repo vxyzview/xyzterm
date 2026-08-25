@@ -3,14 +3,13 @@ package com.rk.utils
 import com.rk.extension.api.XedExtensionPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 
 @XedExtensionPoint
 class GithubReleasesApi(private val owner: String, private val repo: String) {
 
-    private val client = OkHttpClient()
+    private val client = okHttpClient
 
     /**
      * Fetches the tag name of the latest release from the GitHub repository.

@@ -25,32 +25,6 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun SmoothValueSlider(
-    label: String,
-    description: String? = null,
-    singleLineDescription: Boolean = false,
-    enabled: Boolean = true,
-    min: Int,
-    max: Int,
-    default: Int,
-    debounce: Long = 300,
-    onValueChanged: (Int) -> Unit,
-) =
-    ValueSliderImpl(
-        label = label,
-        description = description,
-        singleLineDescription = singleLineDescription,
-        enabled = enabled,
-        min = min,
-        max = max,
-        default = default,
-        steps = 0,
-        valueMapper = { it.toInt() },
-        debounce = debounce,
-        onValueChanged = onValueChanged,
-    )
-
-@Composable
 fun SteppedValueSlider(
     label: String,
     description: String? = null,

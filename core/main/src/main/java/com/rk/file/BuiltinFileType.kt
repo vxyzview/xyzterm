@@ -1,8 +1,6 @@
 package com.rk.file
 
-import com.rk.extension.api.XedExtensionPoint
 import com.rk.icons.Icon
-import com.rk.icons.pack.currentIconPack
 import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
@@ -96,74 +94,20 @@ interface FileType {
      */
     val markdownNames: List<String>
         get() = emptyList()
-
-    /**
-     * Retrieves an icon for this FileType. The icon is not tinted.
-     *
-     * Supports:
-     * - ✔ Icon pack (uses the icon from the icon pack if available, otherwise uses the builtin icon)
-     * - ✘ Tint (applyTint property in icon pack or builtin icon tint)
-     *
-     * @return An [Icon] representing the file type icon.
-     */
-    fun getResolvedIcon(): Icon {
-        val iconPackFile = currentIconPack.value?.getIconFileForFileType(this)
-        return iconPackFile?.let { Icon.SvgIcon(it) } ?: icon ?: Icon.ResourceIcon(drawables.file)
-    }
 }
 
 /**
- * Manager responsible for handling file type registration and resolution.
+ * Manager responsible for handling file type resolution.
  *
- * This object maintains a registry of both built-in [BuiltinFileType]s and dynamically registered [FileType]s via
- * extensions. It provides utility methods to identify a file's type based on its name, extension, or Markdown language
- * identifier.
+ * This object provides utility methods to identify a file's type based on its extension.
  */
 object FileTypeManager {
-    private val dynamicRegistry = mutableListOf<FileType>()
-
-    /** Register a new file type dynamically. */
-    @XedExtensionPoint
-    fun register(fileType: FileType) {
-        if (!dynamicRegistry.contains(fileType)) {
-            dynamicRegistry.add(fileType)
-        }
-    }
-
-    /** Unregister a file type. */
-    @XedExtensionPoint
-    fun unregister(fileType: FileType) {
-        dynamicRegistry.remove(fileType)
-    }
-
-    /** Get all dynamically registered file types + built-in file types together */
-    fun allTypes(): List<FileType> = BuiltinFileType.entries + dynamicRegistry
-
-    fun fromFileName(name: String): FileType {
-        val normalized = name.lowercase()
-        val fileExt = normalized.substringAfterLast('.', "")
-        return allTypes().firstOrNull { it.names != null && normalized in it.names!! } ?: fromExtension(fileExt)
-    }
+    /** Get all built-in file types */
+    fun allTypes(): List<FileType> = BuiltinFileType.entries
 
     fun fromExtension(ext: String): FileType {
         val normalized = ext.lowercase().removePrefix(".")
         return allTypes().firstOrNull { normalized in it.extensions } ?: BuiltinFileType.UNKNOWN
-    }
-
-    fun fromMarkdownName(name: String): FileType {
-        val normalized = name.lowercase()
-        return allTypes().firstOrNull { normalized in it.extensions || normalized in it.markdownNames }
-            ?: BuiltinFileType.UNKNOWN
-    }
-
-    fun fromScope(scope: String?): FileType {
-        if (scope == null) return BuiltinFileType.UNKNOWN
-        return allTypes().firstOrNull { it.textmateScope == scope } ?: BuiltinFileType.UNKNOWN
-    }
-
-    fun knowsExtension(ext: String): Boolean {
-        val normalized = ext.lowercase().removePrefix(".")
-        return allTypes().any { normalized in it.extensions }
     }
 }
 
