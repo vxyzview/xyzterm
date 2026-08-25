@@ -2,6 +2,7 @@ package com.rk.exec
 
 import com.rk.file.TERMINAL_SETUP_OK_MARKER
 import com.rk.file.localDir
+import com.rk.file.child
 import com.rk.file.rootfsFiles
 
 fun isTerminalInstalled(): Boolean {
