@@ -316,4 +316,26 @@
     <string name="update_signature_mismatch">发布版使用与已安装应用不同的签名密钥，无法覆盖安装。请先卸载当前应用，或从源码构建。</string>
     <string name="wake_lock_active">（持有唤醒锁）</string>
     <string name="xed_package">xyzterm 包</string>
+    <string name="backup_swap_old_failed">无法备份当前沙盒</string>
+    <string name="backup_swap_failed">无法将新沙盒移入定位——已恢复原沙盒</string>
+    <string name="backup_swap_rollback_failed">恢复失败，无法找回之前的沙盒</string>
+    <string name="bell_ring">终端响铃</string>
+    <string name="close_sessions_first">请先关闭所有终端会话</string>
+    <string name="compressing">正在压缩…</string>
+    <string name="extracting">正在解压…</string>
+    <string name="deleting">正在删除 %1$s…</string>
+    <string name="install_extracting_title">正在解压 Ubuntu…</string>
+    <string name="install_extracting_warning">解压完成前请保持应用打开</string>
+    <string name="install_extracting_progress">正在解压… %1$d%%</string>
+    <string name="keep_device_awake">保持设备唤醒</string>
+    <string name="moving_into_place">正在移入定位…</string>
+    <string name="pager_page_of">第 %1$d 页，共 %2$d 页</string>
+    <string name="reading_files">正在读取文件…</string>
+    <string name="search_matches">匹配结果：%1$d / %2$d</string>
+    <string name="search_no_results">无匹配结果</string>
+    <string name="theme_low_contrast_title">低对比度</string>
+    <string name="theme_low_contrast_msg">此主题的文本/背景对比度低于 3:1，可能难以阅读。</string>
+    <plurals name="sessions_running">
+        <item quantity="other">%d 个会话正在运行</item>
+    </plurals>
 </resources>
