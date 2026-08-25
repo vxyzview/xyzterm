@@ -168,7 +168,7 @@ fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) 
                 sideEffect = {
                     activity.fileManager.createNewFile(
                         "application/json",
-                        "xed-settings.json",
+                        "xyzterm-settings.json",
                     ) { fileObject ->
                         if (fileObject == null) return@createNewFile
                         scope.launch(Dispatchers.IO) {

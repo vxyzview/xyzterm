@@ -18,7 +18,6 @@ import com.rk.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.apache.commons.net.io.Util.copyStream
 
 var to_save_file: FileObject? = null
 
@@ -237,7 +236,7 @@ class FileManager(private val activity: ComponentActivity) {
     private fun copyUriData(contentResolver: ContentResolver, sourceUri: Uri, destinationUri: Uri) {
         contentResolver.openInputStream(sourceUri)?.use { inputStream ->
             contentResolver.openOutputStream(destinationUri)?.use { outputStream ->
-                copyStream(inputStream, outputStream)
+                inputStream.copyTo(outputStream)
             }
         } ?: throw RuntimeException("Failed to copy data from $sourceUri to $destinationUri")
     }

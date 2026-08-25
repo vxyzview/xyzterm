@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Base.Theme.Karbon" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Base.Theme.Xyzterm" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
@@ -14,5 +14,5 @@
         <item name="android:fontFamily">@font/outfit_regular</item>
     </style>
 
-    <style name="Theme.Karbon" parent="Base.Theme.Karbon" />
+    <style name="Theme.Xyzterm" parent="Base.Theme.Xyzterm" />
 </resources>

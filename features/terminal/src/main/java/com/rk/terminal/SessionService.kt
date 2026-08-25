@@ -305,6 +305,9 @@ class SessionService : Service() {
     }
 
     var wakeLock: PowerManager.WakeLock? = null
+        private set
+
+    fun isWakeLockHeld(): Boolean = synchronized(wakeLockLock) { wakeLock?.isHeld == true }
 
     @Volatile
     private var wakeLockHeld = false

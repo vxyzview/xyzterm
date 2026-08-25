@@ -672,7 +672,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
         // ── Footer actions ─────────────────────────────────────────────
         val activeSession = service?.currentSession?.value
 
-        val keepDeviceAwake = service?.wakeLock?.isHeld == true || Settings.keep_device_awake
+        val keepDeviceAwake = service?.isWakeLockHeld() == true || Settings.keep_device_awake
 
         Surface(
             shape = MaterialTheme.shapes.large,

@@ -37,7 +37,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="false"
-        android:theme="@style/Theme.Karbon"
+        android:theme="@style/Theme.Xyzterm"
         tools:targetApi="tiramisu">
         <profileable
             android:shell="true"
