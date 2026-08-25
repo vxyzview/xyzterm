@@ -54,6 +54,7 @@ class TerminalRestoreSwapTest {
         old.mkdirs()
         File(old, "previous-rootfs").writeText("old")
 
+        assertEquals(SwapFailure.MOVE_FAILED, swapSandboxChecked(live, File(tmp.root, "missing-staging"), old))
         assertFalse(swapSandbox(live, File(tmp.root, "missing-staging"), old))
 
         assertEquals("precious", File(live, "user-data.txt").readText())

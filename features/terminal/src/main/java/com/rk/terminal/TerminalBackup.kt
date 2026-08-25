@@ -19,6 +19,9 @@ internal enum class SwapFailure {
 
     /** Staging could not replace the live sandbox; the original was restored. */
     MOVE_FAILED,
+
+    /** Staging failed to replace the live sandbox and restoring the original also failed. */
+    ROLLBACK_FAILED,
 }
 
 /**
@@ -33,8 +36,10 @@ internal fun swapSandboxChecked(liveDir: File, stagingDir: File, oldDir: File): 
     if (oldDir.exists() && !oldDir.deleteRecursively()) return SwapFailure.OLD_FAILED
     if (liveDir.exists() && !liveDir.renameTo(oldDir)) return SwapFailure.OLD_FAILED
     if (!stagingDir.renameTo(liveDir)) {
-        oldDir.renameTo(liveDir)
-        return SwapFailure.MOVE_FAILED
+        if (oldDir.renameTo(liveDir)) {
+            return SwapFailure.MOVE_FAILED
+        }
+        return SwapFailure.ROLLBACK_FAILED
     }
     oldDir.deleteRecursively()
     return null
@@ -182,6 +187,8 @@ object TerminalBackup {
                         return@withContext strings.backup_swap_old_failed.getString()
                     SwapFailure.MOVE_FAILED ->
                         return@withContext strings.backup_swap_failed.getString()
+                    SwapFailure.ROLLBACK_FAILED ->
+                        return@withContext strings.backup_swap_rollback_failed.getString()
                 }
 
                 localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()

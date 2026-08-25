@@ -88,17 +88,19 @@ class SessionService : Service() {
         }
 
         fun getSession(id: SessionId): TerminalSession? {
-            return sessions[id]
+            return synchronized(sessionLock) { sessions[id] }
         }
 
         fun getSessionId(session: TerminalSession): SessionId? {
-            return sessions.entries.firstOrNull { it.value == session }?.key
+            return synchronized(sessionLock) { sessions.entries.firstOrNull { it.value == session }?.key }
         }
 
         fun getSessionInfoByPwd(pwd: SessionPwd): SessionInfo? {
-            return sessionWorkDirs.keys
-                .find { sessionWorkDirs[it] == pwd }
-                ?.let { SessionInfo(it, sessionWorkDirs[it]!!, sessions[it]!!) }
+            return synchronized(sessionLock) {
+                sessionWorkDirs.keys
+                    .find { sessionWorkDirs[it] == pwd }
+                    ?.let { SessionInfo(it, sessionWorkDirs[it]!!, sessions[it]!!) }
+            }
         }
 
         fun restoreSessions(activity: Terminal) {
@@ -150,7 +152,6 @@ class SessionService : Service() {
                     }
                     // Process teardown stays outside the lock.
                     duplicates.forEach { it.finishIfRunning() }
-                    restorePending = false
                     if (sessionList.isNotEmpty()) {
                         // Restore the session the user was actually using when
                         // the app closed, not whichever restored last.
@@ -165,6 +166,9 @@ class SessionService : Service() {
                     val callbacks = restoreCallbacks.toList()
                     restoreCallbacks.clear()
                     callbacks.forEach { runCatching { it() } }
+                    // Reset only after queued callbacks drained, so a caller
+                    // racing onRestored can never skip the queue mid-drain.
+                    restorePending = false
                     if (sessions.isNotEmpty()) updateNotification()
                 }
             }
@@ -241,14 +245,16 @@ class SessionService : Service() {
 
     override fun onDestroy() {
         liveInstance = null
-        sessions.forEach { s -> s.value.finishIfRunning() }
+        synchronized(sessionLock) { sessions.values.toList() }.forEach { s -> s.finishIfRunning() }
 
         restoreScope.cancel()
         daemonRunning = false
-        if (wakeLock?.isHeld == true) {
-            wakeLock?.release()
+        synchronized(wakeLockLock) {
+            if (wakeLock?.isHeld == true) {
+                wakeLock?.release()
+            }
+            wakeLockHeld = false
         }
-        wakeLockHeld = false
         if (Settings.auto_backup) {
             // IO dispatcher: tar blocks for minutes; Default pool is for CPU.
             DefaultScope.launch(Dispatchers.IO) { runCatching { TerminalBackup.autoBackup() } }
@@ -314,7 +320,7 @@ class SessionService : Service() {
     }
 
     fun actionExit() {
-        sessions.forEach { s -> s.value.finishIfRunning() }
+        synchronized(sessionLock) { sessions.values.toList() }.forEach { s -> s.finishIfRunning() }
         if (daemonRunning) {
             daemonRunning = false
         }

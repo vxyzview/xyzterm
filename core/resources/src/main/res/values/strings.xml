@@ -339,6 +339,7 @@
     <string name="backup_swap_old_failed">Could not back up current sandbox</string>
     <string name="backup_swap_failed">Could not move new sandbox into place — original restored</string>
     <string name="deleting">Deleting %1$s…</string>
+    <string name="backup_swap_rollback_failed">Restore failed and the previous sandbox could not be recovered</string>
     <plurals name="sessions_running">
         <item quantity="one">%d session running</item>
         <item quantity="other">%d sessions running</item>
