@@ -2,6 +2,8 @@ package com.rk.settings.terminal
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
@@ -92,6 +94,8 @@ fun UserBindingsScreen() {
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(60.dp))
     }
 
     if (bindingToDelete != null) {
