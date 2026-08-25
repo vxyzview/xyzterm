@@ -3,9 +3,7 @@ package com.rk.activities.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.rememberScrollState
@@ -42,8 +40,6 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
                 fontWeight = FontWeight.Bold,
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             val scrollState = rememberScrollState()
             Column(
                 modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).weight(1f, fill = false),
@@ -55,8 +51,6 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
                     fontWeight = FontWeight.Medium,
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
-
                 Text(
                     text = stringResource(strings.data_loss_risk),
                     style = MaterialTheme.typography.titleMedium,
@@ -65,8 +59,6 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
                 )
 
                 Text(text = stringResource(strings.data_loss_risk_content), style = MaterialTheme.typography.bodyMedium)
-
-                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = stringResource(strings.terminal_risks),
@@ -77,8 +69,6 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
 
                 Text(text = stringResource(strings.terminal_risks_content), style = MaterialTheme.typography.bodyMedium)
 
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
                     text = stringResource(strings.no_warranty),
                     style = MaterialTheme.typography.titleMedium,
@@ -86,8 +76,6 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
                 )
 
                 Text(text = stringResource(strings.no_warranty_content), style = MaterialTheme.typography.bodyMedium)
-
-                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = stringResource(strings.not_liable),
@@ -97,8 +85,6 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
 
                 Text(text = stringResource(strings.not_liable_content), style = MaterialTheme.typography.bodyMedium)
 
-                Spacer(modifier = Modifier.height(12.dp))
-
                 Text(
                     text = stringResource(strings.consent_statement),
                     style = MaterialTheme.typography.bodySmall,
@@ -106,8 +92,6 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(modifier = Modifier.weight(1f), onClick = onDecline) {

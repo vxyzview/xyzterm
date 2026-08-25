@@ -661,7 +661,6 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                                     imageVector = Icons.Outlined.Edit,
                                     contentDescription = stringResource(strings.rename),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp),
                                 )
                             }
                         }
@@ -714,7 +713,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 enabled = activeSession != null,
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -723,7 +722,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     Icon(
                         imageVector = Icons.Outlined.Delete,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.error,
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -757,7 +756,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.primary,
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -769,7 +768,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 

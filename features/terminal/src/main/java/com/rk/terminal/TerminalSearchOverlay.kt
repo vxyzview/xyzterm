@@ -82,7 +82,7 @@ fun TerminalSearchOverlay(onClose: () -> Unit) {
 
     Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextField(

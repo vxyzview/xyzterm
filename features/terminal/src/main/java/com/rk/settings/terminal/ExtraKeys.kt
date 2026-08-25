@@ -36,7 +36,6 @@ import com.rk.resources.strings
 import com.rk.settings.DEFAULT_TERMINAL_EXTRA_KEYS
 import com.rk.settings.Preference
 import com.rk.settings.Settings
-import com.rk.theme.Typography
 import com.rk.utils.openUrl
 
 @Composable
@@ -74,7 +73,7 @@ fun TerminalExtraKeys() {
             ) {
                 Text(
                     stringResource(strings.see_termux_extra_keys),
-                    fontSize = Typography.bodyMedium.fontSize,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f),
                 )

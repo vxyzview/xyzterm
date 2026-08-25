@@ -198,7 +198,6 @@ private fun BackupItem(backup: File, onRestore: () -> Unit, onDelete: () -> Unit
     // Tap anywhere on the entry to restore; trash icon deletes.
     PreferenceTemplate(
         modifier = Modifier.clickable(onClick = onRestore),
-        verticalPadding = 10.dp,
         title = {
             Text(text = backup.name)
         },

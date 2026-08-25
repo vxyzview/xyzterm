@@ -116,6 +116,7 @@ fun LanguageScreen(modifier: Modifier = Modifier) {
                         isEnabled = localeInfo.isInstalled,
                         startWidget = {
                             RadioButton(
+                                modifier = Modifier.padding(start = 16.dp),
                                 selected = selectedLocaleInfo == localeInfo,
                                 onClick = { setAppLanguage(localeInfo.locale, currentLocale) },
                             )

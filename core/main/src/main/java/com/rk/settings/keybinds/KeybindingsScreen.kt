@@ -65,7 +65,6 @@ import com.rk.icons.XedIcon
 import com.rk.icons.XedIcons
 import com.rk.resources.drawables
 import com.rk.resources.strings
-import com.rk.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -224,7 +223,6 @@ fun KeybindItem(
     PreferenceTemplate(
         modifier = Modifier.clickable(onClick = { promptKeybinds(command) }),
         verticalPadding = 8.dp,
-        horizontalPadding = 24.dp,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 XedIcon(
@@ -251,7 +249,7 @@ fun KeybindItem(
             Text(
                 text = keyCombination?.getDisplayName() ?: stringResource(strings.none_set),
                 fontFamily = FontFamily.Monospace,
-                style = Typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
             )
         },
@@ -331,7 +329,7 @@ fun EditKeybindsDialog(command: Command, onSubmit: (KeyCombination?) -> Unit, on
                         }
                     },
                     maxLines = 1,
-                    textStyle = Typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
                 )
 
                 LaunchedEffect(Unit) { focusRequester.requestFocus() }

@@ -31,7 +31,7 @@ fun Support(modifier: Modifier = Modifier) {
                 default = false,
                 startWidget = {
                     Icon(
-                        modifier = Modifier.padding(start = 16.dp, top = 4.dp, bottom = 4.dp),
+                        modifier = Modifier.padding(start = 16.dp),
                         painter = painterResource(drawables.coffee),
                         contentDescription = null,
                     )
