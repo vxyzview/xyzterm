@@ -78,13 +78,13 @@ $ pfetch
 ### Look & feel
 
 - **Terminal themes** — including pure-black **AMOLED** and Android **dynamic color (Material You)**.
-- **App-wide theming** — light/dark/auto, multiple built-in themes, icon packs.
+- **App-wide theming** — light/dark/auto, multiple built-in themes; installed icon packs can be selected or uninstalled.
 - **Minimal by design** — settings screens contain exactly what a terminal needs. Nothing else.
 
 ### Trust
 
 - **Zero telemetry** — no analytics, no crash reporting to third parties, no network calls you didn't make yourself.
-- **SHA-256–verified downloads** — rootfs archives are checksum-pinned and re-verified on every launch; stale or corrupted downloads are re-fetched automatically.
+- **SHA-256–verified downloads** — rootfs archives are checksum-pinned at download time and re-verified when resuming an interrupted transfer; corrupted archives are re-fetched automatically.
 - **Stable release signing** — every GitHub release is signed with the same key, so updates install in place.
 - **F-Droid first** — submitted to [F-Droid](https://f-droid.org/); releases also published on [GitHub Releases](https://github.com/vxyzview/xyzterm/releases).
 - **Reproducible builds** — verify our APKs match the source with [apksigcopier + diffoscope](docs/CONTRIBUTING.md).
