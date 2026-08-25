@@ -330,7 +330,7 @@ private fun ColumnScope.TerminalView(
                 }
 
                 post {
-                    if (Settings.keep_device_awake) keepScreenOn = true
+                    keepScreenOn = Settings.keep_device_awake
                     isFocusableInTouchMode = true
                     requestFocus()
                 }
@@ -845,7 +845,7 @@ suspend fun Terminal.changeSession(sessionId: String) {
 
     terminalView.apply {
         post {
-            if (Settings.keep_device_awake) keepScreenOn = true
+            keepScreenOn = Settings.keep_device_awake
             isFocusableInTouchMode = true
             requestFocus()
         }

@@ -464,8 +464,12 @@ private var lastHandledIntent: Intent? = null
             val activity = context as? Activity
 
             DisposableEffect(Settings.fullscreen, Settings.keep_device_awake) {
-                if (Settings.keep_device_awake) {
-                    activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                activity?.window?.let { window ->
+                    if (Settings.keep_device_awake) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    } else {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
                 }
 
                 // Fullscreen mode: hide the status bar, swipe to reveal (toggle in
