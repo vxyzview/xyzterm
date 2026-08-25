@@ -371,9 +371,8 @@ fun SettingsTerminalScreen() {
                                         msg = strings.close_sessions_first.getString(),
                                         onCancel = {},
                                     )
-                                    return@onOk
-                                }
-                                DefaultScope.launch(Dispatchers.IO) {
+                                } else {
+                                    DefaultScope.launch(Dispatchers.IO) {
                                     val loading = LoadingPopup(activity, null)
                                     withContext(Dispatchers.Main) { runCatching { loading.show() } }
                                     runCatching {
@@ -393,6 +392,7 @@ fun SettingsTerminalScreen() {
                                         runCatching { loading.hide() }
                                         toast(strings.success)
                                     }
+                                }
                                 }
                             },
                         )

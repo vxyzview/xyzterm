@@ -146,8 +146,7 @@ fun TerminalBackupsScreen() {
                                         msg = strings.close_sessions_first.getString(),
                                         onCancel = {},
                                     )
-                                    return@onOk
-                                }
+                                } else {
                                 val loading = LoadingPopup(activity, null)
                                 loading.show()
                                 DefaultScope.launch(Dispatchers.IO) {
@@ -168,6 +167,7 @@ fun TerminalBackupsScreen() {
                                         }
                                     }
                                     refreshTrigger++
+                                }
                                 }
                             },
                         )

@@ -107,6 +107,7 @@ import kotlinx.coroutines.withTimeout
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.lang.ref.WeakReference
 import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
