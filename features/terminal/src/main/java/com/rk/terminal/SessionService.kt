@@ -10,12 +10,14 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
 import android.view.WindowManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.rk.DefaultScope
 import com.rk.activities.terminal.Terminal
+import com.rk.exec.TerminalCommand
 import com.rk.resources.drawables
 import com.rk.resources.getQuantityString
 import com.rk.resources.getString
@@ -58,6 +60,7 @@ class SessionService : Service() {
             client: TerminalSessionClient,
             activity: Terminal,
             cwd: String? = null,
+            command: TerminalCommand? = null,
         ): SessionInfo {
             return MkSession.createSession(
                     activity,
@@ -65,6 +68,7 @@ class SessionService : Service() {
                     id,
                     activity.installNextStage != null && activity.installNextStage == NEXT_STAGE.EXTRACTION,
                     cwd,
+                    command,
                 )
                 .let {
                     val (session, pwd) = it
@@ -123,6 +127,11 @@ class SessionService : Service() {
                         .map { (id, pwd) ->
                             async {
                                 runCatching { MkSession.createSession(applicationContext, TerminalBackEnd(), id, false, pwd) }
+                                    .onFailure {
+                                        // Silent swallow here makes a broken rootfs look like
+                                        // "app not working" with zero diagnostics.
+                                        Log.w("SessionService", "session restore failed: $id", it)
+                                    }
                                     .getOrNull()
                                     ?.let { id to it }
                             }
@@ -133,6 +142,10 @@ class SessionService : Service() {
                     // App exited while the restore was in flight — drop the shells.
                     if (!daemonRunning) {
                         built.forEach { it.second.first.finishIfRunning() }
+                        // Queued onRestored callbacks would only spawn fresh
+                        // shells against a dying service — drop them instead of
+                        // leaving them stuck in the queue forever.
+                        restoreCallbacks.clear()
                         restorePending = false
                         return@withContext
                     }
@@ -200,8 +213,14 @@ class SessionService : Service() {
             synchronized(sessionLock) {
                 if (oldId == newId || newId.isEmpty() || newId in sessionList) return
 
-                val session = sessions.remove(oldId) ?: return
-                val pwd = sessionWorkDirs.remove(oldId) ?: return
+                // Resolve both maps BEFORE mutating: removing from [sessions]
+                // and then bailing on a missing work-dir left the live session
+                // unreachable from the UI and notification counts.
+                val session = sessions[oldId] ?: return
+                val pwd = sessionWorkDirs[oldId] ?: return
+
+                sessions.remove(oldId)
+                sessionWorkDirs.remove(oldId)
 
                 sessions[newId] = session
                 sessionWorkDirs[newId] = pwd
@@ -219,6 +238,12 @@ class SessionService : Service() {
             if (Preference.getString(ACTIVE_SESSION_KEY, "") == oldId) {
                 Preference.setString(ACTIVE_SESSION_KEY, newId)
             }
+
+            // Persist the rename: until now savedSessions JSON still mapped oldId,
+            // so next cold start would restore under the stale id and lose the
+            // renamed one.
+            removeSession(oldId)
+            saveSession(newId, pwd)
 
             updateNotification()
         }

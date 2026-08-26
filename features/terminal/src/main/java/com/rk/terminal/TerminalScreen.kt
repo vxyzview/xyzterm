@@ -81,7 +81,7 @@ import com.rk.components.ResponsiveDrawer
 import com.rk.components.SingleInputDialog
 import com.rk.utils.FontCache
 import com.rk.utils.isDarkTheme
-import com.rk.exec.pendingCommand
+import com.rk.exec.consumePendingCommand
 import com.rk.file.child
 import com.rk.file.sandboxDir
 import com.rk.resources.drawables
@@ -140,6 +140,10 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
     val keyboardController = LocalSoftwareKeyboardController.current
     val currentTheme = LocalThemeHolder.current
     var showSearch by rememberSaveable { mutableStateOf(false) }
+    // Refresh plain Settings reads when returning from the settings screen.
+    val settingsRefresh = rememberSettingsRefresh()
+    val fullscreenSetting = remember(settingsRefresh) { Settings.fullscreen }
+    val smartToolbarSetting = remember(settingsRefresh) { Settings.smart_toolbar }
 
     DisposableEffect(Unit) { onDispose { keyboardController?.hide() } }
 
@@ -150,13 +154,13 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
 
         ResponsiveDrawer(
             drawerState = drawerState,
-            fullscreen = Settings.fullscreen,
+            fullscreen = fullscreenSetting,
             mainContent = {
                 Scaffold(
                     topBar = {
                         // Smart toolbar: hide the header while the keyboard is open so
                         // the terminal gets the rows back (toggle in app settings).
-                        if (!(Settings.smart_toolbar && WindowInsets.isImeVisible)) {
+                        if (!(smartToolbarSetting && WindowInsets.isImeVisible)) {
                             TopAppBar(
                             title = {
                                 Row(
@@ -373,16 +377,26 @@ private suspend fun TerminalView.attachOrCreateSession(
     client: TerminalBackEnd,
     terminalActivity: Terminal,
 ) {
-    val pendingCommandSnapshot = pendingCommand
+    val binder = terminalActivity.sessionBinder?.get() ?: return // service unbound mid-recreate
+    val service = binder.getService()
+
+    // Single owner for the launch command: consumed exactly once HERE, before
+    // any session is created, and passed explicitly. Parallel session restore
+    // never consumes, so it can no longer steal the command (or run it inside
+    // an unrelated restored shell) while the foreground attach path was still
+    // resolving its binder.
+    val command = consumePendingCommand()
+
     val session =
-        if (pendingCommandSnapshot != null) {
-            val binder = terminalActivity.sessionBinder?.get() ?: return // service unbound mid-recreate
-            binder.getService().currentSession.value = pendingCommandSnapshot.id
-            binder.getSession(pendingCommandSnapshot.id)
-                ?: binder.createSession(pendingCommandSnapshot.id, client, terminalActivity).session
+        if (command != null) {
+            // Always spawn a fresh session for the command: reusing an existing
+            // same-id session (already restored/published) would attach it bare
+            // and silently drop the launch command. createSession's unique-id
+            // logic suffixes collisions, so nothing is clobbered.
+            val info = binder.createSession(command.id, client, terminalActivity, command = command)
+            service.currentSession.value = info.id
+            info.session
         } else {
-            val binder = terminalActivity.sessionBinder?.get() ?: return
-            val service = binder.getService()
             val current = service.currentSession.value
             binder.getSession(current)
                 ?: if (service.restorePending) {
@@ -413,10 +427,13 @@ private suspend fun TerminalView.attachOrCreateSession(
 
         // Broken-rootfs symptom: a shell that dies within seconds of spawn
         // (missing/corrupt /bin/bash, proot failure) leaves a blank screen with
-        // only a fleeting toast. Surface a visible error instead.
+        // only a fleeting toast. Surface a visible error instead. One-shot
+        // sandboxed=false commands ARE the session process — exiting quickly is
+        // success, not a broken rootfs.
+        val oneShotCommand = command != null && !command.sandbox
         scope.launch {
             delay(3000)
-            if (session.isRunning || terminalView.get()?.mTermSession !== session) return@launch
+            if (oneShotCommand || session.isRunning || terminalView.get()?.mTermSession !== session) return@launch
             Log.w("TerminalInstall", "session exited within 3s of spawn; rootfs likely broken")
             errorDialog(msg = strings.setup_failed.getFilledString(strings.session_ended.getString()))
         }
@@ -426,6 +443,7 @@ private suspend fun TerminalView.attachOrCreateSession(
 @Composable
 private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
     val scope = rememberCoroutineScope()
+    val settingsRefresh = rememberSettingsRefresh()
     // Saveable: rotation must not close a mid-action confirm/rename dialog.
     var showRenameDialog by rememberSaveable { mutableStateOf(false) }
     var showExitConfirm by rememberSaveable { mutableStateOf(false) }
@@ -690,7 +708,10 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
         // ── Footer actions ─────────────────────────────────────────────
         val activeSession = service?.currentSession?.value
 
-        val keepDeviceAwake = service?.isWakeLockHeld() == true || Settings.keep_device_awake
+        // Refreshed on resume: toggling keep-awake from the notification or the
+        // settings screen must flip this switch without a manual recompose.
+        val keepDeviceAwake =
+            remember(settingsRefresh) { service?.isWakeLockHeld() == true || Settings.keep_device_awake }
 
         Surface(
             shape = MaterialTheme.shapes.large,
