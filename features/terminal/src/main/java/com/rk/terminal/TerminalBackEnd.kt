@@ -83,7 +83,8 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     // Throttle: a job that rings repeatedly (e.g. `while true; echo -e '\a'`)
-    // must not spam notifications.
+    // must not spam notifications. Touched from session reader threads.
+    @Volatile
     private var lastBellNotifyAt = 0L
 
     private fun notifyBellInBackground(session: TerminalSession) {
@@ -204,7 +205,8 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         val emulator = view?.mEmulator
         if (view != null && emulator != null) {
             val (column, row) = view.getColumnAndRow(e, true).let { it[0] to it[1] }
-            val line = emulator.getScreen().getSelectedText(0, row, emulator.mColumns - 1, row)
+            // getSelectedText is a platform type: null when the row is empty.
+            val line = emulator.getScreen().getSelectedText(0, row, emulator.mColumns - 1, row) ?: ""
             val url = URL_REGEX.find(line)?.takeIf { column in it.range }?.value?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
             if (url != null) {
                 openUrlPrompt(url)

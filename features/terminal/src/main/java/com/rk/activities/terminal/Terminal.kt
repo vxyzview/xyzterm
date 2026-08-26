@@ -167,13 +167,19 @@ class Terminal : AppCompatActivity() {
     }
 
     fun handleIntent(intent: Intent) {
-        if (intent === lastHandledIntent) return
+        // Content-keyed dedupe. Identity (===) failed after activity recreation:
+        // rotation/theme change delivers an equal-but-new Intent, replaying
+        // shared-text prompts and deep-link commands. Tradeoff: re-sharing the
+        // exact same payload while this activity instance is alive is treated as
+        // a replay; the key clears on finish, so the next session handles it.
+        val key = intent.dedupeKey()
+        if (key == lastHandledKey) return
 
         // Only stamp an intent as handled once we actually act on it. Bailing
         // below (view not composed yet, binder gone) leaves it unmarked so a
         // later call can retry instead of silently dropping the request.
         fun markHandled() {
-            lastHandledIntent = intent
+            lastHandledKey = key
             this.intent = intent
         }
 
@@ -270,10 +276,24 @@ class Terminal : AppCompatActivity() {
                 activityRef = WeakReference(value)
             }
 
-        /** True while the terminal UI is visible; gates bell notifications. */
+        /** True while the terminal UI is visible; gates bell notifications. Read from session reader threads. */
+        @Volatile
         var isForeground = false
 
-private var lastHandledIntent: Intent? = null
+private var lastHandledKey: String? = null
+
+        /**
+         * Stable content key for intent dedupe: action, data URI, MIME type and
+         * the string extras this activity actually consumes.
+         */
+        private fun Intent.dedupeKey(): String =
+            listOfNotNull(
+                action,
+                data?.toString(),
+                type,
+                getStringExtra("cwd"),
+                getStringExtra(Intent.EXTRA_TEXT),
+            ).joinToString("|")
 
             internal val SESSION_NAME_REGEX = Regex("^[A-Za-z0-9_-]+$")
 
@@ -355,6 +375,9 @@ private var lastHandledIntent: Intent? = null
             return
         }
 
+        // Fresh activity instance = fresh dedupe state; keeps legitimate
+        // repeat launches (same payload twice) working across sessions.
+        lastHandledKey = null
         super.onDestroy()
     }
 
@@ -388,6 +411,9 @@ private var lastHandledIntent: Intent? = null
         }
 
         fun startInstall() {
+            // Double-tap in one frame would launch two concurrent pipelines
+            // appending to the same sandbox.tar.gz(.part) and corrupting it.
+            if (downloadStarted || installNextStage != null) return
             progressText = strings.installing.getString()
             downloadStarted = true
 
@@ -467,6 +493,8 @@ private var lastHandledIntent: Intent? = null
                             downloadStarted = false
                         },
                     )
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     if (e is UnknownHostException) {
                         toast(strings.network_err.getString())
@@ -736,6 +764,7 @@ private var lastHandledIntent: Intent? = null
         withContext(Dispatchers.IO) {
             try {
                 var completedFiles = 0
+                var downloadsDone = false
 
                 filesToDownload.forEach { file ->
                     val outputFile = file.outputFile
@@ -777,14 +806,23 @@ private var lastHandledIntent: Intent? = null
                     runCatching { outputFile.setExecutable(true) }.onFailure { it.printStackTrace() }
                 }
 
+                downloadsDone = true
+
                 val stage = getNextStage(this@Terminal)
                 Log.w(INSTALL_TAG, "next stage: $stage")
                 onComplete(stage)
+            } catch (e: CancellationException) {
+                // Pure cancellation (activity destroyed mid-download): no error UI,
+                // and keep any partial tarball so the download resumes next time.
+                throw e
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.w(INSTALL_TAG, "setup failed before extraction: ${e.message}")
                 withContext(Dispatchers.Main) { onError(e, currentFile) }
-                if (currentFile?.exists() == true) {
+                if (!downloadsDone && currentFile?.exists() == true) {
+                    // Only discard the tarball for download/checksum failures;
+                    // a stage-detection error must keep the sha-verified file
+                    // instead of forcing a full re-download.
                     currentFile.delete()
                 }
             }
