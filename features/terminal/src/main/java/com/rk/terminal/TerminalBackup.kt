@@ -122,9 +122,15 @@ object TerminalBackup {
             partial.delete()
             return false
         }
-        dir.listFiles { f -> f.name.startsWith("terminal-backup-") }
+        dir
+            .listFiles { f -> f.name.startsWith("terminal-backup-") && !f.name.endsWith(".part") }
             ?.sortedByDescending { it.name }
             ?.drop(KEEP)
+            ?.forEach { it.delete() }
+        // A killed run can still leave a .part sibling behind (crash between
+        // create() and the cleanup above): never let it consume a KEEP slot or
+        // accumulate forever.
+        dir.listFiles { f -> f.name.startsWith("terminal-backup-") && f.name.endsWith(".part") }
             ?.forEach { it.delete() }
         return true
     }

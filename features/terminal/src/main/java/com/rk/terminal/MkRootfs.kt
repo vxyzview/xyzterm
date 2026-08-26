@@ -18,6 +18,7 @@ import java.io.File
 import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 enum class NEXT_STAGE {
@@ -45,6 +46,13 @@ suspend fun CoroutineScope.getNextStage(context: Context): NEXT_STAGE = withCont
             // died mid-extraction; wipe so the retry starts clean instead of
             // being mistaken for an installed system.
             rootfsFiles.forEach {
+                // The extractor's deferred chmod pass restores archive modes, so
+                // a dead attempt can leave mode-0000 dirs behind; deleteRecursively
+                // cannot remove children from those and every retry would hit the
+                // identical wall. Reopen permissions top-down before deleting.
+                it.walkTopDown().filter { dir -> dir.isDirectory }.forEach { dir ->
+                    runCatching { Os.chmod(dir.path, Integer.parseInt("700", 8)) }
+                }
                 if (!it.deleteRecursively()) {
                     throw IOException("Failed to wipe incomplete rootfs: ${it.absolutePath}")
                 }
@@ -67,7 +75,14 @@ suspend fun extractRootfs(onProgress: (Float) -> Unit) =
         Log.w(TAG, "extract start: ${tarball.absolutePath} bytes=${tarball.length()}")
 
         val mainHandler = Handler(Looper.getMainLooper())
-        TarExtractor.extract(tarball, sandbox) { fraction ->
+        TarExtractor.extract(
+            tarball,
+            sandbox,
+            // Stop disk writes promptly when the caller's scope is cancelled
+            // (activity destroyed / watchdog fired) — otherwise a zombie
+            // extractor keeps writing while a retry wipes or re-extracts.
+            checkCancelled = { ensureActive() },
+        ) { fraction ->
             mainHandler.post { onProgress(fraction) }
         }
         Log.w(TAG, "tar extract ok, applying rootfs config")
@@ -105,7 +120,9 @@ suspend fun extractRootfs(onProgress: (Float) -> Unit) =
         // Marker goes down before the tarball is deleted: deleting the tarball
         // first leaves a window where a kill loses the complete rootfs.
         // DO NOT REMOVE THIS FILE JUST DON'T, TRUST ME (same contract as setup.sh)
-        localDir().child(TERMINAL_SETUP_OK_MARKER).createFileIfNot()
+        val marker = localDir().child(TERMINAL_SETUP_OK_MARKER)
+        marker.createFileIfNot()
+        check(marker.exists()) { "Failed to create install marker: ${marker.absolutePath}" }
         Log.w(TAG, "install marker written, removing tarball")
 
         tarball.delete()
@@ -115,12 +132,20 @@ suspend fun extractRootfs(onProgress: (Float) -> Unit) =
  * Rootfs archives ship some directories with restrictive modes; a plain
  * writeText into one fails with EACCES. Open the parent once and retry before
  * giving up (the extractor's deferred chmod pass only covers its own run).
+ * The target itself may also be unwritable or a dangling symlink shipped in
+ * the archive; on retry replace it rather than writing through it.
  */
 private fun writeRootfsFile(file: File, content: String) {
     try {
         file.writeText(content)
     } catch (e: IOException) {
         file.parentFile?.let { parent -> runCatching { Os.chmod(parent.path, Integer.parseInt("755", 8)) } }
+        // Never replace a real directory, but an unwritable file or a symlink
+        // shipped in the archive gets unlinked so the retry creates fresh.
+        if (!file.isDirectory) {
+            runCatching { Os.chmod(file.path, Integer.parseInt("644", 8)) }
+            file.delete()
+        }
         file.writeText(content)
     }
 }
@@ -139,12 +164,31 @@ private fun appendAndroidGroups(groupFile: File) {
             "android_external_storage:x:1077",
         )
 
-    val existing = if (groupFile.isFile) groupFile.readText() else ""
-    val missing = candidates.filter { ":${it.substringAfterLast(':')}" !in existing }
+    val existing =
+        try {
+            groupFile.readText()
+        } catch (e: IOException) {
+            // Same restrictive-mode hazard writeRootfsFile retries for; open the
+            // parent once, then fall back to treating the file as empty.
+            groupFile.parentFile?.let { parent -> runCatching { Os.chmod(parent.path, Integer.parseInt("755", 8)) } }
+            try {
+                groupFile.readText()
+            } catch (_: IOException) {
+                ""
+            }
+        }
+    // Exact gid match on the final field: a substring test also matched
+    // "inet2:x:30030" when probing for gid 3003, wrongly concluding the inet
+    // group existed and skipping the append (guest networking then failed).
+    val missing =
+        candidates.filter { candidate ->
+            val gid = candidate.substringAfterLast(':')
+            existing.lineSequence().none { it.substringAfterLast(':') == gid }
+        }
     if (missing.isEmpty()) return
 
     val separator = if (existing.isEmpty() || existing.endsWith("\n")) "" else "\n"
-    groupFile.appendText(separator + missing.joinToString("") { "$it\n" })
+    writeRootfsFile(groupFile, existing + separator + missing.joinToString("") { "$it\n" })
 }
 
 private const val HOSTS =

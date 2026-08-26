@@ -143,7 +143,15 @@ suspend fun ubuntuProcess(
                 "/bin:/sbin:/usr/bin:/usr/sbin:/usr/games:/usr/local/bin:/usr/local/sbin:${localBinDir()}:${System.getenv("PATH")}"
         }
 
-        val process = processBuilder.start()
+        // A failed spawn (missing linker, exec format) would otherwise leak
+        // this invocation's PROOT_TMP_DIR forever: no reaper is registered yet.
+        val process =
+            try {
+                processBuilder.start()
+            } catch (e: IOException) {
+                tmpDir.deleteRecursively()
+                throw e
+            }
 
         // The per-invocation PROOT_TMP_DIR binding is never reused; reap it once
         // the process is gone instead of leaking one temp dir per spawn.

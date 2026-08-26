@@ -29,7 +29,18 @@ object TarExtractor {
     private const val THROTTLE_MS = 250L
     private const val MODE_MASK = 0b111111111
 
-    fun extract(tarGz: File, destDir: File, onProgress: (Float) -> Unit) {
+    /** Errnos where a hardlink is impossible but a symlink fallback works (proot --link2symlink set). */
+    private val LINK_FALLBACK_ERRNOS =
+        intArrayOf(
+            OsConstants.EXDEV,
+            OsConstants.EACCES,
+            OsConstants.EPERM,
+            OsConstants.EMLINK,
+            OsConstants.ENOSYS,
+            OsConstants.EOPNOTSUPP,
+        )
+
+    fun extract(tarGz: File, destDir: File, onProgress: (Float) -> Unit, checkCancelled: () -> Unit = {}) {
         val root = destDir.canonicalFile
         root.mkdirs()
         val total = tarGz.length().coerceAtLeast(1L)
@@ -50,11 +61,13 @@ object TarExtractor {
             var fileCount = 0
             var dirCount = 0
             var linkCount = 0
+            var fallbackCount = 0
 
             Log.w(TAG, "tar extract start: ${tarGz.name} bytes=$total")
 
             try {
                 while (true) {
+                    checkCancelled()
                     if (!readBlock(gzip, header)) break
                     if (isZeroBlock(header)) break
 
@@ -140,8 +153,20 @@ object TarExtractor {
                                     dirCount++
                                     skipPayload(gzip, size, buf)
                                     ensureParentDir(target, madeDirs)
-                                    if (target.exists() && !target.isDirectory) unlinkExisting(target)
-                                    target.mkdirs()
+                                    // Keep already-extracted real directories, but a symlink
+                                    // at a dir path (dangling ones are invisible to
+                                    // File.exists()) must be removed: mkdirs would no-op on
+                                    // EEXIST and children would be written through the link.
+                                    val isSymlink =
+                                        try {
+                                            Os.readlink(target.path).isNotEmpty()
+                                        } catch (e: ErrnoException) {
+                                            if (e.errno == OsConstants.ENOENT) false else throw e
+                                        }
+                                    if (isSymlink || !target.isDirectory) {
+                                        unlinkExisting(target)
+                                        target.mkdirs()
+                                    }
                                     dirModes.add(target to (mode and MODE_MASK))
                                 }
 
@@ -165,9 +190,20 @@ object TarExtractor {
                                     try {
                                         Os.link(linkTarget.path, target.path)
                                     } catch (e: ErrnoException) {
-                                        if (e.errno != OsConstants.EXDEV) throw e
                                         // Mirrors proot --link2symlink: hardlinks fail across
-                                        // mounts/devices, fall back to a symlink to the target.
+                                        // mounts/devices (EXDEV) and are outright denied by
+                                        // some OEM SELinux policies and FUSE filesystems
+                                        // (EACCES/EPERM); other kernels report unsupported
+                                        // ops or link-count exhaustion. All are recoverable
+                                        // by falling back to a symlink to the target.
+                                        if (e.errno !in LINK_FALLBACK_ERRNOS) throw e
+                                        fallbackCount++
+                                        // Log once: a FUSE/SELinux rootfs volume can deny
+                                        // every single hardlink and thousands of Log.w calls
+                                        // measurably slow extraction.
+                                        if (fallbackCount == 1) {
+                                            Log.w(TAG, "hardlink -> symlink fallback engaged (${e.message})")
+                                        }
                                         unlinkExisting(target)
                                         Os.symlink(linkTarget.path, target.path)
                                         canonicalCache.clear()
@@ -184,7 +220,11 @@ object TarExtractor {
                 throw e
             }
 
-            Log.w(TAG, "tar extract done: $entryCount entries ($fileCount files, $dirCount dirs, $linkCount links)")
+            Log.w(
+                TAG,
+                "tar extract done: $entryCount entries ($fileCount files, $dirCount dirs, " +
+                    "$linkCount links, $fallbackCount hardlinks fell back to symlinks)",
+            )
 
             // Applied last so restrictive directory modes cannot block children.
             dirModes.forEach { (dir, dirMode) -> Os.chmod(dir.path, dirMode) }
@@ -302,7 +342,8 @@ object TarExtractor {
      * Old-GNU sparse member ('S'): the header's size field is the file's REAL
      * (logical) size while the payload holds only the non-zero chunks listed in
      * the sparse map — 4 x 24-byte entries at offset 386 plus an isextended flag
-     * at 482, extended by 512-byte blocks of 21 entries each (flag at 504).
+     * at 482, extended by 512-byte blocks of 21 entries each (flag at 504 in
+     * every extension block).
      * Treating the logical size as payload length desyncs the whole stream.
      */
     private fun extractGnuSparse(
@@ -319,13 +360,20 @@ object TarExtractor {
             if (length > 0) chunks.add(longArrayOf(parseSize(header, 386 + i * 24), length))
         }
         var extraBlocks = 0L
-        while (parseString(header, 482, 1) == "1") {
+        // The isextended flag sits at 482 only in the MAIN ustar header.
+        // Extension blocks are struct oldgnu_extended_header (21 x 24-byte
+        // entries), which keeps the flag at 504; re-reading 482 inside an
+        // extension block parses a digit of entry 20's offset field instead,
+        // so chains longer than one block (>25 chunks) desynced the stream.
+        var flagOffset = 482
+        while (parseString(header, flagOffset, 1) == "1") {
             if (!readBlock(input, header)) throw IOException("Truncated sparse extension header")
             extraBlocks++
             for (i in 0 until 21) {
                 val length = parseSize(header, i * 24 + 12)
                 if (length > 0) chunks.add(longArrayOf(parseSize(header, i * 24), length))
             }
+            flagOffset = 504
         }
 
         val storedBytes = extraBlocks * BLOCK + chunks.sumOf { it[1] }
