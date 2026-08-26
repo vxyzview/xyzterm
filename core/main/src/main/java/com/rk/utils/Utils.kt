@@ -52,7 +52,14 @@ fun toast(message: String?) {
         if (context != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         } else {
-            Log.w("Utils", "no valid ui context available for making toast: $message")
+            // App backgrounded: no RESUMED activity, but plain text toasts are
+            // still legal from the application context — e.g. backup finished.
+            val app = application as? Context
+            if (app != null) {
+                Toast.makeText(app, message, Toast.LENGTH_SHORT).show()
+            } else {
+                Log.w("Utils", "no valid ui context available for making toast: $message")
+            }
         }
     }
 }

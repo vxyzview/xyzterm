@@ -44,7 +44,10 @@ object UpdateManager {
     private fun isNewer(latest: String, installed: String): Boolean {
         val parse = { v: String -> Regex("""v?(\d+)\.(\d+)\.(\d+)""").matchEntire(v.trim())?.groupValues?.drop(1)?.map { it.toInt() } }
         val a = parse(latest) ?: return false
-        val b = parse(installed) ?: return true
+        // Unparseable installed version (local "-dirty" builds, CI suffixes):
+        // claiming it older nagged daily for an identical APK the installer
+        // would then refuse. Treat as up-to-date instead.
+        val b = parse(installed) ?: return false
         return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
     }
 
@@ -150,14 +153,15 @@ object UpdateManager {
             }
 
             val uri = FileProvider.getUriForFile(application!!, "${application!!.packageName}.fileprovider", file)
-            // Multi-MB download may outlive the prompt activity.
-            if (activity.isFinishing || activity.isDestroyed) return@launch
+            // Multi-MB download may outlive the prompt activity; FLAG_NEW_TASK
+            // lets the installer open from the application context regardless,
+            // instead of silently dropping an install the user accepted.
             val intent =
                 Intent(Intent.ACTION_VIEW).apply {
                     setDataAndType(uri, "application/vnd.android.package-archive")
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-            activity.startActivity(intent)
+            application!!.startActivity(intent)
         }
     }
 
@@ -195,7 +199,10 @@ object UpdateManager {
             val lastVersionCode = Settings.last_version_code
             val currentVersionCode = PackageInfoCompat.getLongVersionCode(packageManager.getPackageInfo(packageName, 0))
 
-            if (lastVersionCode != currentVersionCode) {
+            // -1 sentinel = fresh install: every threshold below would fire
+            // (including Preference.clearData()) against empty state, and
+            // keybinding load would double-run alongside App.onCreate.
+            if (lastVersionCode != -1L && lastVersionCode != currentVersionCode) {
                 // App is updated -> Migrate existing files
                 if (lastVersionCode <= 40L) {
                     Preference.clearData()

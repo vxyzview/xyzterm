@@ -40,21 +40,29 @@ open class App : Application() {
         private var _iconPackManager: IconPackManager? = null
         val iconPackManager: IconPackManager
             get() {
-                if (_iconPackManager == null) {
-                    _iconPackManager = IconPackManager(application!!)
-                }
+                // Synchronized: onCreate fires indexLocalPacks/indexLocalThemes on
+                // IO while the first UI frame can hit this getter on main — two
+                // unsynchronized constructions would race and one indexed
+                // instance would be silently discarded.
+                synchronized(this) {
+                    if (_iconPackManager == null) {
+                        _iconPackManager = IconPackManager(application!!)
+                    }
 
-                return _iconPackManager!!
+                    return _iconPackManager!!
+                }
             }
 
         private var _themeManager: ThemeManager? = null
         val themeManager: ThemeManager
             get() {
-                if (_themeManager == null) {
-                    _themeManager = ThemeManager(application!!)
-                }
+                synchronized(this) {
+                    if (_themeManager == null) {
+                        _themeManager = ThemeManager(application!!)
+                    }
 
-                return _themeManager!!
+                    return _themeManager!!
+                }
             }
     }
 

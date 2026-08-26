@@ -40,8 +40,6 @@ import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.theme.XedTheme
 import java.util.concurrent.atomic.AtomicLong
-import kotlinx.coroutines.delay
-
 // Requests outlive configuration changes by design; this caps orphans left behind
 // when no host ever renders them again.
 private const val REQUEST_TTL_MS = 5 * 60 * 1000L
@@ -64,18 +62,39 @@ object DialogHost {
 
     private val idCounter = AtomicLong()
 
+    /** Ids that reached a composing [HostEntry] at least once (i.e. were shown). */
+    private val renderedIds = mutableSetOf<Long>()
+
     fun nextId(): Long = idCounter.getAndIncrement()
 
     fun push(request: DialogRequest) {
+        // Cap true orphans: cancelable requests no host ever rendered within
+        // the TTL are dropped when the next request arrives. Rendered dialogs
+        // are never expired here — a prompt being read on screen must not
+        // vanish, and its callbacks must always stay invocable.
+        val now = System.currentTimeMillis()
+        val stale =
+            synchronized(renderedIds) {
+                dialogs.removeAll { it.cancelable && it.id !in renderedIds && now - it.createdAt > REQUEST_TTL_MS }
+            }
+        if (stale && dialogs.isEmpty() && loadings.isEmpty()) {
+            isDialogShowing = false
+        }
         dialogs.add(request)
         isDialogShowing = true
     }
 
     fun pushLoading(request: DialogRequest) {
         loadings.add(request)
+        isDialogShowing = true
+    }
+
+    fun markRendered(id: Long) {
+        synchronized(renderedIds) { renderedIds.add(id) }
     }
 
     fun remove(id: Long) {
+        synchronized(renderedIds) { renderedIds.remove(id) }
         val removed = dialogs.removeAll { it.id == id } or loadings.removeAll { it.id == id }
         if (removed && dialogs.isEmpty() && loadings.isEmpty()) {
             isDialogShowing = false
@@ -123,17 +142,10 @@ private fun rememberHostResumed(): Boolean {
 
 @Composable
 private fun HostEntry(request: DialogRequest) {
-    LaunchedEffect(request.id) {
-        // Non-cancelable dialogs are mandatory prompts (e.g. storage
-        // permission): expiring them without invoking onOk/onCancel wedges the
-        // flow that pushed them. Only orphans of cancelable requests expire.
-        if (!request.cancelable) return@LaunchedEffect
-        val remaining = REQUEST_TTL_MS - (System.currentTimeMillis() - request.createdAt)
-        if (remaining > 0) {
-            delay(remaining)
-        }
-        DialogHost.remove(request.id)
-    }
+    // Reaching composition means a resumed host is actually showing this
+    // request: mark it rendered so the orphan sweep in [DialogHost.push] can
+    // never consider it stale, no matter how long the user keeps it open.
+    LaunchedEffect(request.id) { DialogHost.markRendered(request.id) }
 
     Dialog(
         onDismissRequest = { DialogHost.remove(request.id) },

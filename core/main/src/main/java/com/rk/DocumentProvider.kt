@@ -172,7 +172,8 @@ class DocumentProvider : DocumentsProvider() {
     }
 
     override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
-        return documentId.startsWith(parentDocumentId)
+        // Raw startsWith accepted "/home/fo" as a parent of "/home/foo".
+        return documentId == parentDocumentId || documentId.startsWith("$parentDocumentId/")
     }
 
     /**
