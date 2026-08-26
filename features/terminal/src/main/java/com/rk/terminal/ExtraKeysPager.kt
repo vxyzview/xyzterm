@@ -60,8 +60,9 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
     // Parse the extra-keys matrix once per settings change, not on every
     // recomposition (the JSONArray constructor is slow enough to jank the
     // terminal screen when sessions/theme/state churn).
+    val settingsRefresh = rememberSettingsRefresh()
     val extraKeysRowCount =
-        remember(Settings.terminal_extra_keys) {
+        remember(settingsRefresh) {
             runCatching { org.json.JSONArray(Settings.terminal_extra_keys).length() }.getOrElse { 2 }
         }
     // Hidden entirely when disabled or the matrix is empty — an empty row
@@ -120,6 +121,9 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                 view.virtualKeysViewClient = VirtualKeysListener(it)
                             }
                         }
+                        // Theme changes flow through here too — keep key colors
+                        // in sync instead of leaving the factory-era tint.
+                        view.buttonTextColor = onSurfaceColor
                         val current = Settings.terminal_extra_keys
                         if (current != appliedExtraKeys) {
                             appliedExtraKeys = current

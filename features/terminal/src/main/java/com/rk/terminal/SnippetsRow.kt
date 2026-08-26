@@ -30,7 +30,11 @@ import kotlinx.coroutines.delay
  */
 @Composable
 fun SnippetsRow() {
-    val snippets = remember(Settings.terminal_snippets) { SnippetStore.decode(Settings.terminal_snippets) }
+    val settingsRefresh = rememberSettingsRefresh()
+    val snippets =
+        remember(settingsRefresh) {
+            SnippetStore.decode(Settings.terminal_snippets)
+        }
     if (snippets.isEmpty()) return
 
     var sessionActive by remember { mutableStateOf(terminalView.get()?.mTermSession != null) }
