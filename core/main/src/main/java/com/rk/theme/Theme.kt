@@ -43,25 +43,25 @@ fun XedTheme(
     val amoledState = remember(highContrastDarkTheme) { highContrastDarkTheme }
     val dynamicState = remember(dynamicColor) { dynamicColor }
 
-    var themeHolder: ThemeHolder
-    val colorScheme = remember(darkThemeState, amoledState, dynamicState) {
-        if (dynamicState && supportsDynamicTheming()) {
-            val baseColorScheme =
+    val (colorScheme, themeHolder) = remember(darkThemeState, amoledState, dynamicState) {
+        var holder: ThemeHolder
+        val scheme =
+            if (dynamicState && supportsDynamicTheming()) {
+                holder = blueberry
                 when {
                     darkThemeState && amoledState -> dynamicDarkColorScheme(context).amoledScheme()
                     darkThemeState -> dynamicDarkColorScheme(context)
                     else -> dynamicLightColorScheme(context)
                 }
-            themeHolder = blueberry
-            baseColorScheme
-        } else {
-            themeHolder = currentTheme.value
-            if (darkThemeState) {
-                if (amoledState) themeHolder.darkScheme.amoledScheme() else themeHolder.darkScheme
             } else {
-                themeHolder.lightScheme
+                holder = currentTheme.value
+                if (darkThemeState) {
+                    if (amoledState) holder.darkScheme.amoledScheme() else holder.darkScheme
+                } else {
+                    holder.lightScheme
+                }
             }
-        }
+        scheme to holder
     }
 
     CompositionLocalProvider(LocalThemeHolder provides themeHolder) {
