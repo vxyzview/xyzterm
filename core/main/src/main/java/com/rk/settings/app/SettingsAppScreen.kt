@@ -242,7 +242,10 @@ fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) 
                                 // failed import doesn't leave settings half-wiped.
                                 runCatching {
                                     Preference.clearData()
-                                    snapshot.forEach { (key, value) -> Preference.put(key, value) }
+                                    snapshot.forEach { entry ->
+                                        val v = entry.value ?: return@forEach
+                                        Preference.put(entry.key, v)
+                                    }
                                 }
                                 toast(strings.import_failed)
                             }
