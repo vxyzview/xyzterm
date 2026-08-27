@@ -305,8 +305,6 @@ val lime =
             },
     )
 
-val builtInThemes = listOf(blueberry, lime, tokyonight, gruvbox, ayu)
-
 // Canonical 16-color ANSI ramps (plus bg/fg/cursor) reused for the terminal surface.
 // Dark themes feed darkTerminalColors, light themes feed lightTerminalColors.
 private fun Properties.applyBase16(
@@ -663,3 +661,5 @@ val ayu =
                 )
             },
     )
+
+val builtInThemes = listOf(blueberry, lime, tokyonight, gruvbox, ayu)
