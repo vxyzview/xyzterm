@@ -128,7 +128,6 @@ suspend fun ubuntuProcess(
 
                 add("-r")
                 add(root.absolutePath)
-                add("--")
                 addAll(command)
             }
 

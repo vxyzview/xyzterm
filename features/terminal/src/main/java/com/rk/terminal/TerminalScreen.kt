@@ -130,7 +130,6 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val currentTheme = LocalThemeHolder.current
-    var showSearch by rememberSaveable { mutableStateOf(false) }
 
     DisposableEffect(Unit) { onDispose { keyboardController?.hide() } }
 
@@ -185,19 +184,13 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
                                 }
                             },
                             actions = {
-                                IconButton(onClick = { showSearch = !showSearch }) {
-                                    Icon(Icons.Rounded.Search, stringResource(strings.search))
-                                }
+                                // no search action
                             },
                         )
                         }
                     }
                 ) { paddingValues ->
                     Column(modifier = Modifier.padding(paddingValues)) {
-                        if (showSearch) {
-                            TerminalSearchOverlay(onClose = { showSearch = false })
-                        }
-
                         TerminalView(isDarkMode, currentTheme, surfaceColor, onSurfaceColor, terminalActivity)
 
                         // One-tap command snippets (configured under terminal settings).
