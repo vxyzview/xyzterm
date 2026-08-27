@@ -223,6 +223,10 @@ fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) 
                                     coerced[key] = fixedValue
                                 }
 
+                                // Snapshot before wiping so a failed write can roll back
+                                // instead of leaving settings half-cleared.
+                                val snapshot = Preference.getAll()
+
                                 Preference.clearData()
                                 coerced.forEach { (key, value) -> Preference.put(key, value) }
 
@@ -234,6 +238,12 @@ fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) 
                                 toast(strings.import_successful)
                             } catch (e: Exception) {
                                 e.printStackTrace()
+                                // ponytail: roll back to the pre-restore snapshot so a
+                                // failed import doesn't leave settings half-wiped.
+                                runCatching {
+                                    Preference.clearData()
+                                    snapshot.forEach { (key, value) -> Preference.put(key, value) }
+                                }
                                 toast(strings.import_failed)
                             }
                         }

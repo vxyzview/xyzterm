@@ -15,6 +15,10 @@ import java.util.Locale
 class NetWrapper(private val url: URL) : FileObject {
     private fun openConnection(): HttpURLConnection {
         return (url.openConnection() as HttpURLConnection).apply {
+            // ponytail: don't follow redirects — a tampered http response could
+            // bounce the fetch to an attacker host and land hostile bytes in the
+            // sandbox/theme dir. Caller owns the canonical URL.
+            instanceFollowRedirects = false
             connectTimeout = 10_000
             readTimeout = 10_000
             requestMethod = "GET"
@@ -66,11 +70,11 @@ class NetWrapper(private val url: URL) : FileObject {
     }
 
     override suspend fun getInputStream(): InputStream {
-        return withContext(Dispatchers.IO) { url.openStream() }
+        return withContext(Dispatchers.IO) { openConnection().inputStream }
     }
 
     override suspend fun <R> useInputStream(block: suspend (InputStream) -> R): R {
-        return withContext(Dispatchers.IO) { url.openStream().use { block(it) } }
+        return withContext(Dispatchers.IO) { openConnection().inputStream.use { block(it) } }
     }
 
     override suspend fun getOutputStream(append: Boolean): OutputStream {
