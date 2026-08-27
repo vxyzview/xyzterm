@@ -111,8 +111,7 @@ dependencies {
     implementation(project(":core:resources"))
     implementation(libs.androidx.appcompat)
     implementation(project(":features:terminal"))
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.espresso)
+    androidTestImplementation(libs.androidx.uiautomator)
 }
-
-androidTestImplementation(libs.androidx.test.junit)
-androidTestImplementation(libs.androidx.test.espresso)
-androidTestImplementation(libs.androidx.uiautomator)
