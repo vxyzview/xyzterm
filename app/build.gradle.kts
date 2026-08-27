@@ -113,5 +113,4 @@ dependencies {
     implementation(project(":features:terminal"))
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.espresso)
-    androidTestImplementation(libs.androidx.uiautomator)
 }

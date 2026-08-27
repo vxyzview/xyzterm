@@ -175,5 +175,6 @@ jobs:
           arch: ${{ matrix.arch }}
           force-avd-create: false
           emulator-build: 7425822
+          emulator-options: -no-window -noaudio -no-boot-anim -gpu swiftshader
           disable-animations: true
           script: ./gradlew connectedDebugAndroidTest --no-daemon
