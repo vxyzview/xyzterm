@@ -67,15 +67,21 @@ open class App : Application() {
         application = this
         Res.application = this
 
+        // ponytail: must run BEFORE FeatureRegistry.initFeatures (below chain reaches
+        // ToolbarConfiguration, whose object-init reads CommandProvider.SettingsCommand,
+        // a lateinit set only here). Building commands is in-memory (no IO), so doing
+        // it synchronously on the main thread is safe and removes the startup race that
+        // crashed the app (lateinit property SettingsCommand has not been initialized).
+        CommandProvider.buildCommands()
+
         val currentLocale = Locale.forLanguageTag(Settings.current_lang)
         val appLocale = LocaleListCompat.create(currentLocale)
         AppCompatDelegate.setApplicationLocales(appLocale)
 
         GlobalScope.launch(Dispatchers.IO) {
-            // Command/keybind registration only needs to land before the first
-            // settings screen opens; keep it off the critical startup path.
+            // Command registration now runs synchronously in onCreate() before
+            // features init; only keybind loading (file IO) stays off the critical path.
             launch(Dispatchers.IO) {
-                CommandProvider.buildCommands()
                 KeybindingsManager.loadKeybindings()
             }
             launch(Dispatchers.IO) {

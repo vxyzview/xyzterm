@@ -7,7 +7,6 @@ import androidx.documentfile.provider.DocumentFile
 import com.rk.utils.application
 import com.rk.utils.errorDialog
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.File
@@ -21,7 +20,7 @@ import java.nio.charset.Charset
 import java.util.Locale
 
 class UriWrapper : FileObject {
-    private val uri: String
+    private var uri: String
     private val isTree: Boolean
 
     @Transient private var _file: DocumentFile? = null
@@ -29,7 +28,8 @@ class UriWrapper : FileObject {
     var file: DocumentFile
         get() {
             if (_file == null) {
-                _file = Uri.parse(uri).getDocumentFile(isTree)!!
+                _file = Uri.parse(uri).getDocumentFile(isTree)
+                    ?: throw IllegalArgumentException("cannot resolve document uri: $uri")
             }
             return _file!!
         }
@@ -44,7 +44,10 @@ class UriWrapper : FileObject {
     }
 
     @Throws(IllegalArgumentException::class)
-    constructor(uri: Uri, isTree: Boolean) : this(uri.getDocumentFile(isTree)!!)
+    constructor(uri: Uri, isTree: Boolean) : this(
+        uri.getDocumentFile(isTree)
+            ?: throw IllegalArgumentException("cannot resolve document uri: $uri"),
+    )
 
     override suspend fun listFiles(): List<FileObject> =
         withContext(Dispatchers.IO) {
@@ -124,8 +127,10 @@ class UriWrapper : FileObject {
 
     override suspend fun <R> useInputStream(block: suspend (InputStream) -> R): R {
         return withContext(Dispatchers.IO) {
-            application!!.contentResolver?.openInputStream(file.uri)?.use { block(it) }
-                ?: throw IOException("Could not open input stream for: ${file.uri}")
+            val stream =
+                application!!.contentResolver?.openInputStream(file.uri)
+                    ?: throw IOException("Could not open input stream for: ${file.uri}")
+            stream.use { block(it) }
         }
     }
 
@@ -150,7 +155,16 @@ class UriWrapper : FileObject {
     override suspend fun renameTo(string: String): Boolean {
         return try {
             withContext(Dispatchers.IO) {
-                return@withContext file.renameTo(string)
+                val ok = file.renameTo(string)
+                if (ok) {
+                    // ponytail: refresh the cached DocumentFile/uri so getName() and
+                    // subsequent IO don't target the now-stale pre-rename document.
+                    file.parentFile?.findFile(string)?.let { renamed ->
+                        _file = renamed
+                        uri = renamed.uri.toString()
+                    }
+                }
+                ok
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -206,29 +220,11 @@ class UriWrapper : FileObject {
         }
 
     override fun canWrite(): Boolean {
-        if (file.canWrite()) {
-            return true
-        }
-
-        runCatching {
-            runBlocking { getOutputStream(true).close() }
-            return true
-        }
-
-        return false
+        return file.canWrite()
     }
 
     override fun canRead(): Boolean {
-        if (file.canRead()) {
-            return true
-        }
-
-        runCatching {
-            runBlocking { getInputStream().close() }
-            return true
-        }
-
-        return false
+        return file.canRead()
     }
 
     override fun canExecute(): Boolean {

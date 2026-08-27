@@ -15,16 +15,16 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
     override fun uncaughtException(thread: Thread, ex: Throwable) {
         runCatching {
                 if (
-                    ex.message.toString().contains("android.view.View${"$"}BaseSavedState") ||
-                        ex.message.toString().contains("android.widget.HorizontalScrollView${"$"}SavedState")
+                    ex.message.toString().contains("android.view.View${\"$\"}BaseSavedState") ||
+                        ex.message.toString().contains("android.widget.HorizontalScrollView${\"$\"}SavedState")
                 ) {
                     Log.w("CrashHandler", "Ignoring crash")
                     return@runCatching
                 }
 
                 if (
-                    ex.stackTrace.contentToString().contains($$"android.view.View$BaseSavedState") ||
-                        ex.stackTrace.contentToString().contains($$"android.widget.HorizontalScrollView$SavedState")
+                    ex.stackTrace.contentToString().contains("android.view.View${\"$\"}BaseSavedState") ||
+                        ex.stackTrace.contentToString().contains("android.widget.HorizontalScrollView${\"$\"}SavedState")
                 ) {
                     Log.w("CrashHandler", "Ignoring crash")
                     ex.printStackTrace()

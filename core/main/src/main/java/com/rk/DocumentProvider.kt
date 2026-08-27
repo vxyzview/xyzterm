@@ -98,6 +98,11 @@ class DocumentProvider : DocumentsProvider() {
 
     @Throws(FileNotFoundException::class)
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
+        // ponytail: mirror renameDocument's guard — reject separator-bearing names so a
+        // caller (any holder of the provider URI) can't write outside sandboxHomeDir via "../".
+        if (displayName.contains("/") || displayName.contains("\\")) {
+            throw FileNotFoundException("Invalid display name: $displayName")
+        }
         val parent = getFileForDocId(parentDocumentId)
         var newFile = File(parent, displayName)
         var noConflictId = 2
