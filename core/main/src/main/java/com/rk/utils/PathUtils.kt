@@ -8,12 +8,15 @@ import android.provider.DocumentsContract
 object PathUtils {
     fun Uri.toPath(): String {
         val path = internalConvertUriToPath(application!!, this)
-        return path.replace("/document", "/storage").replace(":", "/")
+        // ponytail: only map the AOSP content-uri /document/ segment to /storage/.
+        // The docId ':' separator is already consumed by internalConvertUriToPath;
+        // a global replace(":", "/") silently corrupts real ':' in filenames.
+        return path.replace("/document", "/storage")
     }
 
     private fun convertUriToPath(context: Context, uri: Uri?): String {
         val path = internalConvertUriToPath(context, uri)
-        return path.replace("/document", "/storage").replace(":", "/")
+        return path.replace("/document", "/storage")
     }
 
     private fun internalConvertUriToPath(context: Context, uri: Uri?): String {
