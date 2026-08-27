@@ -24,8 +24,6 @@ dependencyResolutionManagement {
 
 include(":app", ":core:main", ":core:components", ":core:resources")
 
-include(":baselineprofile")
-
 include(":features:terminal")
 
 include(":features:terminal:proot")

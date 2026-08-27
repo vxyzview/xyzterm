@@ -3,7 +3,6 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ktfmt)
-    alias(libs.plugins.android.baselineprofile)
 }
 
 android {
@@ -15,8 +14,6 @@ android {
         minSdk = 26
 
         targetSdk = 37
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // versioning
         versionCode = 1
@@ -105,12 +102,8 @@ dependencies {
     implementation(libs.androidx.profileinstaller)
     coreLibraryDesugaring(libs.desugar)
 
-    baselineProfile(project(":baselineprofile"))
-
     implementation(project(":core:main"))
     implementation(project(":core:resources"))
     implementation(libs.androidx.appcompat)
     implementation(project(":features:terminal"))
-    androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.test.espresso)
 }
