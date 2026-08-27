@@ -56,7 +56,7 @@ class TerminalFeature : Feature {
                 .also { SettingsRegistry.registerCategory(it) }
 
         // Register settings routes
-        routes.add(DynamicRoute(SettingsRoutes.TerminalSettings.route) { _, _ -> SettingsTerminalScreen() })
+        routes.add(DynamicRoute(SettingsRoutes.TerminalSettings.route) { navController, _ -> SettingsTerminalScreen(navController) })
         routes.add(DynamicRoute(SettingsRoutes.TerminalExtraKeys.route) { _, _ -> TerminalExtraKeys() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalSnippets.route) { _, _ -> SnippetsScreen() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalCheck.route) { _, _ -> TerminalCheckScreen() })

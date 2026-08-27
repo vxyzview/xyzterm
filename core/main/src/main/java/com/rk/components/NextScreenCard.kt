@@ -50,7 +50,14 @@ fun NextScreenCard(
         startIconTint = startIconTint,
         onClick = {
             // Unregistered route or torn-down nav controller must never crash.
-            runCatching { navController?.navigate(route.route) }
+            runCatching {
+                navController?.navigate(route.route) {
+                    // Rapid taps must not stack duplicate destinations; single-top
+                    // keeps the back stack clean so a popped screen can't linger as a
+                    // ghost layer over the previous one.
+                    launchSingleTop = true
+                }
+            }
         },
     )
 }

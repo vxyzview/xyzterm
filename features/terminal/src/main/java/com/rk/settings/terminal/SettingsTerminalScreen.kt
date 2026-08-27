@@ -14,12 +14,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavController
 import com.rk.DocumentProvider
 import com.rk.DefaultScope
 import com.rk.activities.settings.SettingsActivity
 import com.rk.activities.settings.SettingsRoutes
-import com.rk.activities.settings.settingsNavController
 import com.rk.components.NextScreenCard
 import com.rk.components.PreferenceList
 import com.rk.components.RoundedValueSlider
@@ -70,7 +69,7 @@ enum class TerminalCursorStyle(val value: String, val stringRes: Int) {
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun SettingsTerminalScreen() {
+fun SettingsTerminalScreen(navController: NavController) {
     PreferenceLayout(label = stringResource(id = strings.terminal), backArrowVisible = true) {
         val context = LocalContext.current
         val activity = LocalActivity.current as? AppCompatActivity
@@ -103,7 +102,7 @@ fun SettingsTerminalScreen() {
             NextScreenCard(
                 label = stringResource(strings.terminal_health),
                 description = stringResource(strings.terminal_health_desc),
-                navController = settingsNavController.get(),
+                navController = navController,
                 route = SettingsRoutes.TerminalCheck,
             )
         }
@@ -123,7 +122,7 @@ fun SettingsTerminalScreen() {
             NextScreenCard(
                 label = stringResource(strings.manage_terminal_font),
                 description = stringResource(strings.manage_terminal_font_desc),
-                navController = settingsNavController.get(),
+                navController = navController,
                 route = SettingsRoutes.TerminalFontScreen,
             )
 
@@ -295,14 +294,14 @@ fun SettingsTerminalScreen() {
             NextScreenCard(
                 label = stringResource(strings.manage_backups),
                 description = stringResource(strings.manage_backups_desc),
-                navController = settingsNavController.get(),
+                navController = navController,
                 route = SettingsRoutes.TerminalBackups,
             )
 
             NextScreenCard(
                 label = stringResource(strings.custom_binds),
                 description = stringResource(strings.custom_binds_desc),
-                navController = settingsNavController.get(),
+                navController = navController,
                 route = SettingsRoutes.TerminalBinds,
             )
 
@@ -351,14 +350,14 @@ fun SettingsTerminalScreen() {
             NextScreenCard(
                 label = stringResource(strings.change_extra_keys),
                 description = stringResource(strings.change_extra_keys_desc),
-                navController = settingsNavController.get(),
+                navController = navController,
                 route = SettingsRoutes.TerminalExtraKeys,
             )
 
             NextScreenCard(
                 label = stringResource(strings.manage_snippets),
                 description = stringResource(strings.manage_snippets_desc),
-                navController = settingsNavController.get(),
+                navController = navController,
                 route = SettingsRoutes.TerminalSnippets,
             )
 
