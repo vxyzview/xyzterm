@@ -195,6 +195,9 @@ fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) 
                     activity.fileManager.requestOpenFile("application/json") { uri ->
                         if (uri == null) return@requestOpenFile
                         scope.launch(Dispatchers.IO) {
+                            // Snapshot current settings before any wipe so a failed
+                            // restore can roll back instead of leaving them half-cleared.
+                            val snapshot = Preference.getAll()
                             try {
                                 val type = object : TypeToken<Map<String, Any>>() {}.type
                                 val content = uri.toFileObject(true).readText()
