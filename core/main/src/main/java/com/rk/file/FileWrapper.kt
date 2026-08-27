@@ -143,18 +143,18 @@ class FileWrapper(var file: File) : FileObject {
 
     override suspend fun renameTo(string: String): Boolean =
         withContext(Dispatchers.IO) {
-            val newFile = childSafe(string)
+            val newFile = file.childSafe(string)
             return@withContext file.renameTo(newFile).also { this@FileWrapper.file = newFile }
         }
 
     override suspend fun hasChild(name: String): Boolean =
         withContext(Dispatchers.IO) {
-            return@withContext File(childSafe(name)).exists()
+            return@withContext file.childSafe(name).exists()
         }
 
     override suspend fun createChild(createFile: Boolean, name: String): FileObject =
         withContext(Dispatchers.IO) {
-            val safe = childSafe(name)
+            val safe = file.childSafe(name)
             return@withContext if (createFile) {
                 FileWrapper(safe).createFileIfNot()
             } else {
@@ -179,8 +179,8 @@ class FileWrapper(var file: File) : FileObject {
     }
 
     override suspend fun getChild(name: String): FileObject? {
-        val file = childSafe(name)
-        return FileWrapper(file).takeIf { file.exists() }
+        val childFile = file.childSafe(name)
+        return FileWrapper(childFile).takeIf { childFile.exists() }
     }
 
     override suspend fun readText(): String {

@@ -322,7 +322,7 @@ class DocumentProvider : DocumentsProvider() {
             // ponytail: the doc id is just an absolute path; contain it to the home
             // root so a privileged caller (or an app-built id from untrusted input)
             // cannot read/write/rename/delete outside sandboxHomeDir.
-            val home = sandboxHomeDir(context!!).canonicalPath
+            val home = sandboxHomeDir().canonicalPath
             if (!f.canonicalPath.startsWith(home)) {
                 throw FileNotFoundException(f.absolutePath + " outside home")
             }

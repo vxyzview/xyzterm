@@ -67,15 +67,6 @@ class UriWrapper : FileObject {
 
     override suspend fun exists(): Boolean = file.exists()
 
-    fun isTermuxUri(): Boolean {
-        return getAbsolutePath().startsWith("content://com.termux")
-    }
-
-    fun convertToTermuxFile(): File {
-        if (isTermuxUri().not()) {
-            throw IllegalStateException("this uri is not a termux uri")
-        }
-
     override suspend fun createNewFile(): Boolean =
         withContext(Dispatchers.IO) {
             if (exists()) return@withContext false
