@@ -12,6 +12,7 @@ import com.rk.extension.model.PackageCache
 import com.rk.file.FileOperations
 import com.rk.file.FileWrapper
 import com.rk.file.child
+import com.rk.file.childSafe
 import com.rk.file.createDirIfNot
 import com.rk.file.localDir
 import com.rk.resources.getFilledString
@@ -152,7 +153,7 @@ class IconPackManager(private val context: Application) : CoroutineScope by Coro
     }
 
     private suspend fun writeIconPackToDisk(iconPackManifest: IconPackManifest, dir: File) {
-        val installDir = iconPackDir.child(iconPackManifest.id)
+        val installDir = iconPackDir.childSafe(iconPackManifest.id)
 
         var oldCreatedAt: Long? = null
         if (installDir.exists()) {

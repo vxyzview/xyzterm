@@ -143,24 +143,22 @@ class FileWrapper(var file: File) : FileObject {
 
     override suspend fun renameTo(string: String): Boolean =
         withContext(Dispatchers.IO) {
-            val newFile = File(file.parentFile, string)
+            val newFile = childSafe(string)
             return@withContext file.renameTo(newFile).also { this@FileWrapper.file = newFile }
         }
 
     override suspend fun hasChild(name: String): Boolean =
         withContext(Dispatchers.IO) {
-            return@withContext File(file, name).exists()
+            return@withContext File(childSafe(name)).exists()
         }
 
     override suspend fun createChild(createFile: Boolean, name: String): FileObject =
         withContext(Dispatchers.IO) {
-            if (name.isBlank()) {
-                throw IllegalArgumentException("Name cannot be blank")
-            }
+            val safe = childSafe(name)
             return@withContext if (createFile) {
-                FileWrapper(File(file, name)).createFileIfNot()
+                FileWrapper(safe).createFileIfNot()
             } else {
-                FileWrapper(File(file, name)).createDirIfNot()
+                FileWrapper(safe).createDirIfNot()
             }
         }
 
@@ -181,7 +179,7 @@ class FileWrapper(var file: File) : FileObject {
     }
 
     override suspend fun getChild(name: String): FileObject? {
-        val file = File(file, name)
+        val file = childSafe(name)
         return FileWrapper(file).takeIf { file.exists() }
     }
 

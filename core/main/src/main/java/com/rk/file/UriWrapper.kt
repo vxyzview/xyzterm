@@ -76,16 +76,6 @@ class UriWrapper : FileObject {
             throw IllegalStateException("this uri is not a termux uri")
         }
 
-        val path =
-            URLDecoder.decode(file.uri.toString(), "UTF-8")
-                .removePrefix("content://com.termux.documents/tree//data/data/com.termux/files/home/document/")
-        if (path.startsWith("/data").not()) {
-            errorDialog(msg = "Converting termux uri into realpath failed: \nURI : ${file.uri}\n\nPATH : $path")
-        }
-        // dialog(title = "PATH", msg = path, onOk = {})
-        return File(path)
-    }
-
     override suspend fun createNewFile(): Boolean =
         withContext(Dispatchers.IO) {
             if (exists()) return@withContext false
@@ -207,15 +197,16 @@ class UriWrapper : FileObject {
 
     override suspend fun delete(): Boolean =
         withContext(Dispatchers.IO) {
-            fun deleteFolder(documentFile: DocumentFile): Boolean {
+            fun deleteFolder(documentFile: DocumentFile, visited: MutableSet<String>): Boolean {
+                if (!visited.add(documentFile.uri.toString())) return true
                 if (!documentFile.isDirectory) {
                     return documentFile.delete()
                 }
-                documentFile.listFiles().forEach { child -> deleteFolder(child) }
+                documentFile.listFiles().forEach { child -> deleteFolder(child, visited) }
                 return documentFile.delete()
             }
 
-            return@withContext deleteFolder(file)
+            return@withContext deleteFolder(file, mutableSetOf())
         }
 
     override suspend fun toUri(): Uri =

@@ -51,12 +51,16 @@ object FileOperations {
         var totalSize = 0L
         var totalItems = 0L
 
+        val visited = mutableSetOf<String>()
         val stack = ArrayDeque<FileObject>()
         stack.add(folder)
 
         while (stack.isNotEmpty()) {
             val current = stack.removeLast()
             runCatching {
+                // ponytail: visited-set on canonical path breaks symlink cycles
+                // (a dir symlink to an ancestor would otherwise loop forever / OOM)
+                if (!visited.add(current.getCanonicalPath())) return@runCatching
                 if (current.isDirectory()) {
                     stack.addAll(current.listFiles())
                     totalItems++
@@ -80,12 +84,14 @@ object FileOperations {
         var totalSize = 0L
         var totalItems = 0L
 
+        val visited = mutableSetOf<String>()
         val stack = ArrayDeque<FileObject>()
         stack.add(folder)
 
         while (stack.isNotEmpty()) {
             val current = stack.removeLast()
             runCatching {
+                if (!visited.add(current.getCanonicalPath())) return@runCatching
                 if (current.isDirectory()) {
                     stack.addAll(current.listFiles())
                     totalItems++
@@ -187,6 +193,18 @@ object FileOperations {
         targetParent: FileObject,
         onProgress: ((String) -> Unit)?,
     ) {
+        // ponytail: visited-set on canonical source path breaks symlink cycles
+        // (a dir symlink back up the tree would otherwise recurse until StackOverflow)
+        copyRecursive(context, sourceFile, targetParent, onProgress, mutableSetOf(sourceFile.getCanonicalPath()))
+    }
+
+    private suspend fun copyRecursive(
+        context: Context,
+        sourceFile: FileObject,
+        targetParent: FileObject,
+        onProgress: ((String) -> Unit)?,
+        visited: MutableSet<String>,
+    ) {
         onProgress?.invoke("Processing: ${sourceFile.getName()}")
 
         if (sourceFile.isDirectory()) {
@@ -196,7 +214,12 @@ object FileOperations {
                     ?: throw IllegalStateException("Failed to create directory: ${sourceFile.getName()}")
 
             // Copy all children
-            sourceFile.listFiles().forEach { child -> copyRecursive(context, child, targetDir, onProgress) }
+            sourceFile.listFiles().forEach { child ->
+                val canonical = child.getCanonicalPath()
+                if (visited.add(canonical)) {
+                    copyRecursive(context, child, targetDir, onProgress, visited)
+                }
+            }
         } else {
             // Copy file content
             val targetFile =

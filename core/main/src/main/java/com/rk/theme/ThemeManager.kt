@@ -19,6 +19,7 @@ import com.rk.extension.model.PackageCache
 import com.rk.file.FileOperations
 import com.rk.file.FileWrapper
 import com.rk.file.child
+import com.rk.file.childSafe
 import com.rk.file.themeDir
 import com.rk.resources.getFilledString
 import com.rk.resources.getString
@@ -223,7 +224,7 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
         }
 
     private suspend fun finishThemeInstall(manifest: ThemeManifest, sourceDir: File?) {
-        val installDir = themeDir().child(manifest.id).also { if (!it.exists()) it.mkdirs() }
+        val installDir = themeDir().childSafe(manifest.id).also { if (!it.exists()) it.mkdirs() }
 
         var oldCreatedAt: Long? = null
         if (installDir.exists()) {
