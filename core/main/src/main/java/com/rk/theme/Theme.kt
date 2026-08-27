@@ -121,6 +121,7 @@ private fun Color.towardBlack(amount: Float): Color {
 // read; cache by (color, isDark) to avoid N× recompute in lists. Single-threaded
 // composition so a plain map is enough; switch to LruCache if reads explode.
 private val harmonizeCache = HashMap<Long, Int>()
+@Composable
 private fun harmonized(color: Long, isDark: Boolean): Int {
     val key = (color shl 1) or (if (isDark) 1L else 0L)
     return harmonizeCache.getOrPut(key) {
