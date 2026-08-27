@@ -13,6 +13,7 @@ import com.rk.theme.blueberry
 import com.rk.utils.application
 import com.xyzterm.BuildConfig
 import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -136,7 +137,7 @@ object Preference {
 
     // Registry mapping preference keys to their CachedPreference delegates so that
     // external Preference.setXxx() calls can propagate updates into the MutableState.
-    private val delegateRegistry = mutableMapOf<String, CachedPreference<*>>()
+    private val delegateRegistry = ConcurrentHashMap<String, CachedPreference<*>>()
 
     internal fun registerDelegate(key: String, delegate: CachedPreference<*>) {
         delegateRegistry[key] = delegate
@@ -148,13 +149,11 @@ object Preference {
     }
 
     // Weak reference caches to allow garbage collection of unused settings
-    private val stringCache = mutableMapOf<String, WeakReference<String?>>()
-    // Primitives are immutable values; weak-caching them is pointless and
-    // triggers identity-sensitive warnings on boxed types.
-    private val boolCache = mutableMapOf<String, Boolean>()
-    private val intCache = mutableMapOf<String, Int>()
-    private val longCache = mutableMapOf<String, Long>()
-    private val floatCache = mutableMapOf<String, Float>()
+    private val stringCache = ConcurrentHashMap<String, WeakReference<String?>>()
+    private val boolCache = ConcurrentHashMap<String, Boolean>()
+    private val intCache = ConcurrentHashMap<String, Int>()
+    private val longCache = ConcurrentHashMap<String, Long>()
+    private val floatCache = ConcurrentHashMap<String, Float>()
 
     fun getAll(): Map<String, Any?> {
         return sharedPreferences.all

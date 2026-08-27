@@ -5,6 +5,7 @@ import android.content.Context
 import com.rk.exec.SandboxEnv
 import com.rk.exec.pendingCommand
 import com.rk.file.child
+import com.rk.file.childSafe
 import com.rk.file.localBinDir
 import com.rk.file.localDir
 import com.rk.file.sandboxHomeDir
@@ -53,7 +54,7 @@ object MkSession {
     private fun prepareEnvironment(context: Context, sessionId: String, isExtraction: Boolean, cwd: String?): Prepared {
         val workingDir = cwd ?: getPwd(context)
 
-        val tmpDir = localDir().child("tmp").child(sessionId)
+        val tmpDir = localDir().child("tmp").childSafe(sessionId)
 
         if (tmpDir.exists()) {
             tmpDir.deleteRecursively()

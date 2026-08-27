@@ -55,8 +55,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -69,16 +67,6 @@ fun runOnUiThread(runnable: Runnable) {
 fun toast(@StringRes resId: Int) {
     toast(resId.getString())
 }
-
-suspend fun FileObject.writeObject(obj: Any) =
-    withContext(Dispatchers.IO) { ObjectOutputStream(getOutputStream(false)).use { oos -> oos.writeObject(obj) } }
-
-suspend fun FileObject.readObject(): Any? =
-    withContext(Dispatchers.IO) {
-        ObjectInputStream(getInputStream()).use { ois ->
-            return@withContext ois.readObject()
-        }
-    }
 
 fun toast(message: String?) {
     if (message.isNullOrBlank()) {
@@ -125,7 +113,11 @@ fun isMainThread(): Boolean {
 }
 
 fun Context.openUrl(url: String) {
-    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+    val uri = runCatching { url.toUri() }.getOrNull() ?: return
+    // ponytail: only http(s) may leave via ACTION_VIEW. A theme/extension-supplied
+    // `repository` (or any untrusted url) could otherwise launch javascript:/file:/etc.
+    if (uri.scheme != "http" && uri.scheme != "https") return
+    val intent = Intent(Intent.ACTION_VIEW, uri)
     startActivity(intent)
 }
 

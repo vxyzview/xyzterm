@@ -17,6 +17,22 @@ fun File.child(fileName: String): File {
     return File(this, fileName)
 }
 
+/**
+ * Like [child], but rejects path-traversal segments (`..`, `/`, `\`, `.`).
+ * Guards callers that build paths from untrusted names (e.g. session ids from
+ * a BROWSABLE deep link). Throws IllegalArgumentException on a bad segment.
+ */
+fun File.childSafe(fileName: String): File {
+    require(
+        fileName.isNotEmpty() &&
+            fileName != "." &&
+            fileName != ".." &&
+            !fileName.contains('/') &&
+            !fileName.contains('\\')
+    ) { "invalid path segment: $fileName" }
+    return File(this, fileName)
+}
+
 fun File.createFileIfNot(): File {
     if (parentFile?.exists()?.not() == true) {
         parentFile!!.mkdirs()
@@ -68,9 +84,17 @@ fun File.unzipTo(destDir: File) {
     if (!destDir.exists()) {
         destDir.mkdirs()
     }
+    // ponytail: zip-slip guard — every .xed (theme/extension/icon pack) is extracted
+    // here, so a `../` or absolute entry name must not escape destDir.
+    val destCanonical = destDir.canonicalPath
     ZipFile(this).use { zip ->
         zip.entries().asSequence().forEach { entry ->
             val target = File(destDir, entry.name)
+            val targetCanonical = target.canonicalPath
+            require(
+                targetCanonical.startsWith(destCanonical) &&
+                    targetCanonical.length > destCanonical.length
+            ) { "zip entry escapes destination: ${entry.name}" }
             if (entry.isDirectory) {
                 target.mkdirs()
             } else {

@@ -39,8 +39,6 @@ import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.io.FileInputStream
-import java.io.ObjectInputStream
 import java.util.Properties
 import kotlinx.serialization.json.JsonElement as KJsonElement
 
@@ -311,47 +309,14 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
     }
 
     @Deprecated("Migration from old theme format for backwards compatibility")
-    @Suppress("DEPRECATION") // migration path uses deprecated legacy theme APIs
+    @Suppress("DEPRECATION") // migration path used deprecated legacy theme APIs
     private suspend fun migrateOldThemes(themeDir: File) {
-        val listFiles = themeDir.listFiles()
-        var migratedCount = 0
-        listFiles?.forEach { file ->
-            if (file.isFile) {
-                runCatching {
-                    if (migratedCount == 0) {
-                        withContext(Dispatchers.Main) {
-                            toast(strings.migrating_themes.getString())
-                        }
-                    }
-                    ObjectInputStream(FileInputStream(file)).use { input ->
-                        val oldConfig = input.readObject()
-                        if (oldConfig is ThemeConfig) {
-                            val manifest =
-                                ThemeManifest(
-                                    id = oldConfig.id ?: file.name,
-                                    name = oldConfig.name ?: file.name,
-                                    minAppVersion = oldConfig.minAppVersion,
-                                    inheritBase = oldConfig.inheritBase ?: true,
-                                    light = oldConfig.light?.let { ThemePaletteNew.fromLegacyPalette(it) },
-                                    dark = oldConfig.dark?.let { ThemePaletteNew.fromLegacyPalette(it) },
-                                )
-
-                            finishThemeInstall(manifest, null)
-                            migratedCount++
-                            file.delete()
-                        }
-                    }
-                }
-                    .onFailure {
-                        file.delete()
-                    }
-            }
-        }
-
-        if (migratedCount > 0) {
-            withContext(Dispatchers.Main) {
-                toast(strings.theme_migrated.getFilledString(migratedCount))
-            }
+        // Legacy themes were stored as Java-serialized objects. Deserializing untrusted
+        // bytes is an RCE vector (a crafted file dropped via the zip-slip in unzipTo, or any
+        // path into themeDir, executes gadget chains on next launch). The old format is no
+        // longer shipped, so just drop the stale files instead of deserializing them.
+        themeDir.listFiles()?.forEach { file ->
+            if (file.isFile) runCatching { file.delete() }
         }
     }
 

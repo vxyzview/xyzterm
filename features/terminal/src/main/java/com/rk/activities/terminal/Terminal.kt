@@ -193,23 +193,28 @@ class Terminal : AppCompatActivity() {
      */
     private fun handleDeepLink(uri: Uri) {
         val binder = sessionBinder?.get() ?: return
-        lifecycleScope.launch(Dispatchers.Main) {
-            when (uri.host) {
-                "run" -> {
-                    val cmd = uri.getQueryParameter("cmd") ?: return@launch
-                    binder.getSession(binder.getService().currentSession.value)?.write("$cmd\n")
+        when (uri.host) {
+            "session" -> {
+                val name = uri.lastPathSegment?.trim().orEmpty()
+                // ponytail: deep-link session name is attacker-controlled; reject traversal
+                // and special segments before they reach MkSession.childSafe / deleteRecursively.
+                if (name.isEmpty() ||
+                    name == "." ||
+                    name == ".." ||
+                    name.contains("/") ||
+                    name.contains("\\")
+                ) {
+                    return
                 }
-
-                "session" -> {
-                    val name = uri.lastPathSegment?.trim().orEmpty()
-                    if (name.isEmpty()) return@launch
+                lifecycleScope.launch(Dispatchers.Main) {
                     if (name !in binder.getService().sessionList) {
                         binder.createSession(name, TerminalBackEnd(), this@Terminal)
                     }
                     this@Terminal.changeSession(name)
-                    uri.getQueryParameter("cmd")?.let { cmd -> binder.getSession(name)?.write("$cmd\n") }
                 }
             }
+            // "run" and "?cmd=" intentionally dropped: a BROWSABLE link writing commands
+            // into a live session is unprompted command execution inside the sandbox.
         }
     }
 

@@ -172,7 +172,13 @@ class DocumentProvider : DocumentsProvider() {
     }
 
     override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
-        return documentId.startsWith(parentDocumentId)
+        return runCatching {
+            val parent = File(parentDocumentId).canonicalPath
+            val child = File(documentId).canonicalPath
+            // ponytail: canonical containment, not naive string prefix (a name like
+            // "homeX" would have matched the old prefix check).
+            child != parent && child.startsWith("$parent${File.separator}")
+        }.getOrDefault(false)
     }
 
     /**
@@ -313,6 +319,13 @@ class DocumentProvider : DocumentsProvider() {
         private fun getFileForDocId(docId: String): File {
             val f = File(docId)
             if (!f.exists()) throw FileNotFoundException(f.absolutePath + " not found")
+            // ponytail: the doc id is just an absolute path; contain it to the home
+            // root so a privileged caller (or an app-built id from untrusted input)
+            // cannot read/write/rename/delete outside sandboxHomeDir.
+            val home = sandboxHomeDir(context!!).canonicalPath
+            if (!f.canonicalPath.startsWith(home)) {
+                throw FileNotFoundException(f.absolutePath + " outside home")
+            }
             return f
         }
 

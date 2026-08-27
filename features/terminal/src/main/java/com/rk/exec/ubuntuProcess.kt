@@ -99,8 +99,10 @@ suspend fun ubuntuProcess(
 
         val randomInt = Random.nextInt()
         val tmpDir = getTempDir().child("$randomInt-sandbox")
-        if (!tmpDir.exists()) {
-            tmpDir.mkdirs()
+        // ponytail: exists()+mkdirs() is a TOCTOU; mkdirs() on its own returns
+        // true if the dir already existed or was created, false only on real failure.
+        if (!tmpDir.mkdirs()) {
+            throw IOException("failed to create proot tmp dir: ${tmpDir.absolutePath}")
         }
 
         val linker = if (File("/system/bin/linker64").exists()) "/system/bin/linker64" else "/system/bin/linker"
@@ -126,6 +128,7 @@ suspend fun ubuntuProcess(
 
                 add("-r")
                 add(root.absolutePath)
+                add("--")
                 addAll(command)
             }
 
