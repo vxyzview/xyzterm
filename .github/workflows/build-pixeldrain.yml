@@ -128,12 +128,12 @@ jobs:
     name: Emulator Smoke Test
     needs: build-release
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
-        api-level: [33]
-        target: [google_apis]
+        api-level: [29]
+        target: [default]
         arch: [x86_64]
 
     steps:
@@ -173,7 +173,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          force-avd-create: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          force-avd-create: false
+          emulator-build: 7425822
           disable-animations: true
           script: ./gradlew connectedDebugAndroidTest --no-daemon
