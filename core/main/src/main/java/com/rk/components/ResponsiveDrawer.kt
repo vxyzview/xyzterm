@@ -64,7 +64,7 @@ fun ResponsiveDrawer(
         ModalNavigationDrawer(
             modifier = Modifier.imePadding().systemBarsPadding(),
             drawerState = drawerState,
-            gesturesEnabled = drawerState.isOpen,
+            gesturesEnabled = true,
             content = mainContent,
             drawerContent = {
                 ModalDrawerSheet(

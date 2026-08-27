@@ -8,7 +8,9 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -349,12 +351,21 @@ class SessionService : Service() {
         notificationManager.createNotificationChannel(channel)
     }
 
+    private val notificationHandler = Handler(Looper.getMainLooper())
+    private val notificationRunnable = Runnable { postNotification() }
+
     private fun updateNotification() {
+        // Coalesce bursts (a script spawning many shells) into a single post.
+        // ponytail: 500ms window, last call wins; bump if session churn needs tighter counts.
+        notificationHandler.removeCallbacks(notificationRunnable)
+        notificationHandler.postDelayed(notificationRunnable, 500)
+    }
+
+    private fun postNotification() {
         runCatching {
             val notification = createNotification()
             notificationManager.notify(1, notification)
-        }
-            .onFailure { it.printStackTrace() }
+        }.onFailure { it.printStackTrace() }
     }
 
     private fun getNotificationContentText(wakelock: Boolean): String {

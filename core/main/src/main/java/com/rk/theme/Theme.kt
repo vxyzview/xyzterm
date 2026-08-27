@@ -85,12 +85,6 @@ fun XedTheme(
 @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
 fun supportsDynamicTheming() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
-@Composable
-fun harmonize(color: Long): Int {
-    val context = LocalContext.current
-    return MaterialColors.harmonizeWithPrimary(context, color.toInt())
-}
-
 /**
  * AMOLED scheme: collapse the background/surface family to true black and derive the
  * container ramp by darkening each of the BASE scheme's own containers toward black.
@@ -123,29 +117,41 @@ private fun Color.towardBlack(amount: Float): Color {
     )
 }
 
+// ponytail: harmonize() is a pure color conversion but reads context + runs per
+// read; cache by (color, isDark) to avoid N× recompute in lists. Single-threaded
+// composition so a plain map is enough; switch to LruCache if reads explode.
+private val harmonizeCache = HashMap<Long, Int>()
+private fun harmonized(color: Long, isDark: Boolean): Int {
+    val key = (color shl 1) or (if (isDark) 1L else 0L)
+    return harmonizeCache.getOrPut(key) {
+        val ctx = LocalContext.current
+        MaterialColors.harmonizeWithPrimary(ctx, color.toInt())
+    }
+}
+
 // Custom warning colors
 val ColorScheme.warningSurface: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFF633F00)) else Color(harmonize(0xFFFFDDB4))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFF633F00, true)) else Color(harmonized(0xFFFFDDB4, false))
 
 val ColorScheme.onWarningSurface: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFFFFDDB4)) else Color(harmonize(0xFF633F00))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFFFDDB4, true)) else Color(harmonized(0xFF633F00, false))
 
 // Status colors
 val ColorScheme.greenStatus: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFFA6DA95)) else Color(harmonize(0xFF44842E))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFA6DA95, true)) else Color(harmonized(0xFF44842E, false))
 
 val ColorScheme.yellowStatus: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFFFFE082)) else Color(harmonize(0xFFE6AC00))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFFFE082, true)) else Color(harmonized(0xFFE6AC00, false))
 
 // Git change colors
 val ColorScheme.gitAdded: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFF81C784)) else Color(harmonize(0xFF2E7D32))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFF81C784, true)) else Color(harmonized(0xFF2E7D32, false))
 
 val ColorScheme.gitModified: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFF64B5F6)) else Color(harmonize(0xFF1565C0))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFF64B5F6, true)) else Color(harmonized(0xFF1565C0, false))
 
 val ColorScheme.gitDeleted: Color
     get() = this.onSurface.copy(alpha = 0.6f)
 
 val ColorScheme.gitConflicted: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonize(0xFFE57373)) else Color(harmonize(0xFFC62828))
+    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFE57373, true)) else Color(harmonized(0xFFC62828, false))
