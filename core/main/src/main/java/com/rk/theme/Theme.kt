@@ -11,6 +11,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -37,34 +38,31 @@ fun XedTheme(
     dynamicColor: Boolean = Settings.theme == DYNAMIC_THEME_ID,
     content: @Composable () -> Unit,
 ) {
+    val context = LocalContext.current
+    val darkThemeState = remember(darkTheme) { darkTheme }
+    val amoledState = remember(highContrastDarkTheme) { highContrastDarkTheme }
+    val dynamicState = remember(dynamicColor) { dynamicColor }
+
     var themeHolder: ThemeHolder
-    val colorScheme =
-        if (dynamicColor && supportsDynamicTheming()) {
-            val context = LocalContext.current
+    val colorScheme = remember(darkThemeState, amoledState, dynamicState) {
+        if (dynamicState && supportsDynamicTheming()) {
             val baseColorScheme =
                 when {
-                    darkTheme && highContrastDarkTheme -> dynamicDarkColorScheme(context).amoledScheme()
-                    darkTheme -> dynamicDarkColorScheme(context)
+                    darkThemeState && amoledState -> dynamicDarkColorScheme(context).amoledScheme()
+                    darkThemeState -> dynamicDarkColorScheme(context)
                     else -> dynamicLightColorScheme(context)
                 }
-
-            // Use default theme as the terminal-color fallback for dynamic mode.
             themeHolder = blueberry
-
             baseColorScheme
         } else {
             themeHolder = currentTheme.value
-
-            if (darkTheme) {
-                if (highContrastDarkTheme) {
-                    themeHolder.darkScheme.amoledScheme()
-                } else {
-                    themeHolder.darkScheme
-                }
+            if (darkThemeState) {
+                if (amoledState) themeHolder.darkScheme.amoledScheme() else themeHolder.darkScheme
             } else {
                 themeHolder.lightScheme
             }
         }
+    }
 
     CompositionLocalProvider(LocalThemeHolder provides themeHolder) {
         MaterialTheme(
