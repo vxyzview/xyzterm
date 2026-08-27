@@ -174,6 +174,9 @@ object FileOperations {
                     val oldPath = sourceFile.getAbsolutePath()
                     val deleteSuccess = sourceFile.delete()
                     if (!deleteSuccess) {
+                        // ponytail: roll back the just-copied destination so a failed
+                        // move doesn't leave a duplicate copy behind.
+                        runCatching { newFile.delete() }
                         throw IllegalStateException("Failed to delete source file after moving")
                     }
                     Events.publish(FileEvent.Moved(newFile, oldPath))

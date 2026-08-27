@@ -62,7 +62,7 @@ class UriWrapper : FileObject {
 
     override fun isFile(): Boolean = file.isFile
 
-    override fun getName(): String = file.name ?: "Invalid"
+    override fun getName(): String = file.name ?: ""
 
     override fun getExtension(): String = MimeTypeMap.getFileExtensionFromUrl(file.uri.toString())
 
@@ -285,7 +285,7 @@ class UriWrapper : FileObject {
     }
 
     override fun hashCode(): Int {
-        return file.uri.hashCode()
+        return uri.hashCode()
     }
 
     override fun toString(): String {

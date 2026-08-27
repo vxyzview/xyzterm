@@ -128,7 +128,10 @@ class DocumentProvider : DocumentsProvider() {
     @Throws(FileNotFoundException::class)
     override fun deleteDocument(documentId: String) {
         val file = getFileForDocId(documentId)
-        if (!file.delete()) {
+        // deleteRecursively() so a non-empty directory actually deletes instead of
+        // silently failing (file.delete() returns false on non-empty dirs).
+        val deleted = if (file.isDirectory) file.deleteRecursively() else file.delete()
+        if (!deleted) {
             throw FileNotFoundException("Failed to delete document with id $documentId")
         }
     }
