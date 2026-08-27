@@ -24,7 +24,7 @@ import kotlin.reflect.jvm.isAccessible
 object Settings {
     var shown_disclaimer by CachedPreference("shown_disclaimer", false)
     var amoled by CachedPreference("amoled", false)
-    var monet by CachedPreference("monet", false)
+    var monet by CachedPreference("monet", true)
     var check_for_update by CachedPreference("check_update", false)
     var is_app_font_asset by CachedPreference("is_app_font_asset", false)
     var is_terminal_font_asset by CachedPreference("is_terminal_font_asset", false)

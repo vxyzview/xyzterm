@@ -13,19 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.input.clearText
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Search
+import androidx.compose.foundation.text.input.TextFieldValue
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -44,12 +37,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rk.commands.Command
@@ -72,27 +61,9 @@ import com.rk.theme.Typography
 fun KeybindingsScreen() {
     var editCommandKeybinds by remember { mutableStateOf<Command?>(null) }
     var refreshTrigger by remember { mutableIntStateOf(0) }
-    val searchQuery = rememberTextFieldState("")
 
     val commands = CommandProvider.commandList
-    val filteredCommands =
-        if (searchQuery.text.isEmpty()) {
-                commands
-            } else {
-                val query = searchQuery.text
-
-                commands.filter { command ->
-                    val labelMatch = command.getLabel().contains(query, ignoreCase = true)
-                    val prefixMatch = command.prefix?.contains(query, ignoreCase = true) == true
-                    val keybindMatch =
-                        KeybindingsManager.getKeyCombinationForCommand(command)
-                            ?.getDisplayName()
-                            ?.contains(query, ignoreCase = true) == true
-
-                    labelMatch || prefixMatch || keybindMatch
-                }
-            }
-            .sortedBy { it.getLabel() }
+    val filteredCommands = commands.sortedBy { it.getLabel() }
 
     PreferenceLayoutLazyColumn(
         label = stringResource(id = strings.keybindings),
@@ -106,41 +77,6 @@ fun KeybindingsScreen() {
     ) {
         item { InfoBlock(text = stringResource(id = strings.keybinds_info)) }
 
-        item {
-            SearchBarDefaults.InputField(
-                modifier =
-                    // No bottom padding: lazy layout already gaps items 8dp.
-                    Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
-                        .fillMaxWidth()
-                        .onPreviewKeyEvent { keyEvent ->
-                            if (KeyUtils.isModifierKey(keyEvent)) {
-                                return@onPreviewKeyEvent false
-                            }
-
-                            val keyCombination = KeyCombination.fromEvent(keyEvent)
-                            if (!keyCombination.ctrl && !keyCombination.alt && !keyCombination.shift) {
-                                return@onPreviewKeyEvent false
-                            }
-
-                            searchQuery.setTextAndPlaceCursorAtEnd(keyCombination.getDisplayName())
-                            return@onPreviewKeyEvent true
-                        },
-                state = searchQuery,
-                leadingIcon = { Icon(Icons.Rounded.Search, null) },
-                trailingIcon = {
-                    IconButton({ searchQuery.clearText() }) {
-                        Icon(imageVector = Icons.Rounded.Close, contentDescription = stringResource(strings.close))
-                    }
-                },
-                onSearch = {},
-                expanded = false,
-                onExpandedChange = {},
-                placeholder = {
-                    Text(stringResource(strings.search_keybinds), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                },
-            )
-        }
-
         items(filteredCommands, key = { it.id }) { command ->
             val keyCombination by
                 remember(refreshTrigger) {
@@ -150,7 +86,6 @@ fun KeybindingsScreen() {
                 KeybindItem(
                     command = command,
                     keyCombination = keyCombination,
-                    searchQuery = searchQuery.text.toString(),
                 ) {
                     editCommandKeybinds = it
                 }
@@ -181,27 +116,8 @@ fun KeybindingsScreen() {
 fun KeybindItem(
     command: Command,
     keyCombination: KeyCombination?,
-    searchQuery: String,
     promptKeybinds: (Command) -> Unit,
 ) {
-    val startIndex = command.getLabel().indexOf(searchQuery, ignoreCase = true)
-    val endIndex = startIndex + searchQuery.length
-    val highlightColor = MaterialTheme.colorScheme.primary
-    val highlightedString =
-        remember(searchQuery) {
-            buildAnnotatedString {
-                append(command.getLabel())
-
-                if (startIndex != -1) {
-                    addStyle(
-                        style = SpanStyle(color = highlightColor, fontWeight = FontWeight.Bold),
-                        start = startIndex,
-                        end = endIndex,
-                    )
-                }
-            }
-        }
-
     PreferenceTemplate(
         modifier = Modifier.clickable(onClick = { promptKeybinds(command) }),
         verticalPadding = 8.dp,
@@ -218,7 +134,7 @@ fun KeybindItem(
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         command.prefix?.let { Text(text = "$it: ", color = MaterialTheme.colorScheme.primary) }
                         Text(
-                            text = highlightedString,
+                            text = command.getLabel(),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f),
