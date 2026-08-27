@@ -173,8 +173,8 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
-          force-avd-create: false
-          emulator-build: 7425822
-          emulator-options: -no-window -noaudio -no-boot-anim -gpu swiftshader
+          force-avd-creation: true
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
           disable-animations: true
           script: ./gradlew connectedDebugAndroidTest --no-daemon
