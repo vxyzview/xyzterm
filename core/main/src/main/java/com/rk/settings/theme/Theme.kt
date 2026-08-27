@@ -46,6 +46,7 @@ import com.rk.icons.pack.currentIconPack
 import com.rk.resources.drawables
 import com.rk.resources.strings
 import com.rk.settings.Settings
+import com.rk.theme.DYNAMIC_THEME_ID
 import com.rk.theme.blueberry
 import com.rk.theme.currentTheme
 import kotlinx.coroutines.launch
@@ -53,7 +54,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
     val showDayNightBottomSheet = remember { mutableStateOf(false) }
-    val monetState = remember { mutableStateOf(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && Settings.monet) }
     val amoledState = remember { mutableStateOf(Settings.amoled) }
 
     PreferenceLayout(label = stringResource(strings.themes)) {
@@ -75,24 +75,32 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                     Settings.amoled = it
                 },
             )
-
-            SettingsItem(
-                label = stringResource(id = strings.monet),
-                description = stringResource(id = strings.monet_desc),
-                default = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && Settings.monet,
-                isEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
-                state = monetState,
-                sideEffect = {
-                    Settings.monet = it
-                },
-            )
         }
 
         PreferenceGroup(heading = stringResource(strings.themes)) {
+            // Dynamic (Material You) is always available and is the default; no on/off toggle.
+            SettingsItem(
+                label = stringResource(id = strings.dynamic_colors),
+                description = stringResource(id = strings.dynamic_colors_desc),
+                showSwitch = false,
+                default = false,
+                startWidget = {
+                    RadioButton(
+                        modifier = Modifier.padding(start = 16.dp),
+                        selected = Settings.theme == DYNAMIC_THEME_ID,
+                        onClick = null,
+                    )
+                },
+                sideEffect = {
+                    val oldTheme = currentTheme.value
+                    Settings.theme = DYNAMIC_THEME_ID
+                    DefaultScope.launch { Events.publish(AppEvent.ThemeChanged(blueberry, oldTheme)) }
+                },
+            )
+
             themeManager.loadedThemes.forEach { theme ->
                 val installed = themeManager.isInstalled(theme.id)
                 SettingsItem(
-                    isEnabled = !Settings.monet,
                     label = theme.name,
                     description = null,
                     showSwitch = false,
@@ -100,7 +108,6 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                     startWidget = {
                         RadioButton(
                             modifier = Modifier.padding(start = 16.dp),
-                            enabled = !Settings.monet,
                             selected = currentTheme.value.id == theme.id,
                             onClick = null,
                         )
@@ -114,7 +121,6 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                         if (installed) {
                             {
                                 IconButton(
-                                    enabled = !Settings.monet,
                                     onClick = {
                                         if (currentTheme.value.id == theme.id) {
                                             val oldTheme = currentTheme.value
@@ -139,7 +145,6 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                         },
                 )
             }
-
         }
 
         PreferenceGroup(heading = stringResource(strings.icon_packs)) {
@@ -214,7 +219,6 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                     },
                 )
             }
-
         }
 
         if (showDayNightBottomSheet.value) {
@@ -282,4 +286,5 @@ fun DayNightDialog(showBottomSheet: MutableState<Boolean>, context: Context) {
             }
         }
     }
+}
 }

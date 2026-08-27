@@ -8,19 +8,6 @@ fun String.parseColor(): Color? {
     return runCatching { Color(android.graphics.Color.parseColor(this)) }.getOrNull()
 }
 
-fun String.parseUnknownColor(): Pair<Color, ColorFormat>? {
-    parseHsl()?.let {
-        return it to ColorFormat.HSL
-    }
-    parseRgb()?.let {
-        return it to ColorFormat.RGB
-    }
-    parseHex()?.let {
-        return it to ColorFormat.HEX
-    }
-    return null
-}
-
 fun Color.toHex(): String {
     val a = (alpha * 255).roundToInt()
     val r = (red * 255).roundToInt()

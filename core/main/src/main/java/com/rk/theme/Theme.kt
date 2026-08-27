@@ -22,8 +22,11 @@ import com.rk.theme.rememberAppTypography
 import com.rk.utils.isDarkTheme
 
 val currentTheme = derivedStateOf {
-     themeManager.loadedThemes.find { it.id == Settings.theme } ?: blueberry
+    themeManager.loadedThemes.find { it.id == Settings.theme } ?: blueberry
 }
+
+/** Sentinel theme id for the device's wallpaper-derived dynamic (Material You) colors. Always on. */
+const val DYNAMIC_THEME_ID = "dynamic"
 
 val LocalThemeHolder = staticCompositionLocalOf<ThemeHolder> { error("No ThemeHolder state provided") }
 
@@ -31,7 +34,7 @@ val LocalThemeHolder = staticCompositionLocalOf<ThemeHolder> { error("No ThemeHo
 fun XedTheme(
     darkTheme: Boolean = isDarkTheme(LocalContext.current),
     highContrastDarkTheme: Boolean = Settings.amoled,
-    dynamicColor: Boolean = Settings.monet,
+    dynamicColor: Boolean = Settings.theme == DYNAMIC_THEME_ID,
     content: @Composable () -> Unit,
 ) {
     var themeHolder: ThemeHolder
@@ -45,7 +48,7 @@ fun XedTheme(
                     else -> dynamicLightColorScheme(context)
                 }
 
-            // Use default theme
+            // Use default theme as the terminal-color fallback for dynamic mode.
             themeHolder = blueberry
 
             baseColorScheme

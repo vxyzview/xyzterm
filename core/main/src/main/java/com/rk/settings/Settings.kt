@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import com.rk.commands.ToolbarConfiguration
 import com.rk.feature.FeatureRegistry
-import com.rk.theme.blueberry
 import com.rk.utils.application
 import com.xyzterm.BuildConfig
 import java.lang.ref.WeakReference
@@ -24,7 +23,6 @@ import kotlin.reflect.jvm.isAccessible
 object Settings {
     var shown_disclaimer by CachedPreference("shown_disclaimer", false)
     var amoled by CachedPreference("amoled", false)
-    var monet by CachedPreference("monet", true)
     var check_for_update by CachedPreference("check_update", false)
     var is_app_font_asset by CachedPreference("is_app_font_asset", false)
     var is_terminal_font_asset by CachedPreference("is_terminal_font_asset", false)
@@ -95,7 +93,7 @@ object Settings {
     var terminal_scrollback_buffer by CachedPreference("terminal_scrollback_buffer", 5000)
 
     // String settings
-    var theme by CachedPreference("theme", blueberry.id)
+    var theme by CachedPreference("theme", "dynamic")
     var icon_pack: String by CachedPreference("icon_pack", "")
     var app_font_path by CachedPreference("app_font_path", "")
     var terminal_font_path by CachedPreference("terminal_font_path", "")

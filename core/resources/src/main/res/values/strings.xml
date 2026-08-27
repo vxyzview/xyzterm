@@ -59,8 +59,8 @@
     <string name="next">Next</string>
 <string name="terminal_output">Terminal output</string>
 <string name="text_size">Text size</string>
-<string name="monet">Dynamic colors</string>
-    <string name="monet_desc">Use device theme in app</string>
+<string name="dynamic_colors">Dynamic colors</string>
+    <string name="dynamic_colors_desc">Use your wallpaper\'s colors (Material You)</string>
     <string name="app_desc">General application settings</string>
 <string name="terminal_desc">General terminal settings</string>
     <string name="unknown_error">Unknown error</string>
@@ -281,8 +281,6 @@
     <string name="scrollback_buffer">Scrollback buffer size</string>
     <string name="scrollback_buffer_desc">Number of lines the terminal keeps in memory as history</string>
     <string name="file_type">File type</string>
-<string name="invalid_color">Invalid color</string>
-    <string name="color_picker">Pick a color</string>
 <string name="confirm_exit_dialog">Confirm exit dialog</string>
     <string name="confirm_exit_dialog_desc">Show a confirmation dialog before closing the app</string>
 <string name="invalid_terminal_extra_keys">Invalid format for terminal extra keys. Default keys will be loaded.</string>
