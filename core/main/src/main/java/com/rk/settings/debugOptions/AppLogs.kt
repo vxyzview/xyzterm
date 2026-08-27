@@ -95,7 +95,7 @@ private fun buildLogs(logLevel: LogLevel): String {
     return buildString {
         append("[REPORT] App version: ").append(versionName).appendLine()
         append("[REPORT] Version code: ").append(versionCode).appendLine()
-        append("[REPORT] Commit hash: ").append(BuildConfig.GIT_COMMIT_HASH.substring(0, 8)).appendLine()
+        append("[REPORT] Commit hash: ").append(BuildConfig.GIT_COMMIT_HASH.take(8)).appendLine()
 
         appendLine()
 

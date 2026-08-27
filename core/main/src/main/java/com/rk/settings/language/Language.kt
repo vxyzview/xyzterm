@@ -141,11 +141,13 @@ fun LanguageScreen(modifier: Modifier = Modifier) {
 // Extract function outside composable to avoid recreation
 private suspend fun readSupportedLocales(context: Context): List<Locale> =
     withContext(Dispatchers.IO) {
-        return@withContext context.assets.open("supported_locales.json").use { stream ->
-            val json = stream.bufferedReader().use { it.readText() }
-            val localeStrings: List<String> = Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
-            localeStrings.map { Locale.forLanguageTag(it) }
-        }
+        runCatching {
+            context.assets.open("supported_locales.json").use { stream ->
+                val json = stream.bufferedReader().use { it.readText() }
+                val localeStrings: List<String> = Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
+                localeStrings.map { Locale.forLanguageTag(it) }
+            }
+        }.getOrElse { emptyList() }
     }
 
 fun setAppLanguage(locale: Locale, oldLocale: Locale) {

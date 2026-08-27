@@ -589,7 +589,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.weight(1f),
             ) {
-                items(sessions) { sessionId ->
+                items(sessions, key = { it }) { sessionId ->
                     val isSelected = sessionId == service.currentSession.value
 
                     Surface(
@@ -789,7 +789,7 @@ suspend fun Terminal.changeSession(sessionId: String) {
             requestFocus()
         }
     }
-    virtualKeysView.get()?.apply { virtualKeysViewClient = VirtualKeysListener(terminalView.mTermSession) }
+    virtualKeysView.get()?.apply { terminalView.mTermSession?.let { virtualKeysViewClient = VirtualKeysListener(it) } }
 
     binder.getService().currentSession.value = sessionId
     Preference.setString(ACTIVE_SESSION_KEY, sessionId)
@@ -820,9 +820,9 @@ private fun TerminalView.applyTerminalColors(onSurfaceColor: Int, surfaceColor: 
     mEmulator?.mColors?.reset()
     TerminalColors.COLOR_SCHEME.updateWith(terminalColors)
 
-    // Honor the theme's own cursor color when provided, falling back to onSurface
-    // for the default schemes that don't define one.
-    val cursorColor = terminalColors.getProperty("cursor")?.let { android.graphics.Color.parseColor(it) } ?: onSurfaceColor
+    val cursorColor =
+        terminalColors.getProperty("cursor")?.let { runCatching { android.graphics.Color.parseColor(it) }.getOrNull() }
+            ?: onSurfaceColor
 
     mEmulator?.mColors?.mCurrentColors?.apply {
         set(TextStyle.COLOR_INDEX_FOREGROUND, onSurfaceColor)
