@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -35,8 +36,8 @@ fun rememberAppTypography(context: Context): Typography {
         } else {
             FontCache.getFont(context, DEFAULT_APP_FONT_PATH, true)
         }
-    val family = font?.let { FontFamily(it) } ?: LegacyOutfitFontFamily
-    return generateTypography(family)
+    val family = remember(font) { font?.let { FontFamily(it) } ?: LegacyOutfitFontFamily }
+    return remember(family) { generateTypography(family) }
 }
 
 /*
