@@ -12,19 +12,24 @@ import java.io.StringWriter
 import kotlin.system.exitProcess
 
 object CrashHandler : Thread.UncaughtExceptionHandler {
+    // ponytail: Android's SavedState classes contain a literal '$' (e.g. View$BaseSavedState).
+    // Build those names via a char literal so no string-template escaping is needed.
+    private val VIEW_SAVED_STATE = "android.view.View" + '$' + "BaseSavedState"
+    private val SCROLL_SAVED_STATE = "android.widget.HorizontalScrollView" + '$' + "SavedState"
+
     override fun uncaughtException(thread: Thread, ex: Throwable) {
         runCatching {
                 if (
-                    ex.message.toString().contains("android.view.View${\"$\"}BaseSavedState") ||
-                        ex.message.toString().contains("android.widget.HorizontalScrollView${\"$\"}SavedState")
+                    ex.message.toString().contains(VIEW_SAVED_STATE) ||
+                        ex.message.toString().contains(SCROLL_SAVED_STATE)
                 ) {
                     Log.w("CrashHandler", "Ignoring crash")
                     return@runCatching
                 }
 
                 if (
-                    ex.stackTrace.contentToString().contains("android.view.View${\"$\"}BaseSavedState") ||
-                        ex.stackTrace.contentToString().contains("android.widget.HorizontalScrollView${\"$\"}SavedState")
+                    ex.stackTrace.contentToString().contains(VIEW_SAVED_STATE) ||
+                        ex.stackTrace.contentToString().contains(SCROLL_SAVED_STATE)
                 ) {
                     Log.w("CrashHandler", "Ignoring crash")
                     ex.printStackTrace()
