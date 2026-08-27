@@ -1,13 +1,16 @@
-name: Android CI
+name: Build & Upload to PixelDrain
 
-# VERSION: 2 - auto-generates signing key; no KEYSTORE/PROP secrets needed.
-# If a run log shows "KEYSTORE secret is not a valid keystore" or "Verify signing
-# key", it is using a STALE cached workflow - re-run on this commit.
+# Builds a signed release APK on every push to dev/main and uploads it to
+# PixelDrain (no GitHub artifact / release). Doc-only pushes are skipped.
+# Separate from android.yml (which builds tagged releases).
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+      - dev
+    paths-ignore:
+      - "**/*.md"
   workflow_dispatch:
     inputs:
       use_cache:
@@ -94,29 +97,29 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "Got version: $VERSION"
 
-      - name: Rename APK with version
-        run: mv app/xyzterm-release.apk "app/xyzterm-${{ env.VERSION }}.apk"
+      # Per-commit upload target: <version>-<commit>.apk so each build is distinct.
+      - name: Rename APK with version + commit
+        run: mv app/xyzterm-release.apk "app/xyzterm-${{ env.VERSION }}-${{ env.COMMIT_HASH }}.apk"
 
-      - name: Create GitHub Release
-        id: release
+      - name: Upload APK to PixelDrain
         if: ${{ success() }}
+        timeout-minutes: 15
         env:
-          GH_TOKEN: ${{ github.token }}
+          PIXELDRAIN_API_KEY: ${{ secrets.PIXELDRAIN_API_KEY }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          VERSION: ${{ env.VERSION }}
+          COMMIT_HASH: ${{ env.COMMIT_HASH }}
         run: |
-          TAG="v${{ env.VERSION }}"
-          # Published releases are immutable: each version is tagged and
-          # uploaded exactly once, from the exact commit that built it.
-          # Reproducible-build verification (F-Droid Binaries) depends on
-          # the asset never changing after publication.
-          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            echo "Release $TAG already published - skipping (immutable)."
-            exit 0
+          RESP=$(curl -s -T "app/xyzterm-$VERSION-$COMMIT_HASH.apk" \
+            -u ":$PIXELDRAIN_API_KEY" \
+            "https://pixeldrain.com/api/file/")
+          echo "PixelDrain response: $RESP"
+          ID=$(echo "$RESP" | jq -r '.id // empty')
+          if [ -n "$ID" ]; then
+            echo "APK uploaded: https://pixeldrain.com/u/$ID"
+            echo "Version: $VERSION"
+            echo "Commit: $COMMIT_MSG"
+          else
+            echo "Upload failed: $RESP" >&2
+            exit 1
           fi
-          git tag -f "$TAG" "${{ env.COMMIT_HASH }}"
-          git push origin "refs/tags/$TAG"
-          gh release create "$TAG" \
-            "app/xyzterm-${{ env.VERSION }}.apk" \
-            --title "xyzterm ${{ env.VERSION }}" \
-            --notes "Automated build of commit \`${{ env.COMMIT_HASH }}\`.**APK:** \`xyzterm-${{ env.VERSION }}.apk\`F-Droid: built from source via [metadata](fdroid/metadata/com.xyzterm.app.yml)." \
-            --repo "${{ github.repository }}"
-
