@@ -35,6 +35,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -161,6 +162,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, drawerState: DrawerState) {
     // Reads that change often (IME visibility every frame of the keyboard
