@@ -40,7 +40,13 @@ fi
 # override it. Plain (non-bold) 32/34 map straight to the theme palette's
 # green/blue slots, so the prompt always matches the selected color scheme.
 # User@host is hardcoded per brand ("roo@xyz"); see TerminalScreen wiring.
+# A stale ~/.bashrc (pre-branding, or stock Ubuntu) may re-inject root@localhost
+# via PROMPT_COMMAND; override it so the brand survives, and guard PS1 itself.
 export PS1="\[\e[32m\]roo@xyz\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \$ "
+case "$PROMPT_COMMAND" in
+  *roo@xyz*) ;;
+  *) export PROMPT_COMMAND="${PROMPT_COMMAND%;}; PS1='\[\e[32m\]roo@xyz\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \$ '" ;;
+esac
 
 
 # One-time base setup now runs inside setup.sh, which writes the marker files,

@@ -368,12 +368,10 @@ private suspend fun TerminalView.attachOrCreateSession(
         session.updateTerminalSessionClient(client)
         attachSession(session)
         setTerminalViewClient(client)
-        // Wire the on-screen extra-keys client to the now-attached session so
-        // TAB/arrow keys work on the initial (cold-start) session too — not
-        // only after a manual session switch. changeSession does this; the
-        // first attach path didn't, leaving virtualKeysViewClient null and the
-        // on-screen keys dead until a switch.
-        virtualKeysView.get()?.apply { terminalView.get()?.mTermSession?.let { virtualKeysViewClient = VirtualKeysListener(it) } }
+        // On-screen extra-keys (TAB/arrows) follow the attached session — same
+        // as changeSession. Posted to dodge the extra-keys-factory race.
+        wireExtraKeysClient()
+        reapplyTerminalColors(this)
     }
 }
 
@@ -788,10 +786,35 @@ suspend fun Terminal.changeSession(sessionId: String) {
             requestFocus()
         }
     }
-    virtualKeysView.get()?.apply { terminalView.mTermSession?.let { virtualKeysViewClient = VirtualKeysListener(it) } }
+    wireExtraKeysClient()
+    reapplyTerminalColors(terminalView)
 
     binder.getService().currentSession.value = sessionId
     Preference.setString(ACTIVE_SESSION_KEY, sessionId)
+}
+
+// Re-apply the theme palette after attaching a session. attachSession builds a
+// fresh emulator whose colors reset to Termux defaults, and the composable only
+// calls applyTerminalColors on recomposition/layout — so a switched or added
+// ("other") session would otherwise render with the default palette, making the
+// roo@xyz prompt (ANSI 32/34) mismatch the themed app until a relayout. The
+// last-applied signature lives on the view tag, so this is cheap + idempotent.
+private fun reapplyTerminalColors(view: TerminalView) {
+    val sig = view.tag as? TerminalColorSignature ?: return
+    if (sig.colors == null || sig.colors.isEmpty) return
+    view.applyTerminalColors(sig.onSurface, sig.surface, sig.colors)
+}
+
+// Point the on-screen extra-keys row at the live session so TAB/arrow keys
+// emit into the right shell. Posted: at attach time virtualKeysView may still
+// be null (its own AndroidView factory runs a frame later), so a direct
+// assignment would silently no-op and leave the keys dead until a manual
+// switch. A post() retries on the next frame, after both views exist.
+private fun wireExtraKeysClient() {
+    terminalView.get()?.post {
+        val session = terminalView.get()?.mTermSession ?: return@post
+        virtualKeysView.get()?.virtualKeysViewClient = VirtualKeysListener(session)
+    }
 }
 
 // Signature of colors last applied to a given TerminalView, stored on the view
