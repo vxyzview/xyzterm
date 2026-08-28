@@ -42,7 +42,7 @@ object ShellUtils {
         outputThread.join(joinMs)
         errorThread.join(joinMs)
 
-        Result(
+        return Result(
             exitCode = if (timedOut) -1 else process.exitValue(),
             output = output.toString().trim(),
             error = error.toString().trim(),
