@@ -18,7 +18,6 @@ import com.rk.utils.AppDialogHost
 import com.rk.utils.toast
 import java.lang.ref.WeakReference
 
-var settingsNavController = WeakReference<NavController?>(null)
 var snackbarHostStateRef: WeakReference<SnackbarHostState?> = WeakReference(null)
 
 class SettingsActivity : AppCompatActivity() {
@@ -44,7 +43,6 @@ class SettingsActivity : AppCompatActivity() {
                 Surface {
                     ProvideIsExpandedScreen {
                     val navController = rememberNavController()
-                    settingsNavController = WeakReference(navController)
                     SettingsNavHost(activity = this@SettingsActivity, navController = navController)
 
                     val snackbarHostState = remember { SnackbarHostState() }

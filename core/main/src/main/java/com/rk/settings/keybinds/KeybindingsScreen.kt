@@ -63,7 +63,9 @@ fun KeybindingsScreen() {
     var refreshTrigger by remember { mutableIntStateOf(0) }
 
     val commands = CommandProvider.commandList
-    val filteredCommands = commands.sortedBy { it.getLabel() }
+    // ponytail: command list is static — sorting every recomposition is pure waste
+    // (this screen re-recomposes on key/theme changes). Sort once.
+    val filteredCommands = remember(commands) { commands.sortedBy { it.getLabel() } }
 
     PreferenceLayoutLazyColumn(
         label = stringResource(id = strings.keybindings),

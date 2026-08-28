@@ -24,14 +24,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rk.activities.settings.SettingsRoutes
-import com.rk.activities.settings.settingsNavController
 import com.rk.components.compose.preferences.base.PreferenceTemplate
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NextScreenCard(
     modifier: Modifier = Modifier,
-    navController: NavController? = settingsNavController.get(),
+    navController: NavController,
     label: String,
     description: String? = null,
     route: SettingsRoutes,
@@ -49,9 +48,9 @@ fun NextScreenCard(
         iconRes = iconRes,
         startIconTint = startIconTint,
         onClick = {
-            // Unregistered route or torn-down nav controller must never crash.
+            // Unregistered route must never crash.
             runCatching {
-                navController?.navigate(route.route) {
+                navController.navigate(route.route) {
                     // Rapid taps must not stack duplicate destinations; single-top
                     // keeps the back stack clean so a popped screen can't linger as a
                     // ghost layer over the previous one.
