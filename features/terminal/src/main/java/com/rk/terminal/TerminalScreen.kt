@@ -143,52 +143,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
             fullscreen = Settings.fullscreen,
             mainContent = {
                 Scaffold(
-                    topBar = {
-                        // Smart toolbar: hide the header while the keyboard is open so
-                        // the terminal gets the rows back (toggle in app settings).
-                        if (!(Settings.smart_toolbar && WindowInsets.isImeVisible)) {
-                            TopAppBar(
-                            title = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                ) {
-                                    // Session indicator: solid while live, flashes
-                                    // amber for 2s when the shell rings the bell
-                                    // (e.g. a background job finished).
-                                    LaunchedEffect(bellPulse) {
-                                        if (bellPulse) {
-                                            delay(2000)
-                                            bellPulse = false
-                                        }
-                                    }
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .size(8.dp)
-                                                .background(
-                                                    if (bellPulse) {
-                                                        MaterialTheme.colorScheme.yellowStatus
-                                                    } else {
-                                                        MaterialTheme.colorScheme.primary
-                                                    },
-                                                    CircleShape,
-                                                ),
-                                    )
-                                    SessionTitle(terminalActivity)
-                                }
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                    Icon(Icons.Default.Menu, stringResource(strings.drawer))
-                                }
-                            },
-                            actions = {
-                                // no search action
-                            },
-                        )
-                        }
-                    }
+                    topBar = { TerminalTopBar(terminalActivity, scope, drawerState) }
                 ) { paddingValues ->
                     Column(modifier = Modifier.padding(paddingValues)) {
                         TerminalView(isDarkMode, currentTheme, surfaceColor, onSurfaceColor, terminalActivity)
@@ -204,6 +159,55 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
             TerminalDrawer(terminalActivity)
         }
     }
+}
+
+@Composable
+private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, drawerState: DrawerState) {
+    // Reads that change often (IME visibility every frame of the keyboard
+    // animation; bellPulse on every background-job ring) live HERE, not in
+    // TerminalScreenInternal, so a toggle only recomposes the header — not the
+    // whole screen (which would re-run the terminal AndroidView update + drawer).
+    if (Settings.smart_toolbar && WindowInsets.isImeVisible) return
+    TopAppBar(
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                // Session indicator: solid while live, flashes
+                // amber for 2s when the shell rings the bell
+                // (e.g. a background job finished).
+                LaunchedEffect(bellPulse) {
+                    if (bellPulse) {
+                        delay(2000)
+                        bellPulse = false
+                    }
+                }
+                Box(
+                    modifier =
+                        Modifier
+                            .size(8.dp)
+                            .background(
+                                if (bellPulse) {
+                                    MaterialTheme.colorScheme.yellowStatus
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                                CircleShape,
+                            ),
+                )
+                SessionTitle(terminalActivity)
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                Icon(Icons.Default.Menu, stringResource(strings.drawer))
+            }
+        },
+        actions = {
+            // no search action
+        },
+    )
 }
 
 @Composable
