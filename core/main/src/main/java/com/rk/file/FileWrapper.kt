@@ -176,22 +176,20 @@ class FileWrapper(var file: File) : FileObject {
         return file.canExecute()
     }
 
-    override suspend fun lastModified(): Long? {
-        return file.lastModified().takeIf { it != 0L }
-    }
+    override suspend fun lastModified(): Long? =
+        withContext(Dispatchers.IO) { file.lastModified().takeIf { it != 0L } }
 
-    override suspend fun getChild(name: String): FileObject? {
-        val childFile = file.childSafe(name)
-        return FileWrapper(childFile).takeIf { childFile.exists() }
-    }
+    override suspend fun getChild(name: String): FileObject? =
+        withContext(Dispatchers.IO) {
+            val childFile = file.childSafe(name)
+            FileWrapper(childFile).takeIf { childFile.exists() }
+        }
 
-    override suspend fun readText(): String {
-        return file.readText()
-    }
+    override suspend fun readText(): String =
+        withContext(Dispatchers.IO) { file.readText() }
 
-    override suspend fun readText(charset: Charset): String {
-        return file.readText(charset = charset)
-    }
+    override suspend fun readText(charset: Charset): String =
+        withContext(Dispatchers.IO) { file.readText(charset = charset) }
 
     override fun isSymlink(): Boolean {
         return Files.isSymbolicLink(file.toPath())

@@ -122,12 +122,14 @@ private fun Color.towardBlack(amount: Float): Color {
 }
 
 // ponytail: harmonize() is a pure color conversion but reads context + runs per
-// read; cache by (color, isDark) to avoid N× recompute in lists. Single-threaded
-// composition so a plain map is enough; switch to LruCache if reads explode.
+// read; cache by (color, isDark, primary) to avoid N× recompute in lists AND to
+// stay correct across theme switches (harmonizeWithPrimary uses the theme primary).
+// Single-threaded composition so a plain map is enough; switch to LruCache if reads explode.
 private val harmonizeCache = HashMap<Long, Int>()
 @Composable
 private fun harmonized(color: Long, isDark: Boolean): Int {
-    val key = (color shl 1) or (if (isDark) 1L else 0L)
+    val primary = MaterialTheme.colorScheme.primary.value
+    val key = (color shl 1) or (if (isDark) 1L else 0L) or (primary.toLong() shl 32)
     return harmonizeCache.getOrPut(key) {
         val ctx = LocalContext.current
         MaterialColors.harmonizeWithPrimary(ctx, color.toInt())

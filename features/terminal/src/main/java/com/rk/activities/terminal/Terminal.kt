@@ -335,7 +335,8 @@ class Terminal : AppCompatActivity() {
         var totalBytes by remember { mutableLongStateOf(0L) }
         var unsupportedCpu by remember { mutableStateOf(false) }
         var downloadStarted by remember { mutableStateOf(false) }
-        var ubuntuInstalled by remember { mutableStateOf(isTerminalInstalled()) }
+        var ubuntuInstalled by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) { ubuntuInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() } }
 
         // Helper function to format bytes to MB string
         fun formatBytesToMB(bytes: Long): String {

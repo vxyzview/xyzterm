@@ -98,9 +98,11 @@ class DocumentProvider : DocumentsProvider() {
 
     @Throws(FileNotFoundException::class)
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
-        // ponytail: mirror renameDocument's guard — reject separator-bearing names so a
-        // caller (any holder of the provider URI) can't write outside sandboxHomeDir via "../".
-        if (displayName.contains("/") || displayName.contains("\\")) {
+        // ponytail: reject path components (incl. "."/"..") so a name with no
+        // separator but a ".." segment can't resolve outside sandboxHomeDir.
+        if (displayName.contains("/") || displayName.contains("\\") ||
+            displayName == "." || displayName == ".."
+        ) {
             throw FileNotFoundException("Invalid display name: $displayName")
         }
         val parent = getFileForDocId(parentDocumentId)
@@ -108,6 +110,11 @@ class DocumentProvider : DocumentsProvider() {
         var noConflictId = 2
         while (newFile.exists()) {
             newFile = File(parent, displayName + " (" + noConflictId++ + ")")
+        }
+        // ponytail: re-verify containment after building the target — a crafted
+        // combined name could still escape; mirror getFileForDocId's check.
+        if (!newFile.canonicalPath.startsWith(sandboxHomeDir().canonicalPath)) {
+            throw FileNotFoundException("Invalid display name: $displayName")
         }
         try {
             val succeeded =
@@ -248,7 +255,7 @@ class DocumentProvider : DocumentsProvider() {
             return documentId
         }
 
-        if (displayName.contains(File.separator)) {
+        if (displayName.contains(File.separator) || displayName == "." || displayName == "..") {
             throw FileNotFoundException("Invalid display name for rename: $displayName")
         }
 

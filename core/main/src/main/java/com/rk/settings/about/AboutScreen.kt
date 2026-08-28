@@ -48,8 +48,8 @@ import org.json.JSONObject
 fun AboutScreen() {
     val context = LocalContext.current
     val pm = context.packageManager
-    val appIcon = pm.getApplicationIcon(context.packageName)
-    val packageInfo = pm.getPackageInfo(context.packageName, 0)
+    val appIcon = remember { pm.getApplicationIcon(context.packageName) }
+    val packageInfo = remember { pm.getPackageInfo(context.packageName, 0) }
     val versionName = packageInfo.versionName
     val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 

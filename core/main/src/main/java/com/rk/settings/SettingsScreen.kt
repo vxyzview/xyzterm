@@ -80,7 +80,7 @@ private fun Categories(navController: NavController) {
             description = stringResource(id = strings.app_desc),
             iconResource = drawables.android,
             endWidget = { Chevron() },
-            onNavigate = { navController.navigate(SettingsRoutes.AppSettings.route) },
+            onNavigate = { navController.navigate(SettingsRoutes.AppSettings.route) { launchSingleTop = true } },
         )
 
         PreferenceCategory(
@@ -88,7 +88,7 @@ private fun Categories(navController: NavController) {
             description = stringResource(strings.theme_settings),
             iconResource = drawables.palette,
             endWidget = { Chevron() },
-            onNavigate = { navController.navigate(SettingsRoutes.Themes.route) },
+            onNavigate = { navController.navigate(SettingsRoutes.Themes.route) { launchSingleTop = true } },
         )
 
         PreferenceCategory(
@@ -96,7 +96,7 @@ private fun Categories(navController: NavController) {
             description = stringResource(strings.keybindings_desc),
             iconResource = drawables.keyboard,
             endWidget = { Chevron() },
-            onNavigate = { navController.navigate(SettingsRoutes.Keybindings.route) },
+            onNavigate = { navController.navigate(SettingsRoutes.Keybindings.route) { launchSingleTop = true } },
         )
 
         SettingsRegistry.categories.forEach { category ->
@@ -105,7 +105,7 @@ private fun Categories(navController: NavController) {
                 description = stringResource(id = category.descriptionRes),
                 iconResource = category.iconRes,
                 endWidget = { Chevron() },
-                onNavigate = { navController.navigate(category.route) },
+                onNavigate = { navController.navigate(category.route) { launchSingleTop = true } },
             )
         }
 
@@ -115,7 +115,7 @@ private fun Categories(navController: NavController) {
                 description = strings.debug_options_desc.getFilledString(strings.app_name.getString()),
                 iconResource = drawables.build,
                 endWidget = { Chevron() },
-                onNavigate = { navController.navigate(SettingsRoutes.DeveloperOptions.route) },
+                onNavigate = { navController.navigate(SettingsRoutes.DeveloperOptions.route) { launchSingleTop = true } },
             )
         }
     }
@@ -125,7 +125,7 @@ private fun Categories(navController: NavController) {
             modifier =
                 Modifier
                     .semantics { role = Role.Button }
-                    .clickable { navController.navigate(SettingsRoutes.About.route) },
+                    .clickable { navController.navigate(SettingsRoutes.About.route) { launchSingleTop = true } },
             verticalPadding = 14.dp,
             title = { Text(stringResource(id = strings.about)) },
             description = { Text(stringResource(id = strings.about_desc)) },
@@ -146,7 +146,7 @@ private fun Categories(navController: NavController) {
             modifier =
                 Modifier
                     .semantics { role = Role.Button }
-                    .clickable { navController.navigate(SettingsRoutes.Support.route) },
+                    .clickable { navController.navigate(SettingsRoutes.Support.route) { launchSingleTop = true } },
             verticalPadding = 14.dp,
             title = { Text(stringResource(strings.support)) },
             description = { Text(stringResource(id = strings.support_desc)) },

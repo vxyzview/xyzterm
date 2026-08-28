@@ -9,6 +9,7 @@ import android.view.WindowManager
 import com.rk.activities.terminal.Terminal
 import com.rk.exec.isTerminalInstalled
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,7 +76,10 @@ fun SettingsTerminalScreen(navController: NavController) {
         val context = LocalContext.current
         val activity = LocalActivity.current as? AppCompatActivity
         // State-backed so uninstall/restore updates the card immediately.
+        // ponytail: isTerminalInstalled() scans sandboxDir on disk — compute off the
+        // main thread, not inside remember() during composition.
         var terminalInstalled by remember { mutableStateOf(isTerminalInstalled()) }
+        LaunchedEffect(Unit) { terminalInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() } }
 
         PreferenceGroup(heading = stringResource(strings.advanced)) {
             if (FeatureRegistry.isEnabled("debug_mode")) {
