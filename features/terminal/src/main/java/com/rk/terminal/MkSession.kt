@@ -51,7 +51,7 @@ object MkSession {
     }
 
     /** All disk I/O and environment assembly; must not run on the main thread. */
-    private fun prepareEnvironment(context: Context, sessionId: String, isExtraction: Boolean, cwd: String?): Prepared {
+    private suspend fun prepareEnvironment(context: Context, sessionId: String, isExtraction: Boolean, cwd: String?): Prepared {
         val workingDir = cwd ?: getPwd(context)
 
         val tmpDir = localDir().child("tmp").childSafe(sessionId)

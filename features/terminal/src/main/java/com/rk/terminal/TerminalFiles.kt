@@ -5,22 +5,31 @@ import com.rk.file.createFileIfNot
 import com.rk.file.localBinDir
 import com.rk.file.sandboxDir
 import com.rk.utils.application
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 // ponytail: one-shot per process — scripts only change at app update (which
 // restarts the process), so re-reading+comparing 5 assets on every session
 // spawn is pure waste. Reset to false if manual file deletion ever matters.
+// Mutex (not a plain var) because setupTerminalFiles runs on Dispatchers.IO for
+// every session — including N parallel restores — and the old non-atomic guard
+// let concurrent first-time spawns all pass and double-write the same files.
+private val installMutex = Mutex()
 private var terminalFilesInstalled = false
 
-fun setupTerminalFiles() {
+suspend fun setupTerminalFiles() {
     if (terminalFilesInstalled) return
-    if (sandboxDir().exists().not() || localBinDir().exists().not()) return
+    installMutex.withLock {
+        if (terminalFilesInstalled) return
+        if (sandboxDir().exists().not() || localBinDir().exists().not()) return
 
-    setupAssetFile("termux-x11")
+        setupAssetFile("termux-x11")
 
-    val internalFiles = listOf("init", "sandbox", "setup", "utils")
-    internalFiles.forEach { setupAssetFile(it) }
+        val internalFiles = listOf("init", "sandbox", "setup", "utils")
+        internalFiles.forEach { setupAssetFile(it) }
 
-    terminalFilesInstalled = true
+        terminalFilesInstalled = true
+    }
 }
 
 /**
