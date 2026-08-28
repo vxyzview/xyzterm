@@ -7,7 +7,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.res.stringResource
 import com.rk.exec.isTerminalInstalled
 import com.rk.exec.ShellUtils
-import com.rk.exec.ubuntuProcess
 import com.rk.file.child
 import com.rk.file.sandboxDir
 import com.rk.file.sandboxHomeDir
@@ -190,19 +189,17 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
 
                     printLog("Checking DNS resolution (google.com)...")
                     try {
-                        val dnsProcess = ubuntuProcess(command = listOf("getent", "hosts", "google.com"))
-                        val dnsExitCode =
-                            if (dnsProcess.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                                dnsProcess.exitValue()
-                            } else {
-                                dnsProcess.destroyForcibly()
-                                printLog("DNS check timed out after ${CHECK_TIMEOUT_SECONDS}s")
-                                124
-                            }
-                        if (dnsExitCode == 0) {
+                        val dns =
+                            ShellUtils.runUbuntu(
+                                "getent", "hosts", "google.com",
+                                timeoutSeconds = CHECK_TIMEOUT_SECONDS,
+                            )
+                        if (dns.exitCode == 0 && !dns.timedOut) {
                             printLog("DNS resolution works.")
                         } else {
                             printLog("DNS resolution FAILED.")
+                            if (dns.timedOut) printLog("Timed out after ${CHECK_TIMEOUT_SECONDS}s")
+                            if (dns.error.isNotEmpty()) printLog("Stderr: ${dns.error}")
                             val resolvConf = sandboxDir().child("etc/resolv.conf")
                             if (resolvConf.exists()) {
                                 printLog("/etc/resolv.conf exists, content:")
@@ -212,7 +209,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                             }
                             printLog("Abnormality: Ubuntu will not have internet access without DNS.")
                         }
-                        dnsExitCode == 0
+                        dns.exitCode == 0 && !dns.timedOut
                     } catch (e: Exception) {
                         printLog("Network check failed: ${e.message}")
                         false
@@ -229,11 +226,16 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     var abnormalities = 0
 
                     try {
-                        val process = ubuntuProcess(command = listOf("touch", "/tmp/.test_xed"))
-                        val touchOk = process.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                        if (touchOk && process.exitValue() == 0) {
-                            ubuntuProcess(command = listOf("rm", "/tmp/.test_xed"))
-                                .waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                        val touch =
+                            ShellUtils.runUbuntu(
+                                "touch", "/tmp/.test_xed",
+                                timeoutSeconds = CHECK_TIMEOUT_SECONDS,
+                            )
+                        if (touch.exitCode == 0 && !touch.timedOut) {
+                            ShellUtils.runUbuntu(
+                                "rm", "/tmp/.test_xed",
+                                timeoutSeconds = CHECK_TIMEOUT_SECONDS,
+                            )
                         } else {
                             printLog("Abnormality: /tmp is not writable inside sandbox.")
                             abnormalities++

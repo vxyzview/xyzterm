@@ -182,16 +182,6 @@ suspend fun Process.readStdout(): String =
         }
     }
 
-suspend fun Process.readStderr(): String =
-    withContext(Dispatchers.IO) {
-        try {
-            errorStream.bufferedReader().use { it.readText() }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            if (e.message?.contains("Stream closed") == true) "" else throw e
-        }
-    }
-
 /** Extension to write to process stdin */
 suspend fun Process.writeInput(input: String, flush: Boolean = true) =
     withContext(Dispatchers.IO) {
