@@ -2,7 +2,6 @@
 force_color_prompt=yes
 shopt -s checkwinsize
 
-export HOSTNAME="xyz"
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/games:/usr/local/bin:/usr/local/sbin:$LOCAL/bin:$PATH
 export SHELL="bash"
 
@@ -40,7 +39,8 @@ fi
 # Prompt set AFTER ~/.bashrc so the stock Ubuntu colored prompt cannot
 # override it. Plain (non-bold) 32/34 map straight to the theme palette's
 # green/blue slots, so the prompt always matches the selected color scheme.
-export PS1="\[\e[32m\]\u@\h\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \\$ "
+# User@host is hardcoded per brand ("roo@xyz"); see TerminalScreen wiring.
+export PS1="\[\e[32m\]roo@xyz\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \$ "
 
 
 # One-time base setup now runs inside setup.sh, which writes the marker files,

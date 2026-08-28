@@ -368,6 +368,12 @@ private suspend fun TerminalView.attachOrCreateSession(
         session.updateTerminalSessionClient(client)
         attachSession(session)
         setTerminalViewClient(client)
+        // Wire the on-screen extra-keys client to the now-attached session so
+        // TAB/arrow keys work on the initial (cold-start) session too — not
+        // only after a manual session switch. changeSession does this; the
+        // first attach path didn't, leaving virtualKeysViewClient null and the
+        // on-screen keys dead until a switch.
+        virtualKeysView.get()?.apply { terminalView.get()?.mTermSession?.let { virtualKeysViewClient = VirtualKeysListener(it) } }
     }
 }
 
