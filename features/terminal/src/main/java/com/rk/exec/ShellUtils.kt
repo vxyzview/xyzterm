@@ -7,17 +7,12 @@ import kotlinx.coroutines.withContext
 object ShellUtils {
     data class Result(val exitCode: Int, val output: String, val error: String, val timedOut: Boolean)
 
-    suspend fun run(vararg command: String, timeoutSeconds: Long? = null): Result =
-        withContext(Dispatchers.IO) {
-            drain(ProcessBuilder(*command).start(), timeoutSeconds)
-        }
-
     suspend fun runUbuntu(vararg command: String, timeoutSeconds: Long? = null): Result =
         withContext(Dispatchers.IO) {
             drain(ubuntuProcess(command = command.toList()), timeoutSeconds)
         }
 
-    // ponytail: one drain() for both paths; each reader .join() is bounded to the
+    // ponytail: concurrent stdout/stderr drain; each reader .join() is bounded to the
     // same timeout as waitFor() so a proot grandchild keeping a pipe fd open past
     // destroyForcibly() can't hang the reader thread past the timeout you asked for.
     private fun drain(process: Process, timeoutSeconds: Long?): Result {
