@@ -42,8 +42,12 @@ fun XedTheme(
     val darkThemeState = remember(darkTheme) { darkTheme }
     val amoledState = remember(highContrastDarkTheme) { highContrastDarkTheme }
     val dynamicState = remember(dynamicColor) { dynamicColor }
+    // ponytail: key memoization on the resolved theme id too. Without it, switching
+    // between two non-dynamic themes leaves dynamicState false and the other keys
+    // unchanged, so the remember block never re-runs and the scheme/holder stay stale.
+    val themeId = currentTheme.value.id
 
-    val (colorScheme, themeHolder) = remember(darkThemeState, amoledState, dynamicState) {
+    val (colorScheme, themeHolder) = remember(darkThemeState, amoledState, dynamicState, themeId) {
         var holder: ThemeHolder
         val scheme =
             if (dynamicState && supportsDynamicTheming()) {
