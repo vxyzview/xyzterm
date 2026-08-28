@@ -45,7 +45,7 @@ fi
 export PS1="\[\e[32m\]roo@xyz\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \$ "
 case "$PROMPT_COMMAND" in
   *roo@xyz*) ;;
-  *) export PROMPT_COMMAND="${PROMPT_COMMAND%;}; PS1='\[\e[32m\]roo@xyz\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \$ '" ;;
+  *) pc="${PROMPT_COMMAND%;}"; export PROMPT_COMMAND="${pc:+${pc}; }PS1='\[\e[32m\]roo@xyz\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \$ '" ;;
 esac
 
 
