@@ -1,10 +1,15 @@
 package com.rk.terminal
 
 import android.view.KeyEvent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
@@ -29,6 +34,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
 import com.rk.resources.strings
 import com.rk.settings.Settings
@@ -67,121 +73,146 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
     val keyRowHeight = (extraKeysRowCount * 48).coerceAtLeast(52).dp
     val extraKeysLabel = stringResource(strings.extra_keys)
 
-    HorizontalPager(
-        state = pagerState,
-        modifier = Modifier.fillMaxWidth().height(keyRowHeight),
-    ) { page ->
-        when (page) {
-            0 -> {
-                // Tracks the last key matrix applied to the view so the update
-                // block only reloads when the setting actually changed.
-                var appliedExtraKeys by remember { mutableStateOf(Settings.terminal_extra_keys) }
-                AndroidView(
-                    factory = { context ->
-                        VirtualKeysView(context, null).apply {
-                            virtualKeysView = WeakReference(this)
-                            virtualKeysViewClient =
-                                terminalView.get()?.mTermSession?.let { VirtualKeysListener(it) }
+    Column(Modifier.fillMaxWidth()) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth().height(keyRowHeight),
+        ) { page ->
+            when (page) {
+                0 -> {
+                    // Tracks the last key matrix applied to the view so the update
+                    // block only reloads when the setting actually changed.
+                    var appliedExtraKeys by remember { mutableStateOf(Settings.terminal_extra_keys) }
+                    AndroidView(
+                        factory = { context ->
+                            VirtualKeysView(context, null).apply {
+                                virtualKeysView = WeakReference(this)
+                                virtualKeysViewClient =
+                                    terminalView.get()?.mTermSession?.let { VirtualKeysListener(it) }
 
-                            buttonTextColor = onSurfaceColor
+                                buttonTextColor = onSurfaceColor
 
-                            runCatching {
-                                reload(
-                                    VirtualKeysInfo(
-                                        Settings.terminal_extra_keys,
-                                        "",
-                                        VirtualKeysConstants.CONTROL_CHARS_ALIASES,
-                                    )
-                                )
-                            }
-                                .onFailure {
-                                    toast(strings.invalid_terminal_extra_keys)
+                                runCatching {
                                     reload(
                                         VirtualKeysInfo(
-                                            DEFAULT_TERMINAL_EXTRA_KEYS,
+                                            Settings.terminal_extra_keys,
                                             "",
                                             VirtualKeysConstants.CONTROL_CHARS_ALIASES,
                                         )
                                     )
                                 }
-                        }
-                    },
-                    update = { view ->
-                        val current = Settings.terminal_extra_keys
-                        if (current != appliedExtraKeys) {
-                            appliedExtraKeys = current
-                            runCatching {
-                                view.reload(
-                                    VirtualKeysInfo(current, "", VirtualKeysConstants.CONTROL_CHARS_ALIASES)
-                                )
-                            }
-                                .onFailure {
-                                    toast(strings.invalid_terminal_extra_keys)
-                                    view.reload(
-                                        VirtualKeysInfo(
-                                            DEFAULT_TERMINAL_EXTRA_KEYS,
-                                            "",
-                                            VirtualKeysConstants.CONTROL_CHARS_ALIASES,
+                                    .onFailure {
+                                        toast(strings.invalid_terminal_extra_keys)
+                                        reload(
+                                            VirtualKeysInfo(
+                                                DEFAULT_TERMINAL_EXTRA_KEYS,
+                                                "",
+                                                VirtualKeysConstants.CONTROL_CHARS_ALIASES,
+                                            )
                                         )
-                                    )
-                                }
-                        }
-                    },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(keyRowHeight)
-                            .semantics { contentDescription = extraKeysLabel },
-                )
-            }
-
-            1 -> {
-                var text by rememberSaveable { mutableStateOf("") }
-                val focusRequester = remember { FocusRequester() }
-
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(keyRowHeight),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    TextField(
-                        value = text,
-                        onValueChange = { text = it },
-                        maxLines = 1,
-                        singleLine = true,
-                        label = { Text(text = stringResource(strings.input)) },
-                        shape = MaterialTheme.shapes.medium,
-                        colors =
-                            TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            ),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions =
-                            KeyboardActions(
-                                onDone = {
-                                    if (text.isEmpty()) {
-                                        // Dispatch enter key events if text is empty
-                                        val eventDown =
-                                            KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
-                                        val eventUp =
-                                            KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
-                                        terminalView.get()?.dispatchKeyEvent(eventDown)
-                                        terminalView.get()?.dispatchKeyEvent(eventUp)
-                                    } else {
-                                        terminalView.get()?.currentSession?.write(text)
-                                        text = ""
                                     }
+                            }
+                        },
+                        update = { view ->
+                            val current = Settings.terminal_extra_keys
+                            if (current != appliedExtraKeys) {
+                                appliedExtraKeys = current
+                                runCatching {
+                                    view.reload(
+                                        VirtualKeysInfo(current, "", VirtualKeysConstants.CONTROL_CHARS_ALIASES)
+                                    )
                                 }
-                            ),
+                                    .onFailure {
+                                        toast(strings.invalid_terminal_extra_keys)
+                                        view.reload(
+                                            VirtualKeysInfo(
+                                                DEFAULT_TERMINAL_EXTRA_KEYS,
+                                                "",
+                                                VirtualKeysConstants.CONTROL_CHARS_ALIASES,
+                                            )
+                                        )
+                                    }
+                            }
+                        },
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 8.dp)
-                                .focusRequester(focusRequester),
+                                .height(keyRowHeight)
+                                .semantics { contentDescription = extraKeysLabel },
                     )
                 }
 
-                LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                1 -> {
+                    var text by rememberSaveable { mutableStateOf("") }
+                    val focusRequester = remember { FocusRequester() }
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(keyRowHeight),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        TextField(
+                            value = text,
+                            onValueChange = { text = it },
+                            maxLines = 1,
+                            singleLine = true,
+                            label = { Text(text = stringResource(strings.input)) },
+                            shape = MaterialTheme.shapes.medium,
+                            colors =
+                                TextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                ),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions =
+                                KeyboardActions(
+                                    onDone = {
+                                        if (text.isEmpty()) {
+                                            // Dispatch enter key events if text is empty
+                                            val eventDown =
+                                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
+                                            val eventUp =
+                                                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
+                                            terminalView.get()?.dispatchKeyEvent(eventDown)
+                                            terminalView.get()?.dispatchKeyEvent(eventUp)
+                                        } else {
+                                            terminalView.get()?.currentSession?.write(text)
+                                            text = ""
+                                        }
+                                    }
+                                ),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp)
+                                    .focusRequester(focusRequester),
+                        )
+                    }
+
+                    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                }
+            }
+        }
+
+        // 2-dot indicator (mirrors the 2-page pager above): hints the swipeable
+        // quick-text page exists.
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            repeat(2) { i ->
+                Box(
+                    Modifier
+                        .padding(horizontal = 3.dp)
+                        .size(4.dp)
+                        .background(
+                            if (i == pagerState.currentPage) {
+                                Color(onSurfaceColor)
+                            } else {
+                                Color(onSurfaceColor).copy(alpha = 0.3f)
+                            },
+                            MaterialTheme.shapes.small,
+                        ),
+                )
             }
         }
     }

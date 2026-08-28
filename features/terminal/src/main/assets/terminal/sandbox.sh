@@ -86,8 +86,8 @@ fi
 
 if [ $# -gt 0 ]; then
     # shellcheck disable=SC2086
-    $PROOT $ARGS /bin/bash --rcfile "$LOCAL/bin/init" -i -c "$*"
+    exec $PROOT $ARGS /bin/bash --rcfile "$LOCAL/bin/init" -i -c "$*"
 else
-    $PROOT $ARGS /bin/bash --rcfile "$LOCAL/bin/init" -i
+    exec $PROOT $ARGS /bin/bash --rcfile "$LOCAL/bin/init" -i
 fi
 

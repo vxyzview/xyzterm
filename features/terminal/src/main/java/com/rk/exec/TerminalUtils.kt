@@ -10,9 +10,7 @@ import com.rk.file.sandboxHomeDir
 import com.rk.utils.application
 import com.rk.utils.toast
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import java.util.concurrent.TimeUnit
 
 fun isTerminalInstalled(): Boolean {
     val rootfs =
@@ -26,13 +24,10 @@ fun isTerminalInstalled(): Boolean {
 
 suspend fun isTerminalWorking(): Boolean =
     withContext(Dispatchers.IO) {
-        val process = ubuntuProcess(command = arrayOf("true"))
-        // ponytail: drain stderr so proot's startup errors can't wedge waitFor() once
-        // the 64KB pipe fills; bound the wait so a hung proot can't hang the coroutine.
-        val err = async { process.readStderr() }
-        val ok = process.waitFor(15, TimeUnit.SECONDS)
-        err.await()
-        ok && process.exitValue() == 0
+        // Route through ShellUtils.runUbuntu so stdout/stderr drain concurrently
+        // (the 64KB pipe wedge the old code had to hand-fix) with a bounded wait.
+        val result = ShellUtils.runUbuntu("true", timeoutSeconds = 15)
+        result.exitCode == 0 && !result.timedOut
     }
 
 fun launchTerminal(activity: Activity, terminalCommand: TerminalCommand) {

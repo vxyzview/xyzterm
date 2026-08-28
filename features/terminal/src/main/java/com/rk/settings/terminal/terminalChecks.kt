@@ -6,7 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.res.stringResource
 import com.rk.exec.isTerminalInstalled
-import com.rk.exec.readStderr
+import com.rk.exec.ShellUtils
 import com.rk.exec.ubuntuProcess
 import com.rk.file.child
 import com.rk.file.sandboxDir
@@ -165,21 +165,14 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     printLog("Testing Ubuntu execution...")
                     var working = false
                     try {
-                        val process = ubuntuProcess(command = listOf("true"))
-                        val exitCode =
-                            if (process.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                                process.exitValue()
-                            } else {
-                                process.destroyForcibly()
-                                printLog("Execution timed out after ${CHECK_TIMEOUT_SECONDS}s")
-                                124
-                            }
-                        val stderr = process.readStderr().trim()
+                        // Route through ShellUtils.runUbuntu so stdout/stderr drain
+                        // concurrently (the 64KB pipe wedge the ponytail note had to
+                        // hand-fix), with the wait bounded by CHECK_TIMEOUT_SECONDS.
+                        val result = ShellUtils.runUbuntu("true", timeoutSeconds = CHECK_TIMEOUT_SECONDS)
+                        printLog("Exit code: ${result.exitCode}")
+                        if (result.error.isNotEmpty()) printLog("Stderr: ${result.error}")
 
-                        printLog("Exit code: $exitCode")
-                        if (stderr.isNotEmpty()) printLog("Stderr: $stderr")
-
-                        working = (exitCode == 0)
+                        working = result.exitCode == 0 && !result.timedOut
                     } catch (e: Exception) {
                         printLog("Execution failed: ${e.message}")
                     }
