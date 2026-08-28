@@ -632,6 +632,7 @@ public final class VirtualKeysView extends GridLayout {
         state.setIsCreated(true);
         Button button = new Button(getContext(), null, android.R.attr.buttonBarButtonStyle);
         button.setTextColor(state.isActive ? mButtonActiveTextColor : mButtonTextColor);
+        button.setBackgroundColor(mButtonBackgroundColor);
         if (needUpdate) {
             state.buttons.add(button);
         }

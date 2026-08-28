@@ -45,6 +45,13 @@ public class SpecialButtonState {
           value
               ? mVirtualKeysView.getButtonActiveTextColor()
               : mVirtualKeysView.getButtonTextColor());
+      // ponytail: also flip the background so an armed modifier (Ctrl/Alt/Fn) reads
+      // as a filled key, not just a faint text-color shift — the original walk only
+      // set text, which was easy to miss against onSurfaceColor.
+      button.setBackgroundColor(
+          value
+              ? mVirtualKeysView.getButtonActiveBackgroundColor()
+              : mVirtualKeysView.getButtonBackgroundColor());
     }
   }
 
