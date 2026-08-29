@@ -161,9 +161,17 @@ class Terminal : AppCompatActivity() {
             return
         }
 
+        val binder = sessionBinder?.get() ?: return
+        // Service still restoring saved sessions: the terminalView.get() guard
+        // below already defers UI attach, but a write racing an empty session
+        // map would be dropped silently. Defer the write until restore lands.
+        if (binder.getService().restorePending) {
+            binder.getService().onRestored { handleIntent(intent) }
+            return
+        }
+
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
-            val binder = sessionBinder?.get() ?: return
             lifecycleScope.launch(Dispatchers.Main) {
                 val session = binder.getSession(binder.getService().currentSession.value)
                 session?.write(text)
@@ -172,7 +180,6 @@ class Terminal : AppCompatActivity() {
         }
 
         val pwd = intent.getStringExtra("cwd") ?: return
-        val binder = sessionBinder?.get() ?: return
         terminalView.get() ?: return
 
         val sessionId = File(pwd).name

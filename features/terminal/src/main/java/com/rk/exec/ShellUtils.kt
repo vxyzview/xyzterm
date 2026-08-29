@@ -15,15 +15,25 @@ object ShellUtils {
     // ponytail: concurrent stdout/stderr drain; each reader .join() is bounded to the
     // same timeout as waitFor() so a proot grandchild keeping a pipe fd open past
     // destroyForcibly() can't hang the reader thread past the timeout you asked for.
+    // Appends are synchronized: join(timeout) can expire with a reader thread still
+    // appending, and StringBuilder.toString() racing an append is a torn/crashing read.
     private fun drain(process: Process, timeoutSeconds: Long?): Result {
         val output = StringBuilder()
         val error = StringBuilder()
 
         val outputThread = Thread {
-            runCatching { process.inputStream.bufferedReader().forEachLine { output.appendLine(it) } }
+            runCatching {
+                process.inputStream.bufferedReader().forEachLine { line ->
+                    synchronized(output) { output.appendLine(line) }
+                }
+            }
         }
         val errorThread = Thread {
-            runCatching { process.errorStream.bufferedReader().forEachLine { error.appendLine(it) } }
+            runCatching {
+                process.errorStream.bufferedReader().forEachLine { line ->
+                    synchronized(error) { error.appendLine(line) }
+                }
+            }
         }
 
         outputThread.start()
@@ -44,8 +54,8 @@ object ShellUtils {
 
         return Result(
             exitCode = if (timedOut) -1 else process.exitValue(),
-            output = output.toString().trim(),
-            error = error.toString().trim(),
+            output = synchronized(output) { output.toString() }.trim(),
+            error = synchronized(error) { error.toString() }.trim(),
             timedOut = timedOut,
         )
     }

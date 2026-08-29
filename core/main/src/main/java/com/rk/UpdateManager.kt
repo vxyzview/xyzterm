@@ -82,10 +82,17 @@ object UpdateManager {
         if (installedFromStore()) return
         val now = System.currentTimeMillis()
         if (now - Preference.getLong(LAST_UPDATE_CHECK_KEY, 0L) < UPDATE_INTERVAL_MS) return
+        // Stamp optimistically so parallel opens don't stack checks; a failed
+        // fetch below reverts the stamp so tomorrow's open retries sooner than
+        // "silently dead for another 24h".
         Preference.setLong(LAST_UPDATE_CHECK_KEY, now)
 
         GlobalScope.launch(Dispatchers.Main) {
-            val latest = GithubReleasesApi(UPDATE_OWNER, UPDATE_REPO).fetchLatestVersion() ?: return@launch
+            val latest = GithubReleasesApi(UPDATE_OWNER, UPDATE_REPO).fetchLatestVersion()
+            if (latest == null) {
+                Preference.setLong(LAST_UPDATE_CHECK_KEY, 0L)
+                return@launch
+            }
             val installed = installedVersionName() ?: return@launch
             if (!isNewer(latest, installed)) return@launch
             // The activity may be gone by the time the network call returns.
