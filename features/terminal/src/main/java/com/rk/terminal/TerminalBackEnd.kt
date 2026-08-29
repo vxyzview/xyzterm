@@ -39,9 +39,55 @@ private const val BELL_CHANNEL_ID = "terminal_bell"
 private const val BELL_NOTIFICATION_ID = 2
 private const val BELL_NOTIFY_THROTTLE_MS = 5_000L
 
+/**
+ * File-private shim that reads through the existing package-level globals.
+ * Kept so the no-arg `TerminalBackEnd()` constructor — which every existing
+ * call site still uses in TV2 — keeps working unchanged. Deleted in TV4
+ * once every call site passes a real port.
+ */
+private object LegacyPackageLevelPort : TerminalViewPort {
+    // bellPulse is a package-level MutableState; the proxy below forwards
+    // its set/get through the global so the no-arg-caller path of the
+    // back-end remains observationally identical to before TV2. Same idea
+    // for isForeground, which is a plain `var` in Terminal's companion.
+    // Both shims are deleted in TV4 once every call site passes a real port.
+    override fun view(): TerminalView? = terminalView.get()
+    override fun virtualKeys(): VirtualKeysView? = virtualKeysView.get()
+    override val bell: BellState = LegacyBellState
+    override val isForeground: androidx.compose.runtime.MutableState<Boolean> = LegacyForegroundState
+}
+
+private object LegacyBellState : BellState() {
+    override var value: Boolean
+        get() = bellPulse
+        set(v) {
+            bellPulse = v
+        }
+}
+
+private object LegacyForegroundState : androidx.compose.runtime.MutableState<Boolean> {
+    override var value: Boolean
+        get() = Terminal.isForeground
+        set(v) {
+            Terminal.isForeground = v
+        }
+    override fun component1(): Boolean = value
+    override fun component2(): kotlin.reflect.KFunction1<Boolean, Unit> = { value = it }
+}
+
 class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
+    private val port: TerminalViewPort
+
+    /** No-arg ctor: read through the package-level globals (legacy). */
+    constructor() : this(LegacyPackageLevelPort)
+
+    /** New ctor: read through the supplied [TerminalViewPort]. */
+    constructor(port: TerminalViewPort) {
+        this.port = port
+    }
+
     override fun onTextChanged(changedSession: TerminalSession) {
-        terminalView.get()?.onScreenUpdated()
+        port.view()?.onScreenUpdated()
     }
 
     override fun onTitleChanged(changedSession: TerminalSession) {}
@@ -51,16 +97,16 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     override fun onCopyTextToClipboard(session: TerminalSession, text: String) {
-        val context = terminalView.get()?.context ?: return
+        val context = port.view()?.context ?: return
         val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return
         clipboard.setPrimaryClip(ClipData.newPlainText("Terminal", text))
     }
 
     override fun onPasteTextFromClipboard(session: TerminalSession?) {
-        val emulator = terminalView.get()?.mEmulator ?: return
+        val emulator = port.view()?.mEmulator ?: return
         val clip =
-            terminalView
-                .get()
+            port
+                .view()
                 ?.context
                 ?.getSystemService(ClipboardManager::class.java)
                 ?.primaryClip
@@ -74,7 +120,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     override fun onBell(session: TerminalSession) {
-        bellPulse = true
+        port.bell.value = true
         notifyBellInBackground(session)
     }
 
@@ -83,12 +129,12 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     private var lastBellNotifyAt = 0L
 
     private fun notifyBellInBackground(session: TerminalSession) {
-        if (Terminal.isForeground) return
+        if (port.isForeground.value) return
         val now = SystemClock.elapsedRealtime()
         if (now - lastBellNotifyAt < BELL_NOTIFY_THROTTLE_MS) return
         lastBellNotifyAt = now
 
-        val context = terminalView.get()?.context?.applicationContext ?: return
+        val context = port.view()?.context?.applicationContext ?: return
 
         val nm = context.getSystemService(NotificationManager::class.java) ?: return
         runCatching {
@@ -173,7 +219,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     override fun onScale(scale: Float): Float {
-        val view = terminalView.get() ?: return 1f
+        val view = port.view() ?: return 1f
         // Settings stores the size in dp; convert like every other call site.
         // Returning 1f resets the view's cumulative factor, making `scale` a
         // per-gesture increment applied to the float accumulator below (int
@@ -189,7 +235,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     private var fontSizeDp = -1f
 
     override fun onSingleTapUp(e: MotionEvent) {
-        val view = terminalView.get()
+        val view = port.view()
         val emulator = view?.mEmulator
         if (view != null && emulator != null) {
             val (column, row) = view.getColumnAndRow(e, true).let { it[0] to it[1] }
@@ -238,7 +284,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         // terminal-view v0.118.3 has no shouldSupportClipboardKeybindings() client
         // hook, so Ctrl+Shift+C / Ctrl+Shift+V are handled here instead.
         if (Settings.terminal_clipboard_keybindings && e.isCtrlPressed && e.isShiftPressed) {
-            val view = terminalView.get()
+            val view = port.view()
             when (keyCode) {
                 KeyEvent.KEYCODE_V -> {
                     val clip =
@@ -294,22 +340,22 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
 
     // keys
     override fun readControlKey(): Boolean {
-        val state = virtualKeysView.get()?.readSpecialButton(SpecialButton.CTRL, true)
+        val state = port.virtualKeys()?.readSpecialButton(SpecialButton.CTRL, true)
         return state != null && state
     }
 
     override fun readAltKey(): Boolean {
-        val state = virtualKeysView.get()?.readSpecialButton(SpecialButton.ALT, true)
+        val state = port.virtualKeys()?.readSpecialButton(SpecialButton.ALT, true)
         return state != null && state
     }
 
     override fun readShiftKey(): Boolean {
-        val state = virtualKeysView.get()?.readSpecialButton(SpecialButton.SHIFT, true)
+        val state = port.virtualKeys()?.readSpecialButton(SpecialButton.SHIFT, true)
         return state != null && state
     }
 
     override fun readFnKey(): Boolean {
-        val state = virtualKeysView.get()?.readSpecialButton(SpecialButton.FN, true)
+        val state = port.virtualKeys()?.readSpecialButton(SpecialButton.FN, true)
         return state != null && state
     }
 
@@ -322,13 +368,13 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     private fun setTerminalCursorBlinkingState(start: Boolean) {
-        if (terminalView.get()?.mEmulator != null) {
-            terminalView.get()?.setTerminalCursorBlinkerState(start, true)
+        if (port.view()?.mEmulator != null) {
+            port.view()?.setTerminalCursorBlinkerState(start, true)
         }
     }
 
     private fun showSoftInput() {
-        val view = terminalView.get() ?: return
+        val view = port.view() ?: return
         view.requestFocus()
         view.context.getSystemService(InputMethodManager::class.java)?.showSoftInput(view, 0)
     }
