@@ -7,8 +7,8 @@ import com.rk.activities.terminal.Terminal
 import com.rk.commands.CommandProvider
 import com.rk.commands.ToolbarConfiguration
 import com.rk.commands.global.TerminalCommand
-import com.rk.exec.pendingCommand
 import com.rk.exec.ubuntuProcess
+import com.rk.terminal.setPendingCommand
 import com.rk.extension.api.DynamicRoute
 import com.rk.feature.Feature
 import com.rk.feature.FeatureToggle
@@ -68,7 +68,7 @@ class TerminalFeature : Feature {
 
         // Register TerminalLauncher handler
         TerminalLauncher.handler = { activity, sandbox, exe, args, id, terminatePreviousSession, workingDir, env ->
-            pendingCommand =
+            setPendingCommand(
                 com.rk.exec.TerminalCommand(
                     sandbox = sandbox,
                     exe = exe,
@@ -78,6 +78,7 @@ class TerminalFeature : Feature {
                     workingDir = workingDir,
                     env = env,
                 )
+            )
             try {
                 val intent = Intent(activity, Terminal::class.java)
                 activity.startActivity(intent)

@@ -1,7 +1,15 @@
 package com.rk.exec
 
-var pendingCommand: TerminalCommand? = null
-
+/**
+ * A one-shot command destined for the next session created by
+ * [com.rk.terminal.MkSessionFactory]. Constructed by external callers
+ * (TerminalLauncher handler, launchTerminal), consumed inside
+ * [com.rk.terminal.MkSessionFactory.create] via [setPendingCommand].
+ *
+ * Previously exposed as `var pendingCommand: TerminalCommand? = null`
+ * at file scope; the global was lifted into the factory, where the
+ * one-write-one-read invariant actually lives.
+ */
 data class TerminalCommand(
     val sandbox: Boolean = true,
     val exe: String,

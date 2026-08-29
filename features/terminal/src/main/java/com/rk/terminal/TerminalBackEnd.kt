@@ -270,14 +270,13 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
 
         if (keyCode == KeyEvent.KEYCODE_ENTER && !session.isRunning) {
             val activity = Terminal.instance ?: return false
-            val sessionBinder = activity.sessionBinder?.get() ?: return false
-            sessionBinder.terminateSession(sessionBinder.getService().currentSession.value)
-            if (sessionBinder.getService().sessionList.isEmpty()) {
-                activity.finish()
+            val controller = activity.controller ?: return false
+            val neighbor = controller.sessions.firstOrNull { it != controller.currentId.value }
+            controller.terminate(controller.currentId.value)
+            if (neighbor != null) {
+                activity.lifecycleScope.launch { activity.changeSession(neighbor) }
             } else {
-                activity.lifecycleScope.launch {
-                    activity.changeSession(sessionBinder.getService().sessionList.first())
-                }
+                activity.finish()
             }
             return true
         }

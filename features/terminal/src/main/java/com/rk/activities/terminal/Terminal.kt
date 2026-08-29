@@ -75,6 +75,7 @@ import com.rk.terminal.ROOTFS_X64
 import com.rk.terminal.ROOTFS_ARM_SHA256
 import com.rk.terminal.ROOTFS_ARM64_SHA256
 import com.rk.terminal.ROOTFS_X64_SHA256
+import com.rk.terminal.SessionController
 import com.rk.terminal.SessionService
 import com.rk.terminal.TerminalBackEnd
 import com.rk.terminal.TerminalScreen
@@ -103,29 +104,29 @@ import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
 class Terminal : AppCompatActivity() {
-    var sessionBinder by mutableStateOf<WeakReference<SessionService.SessionBinder>?>(null)
+    var controller: SessionController? = null
     var isBound = false
 
     val serviceConnection =
         object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 val binder = service as SessionService.SessionBinder
-                sessionBinder = WeakReference(binder)
+                controller = binder.getController()
                 isBound = true
                 // Restore saved sessions from previous runs before handling the
                 // intent, so the screen picks the last active session instead of
-                // a fresh "main". The shells themselves spawn off the main thread
-                // (restoreSessions); Compose snapshot state (sessionList/
-                // currentSession) is only mutated on the main thread.
-                if (binder.getService().sessionList.isEmpty()) {
-                    binder.restoreSessions(this@Terminal)
+                // a fresh "main". The shells themselves spawn off the main
+                // thread (controller.startRestore); Compose snapshot state
+                // (sessions/currentId) is only mutated on the main thread.
+                if (controller.sessions.isEmpty()) {
+                    controller.startRestore()
                 }
                 handleIntent(intent)
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 isBound = false
-                sessionBinder = null
+                controller = null
             }
         }
 
@@ -161,36 +162,22 @@ class Terminal : AppCompatActivity() {
             return
         }
 
-        val binder = sessionBinder?.get() ?: return
-        // Service still restoring saved sessions: the terminalView.get() guard
-        // below already defers UI attach, but a write racing an empty session
-        // map would be dropped silently. Defer the write until restore lands.
-        if (binder.getService().restorePending) {
-            binder.getService().onRestored { handleIntent(intent) }
-            return
-        }
-
+        val ctrl = controller ?: return
+        // Service still restoring saved sessions: the attachedView.get() guard
+        // inside the controller already defers UI attach, but a write racing
+        // an empty session map would be dropped silently. Defer the write
+        // until restore lands — the controller handles this internally for
+        // attach(), but onIntent() is the explicit path for extras-only
+        // intents that don't go through attach().
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
-            lifecycleScope.launch(Dispatchers.Main) {
-                val session = binder.getSession(binder.getService().currentSession.value)
-                session?.write(text)
-            }
+            ctrl.currentSession()?.write(text)
             return
         }
 
-        val pwd = intent.getStringExtra("cwd") ?: return
-        terminalView.get() ?: return
-
-        val sessionId = File(pwd).name
-
-        lifecycleScope.launch(Dispatchers.Main) {
-            val client = TerminalBackEnd()
-            val info = binder.getSessionInfoByPwd(pwd) ?: binder.createSession(sessionId, client, this@Terminal)
-
-            this@Terminal.changeSession(info.id)
-            setIntent(intent)
-        }
+        // Defer to the controller's onIntent for cwd intents and deep-links
+        // (it has the same onRestored gate attach() uses).
+        ctrl.onIntent(intent)
     }
 
     /**
@@ -199,30 +186,7 @@ class Terminal : AppCompatActivity() {
      *   xyzterm://session/<name>?cmd=<cmd>   create or switch to session <name>, optionally run <cmd>
      */
     private fun handleDeepLink(uri: Uri) {
-        val binder = sessionBinder?.get() ?: return
-        when (uri.host) {
-            "session" -> {
-                val name = uri.lastPathSegment?.trim().orEmpty()
-                // ponytail: deep-link session name is attacker-controlled; reject traversal
-                // and special segments before they reach MkSession.childSafe / deleteRecursively.
-                if (name.isEmpty() ||
-                    name == "." ||
-                    name == ".." ||
-                    name.contains("/") ||
-                    name.contains("\\")
-                ) {
-                    return
-                }
-                lifecycleScope.launch(Dispatchers.Main) {
-                    if (name !in binder.getService().sessionList) {
-                        binder.createSession(name, TerminalBackEnd(), this@Terminal)
-                    }
-                    this@Terminal.changeSession(name)
-                }
-            }
-            // "run" and "?cmd=" intentionally dropped: a BROWSABLE link writing commands
-            // into a live session is unprompted command execution inside the sandbox.
-        }
+        controller?.onIntent(Intent().apply { data = uri })
     }
 
     override fun onStop() {
@@ -277,7 +241,7 @@ class Terminal : AppCompatActivity() {
                             onAccept = { disclaimerAccepted = true },
                             onDecline = { finishAffinity() },
                         )
-                    } else if (sessionBinder != null) {
+                    } else if (controller != null) {
                         LaunchedEffect(Unit) { FilePermission.verifyStoragePermission(this@Terminal) }
                         TerminalScreenHost(this)
                     } else {
@@ -333,6 +297,18 @@ class Terminal : AppCompatActivity() {
 
     var progressText by mutableStateOf(strings.installing.getString())
     var installNextStage by mutableStateOf<NEXT_STAGE?>(null)
+
+    /** Stops the foreground session service. Used by the drawer's "Logout" button. */
+    fun exitService() {
+        // Best-effort: the service may already be unbound on activity teardown.
+        try {
+            applicationContext.startService(
+                Intent(applicationContext, SessionService::class.java).apply { action = "ACTION_EXIT" }
+            )
+        } catch (_: Exception) {
+            // Service already stopped — nothing to do.
+        }
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
     @Composable

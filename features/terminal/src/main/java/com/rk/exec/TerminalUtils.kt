@@ -1,7 +1,5 @@
 package com.rk.exec
 
-import android.app.Activity
-import android.content.Intent
 import com.rk.file.child
 import com.rk.file.createFileIfNot
 import com.rk.file.localDir
@@ -29,13 +27,3 @@ suspend fun isTerminalWorking(): Boolean =
         val result = ShellUtils.runUbuntu("true", timeoutSeconds = 15)
         result.exitCode == 0 && !result.timedOut
     }
-
-fun launchTerminal(activity: Activity, terminalCommand: TerminalCommand) {
-    pendingCommand = terminalCommand
-    try {
-        val intent = Intent().setClassName(activity, "com.rk.activities.terminal.Terminal")
-        activity.startActivity(intent)
-    } catch (_: Exception) {
-        toast("Terminal feature is not available in this build")
-    }
-}
