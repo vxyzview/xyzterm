@@ -1,0 +1,28 @@
+# CodeQL advanced configuration.
+#
+# This file tells the CodeQL CLI where to find source roots when running
+# with build-mode: none. Without it, the extractor guesses based on standard
+# layouts (src/main/kotlin, src/main/java) and may miss this repo's
+# multi-module Gradle layout where Kotlin/Java files live under
+# `<module>/src/main/java/...` paths.
+#
+# The extractor should find these roots automatically in this repo (they
+# all have the canonical src/main/java/ structure), but if a future run
+# reports 0 files scanned, list them explicitly here.
+#
+# Reference: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/customizing-code-scanning#changing-the-files-that-are-scanned
+
+paths:
+  - 'app/src/main'
+  - 'core/components/src/main'
+  - 'core/main/src/main'
+  - 'core/resources/src/main'
+  - 'features/terminal/src/main'
+  - 'features/terminal/proot/src/main'
+  - 'features/terminal/link2symlink/src/main'
+
+paths-ignore:
+  - '**/build/**'
+  - '**/.gradle/**'
+  - '**/generated/**'
+  - '**/.git/**'

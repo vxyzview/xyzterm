@@ -79,6 +79,17 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
+        config-file: .github/codeql/codeql-config.yml
+      env:
+        # The Java/Kotlin extractor ignores build-mode: none when it
+        # detects a build tool (gradle here) and tries to compile —
+        # which fails because the proot/link2symlink native modules
+        # need cmake 3.22.1 and the gradle daemon needs more heap
+        # than the runner gives. Force the extractor to read .kt/.java
+        # source files directly, no compile, no taint resolution
+        # across module boundaries (still useful for syntax-level
+        # and intra-file queries).
+        CODEQL_EXTRACTOR_JAVA_BUILD_MODE: none
         # If you wish to specify custom queries, you can do so here or in a config file.
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
