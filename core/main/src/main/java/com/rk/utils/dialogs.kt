@@ -3,7 +3,6 @@ package com.rk.utils
 import android.app.Activity
 import android.util.Log
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -215,8 +214,8 @@ fun dialogRes(
     msg: String,
     @StringRes cancelRes: Int = strings.cancel,
     @StringRes okRes: Int = strings.ok,
-    onOk: (AlertDialog?) -> Unit = {},
-    onCancel: ((AlertDialog?) -> Unit)? = null,
+    onOk: () -> Unit = {},
+    onCancel: (() -> Unit)? = null,
     cancelable: Boolean = true,
 ) {
     dialog(
@@ -231,13 +230,7 @@ fun dialogRes(
     )
 }
 
-/**
- * Shows a confirm dialog that survives configuration changes.
- *
- * The callbacks receive `null` instead of an [AlertDialog]: there is no AppCompat handle
- * anymore. Callers must treat the parameter as nullable-and-always-null (existing
- * `?.dismiss()` style call sites are unaffected).
- */
+/** Shows a confirm dialog that survives configuration changes. */
 @XedExtensionPoint
 fun dialog(
     activity: Activity? = ActivityProvider.currentActivity,
@@ -245,8 +238,8 @@ fun dialog(
     msg: String,
     cancelText: String = strings.cancel.getString(),
     okText: String = strings.ok.getString(),
-    onOk: (AlertDialog?) -> Unit = {},
-    onCancel: ((AlertDialog?) -> Unit)? = null,
+    onOk: () -> Unit = {},
+    onCancel: (() -> Unit)? = null,
     cancelable: Boolean = true,
 ) {
     if (activity == null) {
@@ -269,7 +262,7 @@ fun dialog(
                     okString = okText,
                     onOk = {
                         DialogHost.remove(id)
-                        onOk(null)
+                        onOk()
                     },
                     onCancel =
                         if (onCancel == null) {
@@ -277,7 +270,7 @@ fun dialog(
                         } else {
                             {
                                 DialogHost.remove(id)
-                                onCancel.invoke(null)
+                                onCancel.invoke()
                             }
                         },
                 )
@@ -336,17 +329,12 @@ private fun DialogContent(
     }
 }
 
-/**
- * Shows a custom composable dialog that survives configuration changes.
- *
- * The composable receives `null` instead of an [AlertDialog]; there is no AppCompat
- * handle anymore. Callers must treat the parameter as nullable-and-always-null.
- */
+/** Shows a custom composable dialog that survives configuration changes. */
 @XedExtensionPoint
 fun composableDialog(
     activity: Activity? = ActivityProvider.currentActivity,
     cancelable: Boolean = true,
-    composable: @Composable (AlertDialog?) -> Unit,
+    composable: @Composable () -> Unit,
 ) {
     if (activity == null) {
         toast(strings.unknown_error)
@@ -355,7 +343,7 @@ fun composableDialog(
     val id = DialogHost.nextId()
     DialogHost.push(
         DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = cancelable) {
-            Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) { composable(null) }
+            Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) { composable() }
         }
     )
 }
