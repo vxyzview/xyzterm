@@ -6,7 +6,7 @@ android {
     namespace = "com.rk.proot"
     ndkVersion = "28.2.13676358"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
