@@ -132,6 +132,7 @@ class RootfsInstaller(private val context: Context) {
 
             val totalBytes = startedAt + response.body.contentLength()
 
+            val body = response.body
             var downloadedBytes = startedAt
             // Throttle progress: hopping to the main thread and recomposing the
             // progress UI on every 8 KiB block (tens of thousands of times for a
