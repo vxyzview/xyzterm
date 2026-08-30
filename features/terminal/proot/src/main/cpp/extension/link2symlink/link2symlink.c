@@ -573,24 +573,28 @@ static int handle_linkat_from_proc_fd(Tracee *tracee) {
 		return 0;
 	}
 
-	/* Read stats of source file, ensure it is regular file  */
+	/* Open source file first, then fstat the fd.  CodeQL flagged the
+	 * earlier pattern as TOCTOU because we stat'd proc_path by name
+	 * and then re-opened it by name.  fstat() on the fd we just
+	 * opened closes the window.  */
+	int source_fd = open(proc_path, O_RDONLY);
+	if (source_fd < 0) {
+		return 0;
+	}
 	struct stat stats = {};
-	if (0 != stat(proc_path, &stats)) {
+	if (0 != fstat(source_fd, &stats)) {
+		close(source_fd);
 		return 0;
 	}
 	if (!S_ISREG(stats.st_mode)) {
+		close(source_fd);
 		return 0;
 	}
 
 	/* Read path of target file (already translated by proot)  */
 	size = read_string(tracee, target_path, peek_reg(tracee, CURRENT, SYSARG_4), PATH_MAX);
 	if (size < 0 || size >= (ssize_t) sizeof(target_path)) {
-		return 0;
-	}
-
-	/* Open source file for reading  */
-	int source_fd = open(proc_path, O_RDONLY);
-	if (source_fd < 0) {
+		close(source_fd);
 		return 0;
 	}
 

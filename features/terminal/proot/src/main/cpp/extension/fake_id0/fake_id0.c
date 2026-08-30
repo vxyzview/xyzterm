@@ -408,13 +408,20 @@ static void override_permissions(const Tracee *tracee, const char *path, bool is
 	mode_t new_mode;
 	int status;
 
-	/* Get the meta-data */
-	if (should_skip_file_access_due_to_f2fs_bug(tracee, path)) 
+	if (should_skip_file_access_due_to_f2fs_bug(tracee, path))
 		return;
 
-	status = stat(path, &perms);
-	if (status < 0)
+	/* Get the meta-data.  Use an O_PATH fd so the subsequent fchmod()
+	 * targets the same inode the stat() saw, avoiding the TOCTOU window
+	 * CodeQL flagged between stat(path) and chmod(path).  */
+	int path_fd = open(path, O_PATH);
+	if (path_fd < 0)
 		return;
+	status = fstat(path_fd, &perms);
+	if (status < 0) {
+		close(path_fd);
+		return;
+	}
 
 	/* Copy the current permissions */
 	new_mode = perms.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);
@@ -427,12 +434,16 @@ static void override_permissions(const Tracee *tracee, const char *path, bool is
 		new_mode |= S_IXUSR;
 
 	/* Patch the permissions only if needed.  */
-	if (new_mode == (perms.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO)))
+	if (new_mode == (perms.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) {
+		close(path_fd);
 		return;
+	}
 
 	node = talloc_zero(tracee->ctx, ModifiedNode);
-	if (node == NULL)
+	if (node == NULL) {
+		close(path_fd);
 		return;
+	}
 
 	if (!is_final) {
 		/* Restore the previous mode of any non final components.  */
@@ -460,6 +471,8 @@ static void override_permissions(const Tracee *tracee, const char *path, bool is
 		case PR_stat64:
 		case PR_statfs:
 		case PR_statfs64:
+			TALLOC_FREE(node);
+			close(path_fd);
 			return;
 
 		/* Otherwise: restore the previous mode of the final component.  */
@@ -473,6 +486,7 @@ static void override_permissions(const Tracee *tracee, const char *path, bool is
 	if (node->path == NULL) {
 		/* Keep only consistent nodes.  */
 		TALLOC_FREE(node);
+		close(path_fd);
 		return;
 	}
 
@@ -480,7 +494,8 @@ static void override_permissions(const Tracee *tracee, const char *path, bool is
 	 * called in reverse order.  */
 	talloc_set_destructor(node, restore_mode);
 
-	(void) chmod(path, new_mode);
+	(void) fchmod(path_fd, new_mode);
+	close(path_fd);
 
 	return;
 }

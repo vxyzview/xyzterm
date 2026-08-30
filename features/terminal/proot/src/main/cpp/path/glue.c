@@ -38,26 +38,34 @@
 #include "compat.h"
 
 /**
- * Remove @path if it is empty only.
+ * Placeholder metadata attached to a host path that build_glue() created,
+ * so the cleanup destructor knows whether to unlink or rmdir without
+ * re-stat'ing the path (which CodeQL flagged as TOCTOU).
+ */
+typedef struct {
+	mode_t type;
+} Placeholder;
+
+/**
+ * Remove @placeholder->... if it is empty only.
  *
  * Note: this is a Talloc destructor.
  */
-static int remove_placeholder(char *path)
+static int remove_placeholder(Placeholder *placeholder)
 {
-	struct stat statl;
+	const char *path = talloc_get_name(placeholder);
 	int status;
 
-	status = lstat(path, &statl);
-	if (status)
-		return 0; /* Not fatal.  */
-
-	if (!S_ISDIR(statl.st_mode)) {
-		if (statl.st_size != 0)
-			return 0; /* Not fatal.  */
+	if (!S_ISDIR(placeholder->type)) {
+		/* Plain files created by mknod(); unlink is sufficient.  */
 		status = unlink(path);
 	}
-	else
+	else {
+		/* Directory: rmdir requires it to be empty.  We created the
+		 * entry ourselves and proot never writes into it, so it
+		 * should still be empty at this point.  */
 		status = rmdir(path);
+	}
 	if (status)
 		return 0; /* Not fatal.  */
 
@@ -68,19 +76,21 @@ static int remove_placeholder(char *path)
  * Attach a copy of @path to the autofree context, and set its
  * destructor to remove_placeholder().
  */
-static void set_placeholder_destructor(const char *path)
+static void set_placeholder_destructor(const char *path, mode_t type)
 {
 	TALLOC_CTX *autofreed;
-	char *placeholder;
+	Placeholder *placeholder;
 
 	autofreed = talloc_autofree_context();
 	if (autofreed == NULL)
 		return;
 
-	placeholder = talloc_strdup(autofreed, path);
+	placeholder = talloc_zero(autofreed, Placeholder);
 	if (placeholder == NULL)
 		return;
 
+	placeholder->type = type;
+	talloc_set_name(placeholder, "%s", path);
 	talloc_set_destructor(placeholder, remove_placeholder);
 }
 
@@ -155,7 +165,7 @@ mode_t build_glue(Tracee *tracee, const char *guest_path, char host_path[PATH_MA
 	/* Remove placeholders from the guest rootfs once PRoot is
 	 * terminated.  */
 	if (status >= 0 && !belongs_to_gluefs)
-		set_placeholder_destructor(host_path);
+		set_placeholder_destructor(host_path, type);
 
 	/* Nothing else to do if the path already exists or if it is
 	 * the final component since it will be pointed to by the

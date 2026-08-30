@@ -61,19 +61,21 @@ static bool probe_f2fs_bug(const Tracee *tracee) {
 	}
 	close(fd);
 
-	/* Prewarm third file (on normal kernel this won't have any side effect) */
-	int access_result = access(file3, F_OK);
-	if (access_result == 0) {
-		note(tracee, WARNING, SYSTEM, "f2fs bug probe detected successful access() on non-existent file");
-		goto end_delete_temp_files;
-	}
+	/* Prewarm third file: rely on the child's open(O_CREAT) below to
+	 * tell us whether file3 unexpectedly exists.  An earlier version
+	 * called access(file3, F_OK) here first, but that created a
+	 * TOCTOU window between the parent check and the child open.
+	 * The child's errno after open() is the single source of truth:
+	 * ENOENT  -> file was absent, open() succeeded -> no bug.
+	 * EEXIST  -> file was present despite the probe creating only aa/Aa
+	 *           -> f2fs case-collision bug detected.  */
 
 	/* Create third file from child process */
 	int wstatus = 0;
 	pid_t pid = fork();
 	if (pid == 0) {
 		errno = 0;
-		fd = open(file3, O_WRONLY|O_CREAT, 0600);
+		fd = open(file3, O_WRONLY|O_CREAT|O_EXCL, 0600);
 		if (fd < 0) {
 			if (errno == EEXIST) {
 				VERBOSE(tracee, 1, "f2fs bug detected");
