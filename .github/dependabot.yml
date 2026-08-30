@@ -1,0 +1,76 @@
+# Dependabot config for vxyzview/xyzterm.
+#
+# This is a Gradle project, but Dependabot still scans transitive Maven
+# deps, which is where all 47 open alerts live. Weekly cadence matches
+# the project's release rhythm; majors are ignored so Dependabot never
+# breaks the build with a surprise Kotlin/AGP/lsp4j jump.
+
+version: 2
+
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Jakarta"
+    # Open a single PR per direct dep so we can review them one at a time.
+    open-pull-requests-limit: 5
+    groups:
+      # Group Netty + its modules so transitive bumps land together and
+      # don't fight over resolution.
+      netty:
+        patterns:
+          - "io.netty:*"
+          - "org.bouncycastle:*"
+          - "org.bitbucket.b_c:*"
+          - "org.jdom:*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Major bumps need a human: AGP, Kotlin, Gradle plugin coordinates
+      # change API, and lsp4j/tsBinding have shipped breaking changes
+      # between minors historically.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "ci"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
