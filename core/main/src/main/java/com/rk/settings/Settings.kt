@@ -2,6 +2,7 @@ package com.rk.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,47 +28,20 @@ object Settings {
     var is_app_font_asset by CachedPreference("is_app_font_asset", false)
     var is_terminal_font_asset by CachedPreference("is_terminal_font_asset", false)
     var ignore_storage_permission by CachedPreference("ignore_storage_permission", false)
-    private var _anr_watchdog by CachedPreference("anr", BuildConfig.DEBUG)
-    var anr_watchdog: Boolean
-        get() = FeatureRegistry.isEnabled("debug_mode") && _anr_watchdog
-        set(value) {
-            _anr_watchdog = value
-        }
-
-    private var _strict_mode by CachedPreference("strict_mode", BuildConfig.DEBUG)
-    var strict_mode: Boolean
-        get() = FeatureRegistry.isEnabled("debug_mode") && _strict_mode
-        set(value) {
-            _strict_mode = value
-        }
+    var anr_watchdog by debugGated("anr", BuildConfig.DEBUG)
+    var strict_mode by debugGated("strict_mode", BuildConfig.DEBUG)
 
     var expose_home_dir by CachedPreference("expose_home_dir", false)
 
-    private var _verbose_error by CachedPreference("verbose_error", BuildConfig.DEBUG)
-    var verbose_error: Boolean
-        get() = FeatureRegistry.isEnabled("debug_mode") && _verbose_error
-        set(value) {
-            _verbose_error = value
-        }
+    var verbose_error by debugGated("verbose_error", BuildConfig.DEBUG)
     var terminate_sessions_on_exit by CachedPreference("terminate_sessions_on_exit", false)
     var auto_backup by CachedPreference("auto_backup", false)
     var donated by CachedPreference("donated", false)
     var sandbox by CachedPreference("sandbox", true)
     var seccomp_mode by CachedPreference("seccomp_mode", "unspecified")
     var custom_bindings by CachedPreference("custom_bindings", "[]")
-    private var _desktop_mode by CachedPreference("desktop_mode", false)
-    var desktop_mode: Boolean
-        get() = FeatureRegistry.isEnabled("debug_mode") && _desktop_mode
-        set(value) {
-            _desktop_mode = value
-        }
-
-    private var _theme_flipper by CachedPreference("theme_flipper", false)
-    var theme_flipper: Boolean
-        get() = FeatureRegistry.isEnabled("debug_mode") && _theme_flipper
-        set(value) {
-            _theme_flipper = value
-        }
+    var desktop_mode by debugGated("desktop_mode", false)
+    var theme_flipper by debugGated("theme_flipper", false)
     var fullscreen by CachedPreference("fullscreen", false)
     var smart_toolbar by CachedPreference("smart_toolbar", false)
     var confirm_exit by CachedPreference("confirm_exit", true)
@@ -76,12 +50,7 @@ object Settings {
     var terminal_clipboard_keybindings by CachedPreference("terminal_clipboard_keybindings", true)
     var terminal_snippets by CachedPreference("terminal_snippets", "[]")
 
-    private var _enable_logcat by CachedPreference("enable_logcat", false)
-    var enable_logcat: Boolean
-        get() = FeatureRegistry.isEnabled("debug_mode") && _enable_logcat
-        set(value) {
-            _enable_logcat = value
-        }
+    var enable_logcat by debugGated("enable_logcat", false)
 
     // Int settings
     var theme_mode by
@@ -123,9 +92,12 @@ object Preference {
                 try {
                     prop.isAccessible = true
                     val delegate = prop.getDelegate(Settings)
-                    if (delegate is CachedPreference<*>) {
-                        delegate.key to delegate.defaultValue!!::class
-                    } else null
+                    val cached = when (delegate) {
+                        is CachedPreference<*> -> delegate
+                        is DebugGatedPreference -> delegate.underlying
+                        else -> null
+                    } ?: return@mapNotNull null
+                    cached.key to cached.defaultValue!!::class
                 } catch (_: Exception) {
                     null
                 }
@@ -398,6 +370,23 @@ open class CachedPreference<T>(val key: String, val defaultValue: T) : ReadWrite
         state = defaultValue
     }
 }
+
+class DebugGatedPreference(
+    private val key: String,
+    private val default: Boolean,
+    private val gate: () -> Boolean,
+) : ReadWriteProperty<Any?, Boolean> {
+    private val underlying = CachedPreference(key, default)
+    override fun getValue(thisRef: Any?, property: KProperty<*>) =
+        gate() && underlying.getValue(thisRef, property)
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
+        if (!gate()) Log.w("DebugGatedPreference", "ignored write to $key (debug gate closed)")
+        underlying.setValue(thisRef, property, value)
+    }
+}
+
+fun debugGated(key: String, default: Boolean) =
+    DebugGatedPreference(key, default) { FeatureRegistry.isEnabled("debug_mode") }
 
 const val DEFAULT_TERMINAL_EXTRA_KEYS =
     "[\n  [\n    \"ESC\",\n    {\n      \"key\": \"/\",\n      \"popup\": \"\\\\\"\n    },\n    {\n      \"key\": \"-\",\n      \"popup\": \"|\"\n    },\n    \"HOME\",\n    \"UP\",\n    \"END\",\n    \"PGUP\"\n  ],\n  [\n    \"TAB\",\n    \"CTRL\",\n    \"ALT\",\n    \"LEFT\",\n    \"DOWN\",\n    \"RIGHT\",\n    \"PGDN\"\n  ]\n]"
