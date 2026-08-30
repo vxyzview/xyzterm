@@ -14,6 +14,9 @@ on:
         required: true
         default: '4'
 
+permissions:
+  actions: write
+
 jobs:
   deleteWorkflowRuns:
     name: Delete old workflow runs

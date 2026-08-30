@@ -20,6 +20,9 @@ on:
           - 'release'
           - 'debug'
 
+permissions:
+  contents: read
+
 jobs:
   verify-reproducibility:
     runs-on: ubuntu-latest
