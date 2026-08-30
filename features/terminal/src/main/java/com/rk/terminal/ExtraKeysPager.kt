@@ -41,7 +41,6 @@ import com.rk.settings.Settings
 import com.rk.settings.DEFAULT_TERMINAL_EXTRA_KEYS
 import com.rk.terminal.virtualkeys.VirtualKeysConstants
 import com.rk.terminal.virtualkeys.VirtualKeysInfo
-import com.rk.terminal.virtualkeys.VirtualKeysListener
 import com.rk.terminal.virtualkeys.VirtualKeysView
 import com.rk.utils.toast
 
@@ -86,8 +85,10 @@ fun ExtraKeysPager(onSurfaceColor: Int, port: TerminalViewPort) {
                         factory = { context ->
                             VirtualKeysView(context, null).apply {
                                 port.installVirtualKeys(this)
-                                virtualKeysViewClient =
-                                    port.view()?.mTermSession?.let { VirtualKeysListener(it) }
+                                // Wire the initial client through the same
+                                // helper the terminal-side attach path uses,
+                                // so both sides agree on the wiring contract.
+                                TerminalSessionAttach().wireInitial(port.view(), this)
 
                                 buttonTextColor = onSurfaceColor
 

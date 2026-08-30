@@ -90,20 +90,16 @@ import com.rk.settings.Preference
 import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
 import com.rk.terminal.virtualkeys.VirtualKeysConstants
 import com.rk.terminal.virtualkeys.VirtualKeysInfo
-import com.rk.terminal.virtualkeys.VirtualKeysListener
 import com.rk.terminal.virtualkeys.VirtualKeysView
 import com.rk.theme.LocalThemeHolder
 import com.rk.theme.ThemeHolder
 import com.rk.theme.yellowStatus
 import com.rk.utils.dpToPx
 import com.rk.utils.toast
-import com.termux.terminal.TerminalColors
-import com.termux.terminal.TextStyle
 import com.termux.view.TerminalView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Properties
 
 // Package-level mutable singletons that lived here before
 // the TerminalViewPort seam (audit opportunity #3, ADR-0001) —
@@ -375,13 +371,11 @@ private suspend fun TerminalView.attachOrCreateSession(
         }
 
     if (session != null) {
-        session.updateTerminalSessionClient(client)
-        attachSession(session)
-        setTerminalViewClient(client)
-        // On-screen extra-keys (TAB/arrows) follow the attached session — same
-        // as changeSession. Posted to dodge the extra-keys-factory race.
-        wireExtraKeysClient(port)
-        reapplyTerminalColors(this)
+        // The seven-step attach dance (setTerminalViewClient race guard +
+        // session client + attach + re-publish + extra-keys wire + palette
+        // reapply + focus/keep-screen-on) lives in TerminalSessionAttach so
+        // the factory path and Terminal.changeSession can't drift again.
+        TerminalSessionAttach().run(this, port.virtualKeys(), session, client)
     }
 }
 
@@ -785,82 +779,15 @@ suspend fun Terminal.changeSession(sessionId: String, port: TerminalViewPort) {
     val client = TerminalBackEnd(port)
     val session = binder.getSession(sessionId) ?: binder.createSession(sessionId, client, this).session
 
-    session.updateTerminalSessionClient(client)
-    terminalView.attachSession(session)
-    terminalView.setTerminalViewClient(client)
-
-    terminalView.apply {
-        post {
-            if (Settings.terminal_keep_screen_on) keepScreenOn = true
-            isFocusableInTouchMode = true
-            requestFocus()
-        }
-    }
-    wireExtraKeysClient(port)
-    reapplyTerminalColors(terminalView)
+    // Same seven-step attach dance as the factory path — concentrated in
+    // TerminalSessionAttach so the two copies can't drift.
+    TerminalSessionAttach().run(terminalView, port.virtualKeys(), session, client)
 
     binder.getService().currentSession.value = sessionId
     Preference.setString(ACTIVE_SESSION_KEY, sessionId)
 }
 
-// Re-apply the theme palette after attaching a session. attachSession builds a
-// fresh emulator whose colors reset to Termux defaults, and the composable only
-// calls applyTerminalColors on recomposition/layout — so a switched or added
-// ("other") session would otherwise render with the default palette, making the
-// roo@xyz prompt (ANSI 32/34) mismatch the themed app until a relayout. The
-// last-applied signature lives on the view tag, so this is cheap + idempotent.
-private fun reapplyTerminalColors(view: TerminalView) {
-    val sig = view.tag as? TerminalColorSignature ?: return
-    if (sig.colors == null || sig.colors.isEmpty) return
-    view.applyTerminalColors(sig.onSurface, sig.surface, sig.colors)
-}
-
-// Point the on-screen extra-keys row at the live session so TAB/arrow keys
-// emit into the right shell. Posted: at attach time virtualKeysView may still
-// be null (its own AndroidView factory runs a frame later), so a direct
-// assignment would silently no-op and leave the keys dead until a manual
-// switch. A post() retries on the next frame, after both views exist.
-private fun wireExtraKeysClient(port: TerminalViewPort) {
-    port.view()?.post {
-        val session = port.view()?.mTermSession ?: return@post
-        port.virtualKeys()?.virtualKeysViewClient = VirtualKeysListener(session)
-    }
-}
-
-// Signature of colors last applied to a given TerminalView, stored on the view
-// itself (tag) so applyTerminalColors can skip the expensive reset + full
-// repaint when nothing changed. Per-view storage matters: after activity
-// recreation the fresh TerminalView has no signature yet, so its first apply
-// always runs — a process-global cache here would let the new view inherit a
-// stale "already applied" verdict and render with default palette colors.
-private data class TerminalColorSignature(
-    val colors: Properties?,
-    val surface: Int,
-    val onSurface: Int,
-)
-
-private fun TerminalView.applyTerminalColors(onSurfaceColor: Int, surfaceColor: Int, terminalColors: Properties) {
-    if (mEmulator == null) return
-    val last = tag as? TerminalColorSignature
-    if (last?.colors == terminalColors && last.surface == surfaceColor && last.onSurface == onSurfaceColor) {
-        return
-    }
-    tag = TerminalColorSignature(terminalColors, surfaceColor, onSurfaceColor)
-
-    this.onScreenUpdated()
-
-    mEmulator?.mColors?.reset()
-    TerminalColors.COLOR_SCHEME.updateWith(terminalColors)
-
-    val cursorColor =
-        terminalColors.getProperty("cursor")?.let { runCatching { android.graphics.Color.parseColor(it) }.getOrNull() }
-            ?: onSurfaceColor
-
-    mEmulator?.mColors?.mCurrentColors?.apply {
-        set(TextStyle.COLOR_INDEX_FOREGROUND, onSurfaceColor)
-        set(TextStyle.COLOR_INDEX_BACKGROUND, surfaceColor)
-        set(TextStyle.COLOR_INDEX_CURSOR, cursorColor)
-    }
-
-    invalidate()
-}
+// Re-apply the theme palette, wire the extra-keys client, the per-view
+// TerminalColorSignature cache, and applyTerminalColors all live in
+// TerminalSessionAttach — the factory path and Terminal.changeSession both
+// go through it.
