@@ -35,27 +35,10 @@ open class App : Application() {
             val app = application ?: throw IllegalStateException("Application is not initialized yet")
             PackageInfoCompat.getLongVersionCode(app.packageManager.getPackageInfo(app.packageName, 0))
         }
-
-        private var _iconPackManager: IconPackManager? = null
-        val iconPackManager: IconPackManager
-            get() {
-                if (_iconPackManager == null) {
-                    _iconPackManager = IconPackManager(application!!)
-                }
-
-                return _iconPackManager!!
-            }
-
-        private var _themeManager: ThemeManager? = null
-        val themeManager: ThemeManager
-            get() {
-                if (_themeManager == null) {
-                    _themeManager = ThemeManager(application!!)
-                }
-
-                return _themeManager!!
-            }
     }
+
+    lateinit var iconPackManager: IconPackManager; private set
+    lateinit var themeManager: ThemeManager; private set
 
     init {
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler)
@@ -66,6 +49,8 @@ open class App : Application() {
         super.onCreate()
         application = this
         Res.application = this
+        iconPackManager = IconPackManager(this)
+        themeManager = ThemeManager(this)
 
         // ponytail: must run BEFORE FeatureRegistry.initFeatures (below chain reaches
         // ToolbarConfiguration, whose object-init reads CommandProvider.SettingsCommand,

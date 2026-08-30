@@ -31,8 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.rk.App.Companion.iconPackManager
-import com.rk.App.Companion.themeManager
+import com.rk.App
 import com.rk.DefaultScope
 import com.rk.activities.settings.SettingsRoutes
 import com.rk.components.BottomSheetContent
@@ -55,6 +54,9 @@ import kotlinx.coroutines.launch
 fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
     val showDayNightBottomSheet = remember { mutableStateOf(false) }
     val amoledState = remember { mutableStateOf(Settings.amoled) }
+    val app = LocalContext.current.applicationContext as App
+    val themeManager = app.themeManager
+    val iconPackManager = app.iconPackManager
 
     PreferenceLayout(label = stringResource(strings.themes)) {
         PreferenceGroup(heading = stringResource(strings.theme_settings)) {
