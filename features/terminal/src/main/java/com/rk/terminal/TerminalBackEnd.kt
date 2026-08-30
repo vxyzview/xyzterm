@@ -1,10 +1,7 @@
 package com.rk.terminal
 
 import android.Manifest
-import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -17,7 +14,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.rk.activities.terminal.Terminal
-import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
@@ -35,7 +31,6 @@ import kotlinx.coroutines.launch
 
 private val URL_REGEX = Regex("""https?://[^\s"'<>]+|www\.[^\s"'<>]+""")
 
-private const val BELL_CHANNEL_ID = "terminal_bell"
 private const val BELL_NOTIFICATION_ID = 2
 private const val BELL_NOTIFY_THROTTLE_MS = 5_000L
 
@@ -79,7 +74,8 @@ class TerminalBackEnd(private val port: TerminalViewPort) : TerminalViewClient, 
     }
 
     // Throttle: a job that rings repeatedly (e.g. `while true; echo -e '\a'`)
-    // must not spam notifications.
+    // must not spam notifications. State stays here — session-side, not a
+    // notification concern.
     private var lastBellNotifyAt = 0L
 
     private fun notifyBellInBackground(session: TerminalSession) {
@@ -90,17 +86,6 @@ class TerminalBackEnd(private val port: TerminalViewPort) : TerminalViewClient, 
 
         val context = port.view()?.context?.applicationContext ?: return
 
-        val nm = context.getSystemService(NotificationManager::class.java) ?: return
-        runCatching {
-            nm.createNotificationChannel(
-                NotificationChannel(
-                    BELL_CHANNEL_ID,
-                    strings.bell_notification.getString(),
-                    NotificationManager.IMPORTANCE_DEFAULT,
-                )
-            )
-        }
-
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
                 PackageManager.PERMISSION_GRANTED
@@ -108,24 +93,11 @@ class TerminalBackEnd(private val port: TerminalViewPort) : TerminalViewClient, 
             return
         }
 
-        val intent = Intent(context, Terminal::class.java)
-        val pendingIntent =
-            PendingIntent.getActivity(
-                context,
-                3,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-            )
-
-        val notification =
-            Notification.Builder(context, BELL_CHANNEL_ID)
-                .setSmallIcon(drawables.terminal)
-                .setContentTitle(strings.app_name.getString())
-                .setContentText(strings.bell_notification.getString())
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .build()
-
+        val notification = TerminalNotifications.bellNotification(
+            context = context,
+            openActivityIntent = Intent(context, Terminal::class.java),
+        )
+        val nm = context.getSystemService(NotificationManager::class.java) ?: return
         runCatching { nm.notify(BELL_NOTIFICATION_ID, notification) }
     }
 
