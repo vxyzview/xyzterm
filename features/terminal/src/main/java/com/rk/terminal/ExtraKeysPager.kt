@@ -44,7 +44,6 @@ import com.rk.terminal.virtualkeys.VirtualKeysInfo
 import com.rk.terminal.virtualkeys.VirtualKeysListener
 import com.rk.terminal.virtualkeys.VirtualKeysView
 import com.rk.utils.toast
-import java.lang.ref.WeakReference
 
 /**
  * The two-page input area under the terminal: page 0 is the extra-keys row,
@@ -87,9 +86,6 @@ fun ExtraKeysPager(onSurfaceColor: Int, port: TerminalViewPort) {
                         factory = { context ->
                             VirtualKeysView(context, null).apply {
                                 port.installVirtualKeys(this)
-                                // Keep the legacy global in sync for callers that still
-                                // construct TerminalBackEnd() with the no-arg shim. TV4 deletes this.
-                                virtualKeysView = WeakReference(this)
                                 virtualKeysViewClient =
                                     port.view()?.mTermSession?.let { VirtualKeysListener(it) }
 

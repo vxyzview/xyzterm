@@ -103,25 +103,23 @@ import com.termux.view.TerminalView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 import java.util.Properties
 
-var terminalView = WeakReference<TerminalView?>(null)
-var virtualKeysView = WeakReference<VirtualKeysView?>(null)
-
-/** Set by TerminalBackEnd.onBell; the header indicator flashes until reset. */
-var bellPulse by mutableStateOf(false)
+// Package-level mutable singletons that lived here before
+// the TerminalViewPort seam (audit opportunity #3, ADR-0001) —
+// deleted in this PR. Direct callers now read through the
+// TerminalViewPortHolder passed into the Compose tree.
 
 @Composable
-fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
+fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal, port: TerminalViewPort) {
     ProvideIsExpandedScreen {
-        TerminalScreenInternal(terminalActivity = terminalActivity)
+        TerminalScreenInternal(terminalActivity = terminalActivity, port = port)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Terminal) {
+fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Terminal, port: TerminalViewPort) {
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val surfaceColor = MaterialTheme.colorScheme.surface.toArgb()
     // Use the app's theme-mode resolution (honors Settings.theme_mode), not the raw
@@ -131,11 +129,6 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val currentTheme = LocalThemeHolder.current
-    // One per screen. The view factory installs both the TerminalView and
-    // (via ExtraKeysPager) the VirtualKeysView into this holder; the compose
-    // header and back-end read from it. Replaces the package-level terminalView
-    // / virtualKeysView / bellPulse / Terminal.isForeground globals.
-    val port = remember { TerminalViewPortHolder() }
 
     DisposableEffect(Unit) { onDispose { keyboardController?.hide() } }
 
@@ -260,10 +253,6 @@ private fun ColumnScope.TerminalView(
                 )
 
                 port.installView(this)
-                // Keep the legacy global in sync so callers that still construct
-                // TerminalBackEnd() (drawer "+" button, changeSession, deep link)
-                // continue to see the view through the no-arg shim. Removed in TV4.
-                terminalView = WeakReference(this)
                 terminalActivity.handleIntent(terminalActivity.intent)
                 setTextSize(dpToPx(Settings.terminal_font_size.toFloat(), context))
                 // Wire up the client immediately, independent of session availability
@@ -813,13 +802,6 @@ suspend fun Terminal.changeSession(sessionId: String, port: TerminalViewPort) {
     binder.getService().currentSession.value = sessionId
     Preference.setString(ACTIVE_SESSION_KEY, sessionId)
 }
-
-// Compatibility overload for callers that don't have a [TerminalViewPort] in
-// scope (the activity's intent / deep-link handlers, which fire before the
-// Compose tree has built one). Reads through the package-level globals via
-// the legacy shim. Deleted in TV4.
-suspend fun Terminal.changeSession(sessionId: String) =
-    changeSession(sessionId, LegacyPackageLevelPort)
 
 // Re-apply the theme palette after attaching a session. attachSession builds a
 // fresh emulator whose colors reset to Termux defaults, and the composable only

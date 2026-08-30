@@ -42,7 +42,7 @@ import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.terminal.TerminalBackup
-import com.rk.terminal.terminalView
+import com.rk.terminal.TerminalViewPortHolder
 import com.rk.utils.LoadingPopup
 import com.rk.utils.dialogRes
 import com.rk.utils.dpToPx
@@ -120,7 +120,10 @@ fun SettingsTerminalScreen(navController: NavController) {
                 default = Settings.terminal_font_size,
                 onValueChanged = {
                     Settings.terminal_font_size = it
-                    terminalView.get()?.setTextSize(dpToPx(it.toFloat(), context))
+                    // Live apply: only when the terminal activity is up. The
+                    // settings screen lives in a different activity that has
+                    // no TerminalView of its own.
+                    Terminal.instance?.port?.view()?.setTextSize(dpToPx(it.toFloat(), context))
                 },
             )
 
@@ -153,7 +156,7 @@ fun SettingsTerminalScreen(navController: NavController) {
                     } else {
                         window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }
-                    terminalView.get()?.keepScreenOn = it
+                    Terminal.instance?.port?.view()?.keepScreenOn = it
                 },
             )
         }

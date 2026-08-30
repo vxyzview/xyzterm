@@ -77,8 +77,8 @@ import com.rk.terminal.RootfsSource
 import com.rk.terminal.SessionService
 import com.rk.terminal.TerminalBackEnd
 import com.rk.terminal.TerminalScreen
+import com.rk.terminal.TerminalViewPortHolder
 import com.rk.terminal.changeSession
-import com.rk.terminal.terminalView
 import com.rk.theme.XedTheme
 import com.rk.utils.AppDialogHost
 import com.rk.utils.errorDialog
@@ -97,6 +97,18 @@ import java.net.UnknownHostException
 class Terminal : AppCompatActivity() {
     var sessionBinder by mutableStateOf<WeakReference<SessionService.SessionBinder>?>(null)
     var isBound = false
+
+    /**
+     * The screen surface. Created in [onCreate] before any composable runs so
+     * [handleIntent] / [handleDeepLink] can reach the view before the
+     * Compose tree attaches. Owned by the activity; both [TerminalScreen]
+     * and the back-end constructed inside it read from the same instance.
+     *
+     * `internal` because the settings screens (different activity, no
+     * TerminalView) call back into it for live-apply on font-size and
+     * keep-screen-on. They guard with `Terminal.instance != null`.
+     */
+    internal lateinit var port: TerminalViewPortHolder
 
     val serviceConnection =
         object : ServiceConnection {
@@ -142,7 +154,9 @@ class Terminal : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         instance = this
-        isForeground = true
+        if (::port.isInitialized) {
+            port.isForeground.value = true
+        }
     }
 
     fun handleIntent(intent: Intent) {
@@ -172,15 +186,15 @@ class Terminal : AppCompatActivity() {
         }
 
         val pwd = intent.getStringExtra("cwd") ?: return
-        terminalView.get() ?: return
+        port.view() ?: return
 
         val sessionId = File(pwd).name
 
         lifecycleScope.launch(Dispatchers.Main) {
-            val client = TerminalBackEnd()
+            val client = TerminalBackEnd(port)
             val info = binder.getSessionInfoByPwd(pwd) ?: binder.createSession(sessionId, client, this@Terminal)
 
-            this@Terminal.changeSession(info.id)
+            this@Terminal.changeSession(info.id, port)
             setIntent(intent)
         }
     }
@@ -207,9 +221,9 @@ class Terminal : AppCompatActivity() {
                 }
                 lifecycleScope.launch(Dispatchers.Main) {
                     if (name !in binder.getService().sessionList) {
-                        binder.createSession(name, TerminalBackEnd(), this@Terminal)
+                        binder.createSession(name, TerminalBackEnd(port), this@Terminal)
                     }
-                    this@Terminal.changeSession(name)
+                    this@Terminal.changeSession(name, port)
                 }
             }
             // "run" and "?cmd=" intentionally dropped: a BROWSABLE link writing commands
@@ -219,7 +233,9 @@ class Terminal : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        isForeground = false
+        if (::port.isInitialized) {
+            port.isForeground.value = false
+        }
         if (isBound) {
             unbindService(serviceConnection)
             isBound = false
@@ -239,9 +255,6 @@ class Terminal : AppCompatActivity() {
             private set(value) {
                 activityRef = WeakReference(value)
             }
-
-        /** True while the terminal UI is visible; gates bell notifications. */
-        var isForeground = false
     }
 
     private val notificationPermissionLauncher =
@@ -252,6 +265,7 @@ class Terminal : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         instance = this
+        port = TerminalViewPortHolder()
 
         if (needsNotificationPermission()) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -271,7 +285,7 @@ class Terminal : AppCompatActivity() {
                         )
                     } else if (sessionBinder != null) {
                         LaunchedEffect(Unit) { FilePermission.verifyStoragePermission(this@Terminal) }
-                        TerminalScreenHost(this)
+                        TerminalScreenHost(this, port)
                     } else {
                         Column(
                             modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -328,7 +342,7 @@ class Terminal : AppCompatActivity() {
 
     @OptIn(DelicateCoroutinesApi::class)
     @Composable
-    fun TerminalScreenHost(context: Context) {
+    fun TerminalScreenHost(context: Context, port: TerminalViewPortHolder) {
         var unsupportedCpu by remember { mutableStateOf(false) }
         var downloadStarted by remember { mutableStateOf(false) }
         var ubuntuInstalled by remember { mutableStateOf(false) }
@@ -463,7 +477,7 @@ class Terminal : AppCompatActivity() {
                 }
 
                 installNextStage != null && (installNextStage != NEXT_STAGE.NONE || ubuntuInstalled) -> {
-                    TerminalScreen(terminalActivity = this@Terminal)
+                    TerminalScreen(terminalActivity = this@Terminal, port = port)
                 }
 
                 downloadStarted -> {
@@ -474,7 +488,7 @@ class Terminal : AppCompatActivity() {
                 }
 
                 ubuntuInstalled -> {
-                    TerminalScreen(terminalActivity = this@Terminal)
+                    TerminalScreen(terminalActivity = this@Terminal, port = port)
                 }
 
                 else -> {

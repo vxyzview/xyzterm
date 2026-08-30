@@ -39,53 +39,7 @@ private const val BELL_CHANNEL_ID = "terminal_bell"
 private const val BELL_NOTIFICATION_ID = 2
 private const val BELL_NOTIFY_THROTTLE_MS = 5_000L
 
-/**
- * File-private shim that reads through the existing package-level globals.
- * Kept so the no-arg `TerminalBackEnd()` constructor — which every existing
- * call site still uses in TV2 — keeps working unchanged. Deleted in TV4
- * once every call site passes a real port.
- */
-private object LegacyPackageLevelPort : TerminalViewPort {
-    // bellPulse is a package-level MutableState; the proxy below forwards
-    // its set/get through the global so the no-arg-caller path of the
-    // back-end remains observationally identical to before TV2. Same idea
-    // for isForeground, which is a plain `var` in Terminal's companion.
-    // Both shims are deleted in TV4 once every call site passes a real port.
-    override fun view(): TerminalView? = terminalView.get()
-    override fun virtualKeys(): VirtualKeysView? = virtualKeysView.get()
-    override val bell: BellState = LegacyBellState
-    override val isForeground: androidx.compose.runtime.MutableState<Boolean> = LegacyForegroundState
-}
-
-private object LegacyBellState : BellState() {
-    override var value: Boolean
-        get() = bellPulse
-        set(v) {
-            bellPulse = v
-        }
-}
-
-private object LegacyForegroundState : androidx.compose.runtime.MutableState<Boolean> {
-    override var value: Boolean
-        get() = Terminal.isForeground
-        set(v) {
-            Terminal.isForeground = v
-        }
-    override fun component1(): Boolean = value
-    override fun component2(): kotlin.reflect.KFunction1<Boolean, Unit> = { value = it }
-}
-
-class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
-    private val port: TerminalViewPort
-
-    /** No-arg ctor: read through the package-level globals (legacy). */
-    constructor() : this(LegacyPackageLevelPort)
-
-    /** New ctor: read through the supplied [TerminalViewPort]. */
-    constructor(port: TerminalViewPort) {
-        this.port = port
-    }
-
+class TerminalBackEnd(private val port: TerminalViewPort) : TerminalViewClient, TerminalSessionClient {
     override fun onTextChanged(changedSession: TerminalSession) {
         port.view()?.onScreenUpdated()
     }
@@ -322,7 +276,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
                 activity.finish()
             } else {
                 activity.lifecycleScope.launch {
-                    activity.changeSession(sessionBinder.getService().sessionList.first())
+                    activity.changeSession(sessionBinder.getService().sessionList.first(), port)
                 }
             }
             return true

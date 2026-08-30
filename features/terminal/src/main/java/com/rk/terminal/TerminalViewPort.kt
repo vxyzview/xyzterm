@@ -40,7 +40,7 @@ interface TerminalViewPort {
  */
 class BellState {
     private val state = mutableStateOf(false)
-    open var value: Boolean
+    var value: Boolean
         get() = state.value
         set(v) {
             state.value = v
