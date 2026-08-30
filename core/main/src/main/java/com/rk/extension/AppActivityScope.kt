@@ -1,7 +1,7 @@
 package com.rk.extension
 
 import android.app.Activity
-import androidx.compose.runtime.State
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import java.lang.ref.WeakReference
 
@@ -27,7 +27,7 @@ class AppActivityScope {
         get() = activityRef?.get()
 
     /** True between the terminal activity's onResume and onStop. Mirrors the old `Terminal.isForeground`. */
-    val isForeground: State<Boolean> = mutableStateOf(false)
+    val isForeground: MutableState<Boolean> = mutableStateOf(false)
 
     internal fun setCurrent(activity: Activity?) {
         activityRef = if (activity == null) null else WeakReference(activity)
