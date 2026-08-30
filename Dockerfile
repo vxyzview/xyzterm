@@ -1,7 +1,7 @@
 # ==========================================
 # Stage 1: Build Environment
 # ==========================================
-FROM eclipse-temurin:21-jdk AS builder
+FROM eclipse-temurin:25-jdk AS builder
 
 # Set environment variables for Android SDK
 ENV ANDROID_HOME=/opt/android-sdk
