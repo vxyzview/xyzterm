@@ -3,22 +3,24 @@ package com.rk.extension
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import java.lang.ref.WeakReference
 
-object ActivityProvider : Application.ActivityLifecycleCallbacks {
-
-    private var currentActivityRef: WeakReference<Activity>? = null
-
-    val currentActivity: Activity?
-        get() = currentActivityRef?.get()
+/**
+ * Mirrors Android lifecycle into the [AppActivityScope]. Constructed once at
+ * [com.rk.App.onCreate] with the shared scope; registered as lifecycle callbacks
+ * on the application. Not a singleton anymore — call sites that need the
+ * current activity go through [AppActivityScope.currentActivity] directly.
+ */
+class ActivityProvider(
+    private val scope: AppActivityScope,
+) : Application.ActivityLifecycleCallbacks {
 
     override fun onActivityResumed(activity: Activity) {
-        currentActivityRef = WeakReference(activity)
+        scope.setCurrent(activity)
     }
 
     override fun onActivityPaused(activity: Activity) {
-        if (currentActivityRef?.get() == activity) {
-            currentActivityRef = null
+        if (scope.currentActivity == activity) {
+            scope.setCurrent(null)
         }
     }
 

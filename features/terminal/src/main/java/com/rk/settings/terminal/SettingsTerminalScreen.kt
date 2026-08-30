@@ -34,6 +34,7 @@ import com.rk.feature.FeatureRegistry
 import com.rk.file.child
 import com.rk.file.createFileIfNot
 import com.rk.file.toFileObject
+import com.rk.App
 import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
@@ -120,7 +121,8 @@ fun SettingsTerminalScreen(navController: NavController) {
                     // Live apply: only when the terminal activity is up. The
                     // settings screen lives in a different activity that has
                     // no TerminalView of its own.
-                    Terminal.instance?.port?.view()?.setTextSize(dpToPx(it.toFloat(), context))
+                    (App.activityScope.currentActivity as? Terminal)?.port?.view()
+                        ?.setTextSize(dpToPx(it.toFloat(), context))
                 },
             )
 
@@ -147,13 +149,14 @@ fun SettingsTerminalScreen(navController: NavController) {
                     Settings.terminal_keep_screen_on = it
                     // Apply live: both the view flag and the window flag set by
                     // the terminal host must follow, not just after a restart.
-                    val window = Terminal.instance?.window
+                    val terminal = App.activityScope.currentActivity as? Terminal
+                    val window = terminal?.window
                     if (it) {
                         window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     } else {
                         window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }
-                    Terminal.instance?.port?.view()?.keepScreenOn = it
+                    terminal?.port?.view()?.keepScreenOn = it
                 },
             )
         }

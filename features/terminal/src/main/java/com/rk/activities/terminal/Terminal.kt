@@ -54,6 +54,7 @@ import com.rk.commands.KeyCombination
 import com.rk.commands.KeybindingsManager
 import com.rk.exec.ProotSandboxPaths
 import com.rk.exec.isTerminalInstalled
+import com.rk.extension.AppActivityScope
 import com.rk.file.FilePermission
 import com.rk.file.child
 import com.rk.resources.getFilledString
@@ -112,7 +113,7 @@ class Terminal : AppCompatActivity() {
      *
      * `internal` because the settings screens (different activity, no
      * TerminalView) call back into it for live-apply on font-size and
-     * keep-screen-on. They guard with `Terminal.instance != null`.
+     * keep-screen-on. They guard with `App.activityScope.currentActivity is Terminal`.
      */
     internal var port: TerminalViewPortHolder? = null
 
@@ -132,8 +133,10 @@ class Terminal : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        instance = this
-        port?.isForeground?.value = true
+        App.activityScope.markForeground(this)
+        if (::port.isInitialized) {
+            port.isForeground.value = true
+        }
     }
 
     fun handleIntent(intent: Intent) {
@@ -214,6 +217,7 @@ class Terminal : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         port?.isForeground?.value = false
+        App.activityScope.markBackground()
         if (::sessionRegistry.isInitialized) {
             sessionRegistry.unbind()
         }
@@ -225,15 +229,6 @@ class Terminal : AppCompatActivity() {
                 PackageManager.PERMISSION_GRANTED
     }
 
-    companion object {
-        private var activityRef = WeakReference<Terminal?>(null)
-        var instance: Terminal?
-            get() = activityRef.get()
-            private set(value) {
-                activityRef = WeakReference(value)
-            }
-    }
-
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> }
 
@@ -241,7 +236,6 @@ class Terminal : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        instance = this
         port = TerminalViewPortHolder()
         sessionRegistry = ServiceBackedSessionRegistry(this, this)
 
