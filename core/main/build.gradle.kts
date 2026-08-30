@@ -132,7 +132,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.commons.net)
     implementation(libs.okhttp)
-    implementation(libs.material.motion.compose)
     implementation(libs.photoview)
     implementation(libs.anrwatchdog)
     implementation(libs.kotlin.reflect)
