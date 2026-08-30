@@ -32,14 +32,14 @@ import java.util.concurrent.Executors
 
 @OptIn(DelicateCoroutinesApi::class)
 open class App : Application() {
-    lateinit var activityScope: AppActivityScope
-        private set
-
     companion object {
         val versionCode: Long by lazy {
             val app = application ?: throw IllegalStateException("Application is not initialized yet")
             PackageInfoCompat.getLongVersionCode(app.packageManager.getPackageInfo(app.packageName, 0))
         }
+
+        lateinit var activityScope: AppActivityScope
+            private set
     }
 
     lateinit var iconPackManager: IconPackManager; private set
@@ -60,8 +60,8 @@ open class App : Application() {
         // ponytail: scope must exist before ActivityProvider registers, otherwise
         // the very first onActivityResumed callback (terminal activity launch)
         // would null-set a not-yet-constructed scope. Eager construct here.
-        activityScope = AppActivityScope()
-        registerActivityLifecycleCallbacks(ActivityProvider(activityScope))
+        App.activityScope = AppActivityScope()
+        registerActivityLifecycleCallbacks(ActivityProvider(App.activityScope))
 
         // ponytail: must run BEFORE FeatureRegistry.initFeatures (below chain reaches
         // ToolbarConfiguration, whose object-init reads CommandProvider.SettingsCommand,
