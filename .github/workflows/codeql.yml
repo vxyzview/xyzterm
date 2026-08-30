@@ -1,0 +1,50 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev]
+  schedule:
+    - cron: '17 6 * * 1'
+
+permissions:
+  # Required for all CodeQL workflows
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            # The CMake-built native modules (proot, link2symlink) need
+            # cmake 3.22.1 which the default CodeQL autobuilder doesn't
+            # provide. Build-mode 'none' skips the full gradle build and
+            # analyzes the Kotlin/Java source files directly — CodeQL's
+            # Kotlin extractor can parse .kt files without compilation.
+            build-mode: none
+          - language: actions
+          - language: python
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
