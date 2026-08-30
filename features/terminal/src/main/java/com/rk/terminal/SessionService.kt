@@ -13,6 +13,7 @@ import android.os.PowerManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.rk.DefaultScope
+import com.rk.activities.terminal.Terminal
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Preference
