@@ -1,12 +1,8 @@
 package com.rk.terminal
 
 import android.content.Context
-import com.rk.file.child
-import com.rk.file.sandboxDir
-import com.rk.file.sandboxHomeDir
-import com.rk.utils.getTempDir
+import com.rk.exec.ProotSandboxPaths
 import com.rk.utils.isMainThread
-import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,14 +17,9 @@ suspend fun CoroutineScope.getNextStage(context: Context): NEXT_STAGE = withCont
         throw RuntimeException("IO operation on the main thread")
     }
 
-    val sandboxFile = File(getTempDir(), "sandbox.tar.gz")
-    val rootfsFiles =
-        sandboxDir().listFiles()?.filter {
-            it.absolutePath != sandboxHomeDir().absolutePath &&
-                it.absolutePath != sandboxDir().child("tmp").absolutePath
-        } ?: emptyList()
+    val paths = ProotSandboxPaths(context)
 
-    return@withContext if (sandboxFile.exists().not() || rootfsFiles.isEmpty().not()) {
+    return@withContext if (!paths.hasPendingTarball() || paths.hasRootfsFiles()) {
         NEXT_STAGE.NONE
     } else {
         NEXT_STAGE.EXTRACTION

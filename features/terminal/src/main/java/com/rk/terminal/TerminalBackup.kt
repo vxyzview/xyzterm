@@ -1,9 +1,9 @@
 package com.rk.terminal
 
+import com.rk.exec.ProotSandboxPaths
 import com.rk.file.child
 import com.rk.file.createFileIfNot
-import com.rk.file.localDir
-import com.rk.file.sandboxDir
+import com.rk.utils.application
 import com.rk.utils.getTempDir
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -36,14 +36,14 @@ object TerminalBackup {
             "--exclude=sdcard",
         )
 
-    fun backupDir(): File = localDir().child("backups")
+    fun backupDir(): File = ProotSandboxPaths(application!!).processCwd.child("backups")
 
     /** Tars the sandbox into [targetFile]. Returns true on success. */
     suspend fun create(targetFile: File): Boolean =
         withContext(Dispatchers.IO) {
             val process =
                 ProcessBuilder("tar", "-czf", targetFile.absolutePath, ".", *EXCLUDES)
-                    .directory(sandboxDir())
+                    .directory(ProotSandboxPaths(application!!).sandboxRoot)
                     .redirectErrorStream(true)
                     .start()
             // Drain merged output on a side thread while tar runs; an undrained
@@ -137,15 +137,15 @@ object TerminalBackup {
                         )
                 }
 
-                // Raw child path: the sandboxDir() getter auto-creates the
+                // Raw child path: the ProotSandboxPaths.sandboxRoot getter auto-creates the
                 // directory, which would block the rename below.
-                val sandboxPath = localDir().child("sandbox")
+                val sandboxPath = ProotSandboxPaths(application!!).sandboxRoot
                 sandboxPath.deleteRecursively()
                 if (!staging.renameTo(sandboxPath)) {
                     return@withContext "could not move extracted files into place"
                 }
 
-                localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
+                ProotSandboxPaths(application!!).processCwd.child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
                 null
             } catch (e: Exception) {
                 e.message ?: "restore failed"

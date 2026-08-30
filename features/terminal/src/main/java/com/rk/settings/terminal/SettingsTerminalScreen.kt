@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
 import android.view.WindowManager
 import com.rk.activities.terminal.Terminal
+import com.rk.exec.ProotSandboxPaths
 import com.rk.exec.isTerminalInstalled
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,10 +33,6 @@ import com.rk.components.compose.preferences.switch.PreferenceSwitch
 import com.rk.feature.FeatureRegistry
 import com.rk.file.child
 import com.rk.file.createFileIfNot
-import com.rk.file.localBinDir
-import com.rk.file.localDir
-import com.rk.file.localLibDir
-import com.rk.file.sandboxDir
 import com.rk.file.toFileObject
 import com.rk.resources.getFilledString
 import com.rk.resources.getString
@@ -330,10 +327,11 @@ fun SettingsTerminalScreen(navController: NavController) {
                                 val loading = LoadingPopup(activity, null)
                                 withContext(Dispatchers.Main) { runCatching { loading.show() } }
                                 runCatching {
-                                    localBinDir().deleteRecursively()
-                                    localLibDir().deleteRecursively()
-                                    sandboxDir().deleteRecursively()
-                                    localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
+                                    val paths = ProotSandboxPaths(context)
+                                    paths.sandboxBin.deleteRecursively()
+                                    paths.sandboxLib.deleteRecursively()
+                                    paths.sandboxRoot.deleteRecursively()
+                                    paths.processCwd.child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
                                 }
                                 terminalInstalled = false
                                 withContext(Dispatchers.Main + NonCancellable) {

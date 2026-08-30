@@ -29,8 +29,8 @@ import com.rk.components.InfoBlock
 import com.rk.components.ResetButton
 import com.rk.components.compose.preferences.base.LocalIsExpandedScreen
 import com.rk.components.compose.preferences.base.PreferenceScaffold
+import com.rk.exec.ProotSandboxPaths
 import com.rk.file.child
-import com.rk.file.sandboxDir
 import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
@@ -45,7 +45,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun TerminalFontScreen() {
     val context = LocalContext.current
-    val etcFontExists = sandboxDir().child("etc/font.ttf").exists()
+    val etcFontExists = ProotSandboxPaths(context).sandboxRoot.child("etc/font.ttf").exists()
     var fontPath by remember { mutableStateOf(Settings.terminal_font_path) }
 
     // Preview the effective font: the custom pick if set, else the bundled default.

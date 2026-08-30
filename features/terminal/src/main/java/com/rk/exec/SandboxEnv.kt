@@ -2,12 +2,9 @@ package com.rk.exec
 
 import android.content.Context
 import com.rk.feature.FeatureRegistry
-import com.rk.file.localDir
-import com.rk.file.localLibDir
-import com.rk.file.sandboxHomeDir
 import com.rk.settings.Settings
-import com.rk.utils.application
 import com.rk.utils.getSourceDirOfPackage
+import com.rk.utils.application
 import com.rk.utils.getTempDir
 import java.io.File
 import java.util.TimeZone
@@ -18,7 +15,7 @@ import java.util.TimeZone
  * hand-rolled this map and drifted apart over time.
  */
 object SandboxEnv {
-    fun build(context: Context, prootTmpDir: String): MutableMap<String, String> {
+    fun build(context: Context, paths: ProotSandboxPaths, prootTmpDir: String): MutableMap<String, String> {
         val nativeLibDir = context.applicationInfo.nativeLibraryDir
         val env =
             mutableMapOf(
@@ -40,14 +37,14 @@ object SandboxEnv {
                     if (Settings.sandbox) {
                         "/home"
                     } else {
-                        sandboxHomeDir(context).absolutePath
+                        paths.sandboxHome.absolutePath
                     },
                 "PROMPT_DIRTRIM" to "2",
                 "SANDBOX" to Settings.sandbox.toString(),
-                "LOCAL" to localDir(context).absolutePath,
+                "LOCAL" to paths.processCwd.absolutePath,
                 "PRIVATE_DIR" to context.filesDir.parentFile!!.absolutePath,
-                "EXT_HOME" to sandboxHomeDir(context).absolutePath,
-                "LD_LIBRARY_PATH" to localLibDir(context).absolutePath,
+                "EXT_HOME" to paths.sandboxHome.absolutePath,
+                "LD_LIBRARY_PATH" to paths.sandboxLib.absolutePath,
                 "TMP_DIR" to getTempDir().absolutePath,
                 "TMPDIR" to getTempDir().absolutePath,
                 "TZ" to TimeZone.getDefault().id,
