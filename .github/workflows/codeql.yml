@@ -48,7 +48,11 @@ jobs:
         - language: c-cpp
           build-mode: none
         - language: java-kotlin
-          build-mode: autobuild
+          # autobuild fails because the native CMake modules (proot,
+          # link2symlink) need cmake 3.22.1 which the CodeQL runner
+          # doesn't provide. 'none' makes the Kotlin extractor parse .kt
+          # files directly without compiling.
+          build-mode: none
         - language: python
           build-mode: none
         # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'rust', 'swift'
