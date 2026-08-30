@@ -39,24 +39,9 @@ room = "2.8.4"
 
 publish = "0.36.0"
 collection = "1.6.0"
-jcodings = "1.0.64"
-jdtAnnotation = "2.4.100"
-robolectric = "4.16.1"
-kotlinxCoroutines = "1.10.2"
-junit = "4.13.2"
-truth = "1.4.5"
-joni = "2.2.7"
-snakeyaml = "3.0.1"
-moshi = "1.15.2"
-monarch = "1.0.3"
-monarchPack = "1.0.2"
-monarchJson = "1.0.2"
-regexOnig = "1.0.3"
-regexRe2j = "1.0.2"
 gson = "2.13.2"
 semver = "3.1.0"
 leakcanary = "2.14"
-motionCompose = "2.0.1"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -65,7 +50,6 @@ android-test = { id = "com.android.test" }
 android-baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
 
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
@@ -136,32 +120,15 @@ androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstall
 # Misc
 material = { module = "com.google.android.material:material", version.ref = "material" }
 photoview = { module = "com.github.chrisbanes:PhotoView", version.ref = "photoview" }
-jcodings = { module = "org.jruby.jcodings:jcodings", version.ref = "jcodings" }
-joni = { module = "org.jruby.joni:joni", version.ref = "joni" }
-snakeyaml-engine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "snakeyaml" }
-moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 androidsvg-aar = { module = "com.caverock:androidsvg-aar", version.ref = "androidsvgAar" }
 ec4j-core = { module = "org.ec4j.core:ec4j-core", version.ref = "ec4jCore" }
-jdt-annotation = { module = "org.eclipse.jdt:org.eclipse.jdt.annotation", version.ref = "jdtAnnotation" }
 anrwatchdog = { module = "com.github.anrwatchdog:anrwatchdog", version.ref = "anrwatchdog" }
 pine-core = { module = "top.canyie.pine:core", version.ref = "coreVersion" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 
-# Tree-sitter / editor
-tree-sitter = { module = "com.itsaky.androidide.treesitter:android-tree-sitter", version.ref = "tsBinding" }
-tree-sitter-java = { module = "com.itsaky.androidide.treesitter:tree-sitter-java", version.ref = "tsBinding" }
-
 # Compose extras
 compose-dnd = { module = "com.mohamedrejeb.dnd:compose-dnd", version.ref = "composeDnd" }
-material-motion-compose = { module = "io.github.fornewid:material-motion-compose-core", version.ref = "motionCompose" }
-
-# Regex / Monarch
-monarch-code = { module = "io.github.dingyi222666.monarch:monarch", version.ref = "monarch" }
-monarch-language-pack = { module = "io.github.dingyi222666.monarch:monarch-language-pack", version.ref = "monarchPack" }
-monarch-json = { module = "io.github.dingyi222666.monarch:monarch-json-loader", version.ref = "monarchJson" }
-regex-onig = { module = "io.github.dingyi222666.regex-lib:regex-lib-oniguruma", version.ref = "regexOnig" }
-regex-re2j = { module = "io.github.dingyi222666.regex-lib:regex-lib-re2j", version.ref = "regexRe2j" }
 
 # Desugaring
 desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
