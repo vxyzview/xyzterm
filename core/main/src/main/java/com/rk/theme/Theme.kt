@@ -17,13 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.android.material.color.MaterialColors
-import com.rk.App.Companion.themeManager
+import com.rk.App
 import com.rk.settings.Settings
 import com.rk.theme.rememberAppTypography
+import com.rk.utils.application
 import com.rk.utils.isDarkTheme
 
 val currentTheme = derivedStateOf {
-    themeManager.loadedThemes.find { it.id == Settings.theme } ?: blueberry
+    (application as? App)?.themeManager?.loadedThemes?.find { it.id == Settings.theme } ?: blueberry
 }
 
 /** Sentinel theme id for the device's wallpaper-derived dynamic (Material You) colors. Always on. */
