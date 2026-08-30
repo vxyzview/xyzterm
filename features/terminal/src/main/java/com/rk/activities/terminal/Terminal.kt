@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.net.Uri
 import android.view.WindowManager
+import com.rk.App
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -134,9 +135,7 @@ class Terminal : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         App.activityScope.markForeground(this)
-        if (::port.isInitialized) {
-            port.isForeground.value = true
-        }
+        port?.isForeground?.value = true
     }
 
     fun handleIntent(intent: Intent) {
