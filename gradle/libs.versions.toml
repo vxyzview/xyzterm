@@ -44,7 +44,7 @@ kotlinxSerializationJson = "1.10.0"
 room = "2.8.4"
 
 publish = "0.36.0"
-collection = "1.5.0"
+collection = "1.6.0"
 jcodings = "1.0.64"
 jdtAnnotation = "2.4.100"
 robolectric = "4.16.1"
