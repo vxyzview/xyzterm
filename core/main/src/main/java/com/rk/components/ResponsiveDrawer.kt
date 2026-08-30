@@ -1,5 +1,6 @@
 package com.rk.components
 
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -21,8 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.input.pointer.AwaitPointerEventScope
-import androidx.compose.ui.input.pointer.awaitFirstDown
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -92,29 +92,35 @@ fun ResponsiveDrawer(
                     modifier = Modifier
                         .onGloballyPositioned { contentWidthPx = it.size.width }
                         .pointerInput(drawerState, contentWidthPx, edgeMarginPx) {
-                            // Detect-drag only fires once a horizontal motion
-                            // exceeds the touch slop. Inside awaitPointerEventScope
-                            // we look at the FIRST down event's position; if
-                            // it's not in an edge margin, we bail out before
-                            // claiming the gesture, so the TerminalView gets
-                            // every non-edge touch unchanged.
-                            awaitPointerEventScope {
-                                awaitFirstDown(requireUnconsumed = false)
-                                val startX = currentEvent.changes.first().position.x
+                            // Loop so each new gesture starts fresh.
+                            awaitEachGesture {
+                                // Wait for the first DOWN event in this gesture
+                                // sequence. If it's not in an edge margin, bail
+                                // out before consuming the rest — the TerminalView
+                                // underneath gets every mid-screen touch.
+                                var firstDown: androidx.compose.ui.input.pointer.PointerInputChange? = null
+                                while (firstDown == null) {
+                                    val event = awaitPointerEvent(PointerEventPass.Main)
+                                    val down = event.changes.firstOrNull {
+                                        it.pressed && !it.isConsumed
+                                    }
+                                    if (down != null) firstDown = down
+                                }
+                                val startX = firstDown!!.position.x
                                 val width = contentWidthPx.toFloat()
                                 val atEdge =
                                     contentWidthPx > 0 &&
                                     (startX <= edgeMarginPx ||
                                         startX >= width - edgeMarginPx)
-                                if (!atEdge) return@awaitPointerEventScope
-                                // We are at an edge: claim the drag and open.
+                                if (!atEdge) return@awaitEachGesture
+                                // At an edge: open the drawer and consume the
+                                // rest of this gesture so the TerminalView
+                                // underneath doesn't fight us.
                                 if (!drawerState.isOpen) {
                                     scope.launch { drawerState.open() }
                                 }
-                                // Consume the rest of the drag so the view
-                                // underneath doesn't fight us.
                                 while (true) {
-                                    val event = awaitPointerEvent()
+                                    val event = awaitPointerEvent(PointerEventPass.Main)
                                     if (event.changes.all { it.changedToUp() }) break
                                 }
                             }
