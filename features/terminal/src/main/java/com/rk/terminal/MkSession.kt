@@ -2,13 +2,11 @@ package com.rk.terminal
 
 import android.app.Activity
 import android.content.Context
+import com.rk.exec.ProotSandboxPaths
 import com.rk.exec.SandboxEnv
 import com.rk.exec.pendingCommand
 import com.rk.file.child
 import com.rk.file.childSafe
-import com.rk.file.localBinDir
-import com.rk.file.localDir
-import com.rk.file.sandboxHomeDir
 import com.rk.settings.Settings
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
@@ -33,8 +31,9 @@ object MkSession {
         isExtraction: Boolean = false,
         cwd: String? = null,
     ): Pair<TerminalSession, SessionPwd> {
+        val paths = ProotSandboxPaths(context)
         val prepared =
-            withContext(Dispatchers.IO) { prepareEnvironment(context, sessionId, isExtraction, cwd) }
+            withContext(Dispatchers.IO) { prepareEnvironment(context, paths, sessionId, isExtraction, cwd) }
 
         return withContext(Dispatchers.Main.immediate) {
             val session =
@@ -51,10 +50,10 @@ object MkSession {
     }
 
     /** All disk I/O and environment assembly; must not run on the main thread. */
-    private suspend fun prepareEnvironment(context: Context, sessionId: String, isExtraction: Boolean, cwd: String?): Prepared {
-        val workingDir = cwd ?: getPwd(context)
+    private suspend fun prepareEnvironment(context: Context, paths: ProotSandboxPaths, sessionId: String, isExtraction: Boolean, cwd: String?): Prepared {
+        val workingDir = cwd ?: getPwd(context, paths)
 
-        val tmpDir = localDir().child("tmp").childSafe(sessionId)
+        val tmpDir = paths.sandboxTmp.childSafe(sessionId)
 
         if (tmpDir.exists()) {
             tmpDir.deleteRecursively()
@@ -62,9 +61,9 @@ object MkSession {
 
         tmpDir.mkdirs()
 
-        val envMap = SandboxEnv.build(context, tmpDir.absolutePath)
+        val envMap = SandboxEnv.build(context, paths, tmpDir.absolutePath)
         envMap["WKDIR"] = workingDir
-        envMap["PATH"] = "${System.getenv("PATH")}:${localBinDir(context).absolutePath}"
+        envMap["PATH"] = "${System.getenv("PATH")}:${paths.sandboxBin.absolutePath}"
 
         val env = envMap.map { "${it.key}=${it.value}" }.toMutableList()
 
@@ -72,8 +71,8 @@ object MkSession {
 
         setupTerminalFiles()
 
-        val sandboxSH = localBinDir(context).child("sandbox")
-        val setupSH = localBinDir(context).child("setup")
+        val sandboxSH = paths.sandboxBin.child("sandbox")
+        val setupSH = paths.sandboxBin.child("setup")
 
         val args: Array<String>
 
@@ -111,7 +110,7 @@ object MkSession {
 
         return Prepared(
             workingDir = workingDir,
-            processCwd = localDir(context).absolutePath,
+            processCwd = paths.processCwd.absolutePath,
             shell = actualShell,
             args = actualArgs,
             env = env,
@@ -119,7 +118,7 @@ object MkSession {
     }
 }
 
-fun getPwd(context: Context): String {
+fun getPwd(context: Context, paths: ProotSandboxPaths = ProotSandboxPaths(context)): String {
     val pendingWorkingDir = pendingCommand?.workingDir
     if (pendingWorkingDir != null) {
         return pendingWorkingDir
@@ -132,6 +131,6 @@ fun getPwd(context: Context): String {
     return if (Settings.sandbox) {
         "/home"
     } else {
-        sandboxHomeDir(context).absolutePath
+        paths.sandboxHome.absolutePath
     }
 }

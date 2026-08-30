@@ -1,9 +1,7 @@
 package com.rk.terminal
 
-import com.rk.file.child
+import com.rk.exec.ProotSandboxPaths
 import com.rk.file.createFileIfNot
-import com.rk.file.localBinDir
-import com.rk.file.sandboxDir
 import com.rk.utils.application
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -21,7 +19,8 @@ suspend fun setupTerminalFiles() {
     if (terminalFilesInstalled) return
     installMutex.withLock {
         if (terminalFilesInstalled) return
-        if (sandboxDir().exists().not() || localBinDir().exists().not()) return
+        val paths = ProotSandboxPaths(application!!)
+        if (paths.sandboxRoot.exists().not() || paths.sandboxBin.exists().not()) return
 
         setupAssetFile("termux-x11")
 
@@ -33,7 +32,7 @@ suspend fun setupTerminalFiles() {
 }
 
 /**
- * Installs a bundled script into [localBinDir], rewriting it when the shipped
+ * Installs a bundled script into [ProotSandboxPaths.sandboxBin], rewriting it when the shipped
  * copy changed (app update) so script fixes reach existing installs instead of
  * only fresh ones. Exec bit is set here — the one-time chmod in sandbox.sh
  * predates rewrites and would leave updated scripts non-executable.
@@ -41,7 +40,7 @@ suspend fun setupTerminalFiles() {
 fun setupAssetFile(fileName: String) {
     val assetContent = application!!.assets.open("terminal/$fileName.sh").bufferedReader().use { it.readText() }
 
-    with(localBinDir().child(fileName)) {
+    with(ProotSandboxPaths(application!!).sandboxBin.resolve(fileName)) {
         parentFile?.mkdir()
         if (!exists() || readText() != assetContent) {
             createFileIfNot()

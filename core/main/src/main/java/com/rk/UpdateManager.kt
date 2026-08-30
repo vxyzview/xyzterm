@@ -192,6 +192,11 @@ object UpdateManager {
                 }
 
                 if (lastVersionCode <= 68L) {
+                    // ponytail: core/main can't depend on features/terminal (where
+                    // ProotSandboxPaths lives), so this migration step still uses
+                    // the raw FileConstants getters. Once ProotSandboxPaths moves
+                    // to core/main — or once these migration steps drop out of
+                    // support — collapse to paths.hasRootfsFiles().
                     val rootfs =
                         sandboxDir().listFiles()?.filter {
                             it.absolutePath != sandboxHomeDir().absolutePath &&

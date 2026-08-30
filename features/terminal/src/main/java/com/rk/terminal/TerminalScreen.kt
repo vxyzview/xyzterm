@@ -79,9 +79,9 @@ import com.rk.components.ResponsiveDrawer
 import com.rk.components.SingleInputDialog
 import com.rk.utils.FontCache
 import com.rk.utils.isDarkTheme
+import com.rk.exec.ProotSandboxPaths
 import com.rk.exec.pendingCommand
 import com.rk.file.child
-import com.rk.file.sandboxDir
 import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
@@ -260,7 +260,7 @@ private fun ColumnScope.TerminalView(
                 setTerminalViewClient(client)
 
                 // Legacy behavior
-                val fontFile = sandboxDir().child("etc/font.ttf")
+                val fontFile = ProotSandboxPaths(context).sandboxRoot.child("etc/font.ttf")
                 if (fontFile.exists()) {
                     setTypeface(Typeface.createFromFile(fontFile))
                 } else {

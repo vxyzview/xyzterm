@@ -5,11 +5,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.res.stringResource
-import com.rk.exec.isTerminalInstalled
+import com.rk.exec.ProotSandboxPaths
 import com.rk.exec.ShellUtils
-import com.rk.file.child
-import com.rk.file.sandboxDir
-import com.rk.file.sandboxHomeDir
+import com.rk.exec.isTerminalInstalled
 import com.rk.resources.strings
 import com.rk.utils.application
 import com.rk.utils.getTempDir
@@ -124,7 +122,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     printLog("Files Dir: ${filesDir.absolutePath}")
                     printLog("Files Dir Writable: ${filesDir.canWrite()}")
 
-                    val sandboxHome = sandboxHomeDir()
+                    val sandboxHome = ProotSandboxPaths(application!!).sandboxHome
                     printLog("Sandbox Home: ${sandboxHome.absolutePath}")
                     printLog("Sandbox Home Writable: ${sandboxHome.canWrite()}")
 
@@ -143,7 +141,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                         return@Check true
                     }
 
-                    val rootfs = sandboxDir()
+                    val rootfs = ProotSandboxPaths(application!!).sandboxRoot
                     printLog("RootFS path: ${rootfs.absolutePath}")
 
                     val bash = rootfs.child("bin/bash")
@@ -200,7 +198,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                             printLog("DNS resolution FAILED.")
                             if (dns.timedOut) printLog("Timed out after ${CHECK_TIMEOUT_SECONDS}s")
                             if (dns.error.isNotEmpty()) printLog("Stderr: ${dns.error}")
-                            val resolvConf = sandboxDir().child("etc/resolv.conf")
+                            val resolvConf = ProotSandboxPaths(application!!).sandboxRoot.child("etc/resolv.conf")
                             if (resolvConf.exists()) {
                                 printLog("/etc/resolv.conf exists, content:")
                                 resolvConf.readLines().forEach { printLog("  $it") }

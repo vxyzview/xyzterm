@@ -54,10 +54,10 @@ import com.rk.activities.settings.DisclaimerScreen
 import com.rk.commands.ActionContext
 import com.rk.commands.KeyCombination
 import com.rk.commands.KeybindingsManager
+import com.rk.exec.ProotSandboxPaths
 import com.rk.exec.isTerminalInstalled
 import com.rk.file.FilePermission
 import com.rk.file.child
-import com.rk.file.localBinDir
 import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
@@ -367,8 +367,9 @@ class Terminal : AppCompatActivity() {
                 else -> {
                     error.printStackTrace()
                     GlobalScope.launch(Dispatchers.IO) {
-                        if (file?.absolutePath?.contains(localBinDir().absolutePath) == true) {
-                            localBinDir().deleteRecursively()
+                        val paths = ProotSandboxPaths(this@Terminal)
+                        if (file?.absolutePath?.contains(paths.sandboxBin.absolutePath) == true) {
+                            paths.sandboxBin.deleteRecursively()
                         }
 
                         if (file?.name == "sandbox.tar.gz") {
@@ -378,7 +379,7 @@ class Terminal : AppCompatActivity() {
                             // from an earlier successful install,
                             // and a transient download failure must
                             // not destroy it.
-                            File(getTempDir(), "sandbox.tar.gz").delete()
+                            paths.pendingTarball.delete()
                         }
                     }
                     errorDialog(msg = strings.setup_failed.getFilledString(error.message))
@@ -427,6 +428,7 @@ class Terminal : AppCompatActivity() {
                 }
             }
         }
+
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val context = LocalContext.current

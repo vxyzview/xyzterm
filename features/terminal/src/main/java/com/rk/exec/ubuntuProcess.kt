@@ -4,9 +4,6 @@ import android.annotation.SuppressLint
 import android.util.Log
 import com.rk.feature.FeatureRegistry
 import com.rk.file.child
-import com.rk.file.localBinDir
-import com.rk.file.sandboxDir
-import com.rk.file.sandboxHomeDir
 import com.rk.settings.Settings
 import com.rk.utils.application
 import com.rk.utils.getTempDir
@@ -37,7 +34,7 @@ fun List<Binding>.attachTo(list: MutableList<String>, excludeMounts: List<String
     }
 }
 
-fun getDefaultBindings(): List<Binding> {
+fun getDefaultBindings(paths: ProotSandboxPaths): List<Binding> {
     fun MutableList<Binding>.bind(outside: String, inside: String? = null) {
         if (File(outside).exists()) {
             add(Binding(outside, inside))
@@ -47,7 +44,7 @@ fun getDefaultBindings(): List<Binding> {
     val list = mutableListOf<Binding>()
 
     with(list) {
-        bind(sandboxHomeDir().absolutePath, "/home")
+        bind(paths.sandboxHome.absolutePath, "/home")
         bind("/sdcard")
         bind("/storage")
         // Sandbox mode deliberately does not expose raw /data: the guest reaches
@@ -90,11 +87,12 @@ fun getDefaultBindings(): List<Binding> {
 
 suspend fun ubuntuProcess(
     excludeMounts: List<String> = listOf(),
-    root: File = sandboxDir(),
+    paths: ProotSandboxPaths = ProotSandboxPaths(application!!),
     workingDir: String? = null,
     command: List<String>,
 ): Process =
     withContext(Dispatchers.IO) {
+        val root = paths.sandboxRoot
         if (!root.exists()) throw NoSuchFileException(root)
 
         val randomInt = Random.nextInt()
@@ -117,7 +115,7 @@ suspend fun ubuntuProcess(
                     add(workingDir)
                 }
 
-                getDefaultBindings().attachTo(this, excludeMounts)
+                getDefaultBindings(paths).attachTo(this, excludeMounts)
 
                 bind(tmpDir.absolutePath)
 
@@ -138,12 +136,12 @@ suspend fun ubuntuProcess(
         val processBuilder = ProcessBuilder(linker, *args.toTypedArray())
 
         processBuilder.environment().let { env ->
-            env.putAll(SandboxEnv.build(application!!, tmpDir.absolutePath))
+            env.putAll(SandboxEnv.build(application!!, paths, tmpDir.absolutePath))
 
             env["WKDIR"] = workingDir.orEmpty()
 
             env["PATH"] =
-                "/bin:/sbin:/usr/bin:/usr/sbin:/usr/games:/usr/local/bin:/usr/local/sbin:${localBinDir()}:${System.getenv("PATH")}"
+                "/bin:/sbin:/usr/bin:/usr/sbin:/usr/games:/usr/local/bin:/usr/local/sbin:${paths.sandboxBin}:${System.getenv("PATH")}"
         }
 
         val process = processBuilder.start()
@@ -162,11 +160,11 @@ suspend fun ubuntuProcess(
 @SuppressLint("SdCardPath")
 suspend fun ubuntuProcess(
     excludeMounts: List<String> = listOf(),
-    root: File = sandboxDir(),
+    paths: ProotSandboxPaths = ProotSandboxPaths(application!!),
     workingDir: String? = null,
     vararg command: String,
 ): Process {
-    return ubuntuProcess(excludeMounts, root, workingDir, command.toMutableList())
+    return ubuntuProcess(excludeMounts, paths, workingDir, command.toMutableList())
 }
 
 /** Extension to read all stdout as a single string */
