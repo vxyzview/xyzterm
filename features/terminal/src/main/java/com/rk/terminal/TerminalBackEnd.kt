@@ -39,9 +39,9 @@ private const val BELL_CHANNEL_ID = "terminal_bell"
 private const val BELL_NOTIFICATION_ID = 2
 private const val BELL_NOTIFY_THROTTLE_MS = 5_000L
 
-class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
+class TerminalBackEnd(private val port: TerminalViewPort) : TerminalViewClient, TerminalSessionClient {
     override fun onTextChanged(changedSession: TerminalSession) {
-        terminalView.get()?.onScreenUpdated()
+        port.view()?.onScreenUpdated()
     }
 
     override fun onTitleChanged(changedSession: TerminalSession) {}
@@ -51,16 +51,16 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     override fun onCopyTextToClipboard(session: TerminalSession, text: String) {
-        val context = terminalView.get()?.context ?: return
+        val context = port.view()?.context ?: return
         val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return
         clipboard.setPrimaryClip(ClipData.newPlainText("Terminal", text))
     }
 
     override fun onPasteTextFromClipboard(session: TerminalSession?) {
-        val emulator = terminalView.get()?.mEmulator ?: return
+        val emulator = port.view()?.mEmulator ?: return
         val clip =
-            terminalView
-                .get()
+            port
+                .view()
                 ?.context
                 ?.getSystemService(ClipboardManager::class.java)
                 ?.primaryClip
@@ -74,7 +74,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     override fun onBell(session: TerminalSession) {
-        bellPulse = true
+        port.bell.value = true
         notifyBellInBackground(session)
     }
 
@@ -83,12 +83,12 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     private var lastBellNotifyAt = 0L
 
     private fun notifyBellInBackground(session: TerminalSession) {
-        if (Terminal.isForeground) return
+        if (port.isForeground.value) return
         val now = SystemClock.elapsedRealtime()
         if (now - lastBellNotifyAt < BELL_NOTIFY_THROTTLE_MS) return
         lastBellNotifyAt = now
 
-        val context = terminalView.get()?.context?.applicationContext ?: return
+        val context = port.view()?.context?.applicationContext ?: return
 
         val nm = context.getSystemService(NotificationManager::class.java) ?: return
         runCatching {
@@ -173,7 +173,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     override fun onScale(scale: Float): Float {
-        val view = terminalView.get() ?: return 1f
+        val view = port.view() ?: return 1f
         // Settings stores the size in dp; convert like every other call site.
         // Returning 1f resets the view's cumulative factor, making `scale` a
         // per-gesture increment applied to the float accumulator below (int
@@ -189,7 +189,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     private var fontSizeDp = -1f
 
     override fun onSingleTapUp(e: MotionEvent) {
-        val view = terminalView.get()
+        val view = port.view()
         val emulator = view?.mEmulator
         if (view != null && emulator != null) {
             val (column, row) = view.getColumnAndRow(e, true).let { it[0] to it[1] }
@@ -238,7 +238,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         // terminal-view v0.118.3 has no shouldSupportClipboardKeybindings() client
         // hook, so Ctrl+Shift+C / Ctrl+Shift+V are handled here instead.
         if (Settings.terminal_clipboard_keybindings && e.isCtrlPressed && e.isShiftPressed) {
-            val view = terminalView.get()
+            val view = port.view()
             when (keyCode) {
                 KeyEvent.KEYCODE_V -> {
                     val clip =
@@ -276,7 +276,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
                 activity.finish()
             } else {
                 activity.lifecycleScope.launch {
-                    activity.changeSession(sessionBinder.getService().sessionList.first())
+                    activity.changeSession(sessionBinder.getService().sessionList.first(), port)
                 }
             }
             return true
@@ -294,22 +294,22 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
 
     // keys
     override fun readControlKey(): Boolean {
-        val state = virtualKeysView.get()?.readSpecialButton(SpecialButton.CTRL, true)
+        val state = port.virtualKeys()?.readSpecialButton(SpecialButton.CTRL, true)
         return state != null && state
     }
 
     override fun readAltKey(): Boolean {
-        val state = virtualKeysView.get()?.readSpecialButton(SpecialButton.ALT, true)
+        val state = port.virtualKeys()?.readSpecialButton(SpecialButton.ALT, true)
         return state != null && state
     }
 
     override fun readShiftKey(): Boolean {
-        val state = virtualKeysView.get()?.readSpecialButton(SpecialButton.SHIFT, true)
+        val state = port.virtualKeys()?.readSpecialButton(SpecialButton.SHIFT, true)
         return state != null && state
     }
 
     override fun readFnKey(): Boolean {
-        val state = virtualKeysView.get()?.readSpecialButton(SpecialButton.FN, true)
+        val state = port.virtualKeys()?.readSpecialButton(SpecialButton.FN, true)
         return state != null && state
     }
 
@@ -322,13 +322,13 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     }
 
     private fun setTerminalCursorBlinkingState(start: Boolean) {
-        if (terminalView.get()?.mEmulator != null) {
-            terminalView.get()?.setTerminalCursorBlinkerState(start, true)
+        if (port.view()?.mEmulator != null) {
+            port.view()?.setTerminalCursorBlinkerState(start, true)
         }
     }
 
     private fun showSoftInput() {
-        val view = terminalView.get() ?: return
+        val view = port.view() ?: return
         view.requestFocus()
         view.context.getSystemService(InputMethodManager::class.java)?.showSoftInput(view, 0)
     }

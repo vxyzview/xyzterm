@@ -103,25 +103,23 @@ import com.termux.view.TerminalView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 import java.util.Properties
 
-var terminalView = WeakReference<TerminalView?>(null)
-var virtualKeysView = WeakReference<VirtualKeysView?>(null)
-
-/** Set by TerminalBackEnd.onBell; the header indicator flashes until reset. */
-var bellPulse by mutableStateOf(false)
+// Package-level mutable singletons that lived here before
+// the TerminalViewPort seam (audit opportunity #3, ADR-0001) —
+// deleted in this PR. Direct callers now read through the
+// TerminalViewPortHolder passed into the Compose tree.
 
 @Composable
-fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
+fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal, port: TerminalViewPort) {
     ProvideIsExpandedScreen {
-        TerminalScreenInternal(terminalActivity = terminalActivity)
+        TerminalScreenInternal(terminalActivity = terminalActivity, port = port)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Terminal) {
+fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Terminal, port: TerminalViewPort) {
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val surfaceColor = MaterialTheme.colorScheme.surface.toArgb()
     // Use the app's theme-mode resolution (honors Settings.theme_mode), not the raw
@@ -144,32 +142,33 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
             fullscreen = Settings.fullscreen,
             mainContent = {
                 Scaffold(
-                    topBar = { TerminalTopBar(terminalActivity, scope, drawerState) }
+                    topBar = { TerminalTopBar(terminalActivity, scope, drawerState, port) }
                 ) { paddingValues ->
                     Column(modifier = Modifier.padding(paddingValues)) {
-                        TerminalView(isDarkMode, currentTheme, surfaceColor, onSurfaceColor, terminalActivity)
+                        TerminalView(isDarkMode, currentTheme, surfaceColor, onSurfaceColor, terminalActivity, port)
 
                         // One-tap command snippets (configured under terminal settings).
-                        SnippetsRow()
+                        SnippetsRow(port)
 
-                        ExtraKeysPager(onSurfaceColor = onSurfaceColor)
+                        ExtraKeysPager(onSurfaceColor = onSurfaceColor, port = port)
                     }
                 }
             },
         ) {
-            TerminalDrawer(terminalActivity)
+            TerminalDrawer(terminalActivity, port)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, drawerState: DrawerState) {
+private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, drawerState: DrawerState, port: TerminalViewPort) {
     // Reads that change often (IME visibility every frame of the keyboard
     // animation; bellPulse on every background-job ring) live HERE, not in
     // TerminalScreenInternal, so a toggle only recomposes the header — not the
     // whole screen (which would re-run the terminal AndroidView update + drawer).
     if (Settings.smart_toolbar && WindowInsets.isImeVisible) return
+    val bell = port.bell.value
     TopAppBar(
         title = {
             Row(
@@ -179,10 +178,10 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                 // Session indicator: solid while live, flashes
                 // amber for 2s when the shell rings the bell
                 // (e.g. a background job finished).
-                LaunchedEffect(bellPulse) {
-                    if (bellPulse) {
+                LaunchedEffect(bell) {
+                    if (bell) {
                         delay(2000)
-                        bellPulse = false
+                        port.bell.value = false
                     }
                 }
                 Box(
@@ -190,7 +189,7 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                         Modifier
                             .size(8.dp)
                             .background(
-                                if (bellPulse) {
+                                if (bell) {
                                     MaterialTheme.colorScheme.yellowStatus
                                 } else {
                                     MaterialTheme.colorScheme.primary
@@ -233,12 +232,13 @@ private fun ColumnScope.TerminalView(
     surfaceColor: Int,
     onSurfaceColor: Int,
     terminalActivity: Terminal,
+    port: TerminalViewPort,
 ) {
     val terminalOutputLabel = stringResource(strings.terminal_output)
     val scope = rememberCoroutineScope()
     AndroidView(
         factory = { context ->
-            val client = TerminalBackEnd()
+            val client = TerminalBackEnd(port)
             TerminalView(context, null).apply {
                 val terminalColors =
                     if (isDarkMode) {
@@ -252,7 +252,7 @@ private fun ColumnScope.TerminalView(
                     terminalColors = terminalColors,
                 )
 
-                terminalView = WeakReference(this)
+                port.installView(this)
                 terminalActivity.handleIntent(terminalActivity.intent)
                 setTextSize(dpToPx(Settings.terminal_font_size.toFloat(), context))
                 // Wire up the client immediately, independent of session availability
@@ -291,8 +291,8 @@ private fun ColumnScope.TerminalView(
                             } else {
                                 currentTheme.lightTerminalColors
                             }
-                        terminalView
-                            .get()
+                        port
+                            .view()
                             ?.applyTerminalColors(
                                 surfaceColor = surfaceColor,
                                 onSurfaceColor = onSurfaceColor,
@@ -311,7 +311,7 @@ private fun ColumnScope.TerminalView(
                     // Session creation performs disk I/O (tmp dir cleanup, sandbox
                     // build, setup scripts) — run it off the main thread and attach
                     // the finished session to this view when it lands.
-                    scope.launch { view.attachOrCreateSession(scope, client, terminalActivity) }
+                    scope.launch { view.attachOrCreateSession(scope, client, terminalActivity, port) }
                 }
         },
         modifier =
@@ -341,6 +341,7 @@ private suspend fun TerminalView.attachOrCreateSession(
     scope: CoroutineScope,
     client: TerminalBackEnd,
     terminalActivity: Terminal,
+    port: TerminalViewPort,
 ) {
     val session =
         if (pendingCommand != null) {
@@ -358,10 +359,13 @@ private suspend fun TerminalView.attachOrCreateSession(
                     // thread (cold start) — attach the restored
                     // session to this view when it lands.
                     service.onRestored {
-                        if (terminalView.get()?.mTermSession != null) return@onRestored
+                        if (port.view()?.mTermSession != null) return@onRestored
                         val restoredBinder = terminalActivity.sessionBinder?.get() ?: return@onRestored
                         scope.launch {
-                            terminalActivity.changeSession(restoredBinder.getService().currentSession.value)
+                            terminalActivity.changeSession(
+                                restoredBinder.getService().currentSession.value,
+                                port,
+                            )
                         }
                     }
                     null
@@ -376,13 +380,13 @@ private suspend fun TerminalView.attachOrCreateSession(
         setTerminalViewClient(client)
         // On-screen extra-keys (TAB/arrows) follow the attached session — same
         // as changeSession. Posted to dodge the extra-keys-factory race.
-        wireExtraKeysClient()
+        wireExtraKeysClient(port)
         reapplyTerminalColors(this)
     }
 }
 
 @Composable
-private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
+private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: TerminalViewPort) {
     val scope = rememberCoroutineScope()
     // Saveable: rotation must not close a mid-action confirm/rename dialog.
     var showRenameDialog by rememberSaveable { mutableStateOf(false) }
@@ -429,7 +433,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
         val sessionBefore = svc.sessionList.getOrNull(index - 1)
         val sessionAfter = svc.sessionList.getOrNull(index + 1)
         val neighborSession = sessionBefore ?: sessionAfter
-        neighborSession?.let { neighbor -> scope.launch { terminalActivity.changeSession(neighbor) } }
+        neighborSession?.let { neighbor -> scope.launch { terminalActivity.changeSession(neighbor, port) } }
 
         binder.terminateSession(id)
 
@@ -545,9 +549,9 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
 
                         return newString
                     }
-                    terminalView.get()?.let {
+                    port.view()?.let {
                         val binder = terminalActivity.sessionBinder?.get() ?: return@let
-                        val client = TerminalBackEnd()
+                        val client = TerminalBackEnd(port)
                         scope.launch {
                             val info =
                                 binder.createSession(
@@ -557,7 +561,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                                 )
                             // Switch to the new session immediately — creating it
                             // silently in the background feels like a dead button.
-                            terminalActivity.changeSession(info.id)
+                            terminalActivity.changeSession(info.id, port)
                         }
                     }
                 },
@@ -596,7 +600,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     val isSelected = sessionId == service.currentSession.value
 
                     Surface(
-                        onClick = { scope.launch { terminalActivity.changeSession(sessionId) } },
+                        onClick = { scope.launch { terminalActivity.changeSession(sessionId, port) } },
                         shape = MaterialTheme.shapes.large,
                         color =
                             if (isSelected) {
@@ -774,11 +778,11 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
     }
 }
 
-suspend fun Terminal.changeSession(sessionId: String) {
-    val terminalView = terminalView.get() ?: return
+suspend fun Terminal.changeSession(sessionId: String, port: TerminalViewPort) {
+    val terminalView = port.view() ?: return
     val binder = sessionBinder?.get() ?: return
 
-    val client = TerminalBackEnd()
+    val client = TerminalBackEnd(port)
     val session = binder.getSession(sessionId) ?: binder.createSession(sessionId, client, this).session
 
     session.updateTerminalSessionClient(client)
@@ -792,7 +796,7 @@ suspend fun Terminal.changeSession(sessionId: String) {
             requestFocus()
         }
     }
-    wireExtraKeysClient()
+    wireExtraKeysClient(port)
     reapplyTerminalColors(terminalView)
 
     binder.getService().currentSession.value = sessionId
@@ -816,10 +820,10 @@ private fun reapplyTerminalColors(view: TerminalView) {
 // be null (its own AndroidView factory runs a frame later), so a direct
 // assignment would silently no-op and leave the keys dead until a manual
 // switch. A post() retries on the next frame, after both views exist.
-private fun wireExtraKeysClient() {
-    terminalView.get()?.post {
-        val session = terminalView.get()?.mTermSession ?: return@post
-        virtualKeysView.get()?.virtualKeysViewClient = VirtualKeysListener(session)
+private fun wireExtraKeysClient(port: TerminalViewPort) {
+    port.view()?.post {
+        val session = port.view()?.mTermSession ?: return@post
+        port.virtualKeys()?.virtualKeysViewClient = VirtualKeysListener(session)
     }
 }
 

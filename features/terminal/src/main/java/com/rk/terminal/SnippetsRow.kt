@@ -23,7 +23,7 @@ import com.rk.settings.Settings
  * row. Tapping a chip writes the command plus a newline into the active session.
  */
 @Composable
-fun SnippetsRow() {
+fun SnippetsRow(port: TerminalViewPort) {
     val snippets = remember(Settings.terminal_snippets) { SnippetStore.decode(Settings.terminal_snippets) }
     if (snippets.isEmpty()) return
 
@@ -34,10 +34,10 @@ fun SnippetsRow() {
         snippets.forEach { snippet ->
             SuggestionChip(
                 onClick = {
-                    val session = terminalView.get()?.mTermSession ?: return@SuggestionChip
+                    val session = port.view()?.mTermSession ?: return@SuggestionChip
                     session.write(snippet.command + "\n")
                     // Jump back to the live line so the effect is visible.
-                    terminalView.get()?.setTopRow(0)
+                    port.view()?.setTopRow(0)
                 },
                 label = { Text(snippet.label, maxLines = 1) },
                 colors =

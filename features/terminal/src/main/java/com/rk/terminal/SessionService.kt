@@ -36,6 +36,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
+// No-op port for the rare case where a session is restored before the
+// activity has constructed its TerminalViewPortHolder (service connects
+// pre-onCreate on cold start). The restored back-end only ever reads from
+// it when the user actually interacts; before the view attaches, those
+// reads return null and the early-return guards skip the work.
+private object RestorePlaceholderPort : TerminalViewPort {
+    private val placeholderBell = BellState()
+    private val placeholderForeground = mutableStateOf(false)
+    override fun view() = null
+    override fun virtualKeys() = null
+    override val bell: BellState = placeholderBell
+    override val isForeground = placeholderForeground
+}
+
 class SessionService : Service() {
     private val sessions = hashMapOf<SessionId, TerminalSession>()
     private val sessionWorkDirs = mutableMapOf<SessionId, SessionPwd>()
@@ -95,6 +109,14 @@ class SessionService : Service() {
             // first frames of cold start. The terminal view defers attaching
             // until the current session is published below.
             restorePending = true
+            // The activity's port may not exist yet (the binder can connect
+            // before the activity has run onCreate). Fall back to a throwaway
+            // port that returns no view: the screen-side setTerminalViewClient
+            // and attachSession in TerminalScreen.installView/installVirtualKeys
+            // never need it, and the restored session's TerminalBackEnd only
+            // uses the port when the bell rings or a key is pressed, both of
+            // which need a live view that the screen hasn't installed yet.
+            val restorePort = if (activity::port.isInitialized) activity.port else RestorePlaceholderPort
             restoreScope.launch {
                 // Spawn the saved shells in parallel — proot startup takes hundreds
                 // of ms per session, and restoring N sessions serially multiplied
@@ -103,7 +125,9 @@ class SessionService : Service() {
                     saved
                         .map { (id, pwd) ->
                             async {
-                                runCatching { MkSession.createSession(activity, TerminalBackEnd(), id, false, pwd) }
+                                runCatching {
+                                    MkSession.createSession(activity, TerminalBackEnd(restorePort), id, false, pwd)
+                                }
                                     .getOrNull()
                                     ?.let { id to it }
                             }

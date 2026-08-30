@@ -44,14 +44,13 @@ import com.rk.terminal.virtualkeys.VirtualKeysInfo
 import com.rk.terminal.virtualkeys.VirtualKeysListener
 import com.rk.terminal.virtualkeys.VirtualKeysView
 import com.rk.utils.toast
-import java.lang.ref.WeakReference
 
 /**
  * The two-page input area under the terminal: page 0 is the extra-keys row,
  * page 1 a quick text-input field. Swipe between them.
  */
 @Composable
-fun ExtraKeysPager(onSurfaceColor: Int) {
+fun ExtraKeysPager(onSurfaceColor: Int, port: TerminalViewPort) {
     // Height derives from the key-row count so each key keeps a >=48dp touch
     // target (a11y minimum). The default matrix has 2 rows -> 96dp; landscape
     // also 96dp so keys are tappable instead of the previous 26-37dp. The
@@ -86,9 +85,9 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                     AndroidView(
                         factory = { context ->
                             VirtualKeysView(context, null).apply {
-                                virtualKeysView = WeakReference(this)
+                                port.installVirtualKeys(this)
                                 virtualKeysViewClient =
-                                    terminalView.get()?.mTermSession?.let { VirtualKeysListener(it) }
+                                    port.view()?.mTermSession?.let { VirtualKeysListener(it) }
 
                                 buttonTextColor = onSurfaceColor
 
@@ -172,10 +171,10 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                                 KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
                                             val eventUp =
                                                 KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
-                                            terminalView.get()?.dispatchKeyEvent(eventDown)
-                                            terminalView.get()?.dispatchKeyEvent(eventUp)
+                                            port.view()?.dispatchKeyEvent(eventDown)
+                                            port.view()?.dispatchKeyEvent(eventUp)
                                         } else {
-                                            terminalView.get()?.currentSession?.write(text)
+                                            port.view()?.currentSession?.write(text)
                                             text = ""
                                         }
                                     }
@@ -221,7 +220,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
     // resumes without an extra tap.
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage == 0) {
-            terminalView.get()?.requestFocus()
+            port.view()?.requestFocus()
         }
     }
 }
