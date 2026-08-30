@@ -28,6 +28,7 @@ import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 import com.termux.view.TerminalViewClient
 import kotlinx.coroutines.launch
+import com.rk.App
 
 private val URL_REGEX = Regex("""https?://[^\s"'<>]+|www\.[^\s"'<>]+""")
 
@@ -176,7 +177,7 @@ class TerminalBackEnd(private val port: TerminalViewPort) : TerminalViewClient, 
     }
 
     private fun openUrlPrompt(url: String) {
-        val activity = Terminal.instance ?: return
+        val activity = App.activityScope.currentActivity as? Terminal ?: return
         val target = if (url.startsWith("www.")) "https://$url" else url
         dialog(
             activity = activity,

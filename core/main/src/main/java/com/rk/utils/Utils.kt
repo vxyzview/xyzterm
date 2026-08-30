@@ -38,7 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.core.net.toUri
 import com.caverock.androidsvg.SVG
-import com.rk.extension.ActivityProvider
+import com.rk.App
 import com.rk.file.BuiltinFileType
 import com.rk.file.FileDecorationRegistry
 import com.rk.file.FileObject
@@ -79,7 +79,7 @@ fun toast(message: String?) {
     }
 
     runOnUiThread {
-        val context = ActivityProvider.currentActivity as? Context
+        val context = App.activityScope.currentActivity as? Context
         if (context != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         } else {

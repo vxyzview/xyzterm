@@ -31,7 +31,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.rk.extension.ActivityProvider
+import com.rk.App
 import com.rk.extension.api.XedExtensionPoint
 import com.rk.resources.getString
 import com.rk.resources.strings
@@ -143,7 +143,7 @@ private fun HostEntry(request: DialogRequest) {
 }
 
 fun errorDialog(
-    activity: Activity? = ActivityProvider.currentActivity,
+    activity: Activity? = App.activityScope.currentActivity,
     title: String = strings.error.getString(),
     msg: String,
 ) {
@@ -168,7 +168,7 @@ fun errorDialog(@StringRes msgRes: Int) {
 }
 
 fun errorDialog(
-    activity: Activity? = ActivityProvider.currentActivity,
+    activity: Activity? = App.activityScope.currentActivity,
     throwable: Throwable,
     title: String = strings.error.getString(),
 ) {
@@ -209,7 +209,7 @@ var isDialogShowing = false
     private set
 
 fun dialogRes(
-    activity: Activity? = ActivityProvider.currentActivity,
+    activity: Activity? = App.activityScope.currentActivity,
     title: String? = null,
     msg: String,
     @StringRes cancelRes: Int = strings.cancel,
@@ -233,7 +233,7 @@ fun dialogRes(
 /** Shows a confirm dialog that survives configuration changes. */
 @XedExtensionPoint
 fun dialog(
-    activity: Activity? = ActivityProvider.currentActivity,
+    activity: Activity? = App.activityScope.currentActivity,
     title: String? = null,
     msg: String,
     cancelText: String = strings.cancel.getString(),
@@ -332,7 +332,7 @@ private fun DialogContent(
 /** Shows a custom composable dialog that survives configuration changes. */
 @XedExtensionPoint
 fun composableDialog(
-    activity: Activity? = ActivityProvider.currentActivity,
+    activity: Activity? = App.activityScope.currentActivity,
     cancelable: Boolean = true,
     composable: @Composable () -> Unit,
 ) {

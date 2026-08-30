@@ -10,6 +10,8 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.rk.commands.CommandProvider
 import com.rk.commands.KeybindingsManager
 import com.rk.crashhandler.CrashHandler
+import com.rk.extension.ActivityProvider
+import com.rk.extension.AppActivityScope
 import com.rk.utils.FontCache
 import com.rk.icons.pack.IconPackManager
 import com.rk.resources.Res
@@ -30,6 +32,9 @@ import java.util.concurrent.Executors
 
 @OptIn(DelicateCoroutinesApi::class)
 open class App : Application() {
+    lateinit var activityScope: AppActivityScope
+        private set
+
     companion object {
         val versionCode: Long by lazy {
             val app = application ?: throw IllegalStateException("Application is not initialized yet")
@@ -51,6 +56,12 @@ open class App : Application() {
         Res.application = this
         iconPackManager = IconPackManager(this)
         themeManager = ThemeManager(this)
+
+        // ponytail: scope must exist before ActivityProvider registers, otherwise
+        // the very first onActivityResumed callback (terminal activity launch)
+        // would null-set a not-yet-constructed scope. Eager construct here.
+        activityScope = AppActivityScope()
+        registerActivityLifecycleCallbacks(ActivityProvider(activityScope))
 
         // ponytail: must run BEFORE FeatureRegistry.initFeatures (below chain reaches
         // ToolbarConfiguration, whose object-init reads CommandProvider.SettingsCommand,
