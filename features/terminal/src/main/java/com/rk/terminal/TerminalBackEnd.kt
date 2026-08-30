@@ -242,13 +242,14 @@ class TerminalBackEnd(private val port: TerminalViewPort) : TerminalViewClient, 
 
         if (keyCode == KeyEvent.KEYCODE_ENTER && !session.isRunning) {
             val activity = Terminal.instance ?: return false
-            val sessionBinder = activity.sessionBinder?.get() ?: return false
-            sessionBinder.terminateSession(sessionBinder.getService().currentSession.value)
-            if (sessionBinder.getService().sessionList.isEmpty()) {
+            val registry = activity.sessionRegistry
+            registry.terminate(registry.currentSession().value)
+            val remaining = registry.list()
+            if (remaining.isEmpty()) {
                 activity.finish()
             } else {
                 activity.lifecycleScope.launch {
-                    activity.changeSession(sessionBinder.getService().sessionList.first(), port)
+                    activity.changeSession(remaining.first(), port)
                 }
             }
             return true

@@ -51,6 +51,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -209,9 +210,9 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
 
 @Composable
 private fun SessionTitle(terminalActivity: Terminal) {
+    val currentId by terminalActivity.sessionRegistry.currentSession().collectAsState()
     val name =
-        terminalActivity.sessionBinder?.get()?.getService()?.currentSession?.value
-            ?: stringResource(strings.default_session_name)
+        if (currentId.isEmpty()) stringResource(strings.default_session_name) else currentId
     Text(
         text = name,
         style = MaterialTheme.typography.titleMedium,
@@ -339,44 +340,28 @@ private suspend fun TerminalView.attachOrCreateSession(
     terminalActivity: Terminal,
     port: TerminalViewPort,
 ) {
+    val registry = terminalActivity.sessionRegistry
     val session =
-        if (pendingCommand != null) {
-            val binder = terminalActivity.sessionBinder?.get() ?: return // service unbound mid-recreate
-            binder.getService().currentSession.value = pendingCommand!!.id
-            binder.getSession(pendingCommand!!.id)
-                ?: binder.createSession(pendingCommand!!.id, client, terminalActivity).session
-        } else {
-            val binder = terminalActivity.sessionBinder?.get() ?: return
-            val service = binder.getService()
-            val current = service.currentSession.value
-            binder.getSession(current)
-                ?: if (service.restorePending) {
-                    // Saved sessions are being spawned off the main
-                    // thread (cold start) — attach the restored
-                    // session to this view when it lands.
-                    service.onRestored {
-                        if (port.view()?.mTermSession != null) return@onRestored
-                        val restoredBinder = terminalActivity.sessionBinder?.get() ?: return@onRestored
-                        scope.launch {
-                            terminalActivity.changeSession(
-                                restoredBinder.getService().currentSession.value,
-                                port,
-                            )
-                        }
-                    }
-                    null
-                } else {
-                    binder.createSession(current, client, terminalActivity).session
-                }
-        }
+        runCatching {
+            if (pendingCommand != null) {
+                // Pending commands (e.g. deep-link with a target session) come in
+                // through TerminalFeature; honor the requested id explicitly.
+                registry.switchTo(pendingCommand!!.id, client)
+            } else {
+                // The restore-race deferral is a property of switchTo now
+                // (see SessionRegistry / c4f691cfc): if the saved shells are
+                // still spawning off-thread, switchTo waits for them and runs
+                // the get-or-create then. No more `service.restorePending` check
+                // here.
+                registry.switchTo(registry.currentSession().value, client)
+            }
+        }.getOrNull() ?: return
 
-    if (session != null) {
-        // The seven-step attach dance (setTerminalViewClient race guard +
-        // session client + attach + re-publish + extra-keys wire + palette
-        // reapply + focus/keep-screen-on) lives in TerminalSessionAttach so
-        // the factory path and Terminal.changeSession can't drift again.
-        TerminalSessionAttach().run(this, port.virtualKeys(), session, client)
-    }
+    // The seven-step attach dance (setTerminalViewClient race guard +
+    // session client + attach + re-publish + extra-keys wire + palette
+    // reapply + focus/keep-screen-on) lives in TerminalSessionAttach so
+    // the factory path and Terminal.changeSession can't drift again.
+    TerminalSessionAttach().run(this, port.virtualKeys(), session, client)
 }
 
 @Composable
@@ -392,7 +377,8 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: Termina
     var renameError by rememberSaveable { mutableStateOf<String?>(null) }
 
     if (showRenameDialog) {
-        val service = terminalActivity.sessionBinder?.get()?.getService()
+        val registry = terminalActivity.sessionRegistry
+        val sessions = registry.list()
 
         SingleInputDialog(
             title = stringResource(strings.rename_session),
@@ -404,36 +390,36 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: Termina
                 renameError =
                     if (it.isBlank()) {
                         strings.name_empty_err.getString()
-                    } else if (it != sessionToRename && service?.sessionList?.contains(it) == true) {
+                    } else if (it != sessionToRename && sessions.contains(it)) {
                         strings.session_name_exists.getString()
                     } else null
             },
             onConfirm = {
                 if (renameError == null && renameValue.isNotBlank() && renameValue != sessionToRename) {
-                    terminalActivity.sessionBinder?.get()?.renameSession(sessionToRename, renameValue)
+                    registry.rename(sessionToRename, renameValue)
                 }
             },
             onFinish = { showRenameDialog = false },
         )
     }
 
-    val service = terminalActivity.sessionBinder?.get()?.getService()
+    val registry = terminalActivity.sessionRegistry
+    val sessions = registry.list()
+    val currentSessionId by registry.currentSession().collectAsState()
     val context = LocalContext.current
 
     fun deleteSession(id: String) {
-        val binder = terminalActivity.sessionBinder?.get() ?: return
-        val svc = service ?: return
-        val index = svc.sessionList.indexOf(id)
-        val sessionBefore = svc.sessionList.getOrNull(index - 1)
-        val sessionAfter = svc.sessionList.getOrNull(index + 1)
+        val index = sessions.indexOf(id)
+        val sessionBefore = sessions.getOrNull(index - 1)
+        val sessionAfter = sessions.getOrNull(index + 1)
         val neighborSession = sessionBefore ?: sessionAfter
         neighborSession?.let { neighbor -> scope.launch { terminalActivity.changeSession(neighbor, port) } }
 
-        binder.terminateSession(id)
+        registry.terminate(id)
 
-        if (svc.sessionList.isEmpty()) {
+        if (registry.list().isEmpty()) {
             terminalActivity.finish()
-            svc.actionExit()
+            registry.exitService()
         }
     }
 
@@ -544,18 +530,13 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: Termina
                         return newString
                     }
                     port.view()?.let {
-                        val binder = terminalActivity.sessionBinder?.get() ?: return@let
-                        val client = TerminalBackEnd(port)
                         scope.launch {
-                            val info =
-                                binder.createSession(
-                                    generateUniqueString(binder.getService().sessionList),
-                                    client,
-                                    terminalActivity,
-                                )
-                            // Switch to the new session immediately — creating it
-                            // silently in the background feels like a dead button.
-                            terminalActivity.changeSession(info.id, port)
+                            val registry = terminalActivity.sessionRegistry
+                            val newId = generateUniqueString(registry.list())
+                            // changeSession → switchTo handles get-or-create
+                            // (the unique id we just generated is guaranteed
+                            // to be absent), so no separate createNew call.
+                            terminalActivity.changeSession(newId, port)
                         }
                     }
                 },
@@ -573,28 +554,27 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: Termina
             }
         }
 
-        service?.sessionList?.let { sessions ->
-            val listState = rememberLazyListState()
+        val sessions = registry.list()
 
-            // Keep the active session visible when the drawer opens or the
-            // selection changes — with many sessions it can sit off-screen.
-            LaunchedEffect(service.currentSession.value, sessions.size) {
-                val index = sessions.indexOf(service.currentSession.value)
-                if (index >= 0) {
-                    listState.scrollToItem(index)
-                }
+        // Keep the active session visible when the drawer opens or the
+        // selection changes — with many sessions it can sit off-screen.
+        LaunchedEffect(currentSessionId, sessions.size) {
+            val index = sessions.indexOf(currentSessionId)
+            if (index >= 0) {
+                listState.scrollToItem(index)
             }
+        }
 
-            LazyColumn(
-                state = listState,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.weight(1f),
-            ) {
-                items(sessions, key = { it }) { sessionId ->
-                    val isSelected = sessionId == service.currentSession.value
+        LazyColumn(
+            state = listState,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.weight(1f),
+        ) {
+            items(sessions, key = { it }) { sessionId ->
+                val isSelected = sessionId == currentSessionId
 
-                    Surface(
-                        onClick = { scope.launch { terminalActivity.changeSession(sessionId, port) } },
+                Surface(
+                    onClick = { scope.launch { terminalActivity.changeSession(sessionId, port) } },
                         shape = MaterialTheme.shapes.large,
                         color =
                             if (isSelected) {
@@ -642,19 +622,18 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: Termina
                     }
                 }
             }
-        }
 
         // ── Footer actions ─────────────────────────────────────────────
-        val activeSession = service?.currentSession?.value
+        val activeSession = currentSessionId
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Surface(
                 onClick = {
-                    if (service == null || activeSession == null) return@Surface
+                    if (activeSession.isEmpty()) return@Surface
                     sessionToDelete = activeSession
                     showDeleteConfirm = true
                 },
-                enabled = activeSession != null,
+                enabled = activeSession.isNotEmpty(),
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                 modifier = Modifier.fillMaxWidth(),
@@ -686,7 +665,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: Termina
                     if (Settings.confirm_exit) {
                         showExitConfirm = true
                     } else {
-                        service?.actionExit()
+                        registry.exitService()
                     }
                 },
                 shape = MaterialTheme.shapes.large,
@@ -757,7 +736,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: Termina
                 TextButton(
                     onClick = {
                         showExitConfirm = false
-                        service?.actionExit()
+                        registry.exitService()
                     },
                 ) {
                     Text(text = stringResource(strings.logout))
@@ -774,16 +753,16 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: Termina
 
 suspend fun Terminal.changeSession(sessionId: String, port: TerminalViewPort) {
     val terminalView = port.view() ?: return
-    val binder = sessionBinder?.get() ?: return
 
     val client = TerminalBackEnd(port)
-    val session = binder.getSession(sessionId) ?: binder.createSession(sessionId, client, this).session
+    val session =
+        runCatching { sessionRegistry.switchTo(sessionId, client) }.getOrNull() ?: return
 
     // Same seven-step attach dance as the factory path — concentrated in
     // TerminalSessionAttach so the two copies can't drift.
     TerminalSessionAttach().run(terminalView, port.virtualKeys(), session, client)
 
-    binder.getService().currentSession.value = sessionId
+    // switchTo already set service.currentSession.value; persist the active id.
     Preference.setString(ACTIVE_SESSION_KEY, sessionId)
 }
 
