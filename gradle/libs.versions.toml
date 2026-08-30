@@ -31,7 +31,6 @@ coil = "2.7.0"
 ktfmt = "0.25.0"
 
 tsBinding = "4.3.2"
-lsp4j = "1.0.0"
 uiautomator = "2.4.0"
 benchmark = "1.5.0-alpha06"
 baselineprofile = "1.5.0-alpha06"
@@ -152,7 +151,6 @@ androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstall
 # Misc
 material = { module = "com.google.android.material:material", version.ref = "material" }
 photoview = { module = "com.github.chrisbanes:PhotoView", version.ref = "photoview" }
-lsp4j = { module = "org.eclipse.lsp4j:org.eclipse.lsp4j", version.ref = "lsp4j" }
 jcodings = { module = "org.jruby.jcodings:jcodings", version.ref = "jcodings" }
 joni = { module = "org.jruby.joni:joni", version.ref = "joni" }
 snakeyaml-engine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "snakeyaml" }
