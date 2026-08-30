@@ -376,7 +376,7 @@ class DebugGatedPreference(
     private val default: Boolean,
     private val gate: () -> Boolean,
 ) : ReadWriteProperty<Any?, Boolean> {
-    private val underlying = CachedPreference(key, default)
+    internal val underlying = CachedPreference(key, default)
     override fun getValue(thisRef: Any?, property: KProperty<*>) =
         gate() && underlying.getValue(thisRef, property)
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
