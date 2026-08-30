@@ -123,7 +123,7 @@ object UpdateManager {
                                 .build()
                         OkHttpClient().newCall(request).execute().use { response ->
                             if (!response.isSuccessful) error("download failed: ${response.code}")
-                            target.outputStream().use { response.body!!.byteStream().copyTo(it) }
+                            target.outputStream().use { response.body?.byteStream()?.copyTo(it) }
                         }
                         target
                     }

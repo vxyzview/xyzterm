@@ -106,7 +106,7 @@ fun ResponsiveDrawer(
                                     }
                                     if (down != null) firstDown = down
                                 }
-                                val startX = firstDown!!.position.x
+                                val startX = firstDown.position.x
                                 val width = contentWidthPx.toFloat()
                                 val atEdge =
                                     contentWidthPx > 0 &&
