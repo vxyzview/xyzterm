@@ -242,7 +242,7 @@ class TerminalBackEnd(private val port: TerminalViewPort) : TerminalViewClient, 
         }
 
         if (keyCode == KeyEvent.KEYCODE_ENTER && !session.isRunning) {
-            val activity = Terminal.instance ?: return false
+            val activity = App.activityScope.currentActivity as? Terminal ?: return false
             val registry = activity.sessionRegistry
             registry.terminate(registry.currentSession().value)
             val remaining = registry.list()
