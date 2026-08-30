@@ -130,9 +130,7 @@ class RootfsInstaller(private val context: Context) {
                 }
             }
 
-            val body = response.body
-            if (body == null) throw Exception("Empty response body")
-            val totalBytes = startedAt + body.contentLength()
+            val totalBytes = startedAt + response.body.contentLength()
 
             var downloadedBytes = startedAt
             // Throttle progress: hopping to the main thread and recomposing the
