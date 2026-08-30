@@ -2,9 +2,7 @@ package com.rk.terminal
 
 import android.annotation.SuppressLint
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
@@ -14,11 +12,7 @@ import android.os.Looper
 import android.os.PowerManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.app.NotificationCompat
 import com.rk.DefaultScope
-import com.rk.activities.terminal.Terminal
-import com.rk.resources.drawables
-import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Preference
@@ -261,7 +255,7 @@ class SessionService : Service() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
+        TerminalNotifications.registerChannels(this)
         val notification = createNotification()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(
@@ -315,65 +309,12 @@ class SessionService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun createNotification(): Notification {
-        val intent = Intent(this, Terminal::class.java)
-        val pendingIntent =
-            PendingIntent.getActivity(
-                this,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-            )
-        val exitIntent = Intent(this, SessionService::class.java).apply { action = "ACTION_EXIT" }
-        val wakeLockIntent = Intent(this, SessionService::class.java).apply { action = "ACTION_WAKE_LOCK" }
-
-        val exitPendingIntent =
-            PendingIntent.getService(
-                this,
-                1,
-                exitIntent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-            )
-        val wakelockPendingIntent =
-            PendingIntent.getService(
-                this,
-                2,
-                wakeLockIntent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-            )
-
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(strings.notification_title.getString())
-            .setContentText(getNotificationContentText(wakeLock?.isHeld == true))
-            .setSmallIcon(drawables.terminal)
-            .setContentIntent(pendingIntent)
-            .addAction(NotificationCompat.Action.Builder(null, strings.exit.getString(), exitPendingIntent).build())
-            .addAction(
-                NotificationCompat.Action.Builder(
-                        null,
-                        if (wakeLock?.isHeld == true) {
-                            strings.release_wakelock.getString()
-                        } else {
-                            strings.acquire_wakelock.getString()
-                        },
-                        wakelockPendingIntent,
-                    )
-                    .build()
-            )
-            .setOngoing(true)
-            .build()
-    }
-
-    private val CHANNEL_ID = "session_service_channel"
-
-    private fun createNotificationChannel() {
-        val channel =
-            NotificationChannel(CHANNEL_ID, strings.notification_channel_name.getString(), NotificationManager.IMPORTANCE_LOW)
-                .apply {
-                    description = strings.notification_channel_desc.getString()
-                }
-        notificationManager.createNotificationChannel(channel)
-    }
+    private fun createNotification(): Notification =
+        TerminalNotifications.serviceNotification(
+            context = this,
+            sessionCount = sessions.size,
+            wakelockHeld = wakeLock?.isHeld == true,
+        )
 
     private val notificationHandler = Handler(Looper.getMainLooper())
     private val notificationRunnable = Runnable { postNotification() }
@@ -390,15 +331,6 @@ class SessionService : Service() {
             val notification = createNotification()
             notificationManager.notify(1, notification)
         }.onFailure { it.printStackTrace() }
-    }
-
-    private fun getNotificationContentText(wakelock: Boolean): String {
-        val base = strings.sessions_running.getFilledString(sessions.size)
-        return if (wakelock) {
-            "$base ${strings.wake_lock_active.getString()}"
-        } else {
-            base
-        }
     }
 
     private companion object {
