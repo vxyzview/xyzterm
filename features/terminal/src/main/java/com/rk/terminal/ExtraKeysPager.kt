@@ -88,7 +88,7 @@ fun ExtraKeysPager(onSurfaceColor: Int, port: TerminalViewPort) {
                                 // Wire the initial client through the same
                                 // helper the terminal-side attach path uses,
                                 // so both sides agree on the wiring contract.
-                                TerminalSessionAttach().wireInitial(port.view(), this)
+                                port.view()?.let { view -> TerminalSessionAttach().wireInitial(view, this) }
 
                                 buttonTextColor = onSurfaceColor
 

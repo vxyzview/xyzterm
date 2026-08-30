@@ -108,7 +108,7 @@ class Terminal : AppCompatActivity() {
      * TerminalView) call back into it for live-apply on font-size and
      * keep-screen-on. They guard with `Terminal.instance != null`.
      */
-    internal lateinit var port: TerminalViewPortHolder
+    internal var port: TerminalViewPortHolder? = null
 
     val serviceConnection =
         object : ServiceConnection {
@@ -154,9 +154,7 @@ class Terminal : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         instance = this
-        if (::port.isInitialized) {
-            port.isForeground.value = true
-        }
+        port?.isForeground?.value = true
     }
 
     fun handleIntent(intent: Intent) {
@@ -186,15 +184,16 @@ class Terminal : AppCompatActivity() {
         }
 
         val pwd = intent.getStringExtra("cwd") ?: return
-        port.view() ?: return
+        val activePort = port ?: return
+        activePort.view() ?: return
 
         val sessionId = File(pwd).name
 
         lifecycleScope.launch(Dispatchers.Main) {
-            val client = TerminalBackEnd(port)
+            val client = TerminalBackEnd(activePort)
             val info = binder.getSessionInfoByPwd(pwd) ?: binder.createSession(sessionId, client, this@Terminal)
 
-            this@Terminal.changeSession(info.id, port)
+            this@Terminal.changeSession(info.id, activePort)
             setIntent(intent)
         }
     }
@@ -221,9 +220,9 @@ class Terminal : AppCompatActivity() {
                 }
                 lifecycleScope.launch(Dispatchers.Main) {
                     if (name !in binder.getService().sessionList) {
-                        binder.createSession(name, TerminalBackEnd(port), this@Terminal)
+                        binder.createSession(name, TerminalBackEnd(port ?: return@launch), this@Terminal)
                     }
-                    this@Terminal.changeSession(name, port)
+                    this@Terminal.changeSession(name, port ?: return@launch)
                 }
             }
             // "run" and "?cmd=" intentionally dropped: a BROWSABLE link writing commands
@@ -233,9 +232,7 @@ class Terminal : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        if (::port.isInitialized) {
-            port.isForeground.value = false
-        }
+        port?.isForeground?.value = false
         if (isBound) {
             unbindService(serviceConnection)
             isBound = false
@@ -285,7 +282,7 @@ class Terminal : AppCompatActivity() {
                         )
                     } else if (sessionBinder != null) {
                         LaunchedEffect(Unit) { FilePermission.verifyStoragePermission(this@Terminal) }
-                        TerminalScreenHost(this, port)
+                        TerminalScreenHost(this, port ?: return)
                     } else {
                         Column(
                             modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -348,6 +345,45 @@ class Terminal : AppCompatActivity() {
         var ubuntuInstalled by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) { ubuntuInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() } }
 
+        // handleInstallFailure comes before startInstall so the launch block
+        // below can call it directly — forward references to local functions
+        // from inside a suspending lambda inside an enclosing @Composable are
+        // not always resolved by the Kotlin compiler.
+        fun handleInstallFailure(failure: InstallResult.Failure) {
+            val error = failure.error
+            val file = failure.file
+            when (error) {
+                is UnknownHostException -> {
+                    toast(strings.network_err.getString())
+                }
+
+                is SocketTimeoutException -> {
+                    errorDialog(strings.timeout)
+                }
+
+                else -> {
+                    error.printStackTrace()
+                    GlobalScope.launch(Dispatchers.IO) {
+                        if (file?.absolutePath?.contains(localBinDir().absolutePath) == true) {
+                            localBinDir().deleteRecursively()
+                        }
+
+                        if (file?.name == "sandbox.tar.gz") {
+                            // Drop only the bad tarball so the retry
+                            // starts clean. Never wipe sandboxDir()
+                            // here: it may hold a working rootfs
+                            // from an earlier successful install,
+                            // and a transient download failure must
+                            // not destroy it.
+                            File(getTempDir(), "sandbox.tar.gz").delete()
+                        }
+                    }
+                    errorDialog(msg = strings.setup_failed.getFilledString(error.message))
+                }
+            }
+            downloadStarted = false
+        }
+
         fun startInstall() {
             downloadStarted = true
             installProgress = InstallProgress(fileName = "", downloadedBytes = 0L, totalBytes = 0L)
@@ -387,41 +423,6 @@ class Terminal : AppCompatActivity() {
                     is InstallResult.Failure -> handleInstallFailure(result)
                 }
             }
-        }
-
-        fun handleInstallFailure(failure: InstallResult.Failure) {
-            val error = failure.error
-            val file = failure.file
-            when (error) {
-                is UnknownHostException -> {
-                    toast(strings.network_err.getString())
-                }
-
-                is SocketTimeoutException -> {
-                    errorDialog(strings.timeout)
-                }
-
-                else -> {
-                    error.printStackTrace()
-                    GlobalScope.launch(Dispatchers.IO) {
-                        if (file?.absolutePath?.contains(localBinDir().absolutePath) == true) {
-                            localBinDir().deleteRecursively()
-                        }
-
-                        if (file?.name == "sandbox.tar.gz") {
-                            // Drop only the bad tarball so the retry
-                            // starts clean. Never wipe sandboxDir()
-                            // here: it may hold a working rootfs
-                            // from an earlier successful install,
-                            // and a transient download failure must
-                            // not destroy it.
-                            File(getTempDir(), "sandbox.tar.gz").delete()
-                        }
-                    }
-                    errorDialog(msg = strings.setup_failed.getFilledString(error.message))
-                }
-            }
-            downloadStarted = false
         }
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -25,6 +25,8 @@ import com.rk.settings.Preference
 import com.rk.settings.Settings
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
+import com.rk.terminal.virtualkeys.VirtualKeysView
+import com.termux.view.TerminalView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -44,8 +46,10 @@ import org.json.JSONObject
 private object RestorePlaceholderPort : TerminalViewPort {
     private val placeholderBell = BellState()
     private val placeholderForeground = mutableStateOf(false)
-    override fun view() = null
-    override fun virtualKeys() = null
+    override fun view(): TerminalView? = null
+    override fun virtualKeys(): VirtualKeysView? = null
+    override fun installView(view: TerminalView) = Unit
+    override fun installVirtualKeys(view: VirtualKeysView) = Unit
     override val bell: BellState = placeholderBell
     override val isForeground = placeholderForeground
 }
@@ -116,7 +120,7 @@ class SessionService : Service() {
             // never need it, and the restored session's TerminalBackEnd only
             // uses the port when the bell rings or a key is pressed, both of
             // which need a live view that the screen hasn't installed yet.
-            val restorePort = if (activity::port.isInitialized) activity.port else RestorePlaceholderPort
+            val restorePort = activity.port ?: RestorePlaceholderPort
             restoreScope.launch {
                 // Spawn the saved shells in parallel — proot startup takes hundreds
                 // of ms per session, and restoring N sessions serially multiplied

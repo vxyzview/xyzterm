@@ -2,6 +2,7 @@ package com.rk.terminal
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.rk.terminal.virtualkeys.VirtualKeysView
 import com.termux.view.TerminalView
 import java.lang.ref.WeakReference
 
@@ -20,6 +21,18 @@ interface TerminalViewPort {
 
     /** Current [VirtualKeysView], or null before the view attaches / after it detaches. */
     fun virtualKeys(): VirtualKeysView?
+
+    /**
+     * Install the just-built [TerminalView] (called from the AndroidView factory).
+     * Lives on the interface (not only on the holder) so the factory path doesn't
+     * need to know the concrete type.
+     */
+    fun installView(view: TerminalView)
+
+    /**
+     * Install the just-built [VirtualKeysView] (called from the AndroidView factory).
+     */
+    fun installVirtualKeys(view: VirtualKeysView)
 
     /** "Shell rang the bell" pulse. The header observes it; the back-end sets it. */
     val bell: BellState
@@ -66,12 +79,12 @@ class TerminalViewPortHolder : TerminalViewPort {
     override fun virtualKeys(): VirtualKeysView? = virtualKeysRef.get()
 
     /** Called by the TerminalView AndroidView factory once the view is built. */
-    fun installView(view: TerminalView) {
+    override fun installView(view: TerminalView) {
         viewRef = WeakReference(view)
     }
 
     /** Called by the VirtualKeysView AndroidView factory once the view is built. */
-    fun installVirtualKeys(view: VirtualKeysView) {
+    override fun installVirtualKeys(view: VirtualKeysView) {
         virtualKeysRef = WeakReference(view)
     }
 }
