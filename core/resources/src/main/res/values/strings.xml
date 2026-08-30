@@ -2,6 +2,10 @@
 <resources>
     <string name="app_name" translatable="false">xyzterm</string>
     <string name="developed_by" translatable="false">developed by vxyzview</string>
+    <string name="color_picker">Pick a color</string>
+    <string name="invalid_color">Invalid color</string>
+    <string name="monet">Dynamic colors</string>
+    <string name="monet_desc">Use device theme in the app</string>
 <string name="restart_required">Restart required</string>
     <string name="save">Save</string>
 <string name="wait">Please wait…</string>
