@@ -8,6 +8,7 @@ import androidx.compose.ui.res.stringResource
 import com.rk.exec.ProotSandboxPaths
 import com.rk.exec.ShellUtils
 import com.rk.exec.isTerminalInstalled
+import com.rk.file.child
 import com.rk.resources.strings
 import com.rk.utils.application
 import com.rk.utils.getTempDir

@@ -73,6 +73,17 @@ interface SessionRegistry {
     fun terminate(id: String)
 
     /**
+     * Bind to the running service. Must be called from the main thread
+     * (Android's ServiceConnection contract). Call [unbind] from onStop.
+     */
+    fun bind()
+
+    /**
+     * Drop the service connection. Idempotent — safe to call when not bound.
+     */
+    fun unbind()
+
+    /**
      * Stop the underlying session service. Used by the drawer's delete-last
      * path (matches the old `SessionService.actionExit()` call). No-op if
      * the service is already stopped.
@@ -85,7 +96,7 @@ interface SessionRegistry {
      * register handlers (e.g. replay the launching intent) that must wait
      * for the saved shells to materialise before they run.
      */
-    fun onRestored(callback: () -> Unit)
+    fun onRestored(callback: suspend () -> Unit)
 
     /**
      * Find the session whose working directory is [pwd], or null if none.
@@ -120,7 +131,7 @@ class ServiceBackedSessionRegistry(
      * Bind to the running service. Must be called from the main thread
      * (Android's ServiceConnection contract). Call [unbind] from onStop.
      */
-    fun bind() {
+    override fun bind() {
         context.bindService(
             Intent(context, SessionService::class.java),
             connection,
@@ -129,7 +140,7 @@ class ServiceBackedSessionRegistry(
     }
 
     /** Drop the connection. Idempotent — safe to call when not bound. */
-    fun unbind() {
+    override fun unbind() {
         if (!isBound) return
         runCatching { context.unbindService(connection) }
         isBound = false
@@ -221,7 +232,7 @@ class ServiceBackedSessionRegistry(
         binder()?.getService()?.actionExit()
     }
 
-    override fun onRestored(callback: () -> Unit) {
+    override fun onRestored(callback: suspend () -> Unit) {
         val b = binder()
         if (b == null) {
             pendingBeforeBind.add(callback)
@@ -235,7 +246,7 @@ class ServiceBackedSessionRegistry(
         return b.getSessionInfoByPwd(pwd)
     }
 
-    private val pendingBeforeBind = mutableListOf<() -> Unit>()
+    private val pendingBeforeBind = mutableListOf<suspend () -> Unit>()
 
     /** Drain anything queued before the binder connected. */
     private fun drainPendingBeforeBind() {

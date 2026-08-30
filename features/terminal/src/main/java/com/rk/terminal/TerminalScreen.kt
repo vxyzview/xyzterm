@@ -407,6 +407,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal, port: Termina
     val sessions = registry.list()
     val currentSessionId by registry.currentSession().collectAsState()
     val context = LocalContext.current
+    val listState = rememberLazyListState()
 
     fun deleteSession(id: String) {
         val index = sessions.indexOf(id)

@@ -213,9 +213,7 @@ class Terminal : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        if (::port.isInitialized) {
-            port.isForeground.value = false
-        }
+        port?.isForeground?.value = false
         if (::sessionRegistry.isInitialized) {
             sessionRegistry.unbind()
         }

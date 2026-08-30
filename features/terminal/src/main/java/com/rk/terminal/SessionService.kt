@@ -55,7 +55,7 @@ class SessionService : Service() {
     val sessionList = mutableStateListOf<String>()
     var currentSession = mutableStateOf("main")
     var restorePending = false
-    private val restoreCallbacks = mutableListOf<() -> Unit>()
+    private val restoreCallbacks = mutableListOf<suspend () -> Unit>()
     private val restoreScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var daemonRunning = false
 
@@ -223,11 +223,11 @@ class SessionService : Service() {
     private val notificationManager by lazy { getSystemService(NotificationManager::class.java) }
 
     /** Runs [callback] once the in-flight session restore has published, or immediately. */
-    fun onRestored(callback: () -> Unit) {
+    fun onRestored(callback: suspend () -> Unit) {
         if (restorePending) {
             restoreCallbacks.add(callback)
         } else {
-            callback()
+            restoreScope.launch { callback() }
         }
     }
 
