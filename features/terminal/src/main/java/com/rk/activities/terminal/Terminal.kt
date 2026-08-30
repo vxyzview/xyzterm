@@ -2,15 +2,12 @@ package com.rk.activities.terminal
 
 import android.Manifest
 import android.app.Activity
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.view.KeyEvent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
 import android.net.Uri
 import android.view.WindowManager
 import androidx.activity.compose.setContent
@@ -35,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,7 +72,9 @@ import com.rk.terminal.ROOTFS_X64_SHA256
 import com.rk.terminal.RootfsInstallScreen
 import com.rk.terminal.RootfsInstaller
 import com.rk.terminal.RootfsSource
-import com.rk.terminal.SessionService
+import com.rk.terminal.SessionInfo
+import com.rk.terminal.SessionRegistry
+import com.rk.terminal.ServiceBackedSessionRegistry
 import com.rk.terminal.TerminalBackEnd
 import com.rk.terminal.TerminalScreen
 import com.rk.terminal.TerminalViewPortHolder
@@ -95,8 +95,14 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 class Terminal : AppCompatActivity() {
-    var sessionBinder by mutableStateOf<WeakReference<SessionService.SessionBinder>?>(null)
-    var isBound = false
+    /**
+     * Single point of contact with the session service. Constructed at
+     * onCreate and rebound at onStart. Replaces the old
+     * `sessionBinder: WeakReference<SessionBinder>?` field — the binder dance
+     * is now owned by the registry (see SessionRegistry).
+     */
+    lateinit var sessionRegistry: SessionRegistry
+        private set
 
     /**
      * The screen surface. Created in [onCreate] before any composable runs so
@@ -110,36 +116,9 @@ class Terminal : AppCompatActivity() {
      */
     internal var port: TerminalViewPortHolder? = null
 
-    val serviceConnection =
-        object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                val binder = service as SessionService.SessionBinder
-                sessionBinder = WeakReference(binder)
-                isBound = true
-                // Restore saved sessions from previous runs before handling the
-                // intent, so the screen picks the last active session instead of
-                // a fresh "main". The shells themselves spawn off the main thread
-                // (restoreSessions); Compose snapshot state (sessionList/
-                // currentSession) is only mutated on the main thread.
-                if (binder.getService().sessionList.isEmpty()) {
-                    binder.restoreSessions(this@Terminal)
-                }
-                handleIntent(intent)
-            }
-
-            override fun onServiceDisconnected(name: ComponentName?) {
-                isBound = false
-                sessionBinder = null
-            }
-        }
-
     override fun onStart() {
         super.onStart()
-        ContextCompat.startForegroundService(this, Intent(this, SessionService::class.java))
-
-        Intent(this, SessionService::class.java).also { intent ->
-            bindService(intent, serviceConnection, BIND_AUTO_CREATE)
-        }
+        sessionRegistry.bind()
 
         // Auto-update check (throttled to once per day inside).
         UpdateManager.checkForUpdates(this)
@@ -165,20 +144,20 @@ class Terminal : AppCompatActivity() {
             return
         }
 
-        val binder = sessionBinder?.get() ?: return
-        // Service still restoring saved sessions: the terminalView.get() guard
-        // below already defers UI attach, but a write racing an empty session
-        // map would be dropped silently. Defer the write until restore lands.
-        if (binder.getService().restorePending) {
-            binder.getService().onRestored { handleIntent(intent) }
-            return
-        }
+        // Restore-race deferral is a property of the registry: every consumer
+        // that registered at construction via `registry.onRestored { ... }` is
+        // replayed only after the saved shells have been published. No more
+        // restorePending check in every call site (see c4f691cfc).
 
         if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
+            val registry = sessionRegistry
             lifecycleScope.launch(Dispatchers.Main) {
-                val session = binder.getSession(binder.getService().currentSession.value)
-                session?.write(text)
+                // Read the current session id lazily so the share-write lands
+                // on whichever session the registry restored (not the placeholder
+                // "main" we initialized before the binder connected).
+                val session = registry.getSession(registry.currentSession().value) ?: return@launch
+                session.write(text)
             }
             return
         }
@@ -188,11 +167,13 @@ class Terminal : AppCompatActivity() {
         activePort.view() ?: return
 
         val sessionId = File(pwd).name
+        val registry = sessionRegistry
 
         lifecycleScope.launch(Dispatchers.Main) {
             val client = TerminalBackEnd(activePort)
-            val info = binder.getSessionInfoByPwd(pwd) ?: binder.createSession(sessionId, client, this@Terminal)
-
+            val existing = registry.sessionByPwd(pwd)
+            val info =
+                existing ?: registry.createNew(sessionId, client).let { SessionInfo(sessionId, pwd, it) }
             this@Terminal.changeSession(info.id, activePort)
             setIntent(intent)
         }
@@ -204,7 +185,7 @@ class Terminal : AppCompatActivity() {
      *   xyzterm://session/<name>?cmd=<cmd>   create or switch to session <name>, optionally run <cmd>
      */
     private fun handleDeepLink(uri: Uri) {
-        val binder = sessionBinder?.get() ?: return
+        val registry = sessionRegistry
         when (uri.host) {
             "session" -> {
                 val name = uri.lastPathSegment?.trim().orEmpty()
@@ -219,8 +200,8 @@ class Terminal : AppCompatActivity() {
                     return
                 }
                 lifecycleScope.launch(Dispatchers.Main) {
-                    if (name !in binder.getService().sessionList) {
-                        binder.createSession(name, TerminalBackEnd(port ?: return@launch), this@Terminal)
+                    if (name !in registry.list()) {
+                        registry.createNew(name, TerminalBackEnd(port ?: return@launch))
                     }
                     this@Terminal.changeSession(name, port ?: return@launch)
                 }
@@ -232,10 +213,11 @@ class Terminal : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        port?.isForeground?.value = false
-        if (isBound) {
-            unbindService(serviceConnection)
-            isBound = false
+        if (::port.isInitialized) {
+            port.isForeground.value = false
+        }
+        if (::sessionRegistry.isInitialized) {
+            sessionRegistry.unbind()
         }
     }
 
@@ -263,12 +245,24 @@ class Terminal : AppCompatActivity() {
         enableEdgeToEdge()
         instance = this
         port = TerminalViewPortHolder()
+        sessionRegistry = ServiceBackedSessionRegistry(this, this)
+
+        // Register the launching-intent replay once. The registry owns the
+        // restore-race contract (see c4f691cfc): if the binder is not yet
+        // connected, the callback queues in `pendingBeforeBind` and runs when
+        // `onServiceConnected` drains it after the saved shells are published.
+        // No more `restorePending` check inside handleIntent itself.
+        val initial = intent
+        sessionRegistry.onRestored {
+            handleIntent(initial)
+        }
 
         if (needsNotificationPermission()) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
         setContent {
+            val connected by sessionRegistry.connectionState().collectAsState()
             XedTheme {
                 AppDialogHost()
 
@@ -280,7 +274,7 @@ class Terminal : AppCompatActivity() {
                             onAccept = { disclaimerAccepted = true },
                             onDecline = { finishAffinity() },
                         )
-                    } else if (sessionBinder != null) {
+                    } else if (connected) {
                         LaunchedEffect(Unit) { FilePermission.verifyStoragePermission(this@Terminal) }
                         val port = this@Terminal.port
                         if (port != null) {
