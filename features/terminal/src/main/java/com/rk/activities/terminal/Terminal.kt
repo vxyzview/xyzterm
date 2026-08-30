@@ -282,7 +282,10 @@ class Terminal : AppCompatActivity() {
                         )
                     } else if (sessionBinder != null) {
                         LaunchedEffect(Unit) { FilePermission.verifyStoragePermission(this@Terminal) }
-                        TerminalScreenHost(this, port ?: return)
+                        val port = this@Terminal.port
+                        if (port != null) {
+                            TerminalScreenHost(this, port)
+                        }
                     } else {
                         Column(
                             modifier = Modifier.fillMaxSize().padding(24.dp),
