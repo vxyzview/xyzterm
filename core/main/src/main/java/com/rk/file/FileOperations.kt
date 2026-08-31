@@ -9,7 +9,6 @@ import com.rk.events.FileEvent
 import com.rk.utils.logError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.apache.commons.net.io.Util
 
 object FileOperations {
     var clipboard: List<FileObject> = emptyList()
@@ -231,7 +230,7 @@ object FileOperations {
 
             sourceFile.useInputStream { inputStream ->
                 targetFile.getOutputStream(append = false).use { outputStream ->
-                    Util.copyStream(inputStream, outputStream)
+                    inputStream.copyTo(outputStream)
                 }
             }
         }

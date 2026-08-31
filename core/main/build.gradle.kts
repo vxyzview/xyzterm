@@ -130,7 +130,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
     implementation(libs.gson)
-    implementation(libs.commons.net)
     implementation(libs.okhttp)
     implementation(libs.photoview)
     implementation(libs.anrwatchdog)

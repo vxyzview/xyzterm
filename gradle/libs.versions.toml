@@ -11,7 +11,6 @@ annotation = "1.9.1"
 anrwatchdog = "1.4.0"
 appcompat = "1.7.1"
 browser = "1.9.0"
-commonsNet = "3.13.0"
 coreVersion = "0.3.0"
 desugar_jdk_libs = "2.1.5"
 documentfile = "1.1.0"
@@ -95,7 +94,6 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 
 # Networking / IO
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-commons-net = { module = "commons-net:commons-net", version.ref = "commonsNet" }
 
 # Images
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
