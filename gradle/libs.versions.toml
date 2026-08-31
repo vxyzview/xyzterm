@@ -11,7 +11,6 @@ annotation = "1.9.1"
 anrwatchdog = "1.4.0"
 appcompat = "1.7.1"
 browser = "1.9.0"
-coreVersion = "0.3.0"
 desugar_jdk_libs = "2.1.5"
 documentfile = "1.1.0"
 material = "1.13.0"
@@ -120,7 +119,6 @@ photoview = { module = "com.github.chrisbanes:PhotoView", version.ref = "photovi
 androidsvg-aar = { module = "com.caverock:androidsvg-aar", version.ref = "androidsvgAar" }
 ec4j-core = { module = "org.ec4j.core:ec4j-core", version.ref = "ec4jCore" }
 anrwatchdog = { module = "com.github.anrwatchdog:anrwatchdog", version.ref = "anrwatchdog" }
-pine-core = { module = "top.canyie.pine:core", version.ref = "coreVersion" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 
