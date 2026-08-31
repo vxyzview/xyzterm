@@ -113,7 +113,7 @@ class DocumentProvider : DocumentsProvider() {
         }
         // ponytail: re-verify containment after building the target — a crafted
         // combined name could still escape; mirror getFileForDocId's check.
-        if (!newFile.canonicalPath.startsWith(sandboxHomeDir().canonicalPath)) {
+        if (!newFile.canonicalPath.startsWith("${sandboxHomeDir().canonicalPath}${File.separator}")) {
             throw FileNotFoundException("Invalid display name: $displayName")
         }
         try {
@@ -168,7 +168,7 @@ class DocumentProvider : DocumentsProvider() {
             // through the whole SD card).
             var isInsideHome: Boolean =
                 try {
-                    file.canonicalPath.startsWith(sandboxHomeDir().canonicalPath)
+                    file.canonicalPath.startsWith("${sandboxHomeDir().canonicalPath}${File.separator}")
                 } catch (e: IOException) {
                     true
                 }
@@ -338,7 +338,10 @@ class DocumentProvider : DocumentsProvider() {
             // root so a privileged caller (or an app-built id from untrusted input)
             // cannot read/write/rename/delete outside sandboxHomeDir.
             val home = sandboxHomeDir().canonicalPath
-            if (!f.canonicalPath.startsWith(home)) {
+            // ponytail: allow the home root itself but contain every descendant by a
+            // separator boundary, so a sibling prefix (homeXYZ) can't pass as inside.
+            val contained = f.canonicalPath == home || f.canonicalPath.startsWith("$home${File.separator}")
+            if (!contained) {
                 throw FileNotFoundException(f.absolutePath + " outside home")
             }
             return f

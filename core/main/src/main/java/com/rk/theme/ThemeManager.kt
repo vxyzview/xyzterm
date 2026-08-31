@@ -315,9 +315,13 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
         // Legacy themes were stored as Java-serialized objects. Deserializing untrusted
         // bytes is an RCE vector (a crafted file dropped via the zip-slip in unzipTo, or any
         // path into themeDir, executes gadget chains on next launch). The old format is no
-        // longer shipped, so just drop the stale files instead of deserializing them.
+        // longer shipped. Instead of deserializing (RCE) or hard-deleting (data loss),
+        // move them to a .legacy-backup/ subdir — inert bytes preserved, user can recover
+        // if a future safe parser is added.
+        val backupDir = themeDir.resolve(".legacy-backup")
+        if (!backupDir.exists()) backupDir.mkdirs()
         themeDir.listFiles()?.forEach { file ->
-            if (file.isFile) runCatching { file.delete() }
+            if (file.isFile) runCatching { file.renameTo(backupDir.resolve(file.name)) }
         }
     }
 

@@ -91,8 +91,9 @@ fun File.unzipTo(destDir: File) {
         zip.entries().asSequence().forEach { entry ->
             val target = File(destDir, entry.name)
             val targetCanonical = target.canonicalPath
+            // separator boundary so a sibling-prefix dir (destXYZ) can't pass as inside dest.
             require(
-                targetCanonical.startsWith(destCanonical) &&
+                targetCanonical.startsWith("$destCanonical${File.separator}") &&
                     targetCanonical.length > destCanonical.length
             ) { "zip entry escapes destination: ${entry.name}" }
             if (entry.isDirectory) {

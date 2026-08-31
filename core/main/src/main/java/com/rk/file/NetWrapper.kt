@@ -14,14 +14,35 @@ import java.util.Locale
 
 class NetWrapper(private val url: URL) : FileObject {
     private fun openConnection(): HttpURLConnection {
-        return (url.openConnection() as HttpURLConnection).apply {
-            // ponytail: don't follow redirects — a tampered http response could
-            // bounce the fetch to an attacker host and land hostile bytes in the
-            // sandbox/theme dir. Caller owns the canonical URL.
-            instanceFollowRedirects = false
-            connectTimeout = 10_000
-            readTimeout = 10_000
-            requestMethod = "GET"
+        // ponytail: same-host redirect following — block cross-host hijack (a tampered
+        // http response redirecting to an attacker host) while allowing legitimate
+        // same-host redirects (GitHub /releases/latest, CDN shortlinks) to work.
+        // HttpURLConnection's instanceFollowRedirects is all-or-nothing, so we
+        // manually follow only same-host redirects, surfacing a cross-host 3xx to the
+        // caller (who treats it as an error) instead of following it.
+        var currentUrl = url
+        var hops = 0
+        while (true) {
+            val conn =
+                (currentUrl.openConnection() as HttpURLConnection).apply {
+                    instanceFollowRedirects = false
+                    connectTimeout = 10_000
+                    readTimeout = 10_000
+                    requestMethod = "GET"
+                }
+            conn.connect()
+            val code = conn.responseCode
+            if (code in 300..399) {
+                val location = conn.getHeaderField("Location")
+                val next = location?.let { URL(currentUrl, it) }
+                if (next == null || ++hops > 10 || next.host != currentUrl.host) {
+                    return conn // cross-host, loop, or malformed redirect: surface the 3xx
+                }
+                conn.disconnect()
+                currentUrl = next
+            } else {
+                return conn // final response
+            }
         }
     }
 

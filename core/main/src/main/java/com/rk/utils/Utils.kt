@@ -114,9 +114,14 @@ fun isMainThread(): Boolean {
 
 fun Context.openUrl(url: String) {
     val uri = runCatching { url.toUri() }.getOrNull() ?: return
-    // ponytail: only http(s) may leave via ACTION_VIEW. A theme/extension-supplied
-    // `repository` (or any untrusted url) could otherwise launch javascript:/file:/etc.
-    if (uri.scheme != "http" && uri.scheme != "https") return
+    // ponytail: allow common safe schemes that launch system handlers without
+    // executing code. Block javascript:/file:/content:/data: as they can escape
+    // sandbox or run arbitrary code. A theme/extension-supplied URL must not be
+    // able to craft a dangerous scheme.
+    val scheme = uri.scheme
+    // intent:/data:/file:/content:/javascript: are deliberately excluded — they can
+    // wrap an arbitrary intent or execute code from an untrusted theme/extension URL.
+    if (scheme !in setOf("http", "https", "mailto", "tel", "sms", "geo", "market")) return
     val intent = Intent(Intent.ACTION_VIEW, uri)
     startActivity(intent)
 }

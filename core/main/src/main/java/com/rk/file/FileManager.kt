@@ -151,8 +151,11 @@ class FileManager(private val activity: ComponentActivity) {
                 return@launchDirectoryPicker
             }
 
-            try {
-                this.activity.lifecycleScope.launch(Dispatchers.IO) {
+            // ponytail: the try/catch must live inside the launched coroutine —
+            // createChild -> childSafe throws IllegalArgumentException for a name with
+            // '/'/'\\'/'.'/'..', which the surrounding scope-level catch cannot see.
+            this.activity.lifecycleScope.launch(Dispatchers.IO) {
+                try {
                     val fileObject = uri.toFileObject(expectedIsFile = true)
                     if (fileObject.hasChild(fileName)) {
                         toast("File with name $fileName already exists")
@@ -161,10 +164,10 @@ class FileManager(private val activity: ComponentActivity) {
                         val newFile = fileObject.createChild(true, fileName)
                         callback(newFile)
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    callback(null)
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                callback(null)
             }
         }
     }

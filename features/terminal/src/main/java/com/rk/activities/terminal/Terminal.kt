@@ -156,17 +156,18 @@ class Terminal : AppCompatActivity() {
     fun handleIntent(intent: Intent) {
         this.intent = intent
 
-        if (intent.data?.scheme == "xyzterm") {
-            handleDeepLink(intent.data ?: return)
+        val binder = sessionBinder?.get() ?: return
+        // Service still restoring saved sessions: defer deep-link / SEND / cwd
+        // handling until restore lands, so a raced intent no longer creates a
+        // duplicate fresh session (deep link) or writes into an empty session
+        // map (SEND/cwd, silently dropped).
+        if (binder.getService().restorePending) {
+            binder.getService().onRestored { handleIntent(intent) }
             return
         }
 
-        val binder = sessionBinder?.get() ?: return
-        // Service still restoring saved sessions: the terminalView.get() guard
-        // below already defers UI attach, but a write racing an empty session
-        // map would be dropped silently. Defer the write until restore lands.
-        if (binder.getService().restorePending) {
-            binder.getService().onRestored { handleIntent(intent) }
+        if (intent.data?.scheme == "xyzterm") {
+            handleDeepLink(intent.data ?: return)
             return
         }
 

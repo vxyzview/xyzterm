@@ -129,7 +129,10 @@ private val harmonizeCache = HashMap<Long, Int>()
 @Composable
 private fun harmonized(color: Long, isDark: Boolean): Int {
     val primary = MaterialTheme.colorScheme.primary.value
-    val key = (color shl 1) or (if (isDark) 1L else 0L) or (primary.toLong() shl 32)
+    // ponytail: pack color (bits 1..32), isDark (bit 0), primary (bits 33..64) into
+    // disjoint slots. The old packing let color's high bit and primary's low bit land
+    // on the same Long bit, so distinct (color, primary) tuples collided in the cache.
+    val key = ((color and 0xFFFFFFFFL) shl 1) or (if (isDark) 1L else 0L) or ((primary and 0xFFFFFFFFL) shl 33)
     return harmonizeCache.getOrPut(key) {
         val ctx = LocalContext.current
         MaterialColors.harmonizeWithPrimary(ctx, color.toInt())
