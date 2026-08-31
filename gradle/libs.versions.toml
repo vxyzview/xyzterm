@@ -35,7 +35,6 @@ ec4jCore = "1.2.0"
 kotlinxSerializationJson = "1.10.0"
 room = "2.8.4"
 
-publish = "0.36.0"
 collection = "1.6.0"
 gson = "2.13.2"
 semver = "3.1.0"
@@ -44,7 +43,6 @@ leakcanary = "2.14"
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-android-test = { id = "com.android.test" }
 android-baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
 
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -53,7 +51,6 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
-publish = { id = "com.vanniktech.maven.publish.base", version.ref = "publish" }
 
 [libraries]
 # AndroidX
