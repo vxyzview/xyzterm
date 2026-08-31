@@ -27,7 +27,7 @@ composeBom = "2025.11.01"
 coil = "2.7.0"
 ktfmt = "0.25.0"
 
-baselineprofile = "1.5.0-alpha06"
+baselineprofile = "1.5.0-rc02"
 profileinstaller = "1.4.1"
 composeDnd = "0.4.0"
 androidsvgAar = "1.4"
