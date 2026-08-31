@@ -5,7 +5,7 @@ agp = "9.3.2"
 kotlin = "2.4.10"
 ksp = "2.3.2"
 kotlinReflect = "2.4.10"
-kotlinxCoroutines = "1.10.2"
+kotlinxCoroutines = "1.11.0"
 
 annotation = "1.9.1"
 anrwatchdog = "1.4.0"
