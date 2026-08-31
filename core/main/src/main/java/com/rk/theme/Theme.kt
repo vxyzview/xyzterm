@@ -126,13 +126,15 @@ private fun Color.towardBlack(amount: Float): Color {
 // stay correct across theme switches (harmonizeWithPrimary uses the theme primary).
 // Single-threaded composition so a plain map is enough; switch to LruCache if reads explode.
 private val harmonizeCache = HashMap<Long, Int>()
+/** 0xFFFFFFFF as Long; computed to dodge Kotlin's ULong inference on the hex literal. */
+private const val MASK_32 = (1L shl 32) - 1
 @Composable
 private fun harmonized(color: Long, isDark: Boolean): Int {
     val primary = MaterialTheme.colorScheme.primary.value
     // ponytail: pack color (bits 1..32), isDark (bit 0), primary (bits 33..64) into
     // disjoint slots. The old packing let color's high bit and primary's low bit land
     // on the same Long bit, so distinct (color, primary) tuples collided in the cache.
-    val key = ((color and 0xFFFFFFFFL) shl 1) or (if (isDark) 1L else 0L) or ((primary and 0xFFFFFFFFL) shl 33)
+    val key = ((color and MASK_32) shl 1) or (if (isDark) 1L else 0L) or ((primary and MASK_32) shl 33)
     return harmonizeCache.getOrPut(key) {
         val ctx = LocalContext.current
         MaterialColors.harmonizeWithPrimary(ctx, color.toInt())
