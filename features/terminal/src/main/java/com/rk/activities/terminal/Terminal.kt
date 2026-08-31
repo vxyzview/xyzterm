@@ -696,7 +696,7 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
-                val body = response.body ?: throw Exception("Empty response body")
+                val body = response.body
                 val totalBytes = startedAt + body.contentLength()
 
                 var downloadedBytes = startedAt
