@@ -130,10 +130,10 @@ private val harmonizeCache = HashMap<Pair<Boolean, Pair<Long, Long>>, Int>()
 private fun harmonized(color: Long, isDark: Boolean): Int {
     val primary = MaterialTheme.colorScheme.primary.value
     // ponytail: exact Pair key (isDark, color, primary) — the old Long bit-packing
-    // collided distinct (color, primary) tuples (color's high bit vs primary's low
-    // bit), and hand-masking a 32-bit Long is fragile to Kotlin's ULong inference in
-    // shl across versions. Pair hashing is exact and collision-free.
-    val key = isDark to (color to primary)
+    // collided distinct (color, primary) tuples and was fragile to ULong inference.
+    // Color.value is ULong in Compose 1.7+; coerce to Long for the key. Pair hashing
+    // is exact and collision-free.
+    val key = isDark to (color to primary.toLong())
     return harmonizeCache.getOrPut(key) {
         val ctx = LocalContext.current
         MaterialColors.harmonizeWithPrimary(ctx, color.toInt())
