@@ -40,7 +40,7 @@ runner = "1.7.0"
 composeDnd = "0.4.0"
 androidsvgAar = "1.4"
 ec4jCore = "1.2.0"
-kotlinxSerializationJson = "1.10.0"
+kotlinxSerializationJson = "1.11.0"
 room = "2.8.4"
 
 publish = "0.36.0"
