@@ -58,7 +58,7 @@ jobs:
           api-level: 34
           target: aosp_atd
           arch: x86_64
-          script: ./gradlew :app:generateBaselineProfiles --no-daemon --no-configuration-cache
+          script: ./gradlew :app:generateBaselineProfile --no-daemon --no-configuration-cache
 
       - name: Upload profile artifact
         uses: actions/upload-artifact@v7

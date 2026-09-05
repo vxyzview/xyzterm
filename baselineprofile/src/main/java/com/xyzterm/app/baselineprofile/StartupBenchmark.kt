@@ -11,7 +11,7 @@ import org.junit.runner.RunWith
 
 /**
  * Cold-start benchmark that drives baseline profile generation.
- * Run via: ./gradlew :app:generateBaselineProfiles
+ * Run via: ./gradlew :app:generateBaselineProfile
  */
 @RunWith(AndroidJUnit4::class)
 class StartupBenchmark {
