@@ -14,6 +14,10 @@ android {
 
     targetProjectPath = ":app"
 
+    // Benchmark the release app (minified + baseline profiles embedded),
+    // not the debuggable debug variant macrobenchmarks refuse to measure.
+    testBuildType = "release"
+
     experimentalProperties["android.experimental.self-instrumenting"] = true
 }
 

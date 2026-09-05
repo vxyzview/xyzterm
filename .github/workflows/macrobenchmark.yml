@@ -57,4 +57,4 @@ jobs:
           api-level: 34
           target: aosp_atd
           arch: x86_64
-          script: ./gradlew :macrobenchmark:tasks --all --no-daemon --no-configuration-cache
+          script: ./gradlew :macrobenchmark:connectedReleaseAndroidTest --no-daemon --no-configuration-cache
