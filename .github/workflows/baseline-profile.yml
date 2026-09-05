@@ -61,7 +61,7 @@ jobs:
           script: ./gradlew :app:generateBaselineProfiles --no-daemon --no-configuration-cache
 
       - name: Upload profile artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: baseline-profiles
           path: app/src/main/generated/baselineProfiles/
