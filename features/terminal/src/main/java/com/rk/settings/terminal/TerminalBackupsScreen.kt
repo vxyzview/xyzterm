@@ -126,7 +126,8 @@ fun TerminalBackupsScreen() {
                             DefaultScope.launch(Dispatchers.IO) {
                                 val error = runCatching {
                                     TerminalBackup.restore(backup)
-                                }.getOrElse { it.message ?: "restore failed" }
+                                }
+                                    .getOrElse { it.message ?: "restore failed" }
                                 withContext(Dispatchers.Main + NonCancellable) {
                                     runCatching { loading.hide() }
                                     if (error == null) {

@@ -53,7 +53,8 @@ object UpdateManager {
 
     private fun installedVersionName(): String? = runCatching {
         application!!.packageManager.getPackageInfo(application!!.packageName, 0).versionName
-    }.getOrNull()
+    }
+        .getOrNull()
 
     /**
      * True when a store client (F-Droid, Droid-ify, Play, ...) installed the app. Those clients deliver updates
