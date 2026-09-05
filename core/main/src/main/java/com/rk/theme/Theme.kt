@@ -1,6 +1,7 @@
 package com.rk.theme
 
 import android.os.Build
+import android.util.LruCache
 import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
@@ -124,8 +125,8 @@ private fun Color.towardBlack(amount: Float): Color {
 // ponytail: harmonize() is a pure color conversion but reads context + runs per
 // read; cache by (color, isDark, primary) to avoid N× recompute in lists AND to
 // stay correct across theme switches (harmonizeWithPrimary uses the theme primary).
-// Single-threaded composition so a plain map is enough; switch to LruCache if reads explode.
-private val harmonizeCache = HashMap<Pair<Boolean, Pair<Long, Long>>, Int>()
+// Bounded LRU: theme lists can feed many distinct colors; an unbounded map grows forever.
+private val harmonizeCache = LruCache<Pair<Boolean, Pair<Long, Long>>, Int>(128)
 @Composable
 private fun harmonized(color: Long, isDark: Boolean): Int {
     val primary = MaterialTheme.colorScheme.primary.value
@@ -134,9 +135,9 @@ private fun harmonized(color: Long, isDark: Boolean): Int {
     // Color.value is ULong in Compose 1.7+; coerce to Long for the key. Pair hashing
     // is exact and collision-free.
     val key = isDark to (color to primary.toLong())
-    return harmonizeCache.getOrPut(key) {
+    return harmonizeCache.get(key) ?: run {
         val ctx = LocalContext.current
-        MaterialColors.harmonizeWithPrimary(ctx, color.toInt())
+        MaterialColors.harmonizeWithPrimary(ctx, color.toInt()).also { harmonizeCache.put(key, it) }
     }
 }
 

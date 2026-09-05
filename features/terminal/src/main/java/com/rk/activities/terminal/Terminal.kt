@@ -697,7 +697,11 @@ class Terminal : AppCompatActivity() {
                 }
 
                 val body = response.body
-                val totalBytes = startedAt + body.contentLength()
+                // contentLength is -1 when the server omits it: propagate -1 as
+                // "unknown" (callers guard total > 0) instead of a bogus total
+                // that would push progress past 100%.
+                val contentLength = body.contentLength()
+                val totalBytes = if (contentLength < 0) -1 else startedAt + contentLength
 
                 var downloadedBytes = startedAt
                 // Throttle progress: hopping to the main thread and recomposing the

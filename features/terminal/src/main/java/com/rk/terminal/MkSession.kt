@@ -20,10 +20,14 @@ object MkSession {
     /** Sanitize a session id for use as a directory name; fallback instead of throwing. */
     private fun nameSafe(id: String): String {
         val clean = id.replace(Regex("[^A-Za-z0-9_.-]"), "_")
-        return when {
-            clean.isEmpty() || clean == "." || clean == ".." -> "session"
-            else -> clean
-        }
+        val base =
+            when {
+                clean.isEmpty() || clean == "." || clean == ".." -> "session"
+                else -> clean
+            }
+        // Suffix by the raw id so distinct ids that sanitize identically
+        // (e.g. "a/b" vs "a_b") never share — and delete — each other's tmp dir.
+        return "${base}_${id.hashCode().toUInt().toString(36)}"
     }
 
     /** Everything the [TerminalSession] constructor needs, assembled off the main thread. */

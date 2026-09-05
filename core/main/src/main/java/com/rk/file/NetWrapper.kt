@@ -13,6 +13,9 @@ import java.nio.charset.Charset
 import java.util.Locale
 
 class NetWrapper(private val url: URL) : FileObject {
+    /** Explicit port, or the scheme default when unspecified (http:80, https:443). */
+    private fun effectivePort(url: URL): Int = if (url.port != -1) url.port else url.defaultPort
+
     private fun openConnection(): HttpURLConnection {
         // ponytail: same-host redirect following — block cross-host hijack (a tampered
         // http response redirecting to an attacker host) while allowing legitimate
@@ -35,8 +38,16 @@ class NetWrapper(private val url: URL) : FileObject {
             if (code in 300..399) {
                 val location = conn.getHeaderField("Location")
                 val next = location?.let { URL(currentUrl, it) }
-                if (next == null || ++hops > 10 || next.host != currentUrl.host) {
-                    return conn // cross-host, loop, or malformed redirect: surface the 3xx
+                // Same-origin only: scheme + host (case-insensitive) + effective
+                // port. A tampered http response must not bounce the fetch to an
+                // attacker host, a downgraded scheme, or a different port.
+                val sameOrigin =
+                    next != null &&
+                        next.protocol.equals(currentUrl.protocol, ignoreCase = true) &&
+                        next.host.equals(currentUrl.host, ignoreCase = true) &&
+                        effectivePort(next) == effectivePort(currentUrl)
+                if (!sameOrigin || ++hops > 10) {
+                    return conn // cross-origin, loop, or malformed redirect: surface the 3xx
                 }
                 conn.disconnect()
                 currentUrl = next
