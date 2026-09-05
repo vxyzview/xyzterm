@@ -66,6 +66,24 @@ jobs:
           name: baseline-profiles
           path: app/src/main/generated/baselineProfiles/
 
+      - name: Collect generated profile into src
+        run: |
+          mkdir -p app/src/main/generated/baselineProfiles
+          # The plugin's copy task can restore a stale cache hit; collect
+          # deterministically from this run's build outputs instead.
+          FOUND=$(find baselineprofile app -path "*build*" -name "baselineprof.txt" 2>/dev/null | grep -i release | head -n 1)
+          if [ -z "$FOUND" ]; then
+            FOUND=$(find baselineprofile app -path "*build*" -name "baselineprof.txt" 2>/dev/null | head -n 1)
+          fi
+          if [ -n "$FOUND" ]; then
+            echo "Copying $FOUND"
+            cp "$FOUND" app/src/main/generated/baselineProfiles/baselineprof.txt
+          else
+            echo "No baselineprof.txt under any build/ dir:"
+            find baselineprofile app -path "*build*" -name "*.txt" 2>/dev/null | head -n 20
+            exit 1
+          fi
+
       - name: Commit generated profile
         run: |
           git config user.name "github-actions[bot]"
