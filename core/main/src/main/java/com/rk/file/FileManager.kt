@@ -130,9 +130,7 @@ class FileManager(private val activity: ComponentActivity) {
 
                     destinationFile?.let { file ->
                         copyUriData(activity.contentResolver, sourceUri, file.toUri())
-                        withContext(Dispatchers.Main) {
-                            callback(file)
-                        }
+                        withContext(Dispatchers.Main) { callback(file) }
                     } ?: run { withContext(Dispatchers.Main) { callback(null) } }
                 } catch (e: Exception) {
                     e.printStackTrace()

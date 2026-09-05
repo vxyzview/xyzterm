@@ -50,25 +50,16 @@ fun LogScreen(
     // the screen keeping the stale initial text forever.
     var logs by remember(logText) { mutableStateOf(logText) }
 
-    LaunchedEffect(flow) {
-        flow?.collect { newLine ->
-            logs += "\n" + newLine
-        }
-    }
+    LaunchedEffect(flow) { flow?.collect { newLine -> logs += "\n" + newLine } }
 
     PreferenceScaffold(
         label = stringResource(strings.logs),
         isExpandedScreen = LocalIsExpandedScreen.current,
         actions = {
-            TextButton(onClick = { copyToClipboard(copyLabel, logs, true) }) {
-                Text(stringResource(strings.copy))
-            }
+            TextButton(onClick = { copyToClipboard(copyLabel, logs, true) }) { Text(stringResource(strings.copy)) }
 
             TextButton(
-                onClick = {
-                    runCatching { reportLogs(logs, issueTitle, copyLabel) }
-                        .onFailure { logErrorOrExit(it) }
-                },
+                onClick = { runCatching { reportLogs(logs, issueTitle, copyLabel) }.onFailure { logErrorOrExit(it) } }
             ) {
                 Text(stringResource(strings.report_issue))
             }

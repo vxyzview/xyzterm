@@ -344,10 +344,12 @@ class SessionService : Service() {
 
     private fun createNotificationChannel() {
         val channel =
-            NotificationChannel(CHANNEL_ID, strings.notification_channel_name.getString(), NotificationManager.IMPORTANCE_LOW)
-                .apply {
-                    description = strings.notification_channel_desc.getString()
-                }
+            NotificationChannel(
+                    CHANNEL_ID,
+                    strings.notification_channel_name.getString(),
+                    NotificationManager.IMPORTANCE_LOW,
+                )
+                .apply { description = strings.notification_channel_desc.getString() }
         notificationManager.createNotificationChannel(channel)
     }
 
@@ -365,7 +367,8 @@ class SessionService : Service() {
         runCatching {
             val notification = createNotification()
             notificationManager.notify(1, notification)
-        }.onFailure { it.printStackTrace() }
+        }
+            .onFailure { it.printStackTrace() }
     }
 
     private fun getNotificationContentText(wakelock: Boolean): String {
@@ -382,8 +385,9 @@ class SessionService : Service() {
     }
 
     private fun saveSession(id: SessionId, pwd: SessionPwd) {
-        val existing =
-            runCatching { JSONObject(Preference.getString(SAVED_SESSIONS_KEY, "{}")) }.getOrElse { JSONObject() }
+        val existing = runCatching {
+            JSONObject(Preference.getString(SAVED_SESSIONS_KEY, "{}"))
+        }.getOrElse { JSONObject() }
         val map = JSONObject()
         existing.keys().forEach { key -> map.put(key, existing.getString(key)) }
         map.put(id, pwd)
@@ -398,9 +402,7 @@ class SessionService : Service() {
 
     private fun savedSessions(): Map<SessionId, SessionPwd> {
         val obj = runCatching { JSONObject(Preference.getString(SAVED_SESSIONS_KEY, "{}")) }.getOrElse { JSONObject() }
-        return buildMap {
-            obj.keys().forEach { key -> put(key, obj.getString(key)) }
-        }
+        return buildMap { obj.keys().forEach { key -> put(key, obj.getString(key)) } }
     }
 }
 

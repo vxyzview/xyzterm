@@ -78,9 +78,7 @@ object Events {
     inline fun <reified T : Event> subscribe(noinline listener: suspend (T) -> Unit): EventSubscription {
         val list = listeners.getOrPut(T::class) { mutableListOf() }
 
-        val wrapper: suspend (Event) -> Unit = {
-            listener(it as T)
-        }
+        val wrapper: suspend (Event) -> Unit = { listener(it as T) }
 
         list += wrapper
 

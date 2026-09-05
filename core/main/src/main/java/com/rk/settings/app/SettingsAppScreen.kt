@@ -26,7 +26,6 @@ import com.google.gson.reflect.TypeToken
 import com.rk.activities.settings.SettingsActivity
 import com.rk.activities.settings.SettingsRoutes
 import com.rk.components.BasicToggle
-import com.rk.components.NextScreenCard
 import com.rk.components.SettingsItem
 import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.components.compose.preferences.base.PreferenceLayout
@@ -35,7 +34,6 @@ import com.rk.file.toFileObject
 import com.rk.resources.strings
 import com.rk.settings.Preference
 import com.rk.settings.Settings
-import com.rk.theme.currentTheme
 import com.rk.utils.application
 import com.rk.utils.toast
 import kotlinx.coroutines.Dispatchers
@@ -106,9 +104,8 @@ fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) 
                         )
 
                     hasManageExternalStorageDeclared =
-                        pkgInfo.requestedPermissions?.any {
-                            it == android.Manifest.permission.MANAGE_EXTERNAL_STORAGE
-                        } ?: false
+                        pkgInfo.requestedPermissions?.any { it == android.Manifest.permission.MANAGE_EXTERNAL_STORAGE }
+                            ?: false
                 }
 
                 SettingsItem(
@@ -131,7 +128,6 @@ fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) 
                     },
                 )
             }
-
         }
 
         PreferenceGroup(heading = stringResource(strings.feature_toggles)) {
@@ -141,9 +137,7 @@ fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) 
                     checked = toggle.state.value,
                     onSwitch = { checked ->
                         if (toggle.onSwitch != null) {
-                            toggle.onSwitch.invoke(activity, checked) { ok ->
-                                toggle.setEnable(ok)
-                            }
+                            toggle.onSwitch.invoke(activity, checked) { ok -> toggle.setEnable(ok) }
                         } else {
                             toggle.setEnable(checked)
                         }

@@ -119,9 +119,7 @@ class LogcatService : Service() {
         serviceScope.launch {
             try {
                 // Clear any existing logs
-                launch(Dispatchers.Main) {
-                    logcatLogs.clear()
-                }
+                launch(Dispatchers.Main) { logcatLogs.clear() }
 
                 // Run logcat continuously in brief format
                 val process = Runtime.getRuntime().exec(arrayOf("logcat", "-v", "brief"))
@@ -134,9 +132,7 @@ class LogcatService : Service() {
                     lines.forEach { line ->
                         if (shouldCaptureLog(line)) {
                             _logFlow.tryEmit(line)
-                            synchronized(batch) {
-                                batch.add(line)
-                            }
+                            synchronized(batch) { batch.add(line) }
 
                             val now = System.currentTimeMillis()
                             if (batch.size >= 50 || now - lastUpdateTime > 100) {

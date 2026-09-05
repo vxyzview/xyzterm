@@ -62,9 +62,7 @@ fun UserBindingsScreen() {
         items(bindings, key = { it.outside + it.inside.orEmpty() }) { binding ->
             PreferenceTemplate(
                 verticalPadding = 16.dp,
-                title = {
-                    Text(text = binding.outside, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                },
+                title = { Text(text = binding.outside, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 description = {
                     Text(
                         text = binding.inside ?: binding.outside,
@@ -156,8 +154,7 @@ private fun BindEditDialog(existing: Set<String>, onDismiss: () -> Unit, onSave:
                     error =
                         when {
                             !UserBindings.isValidHostPath(outside) -> strings.bind_invalid_host
-                            inside != null && !UserBindings.isValidGuestPath(inside) ->
-                                strings.bind_invalid_guest
+                            inside != null && !UserBindings.isValidGuestPath(inside) -> strings.bind_invalid_guest
                             existing.contains(outside) -> strings.bind_duplicate
                             else -> null
                         }

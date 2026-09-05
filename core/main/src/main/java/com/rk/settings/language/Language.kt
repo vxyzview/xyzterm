@@ -36,10 +36,10 @@ import com.rk.events.Events
 import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.utils.application
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 // Data class to hold locale with its availability status
 data class LocaleInfo(val locale: Locale, val isInstalled: Boolean, val displayName: String)
@@ -78,9 +78,7 @@ fun LanguageScreen(modifier: Modifier = Modifier) {
         fab = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, "https://github.com/vxyzview/xyzterm".toUri())
-                    )
+                    context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/vxyzview/xyzterm".toUri()))
                 },
                 text = { Text(stringResource(strings.translate)) },
                 icon = { Icon(imageVector = Icons.Default.Add, contentDescription = null) },
@@ -147,7 +145,8 @@ private suspend fun readSupportedLocales(context: Context): List<Locale> =
                 val localeStrings: List<String> = Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
                 localeStrings.map { Locale.forLanguageTag(it) }
             }
-        }.getOrElse { emptyList() }
+        }
+            .getOrElse { emptyList() }
     }
 
 fun setAppLanguage(locale: Locale, oldLocale: Locale) {
@@ -155,7 +154,5 @@ fun setAppLanguage(locale: Locale, oldLocale: Locale) {
     AppCompatDelegate.setApplicationLocales(appLocale)
     Settings.current_lang = locale.toLanguageTag()
 
-    DefaultScope.launch {
-        Events.publish(AppEvent.LanguageChanged(locale, oldLocale))
-    }
+    DefaultScope.launch { Events.publish(AppEvent.LanguageChanged(locale, oldLocale)) }
 }

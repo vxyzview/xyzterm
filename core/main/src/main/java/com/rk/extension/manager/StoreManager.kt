@@ -50,9 +50,7 @@ object StoreManager {
                 val response = json.decodeFromString<ThemeListResponse>(jsonString)
                 response.themes
             }
-                .onFailure {
-                    it.printStackTrace()
-                }
+                .onFailure { it.printStackTrace() }
                 .getOrElse { emptyList() }
         }
 
@@ -63,9 +61,7 @@ object StoreManager {
                 val response = json.decodeFromString<IconPackListResponse>(jsonString)
                 response.iconPacks
             }
-                .onFailure {
-                    it.printStackTrace()
-                }
+                .onFailure { it.printStackTrace() }
                 .getOrElse { emptyList() }
         }
 }

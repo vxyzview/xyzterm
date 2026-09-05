@@ -38,7 +38,7 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(libs.gson)
     implementation(libs.semver)
-    
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
@@ -49,5 +49,4 @@ dependencies {
 
     implementation("com.github.termux.termux-app:terminal-view:v0.118.3")
     implementation("com.github.termux.termux-app:terminal-emulator:v0.118.3")
-
 }

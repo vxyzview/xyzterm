@@ -101,9 +101,10 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
             )
         }
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
-                PackageManager.PERMISSION_GRANTED
+        if (
+            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                    PackageManager.PERMISSION_GRANTED
         ) {
             return
         }
@@ -133,7 +134,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
 
     override fun onTerminalCursorStateChange(state: Boolean) {}
 
-    //override fun setTerminalShellPid(session: TerminalSession, pid: Int) {}
+    // override fun setTerminalShellPid(session: TerminalSession, pid: Int) {}
 
     override fun getTerminalCursorStyle(): Int {
         return when (Settings.terminal_cursor_style) {
@@ -194,7 +195,11 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         if (view != null && emulator != null) {
             val (column, row) = view.getColumnAndRow(e, true).let { it[0] to it[1] }
             val line = emulator.getScreen().getSelectedText(0, row, emulator.mColumns - 1, row)
-            val url = URL_REGEX.find(line)?.takeIf { column in it.range }?.value?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
+            val url =
+                URL_REGEX.find(line)
+                    ?.takeIf { column in it.range }
+                    ?.value
+                    ?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
             if (url != null) {
                 openUrlPrompt(url)
                 return

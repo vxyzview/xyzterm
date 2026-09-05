@@ -115,7 +115,9 @@ private fun Categories(navController: NavController) {
                 description = strings.debug_options_desc.getFilledString(strings.app_name.getString()),
                 iconResource = drawables.build,
                 endWidget = { Chevron() },
-                onNavigate = { navController.navigate(SettingsRoutes.DeveloperOptions.route) { launchSingleTop = true } },
+                onNavigate = {
+                    navController.navigate(SettingsRoutes.DeveloperOptions.route) { launchSingleTop = true }
+                },
             )
         }
     }
@@ -123,8 +125,7 @@ private fun Categories(navController: NavController) {
     PreferenceGroup {
         PreferenceTemplate(
             modifier =
-                Modifier
-                    .semantics { role = Role.Button }
+                Modifier.semantics { role = Role.Button }
                     .clickable { navController.navigate(SettingsRoutes.About.route) { launchSingleTop = true } },
             verticalPadding = 14.dp,
             title = { Text(stringResource(id = strings.about)) },
@@ -144,8 +145,7 @@ private fun Categories(navController: NavController) {
 
         PreferenceTemplate(
             modifier =
-                Modifier
-                    .semantics { role = Role.Button }
+                Modifier.semantics { role = Role.Button }
                     .clickable { navController.navigate(SettingsRoutes.Support.route) { launchSingleTop = true } },
             verticalPadding = 14.dp,
             title = { Text(stringResource(strings.support)) },

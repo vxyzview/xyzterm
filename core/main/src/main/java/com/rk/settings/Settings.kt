@@ -49,6 +49,7 @@ object Settings {
         set(value) {
             _verbose_error = value
         }
+
     var terminate_sessions_on_exit by CachedPreference("terminate_sessions_on_exit", false)
     var auto_backup by CachedPreference("auto_backup", false)
     var donated by CachedPreference("donated", false)
@@ -68,6 +69,7 @@ object Settings {
         set(value) {
             _theme_flipper = value
         }
+
     var fullscreen by CachedPreference("fullscreen", false)
     var smart_toolbar by CachedPreference("smart_toolbar", false)
     var confirm_exit by CachedPreference("confirm_exit", true)

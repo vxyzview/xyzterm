@@ -52,8 +52,9 @@ fun Color.toRgb(): String {
 }
 
 fun String.parseRgb(): Color? {
-    val match = Regex("rgba?\\(\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*(?:,\\s*([\\d.]+)\\s*)?\\)").find(trim())
-        ?: return null
+    val match =
+        Regex("rgba?\\(\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*(?:,\\s*([\\d.]+)\\s*)?\\)").find(trim())
+            ?: return null
     val r = match.groupValues[1].toFloatOrNull() ?: return null
     val g = match.groupValues[2].toFloatOrNull() ?: return null
     val b = match.groupValues[3].toFloatOrNull() ?: return null
@@ -98,8 +99,9 @@ fun Color.toHsl(): String {
 }
 
 fun String.parseHsl(): Color? {
-    val match = Regex("hsla?\\(\\s*([\\d.]+)\\s*,\\s*([\\d.]+)%\\s*,\\s*([\\d.]+)%\\s*(?:,\\s*([\\d.]+)\\s*)?\\)").find(trim())
-        ?: return null
+    val match =
+        Regex("hsla?\\(\\s*([\\d.]+)\\s*,\\s*([\\d.]+)%\\s*,\\s*([\\d.]+)%\\s*(?:,\\s*([\\d.]+)\\s*)?\\)").find(trim())
+            ?: return null
     val h = match.groupValues[1].toFloatOrNull() ?: return null
     val s = (match.groupValues[2].toFloatOrNull() ?: return null) / 100f
     val l = (match.groupValues[3].toFloatOrNull() ?: return null) / 100f

@@ -20,12 +20,9 @@ import androidx.compose.ui.unit.dp
 import com.google.android.material.color.MaterialColors
 import com.rk.App.Companion.themeManager
 import com.rk.settings.Settings
-import com.rk.theme.rememberAppTypography
 import com.rk.utils.isDarkTheme
 
-val currentTheme = derivedStateOf {
-    themeManager.loadedThemes.find { it.id == Settings.theme } ?: blueberry
-}
+val currentTheme = derivedStateOf { themeManager.loadedThemes.find { it.id == Settings.theme } ?: blueberry }
 
 /** Sentinel theme id for the device's wallpaper-derived dynamic (Material You) colors. Always on. */
 const val DYNAMIC_THEME_ID = "dynamic"
@@ -48,26 +45,27 @@ fun XedTheme(
     // unchanged, so the remember block never re-runs and the scheme/holder stay stale.
     val themeId = currentTheme.value.id
 
-    val (colorScheme, themeHolder) = remember(darkThemeState, amoledState, dynamicState, themeId) {
-        var holder: ThemeHolder
-        val scheme =
-            if (dynamicState && supportsDynamicTheming()) {
-                holder = blueberry
-                when {
-                    darkThemeState && amoledState -> dynamicDarkColorScheme(context).amoledScheme()
-                    darkThemeState -> dynamicDarkColorScheme(context)
-                    else -> dynamicLightColorScheme(context)
-                }
-            } else {
-                holder = currentTheme.value
-                if (darkThemeState) {
-                    if (amoledState) holder.darkScheme.amoledScheme() else holder.darkScheme
+    val (colorScheme, themeHolder) =
+        remember(darkThemeState, amoledState, dynamicState, themeId) {
+            var holder: ThemeHolder
+            val scheme =
+                if (dynamicState && supportsDynamicTheming()) {
+                    holder = blueberry
+                    when {
+                        darkThemeState && amoledState -> dynamicDarkColorScheme(context).amoledScheme()
+                        darkThemeState -> dynamicDarkColorScheme(context)
+                        else -> dynamicLightColorScheme(context)
+                    }
                 } else {
-                    holder.lightScheme
+                    holder = currentTheme.value
+                    if (darkThemeState) {
+                        if (amoledState) holder.darkScheme.amoledScheme() else holder.darkScheme
+                    } else {
+                        holder.lightScheme
+                    }
                 }
-            }
-        scheme to holder
-    }
+            scheme to holder
+        }
 
     CompositionLocalProvider(LocalThemeHolder provides themeHolder) {
         MaterialTheme(
@@ -91,11 +89,10 @@ fun XedTheme(
 fun supportsDynamicTheming() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
 /**
- * AMOLED scheme: collapse the background/surface family to true black and derive the
- * container ramp by darkening each of the BASE scheme's own containers toward black.
- * Each level scales from its ORIGINAL counterpart (copy() args evaluate against the
- * receiver, not sibling params), which preserves the tone spacing and hue so cards
- * stay distinguishable from the background while keeping the pure-black look.
+ * AMOLED scheme: collapse the background/surface family to true black and derive the container ramp by darkening each
+ * of the BASE scheme's own containers toward black. Each level scales from its ORIGINAL counterpart (copy() args
+ * evaluate against the receiver, not sibling params), which preserves the tone spacing and hue so cards stay
+ * distinguishable from the background while keeping the pure-black look.
  */
 private fun ColorScheme.amoledScheme(): ColorScheme =
     copy(
@@ -127,6 +124,7 @@ private fun Color.towardBlack(amount: Float): Color {
 // stay correct across theme switches (harmonizeWithPrimary uses the theme primary).
 // Bounded LRU: theme lists can feed many distinct colors; an unbounded map grows forever.
 private val harmonizeCache = LruCache<Pair<Boolean, Pair<Long, Long>>, Int>(128)
+
 @Composable
 private fun harmonized(color: Long, isDark: Boolean): Int {
     val primary = MaterialTheme.colorScheme.primary.value
@@ -135,35 +133,57 @@ private fun harmonized(color: Long, isDark: Boolean): Int {
     // Color.value is ULong in Compose 1.7+; coerce to Long for the key. Pair hashing
     // is exact and collision-free.
     val key = isDark to (color to primary.toLong())
-    return harmonizeCache.get(key) ?: run {
-        val ctx = LocalContext.current
-        MaterialColors.harmonizeWithPrimary(ctx, color.toInt()).also { harmonizeCache.put(key, it) }
-    }
+    return harmonizeCache.get(key)
+        ?: run {
+            val ctx = LocalContext.current
+            MaterialColors.harmonizeWithPrimary(ctx, color.toInt()).also { harmonizeCache.put(key, it) }
+        }
 }
 
 // Custom warning colors
 val ColorScheme.warningSurface: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFF633F00, true)) else Color(harmonized(0xFFFFDDB4, false))
+    @Composable
+    get() =
+        if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFF633F00, true))
+        else Color(harmonized(0xFFFFDDB4, false))
 
 val ColorScheme.onWarningSurface: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFFFDDB4, true)) else Color(harmonized(0xFF633F00, false))
+    @Composable
+    get() =
+        if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFFFDDB4, true))
+        else Color(harmonized(0xFF633F00, false))
 
 // Status colors
 val ColorScheme.greenStatus: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFA6DA95, true)) else Color(harmonized(0xFF44842E, false))
+    @Composable
+    get() =
+        if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFA6DA95, true))
+        else Color(harmonized(0xFF44842E, false))
 
 val ColorScheme.yellowStatus: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFFFE082, true)) else Color(harmonized(0xFFE6AC00, false))
+    @Composable
+    get() =
+        if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFFFE082, true))
+        else Color(harmonized(0xFFE6AC00, false))
 
 // Git change colors
 val ColorScheme.gitAdded: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFF81C784, true)) else Color(harmonized(0xFF2E7D32, false))
+    @Composable
+    get() =
+        if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFF81C784, true))
+        else Color(harmonized(0xFF2E7D32, false))
 
 val ColorScheme.gitModified: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFF64B5F6, true)) else Color(harmonized(0xFF1565C0, false))
+    @Composable
+    get() =
+        if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFF64B5F6, true))
+        else Color(harmonized(0xFF1565C0, false))
 
 val ColorScheme.gitDeleted: Color
     get() = this.onSurface.copy(alpha = 0.6f)
 
 val ColorScheme.gitConflicted: Color
-    @Composable get() = if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFE57373, true)) else Color(harmonized(0xFFC62828, false))
+    @Composable
+    get() =
+        if (isDarkTheme(LocalContext.current)) Color(harmonized(0xFFE57373, true))
+        else Color(harmonized(0xFFC62828, false))

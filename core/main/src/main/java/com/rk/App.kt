@@ -10,23 +10,23 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.rk.commands.CommandProvider
 import com.rk.commands.KeybindingsManager
 import com.rk.crashhandler.CrashHandler
-import com.rk.utils.FontCache
 import com.rk.icons.pack.IconPackManager
 import com.rk.resources.Res
 import com.rk.settings.Settings
 import com.rk.settings.debugOptions.LogcatService
 import com.rk.settings.debugOptions.startThemeFlipperIfNotRunning
+import com.rk.theme.ThemeManager
 import com.rk.utils.DEFAULT_APP_FONT_PATH
 import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
-import com.rk.theme.ThemeManager
+import com.rk.utils.FontCache
 import com.rk.utils.application
 import com.rk.utils.getTempDir
+import java.util.Locale
+import java.util.concurrent.Executors
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.Locale
-import java.util.concurrent.Executors
 
 @OptIn(DelicateCoroutinesApi::class)
 open class App : Application() {
@@ -81,9 +81,7 @@ open class App : Application() {
         GlobalScope.launch(Dispatchers.IO) {
             // Command registration now runs synchronously in onCreate() before
             // features init; only keybind loading (file IO) stays off the critical path.
-            launch(Dispatchers.IO) {
-                KeybindingsManager.loadKeybindings()
-            }
+            launch(Dispatchers.IO) { KeybindingsManager.loadKeybindings() }
             launch(Dispatchers.IO) {
                 iconPackManager.indexLocalPacks()
                 iconPackManager.indexStoreIconPacks()

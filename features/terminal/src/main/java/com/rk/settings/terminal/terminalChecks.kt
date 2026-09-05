@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.res.stringResource
-import com.rk.exec.isTerminalInstalled
 import com.rk.exec.ShellUtils
+import com.rk.exec.isTerminalInstalled
 import com.rk.file.child
 import com.rk.file.sandboxDir
 import com.rk.file.sandboxHomeDir
@@ -191,7 +191,9 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     try {
                         val dns =
                             ShellUtils.runUbuntu(
-                                "getent", "hosts", "google.com",
+                                "getent",
+                                "hosts",
+                                "google.com",
                                 timeoutSeconds = CHECK_TIMEOUT_SECONDS,
                             )
                         if (dns.exitCode == 0 && !dns.timedOut) {
@@ -228,12 +230,14 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     try {
                         val touch =
                             ShellUtils.runUbuntu(
-                                "touch", "/tmp/.test_xed",
+                                "touch",
+                                "/tmp/.test_xed",
                                 timeoutSeconds = CHECK_TIMEOUT_SECONDS,
                             )
                         if (touch.exitCode == 0 && !touch.timedOut) {
                             ShellUtils.runUbuntu(
-                                "rm", "/tmp/.test_xed",
+                                "rm",
+                                "/tmp/.test_xed",
                                 timeoutSeconds = CHECK_TIMEOUT_SECONDS,
                             )
                         } else {

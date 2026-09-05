@@ -52,14 +52,9 @@ fun <T> PreferenceList(
                 Column {
                     items.forEach { (item, string) ->
                         PreferenceTemplate(
-                            modifier =
-                                Modifier.clip(MaterialTheme.shapes.large).clickable {
-                                    tempSelectedItem = item
-                                },
+                            modifier = Modifier.clip(MaterialTheme.shapes.large).clickable { tempSelectedItem = item },
                             title = { Text(text = string) },
-                            startWidget = {
-                                RadioButton(selected = tempSelectedItem == item, onClick = null)
-                            },
+                            startWidget = { RadioButton(selected = tempSelectedItem == item, onClick = null) },
                             verticalPadding = 12.dp,
                             carded = false,
                         )
@@ -77,9 +72,7 @@ fun <T> PreferenceList(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(text = strings.cancel.getString())
-                }
+                TextButton(onClick = { showDialog = false }) { Text(text = strings.cancel.getString()) }
             },
         )
     }

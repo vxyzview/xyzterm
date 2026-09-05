@@ -22,6 +22,7 @@ import com.rk.settings.Settings
 import com.rk.utils.application
 import com.rk.utils.dialogRes
 import com.rk.utils.logError
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,7 +33,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.io.File
 
 @Serializable
 data class IconPackEntry(
@@ -89,9 +89,7 @@ class IconPackManager(private val context: Application) : CoroutineScope by Coro
         return runCatching {
             json.decodeFromString<PackageCache>(cacheFile.readText())
         }
-            .getOrElse {
-                PackageCache()
-            }
+            .getOrElse { PackageCache() }
     }
 
     private fun writeCache(dir: File, cache: PackageCache) {
@@ -108,9 +106,7 @@ class IconPackManager(private val context: Application) : CoroutineScope by Coro
             val newSize = calcSize(dir)
             writeCache(dir, cache.copy(size = newSize))
 
-            withContext(Dispatchers.Main) {
-                localIconPacks[pkg.id]?.size = newSize
-            }
+            withContext(Dispatchers.Main) { localIconPacks[pkg.id]?.size = newSize }
         }
     }
 
@@ -140,11 +136,7 @@ class IconPackManager(private val context: Application) : CoroutineScope by Coro
                 msg = strings.incompatible_icon_pack_warning.getString(),
                 cancelRes = strings.cancel,
                 okRes = strings.continue_action,
-                onOk = {
-                    DefaultScope.launch {
-                        writeIconPackToDisk(iconPackManifest, dir)
-                    }
-                },
+                onOk = { DefaultScope.launch { writeIconPackToDisk(iconPackManifest, dir) } },
             )
             return
         }
@@ -252,9 +244,7 @@ class IconPackManager(private val context: Application) : CoroutineScope by Coro
                                 )
                             newLocal[iconPackManifest.id] = iconPack
                         }
-                            .onFailure {
-                                logError(it, "Failed to index local icon pack")
-                            }
+                            .onFailure { logError(it, "Failed to index local icon pack") }
                     }
                 }
             }

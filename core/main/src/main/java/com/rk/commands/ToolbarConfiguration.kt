@@ -55,10 +55,7 @@ object ToolbarConfiguration {
         removeEditorToolbarCommand(command.id)
     }
 
-    private var _globalCommands: SnapshotStateList<Command> =
-        mutableStateListOf(
-            CommandProvider.SettingsCommand,
-        )
+    private var _globalCommands: SnapshotStateList<Command> = mutableStateListOf(CommandProvider.SettingsCommand)
 
     val globalCommands: List<Command>
         get() = _globalCommands

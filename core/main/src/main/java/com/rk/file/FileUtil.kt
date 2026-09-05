@@ -18,9 +18,8 @@ fun File.child(fileName: String): File {
 }
 
 /**
- * Like [child], but rejects path-traversal segments (`..`, `/`, `\`, `.`).
- * Guards callers that build paths from untrusted names (e.g. session ids from
- * a BROWSABLE deep link). Throws IllegalArgumentException on a bad segment.
+ * Like [child], but rejects path-traversal segments (`..`, `/`, `\`, `.`). Guards callers that build paths from
+ * untrusted names (e.g. session ids from a BROWSABLE deep link). Throws IllegalArgumentException on a bad segment.
  */
 fun File.childSafe(fileName: String): File {
     require(
@@ -29,7 +28,9 @@ fun File.childSafe(fileName: String): File {
             fileName != ".." &&
             !fileName.contains('/') &&
             !fileName.contains('\\')
-    ) { "invalid path segment: $fileName" }
+    ) {
+        "invalid path segment: $fileName"
+    }
     return File(this, fileName)
 }
 
@@ -95,16 +96,14 @@ fun File.unzipTo(destDir: File) {
             require(
                 targetCanonical.startsWith("$destCanonical${File.separator}") &&
                     targetCanonical.length > destCanonical.length
-            ) { "zip entry escapes destination: ${entry.name}" }
+            ) {
+                "zip entry escapes destination: ${entry.name}"
+            }
             if (entry.isDirectory) {
                 target.mkdirs()
             } else {
                 target.parentFile?.mkdirs()
-                zip.getInputStream(entry).use { input ->
-                    target.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
+                zip.getInputStream(entry).use { input -> target.outputStream().use { output -> input.copyTo(output) } }
             }
         }
     }

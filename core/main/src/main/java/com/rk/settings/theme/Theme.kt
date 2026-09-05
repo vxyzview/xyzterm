@@ -1,7 +1,6 @@
 package com.rk.settings.theme
 
 import android.content.Context
-import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
@@ -27,14 +26,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rk.App.Companion.iconPackManager
 import com.rk.App.Companion.themeManager
 import com.rk.DefaultScope
-import com.rk.activities.settings.SettingsRoutes
 import com.rk.components.BottomSheetContent
 import com.rk.components.SettingsItem
 import com.rk.components.compose.preferences.base.PreferenceGroup
@@ -43,7 +40,6 @@ import com.rk.components.compose.preferences.base.PreferenceTemplate
 import com.rk.events.AppEvent
 import com.rk.events.Events
 import com.rk.icons.pack.currentIconPack
-import com.rk.resources.drawables
 import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.theme.DYNAMIC_THEME_ID
@@ -71,9 +67,7 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                 description = stringResource(id = strings.oled_desc),
                 default = Settings.amoled,
                 state = amoledState,
-                sideEffect = {
-                    Settings.amoled = it
-                },
+                sideEffect = { Settings.amoled = it },
             )
         }
 
@@ -132,7 +126,7 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                                             }
                                         }
                                         themeManager.uninstallTheme(theme)
-                                    },
+                                    }
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Delete,
@@ -165,9 +159,7 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                     currentIconPack.value = null
                     Settings.icon_pack = ""
 
-                    DefaultScope.launch {
-                        Events.publish(AppEvent.IconPackChanged(null, oldIconPack))
-                    }
+                    DefaultScope.launch { Events.publish(AppEvent.IconPackChanged(null, oldIconPack)) }
                 },
             )
 
@@ -191,9 +183,7 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                         currentIconPack.value = iconPack
                         Settings.icon_pack = id
 
-                        DefaultScope.launch {
-                            Events.publish(AppEvent.IconPackChanged(iconPack, oldIconPack))
-                        }
+                        DefaultScope.launch { Events.publish(AppEvent.IconPackChanged(iconPack, oldIconPack)) }
                     },
                     endWidget = {
                         IconButton(
@@ -203,9 +193,7 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                                     currentIconPack.value = null
                                     Settings.icon_pack = ""
 
-                                    DefaultScope.launch {
-                                        Events.publish(AppEvent.IconPackChanged(null, oldIconPack))
-                                    }
+                                    DefaultScope.launch { Events.publish(AppEvent.IconPackChanged(null, oldIconPack)) }
                                 }
 
                                 iconPackManager.uninstallIconPack(id)
@@ -287,5 +275,3 @@ fun DayNightDialog(showBottomSheet: MutableState<Boolean>, context: Context) {
         }
     }
 }
-
-

@@ -13,9 +13,8 @@ import java.io.File
 import java.util.TimeZone
 
 /**
- * Single source of truth for the environment handed to proot sessions and
- * one-shot sandbox commands. Previously MkSession and ubuntuProcess each
- * hand-rolled this map and drifted apart over time.
+ * Single source of truth for the environment handed to proot sessions and one-shot sandbox commands. Previously
+ * MkSession and ubuntuProcess each hand-rolled this map and drifted apart over time.
  */
 object SandboxEnv {
     fun build(context: Context, prootTmpDir: String): MutableMap<String, String> {
@@ -79,10 +78,9 @@ object SandboxEnv {
         // so hand it the user's custom binds here. Newline-separated entries of
         // "outside" or "outside:inside"; the script drops missing sources.
         env["CUSTOM_BINDS"] =
-            UserBindings.decode(Settings.custom_bindings)
-                .joinToString("\n") { binding ->
-                    if (binding.inside.isNullOrBlank()) binding.outside else "${binding.outside}:${binding.inside}"
-                }
+            UserBindings.decode(Settings.custom_bindings).joinToString("\n") { binding ->
+                if (binding.inside.isNullOrBlank()) binding.outside else "${binding.outside}:${binding.inside}"
+            }
 
         val loader32 = "$nativeLibDir/libloader32.so"
         if (File(loader32).exists()) {

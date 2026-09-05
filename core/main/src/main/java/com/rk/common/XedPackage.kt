@@ -1,11 +1,11 @@
 package com.rk.common
 
 import com.rk.file.unzipTo
+import java.io.File
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import java.io.File
 
 enum class PackageType {
     @SerialName("extension") EXTENSION,

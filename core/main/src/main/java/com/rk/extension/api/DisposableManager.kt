@@ -33,9 +33,7 @@ class DisposableManager {
     fun onDispose(beforeDispose: (Registerable) -> Unit = {}) {
         registry.forEach { (registerable, disposers) ->
             beforeDispose(registerable)
-            disposers.forEach {
-                (it as Disposer<Registerable>).dispose(registerable)
-            }
+            disposers.forEach { (it as Disposer<Registerable>).dispose(registerable) }
         }
         registry.clear()
     }

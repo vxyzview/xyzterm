@@ -53,9 +53,8 @@ class DialogRequest(
 )
 
 /**
- * Process-singleton store for state-hoisted dialogs. [dialog], [composableDialog] and
- * [LoadingPopup] push requests here; every activity root must compose [AppDialogHost]
- * once so the requests render.
+ * Process-singleton store for state-hoisted dialogs. [dialog], [composableDialog] and [LoadingPopup] push requests
+ * here; every activity root must compose [AppDialogHost] once so the requests render.
  */
 object DialogHost {
     val dialogs = mutableStateListOf<DialogRequest>()
@@ -99,20 +98,14 @@ fun AppDialogHost() {
 @Composable
 private fun rememberHostResumed(): Boolean {
     val lifecycleOwner = LocalContext.current as? LifecycleOwner
-    val resumed =
-        remember {
-            mutableStateOf(
-                lifecycleOwner?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.RESUMED) ?: true
-            )
-        }
+    val resumed = remember {
+        mutableStateOf(lifecycleOwner?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.RESUMED) ?: true)
+    }
     DisposableEffect(lifecycleOwner) {
         if (lifecycleOwner == null) {
             onDispose {}
         } else {
-            val observer =
-                LifecycleEventObserver { _, event ->
-                    resumed.value = event == Lifecycle.Event.ON_RESUME
-                }
+            val observer = LifecycleEventObserver { _, event -> resumed.value = event == Lifecycle.Event.ON_RESUME }
             lifecycleOwner.lifecycle.addObserver(observer)
             onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
         }
@@ -234,9 +227,8 @@ fun dialogRes(
 /**
  * Shows a confirm dialog that survives configuration changes.
  *
- * The callbacks receive `null` instead of an [AlertDialog]: there is no AppCompat handle
- * anymore. Callers must treat the parameter as nullable-and-always-null (existing
- * `?.dismiss()` style call sites are unaffected).
+ * The callbacks receive `null` instead of an [AlertDialog]: there is no AppCompat handle anymore. Callers must treat
+ * the parameter as nullable-and-always-null (existing `?.dismiss()` style call sites are unaffected).
  */
 @XedExtensionPoint
 fun dialog(
@@ -314,24 +306,12 @@ private fun DialogContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (onCancel != null) {
-                TextButton(
-                    onClick = {
-                        onCancel()
-                    }
-                ) {
-                    Text(cancelString)
-                }
+                TextButton(onClick = { onCancel() }) { Text(cancelString) }
 
                 Spacer(modifier = Modifier.width(8.dp))
             }
 
-            TextButton(
-                onClick = {
-                    onOk()
-                }
-            ) {
-                Text(okString)
-            }
+            TextButton(onClick = { onOk() }) { Text(okString) }
         }
     }
 }
@@ -339,8 +319,8 @@ private fun DialogContent(
 /**
  * Shows a custom composable dialog that survives configuration changes.
  *
- * The composable receives `null` instead of an [AlertDialog]; there is no AppCompat
- * handle anymore. Callers must treat the parameter as nullable-and-always-null.
+ * The composable receives `null` instead of an [AlertDialog]; there is no AppCompat handle anymore. Callers must treat
+ * the parameter as nullable-and-always-null.
  */
 @XedExtensionPoint
 fun composableDialog(

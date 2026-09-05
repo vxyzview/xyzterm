@@ -13,15 +13,11 @@ import androidx.compose.animation.slideOutHorizontally
 // "Remove animations" accessibility setting (animator duration scale = 0) on its
 // own, so no explicit reduced-motion branch is needed here.
 object NavigationAnimationTransitions {
-    fun popEnterTransition(): EnterTransition =
-        fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
+    fun popEnterTransition(): EnterTransition = fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
 
-    fun popExitTransition(): ExitTransition =
-        fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
+    fun popExitTransition(): ExitTransition = fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
 
-    fun enterTransition(): EnterTransition =
-        fadeIn(tween(250)) + slideInHorizontally { it / 2 }
+    fun enterTransition(): EnterTransition = fadeIn(tween(250)) + slideInHorizontally { it / 2 }
 
-    fun exitTransition(): ExitTransition =
-        fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
+    fun exitTransition(): ExitTransition = fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
 }

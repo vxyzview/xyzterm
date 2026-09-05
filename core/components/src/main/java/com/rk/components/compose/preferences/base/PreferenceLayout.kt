@@ -249,9 +249,8 @@ fun PreferenceLayoutLazyColumn(
 val LocalIsExpandedScreen = compositionLocalOf { false }
 
 /**
- * Provides [LocalIsExpandedScreen] from the actual window width (Material's expanded
- * breakpoint is >= 840dp), so tablet / landscape windows get the expanded top-app-bar
- * treatment instead of the compact phone layout.
+ * Provides [LocalIsExpandedScreen] from the actual window width (Material's expanded breakpoint is >= 840dp), so tablet
+ * / landscape windows get the expanded top-app-bar treatment instead of the compact phone layout.
  */
 @Composable
 fun ProvideIsExpandedScreen(content: @Composable () -> Unit) {

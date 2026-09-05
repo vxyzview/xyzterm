@@ -1,5 +1,6 @@
 package com.rk.settings.terminal
 
+import android.text.format.Formatter
 import androidx.activity.compose.LocalActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
@@ -25,13 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import android.text.format.Formatter
 import com.rk.DefaultScope
 import com.rk.components.InfoBlock
 import com.rk.components.compose.preferences.base.PreferenceLayoutLazyColumn
 import com.rk.components.compose.preferences.base.PreferenceTemplate
-import com.rk.resources.getString
 import com.rk.resources.getFilledString
+import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.terminal.TerminalBackup
 import com.rk.utils.LoadingPopup
@@ -73,8 +73,10 @@ fun TerminalBackupsScreen() {
                         val loading = LoadingPopup(activity, null)
                         loading.show()
                         DefaultScope.launch(Dispatchers.IO) {
-                            val ok =
-                                runCatching { TerminalBackup.autoBackup() }.getOrElse {
+                            val ok = runCatching {
+                                TerminalBackup.autoBackup()
+                            }
+                                .getOrElse {
                                     it.printStackTrace()
                                     false
                                 }
@@ -122,9 +124,9 @@ fun TerminalBackupsScreen() {
                             val loading = LoadingPopup(activity, null)
                             loading.show()
                             DefaultScope.launch(Dispatchers.IO) {
-                                val error =
-                                    runCatching { TerminalBackup.restore(backup) }
-                                        .getOrElse { it.message ?: "restore failed" }
+                                val error = runCatching {
+                                    TerminalBackup.restore(backup)
+                                }.getOrElse { it.message ?: "restore failed" }
                                 withContext(Dispatchers.Main + NonCancellable) {
                                     runCatching { loading.hide() }
                                     if (error == null) {
@@ -167,9 +169,7 @@ private fun BackupItem(backup: File, onRestore: () -> Unit, onDelete: () -> Unit
     PreferenceTemplate(
         modifier = Modifier.clickable(onClick = onRestore),
         verticalPadding = 10.dp,
-        title = {
-            Text(text = backup.name)
-        },
+        title = { Text(text = backup.name) },
         description = { Text(text = details) },
         endWidget = {
             IconButton(onClick = onDelete) {

@@ -66,9 +66,8 @@ fun TerminalExtraKeys() {
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             Row(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .padding(horizontal = 16.dp),
+                modifier =
+                    Modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -79,9 +78,7 @@ fun TerminalExtraKeys() {
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(
-                    onClick = {
-                        context.openUrl("https://wiki.termux.com/wiki/Touch_Keyboard#Extra_Keys_Row")
-                    }
+                    onClick = { context.openUrl("https://wiki.termux.com/wiki/Touch_Keyboard#Extra_Keys_Row") }
                 ) {
                     Icon(
                         painter = painterResource(drawables.open_in_new),
@@ -111,9 +108,7 @@ fun TerminalExtraKeys() {
                         unfocusedContainerColor = Color.Transparent,
                         disabledContainerColor = Color.Transparent,
                     ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 textStyle =
                     TextStyle(
                         fontFamily = FontFamily.Monospace,

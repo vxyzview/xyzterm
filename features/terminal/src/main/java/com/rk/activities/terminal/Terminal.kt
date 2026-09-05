@@ -6,20 +6,18 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.view.KeyEvent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.net.Uri
 import android.os.SystemClock
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,9 +30,9 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -54,6 +52,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.rk.UpdateManager
 import com.rk.activities.settings.DisclaimerScreen
@@ -71,9 +71,9 @@ import com.rk.settings.Settings
 import com.rk.terminal.NEXT_STAGE
 import com.rk.terminal.ROOTFS_ARM
 import com.rk.terminal.ROOTFS_ARM64
-import com.rk.terminal.ROOTFS_X64
-import com.rk.terminal.ROOTFS_ARM_SHA256
 import com.rk.terminal.ROOTFS_ARM64_SHA256
+import com.rk.terminal.ROOTFS_ARM_SHA256
+import com.rk.terminal.ROOTFS_X64
 import com.rk.terminal.ROOTFS_X64_SHA256
 import com.rk.terminal.SessionService
 import com.rk.terminal.TerminalBackEnd
@@ -86,6 +86,14 @@ import com.rk.utils.AppDialogHost
 import com.rk.utils.errorDialog
 import com.rk.utils.getTempDir
 import com.rk.utils.toast
+import java.io.File
+import java.io.FileOutputStream
+import java.lang.ref.WeakReference
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.security.MessageDigest
+import java.util.concurrent.TimeUnit
+import java.util.zip.GZIPInputStream
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -93,14 +101,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.File
-import java.io.FileOutputStream
-import java.lang.ref.WeakReference
-import java.security.MessageDigest
-import java.util.zip.GZIPInputStream
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-import java.util.concurrent.TimeUnit
 
 class Terminal : AppCompatActivity() {
     var sessionBinder by mutableStateOf<WeakReference<SessionService.SessionBinder>?>(null)
@@ -195,9 +195,8 @@ class Terminal : AppCompatActivity() {
     }
 
     /**
-     * Handles xyzterm:// URIs:
-     *   xyzterm://run?cmd=<command>          write command to the current session
-     *   xyzterm://session/<name>?cmd=<cmd>   create or switch to session <name>, optionally run <cmd>
+     * Handles xyzterm:// URIs: xyzterm://run?cmd=<command> write command to the current session
+     * xyzterm://session/<name>?cmd=<cmd> create or switch to session <name>, optionally run <cmd>
      */
     private fun handleDeepLink(uri: Uri) {
         val binder = sessionBinder?.get() ?: return
@@ -206,12 +205,7 @@ class Terminal : AppCompatActivity() {
                 val name = uri.lastPathSegment?.trim().orEmpty()
                 // ponytail: deep-link session name is attacker-controlled; reject traversal
                 // and special segments before they reach MkSession.childSafe / deleteRecursively.
-                if (name.isEmpty() ||
-                    name == "." ||
-                    name == ".." ||
-                    name.contains("/") ||
-                    name.contains("\\")
-                ) {
+                if (name.isEmpty() || name == "." || name == ".." || name.contains("/") || name.contains("\\")) {
                     return
                 }
                 lifecycleScope.launch(Dispatchers.Main) {
@@ -221,8 +215,8 @@ class Terminal : AppCompatActivity() {
                     this@Terminal.changeSession(name)
                 }
             }
-            // "run" and "?cmd=" intentionally dropped: a BROWSABLE link writing commands
-            // into a live session is unprompted command execution inside the sandbox.
+        // "run" and "?cmd=" intentionally dropped: a BROWSABLE link writing commands
+        // into a live session is unprompted command execution inside the sandbox.
         }
     }
 
@@ -293,9 +287,7 @@ class Terminal : AppCompatActivity() {
                                 textAlign = TextAlign.Center,
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = { recreate() }) {
-                                Text(text = stringResource(strings.retry))
-                            }
+                            Button(onClick = { recreate() }) { Text(text = stringResource(strings.retry)) }
                         }
                     }
                 }
@@ -375,7 +367,7 @@ class Terminal : AppCompatActivity() {
                             url = rootfs.first,
                             outputFile = getTempDir().child("sandbox.tar.gz"),
                             sha256 = rootfs.second,
-                        ),
+                        )
                     )
 
                 try {
@@ -491,9 +483,7 @@ class Terminal : AppCompatActivity() {
                             textAlign = TextAlign.Center,
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { finishAffinity() }) {
-                            Text(text = stringResource(strings.ok))
-                        }
+                        Button(onClick = { finishAffinity() }) { Text(text = stringResource(strings.ok)) }
                     }
                 }
 
@@ -523,9 +513,7 @@ class Terminal : AppCompatActivity() {
                                     text = "$percent%",
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier =
-                                        Modifier
-                                            .padding(top = 8.dp)
-                                            .semantics { liveRegion = LiveRegionMode.Polite },
+                                        Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
                                 )
                             }
                         }
@@ -535,10 +523,7 @@ class Terminal : AppCompatActivity() {
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error,
                             modifier =
-                                Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = 8.dp)
-                                    .safeDrawingPadding(),
+                                Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp).safeDrawingPadding(),
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -552,11 +537,7 @@ class Terminal : AppCompatActivity() {
                     // Ubuntu not installed and no download in progress: offer the
                     // optional install instead of forcing the rootfs download.
                     Column(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .padding(24.dp)
-                                .semantics(mergeDescendants = true) {},
+                        modifier = Modifier.fillMaxSize().padding(24.dp).semantics(mergeDescendants = true) {},
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
@@ -573,13 +554,9 @@ class Terminal : AppCompatActivity() {
                             textAlign = TextAlign.Center,
                         )
                         Spacer(modifier = Modifier.height(24.dp))
-                        Button(onClick = { startInstall() }) {
-                            Text(text = stringResource(strings.install))
-                        }
+                        Button(onClick = { startInstall() }) { Text(text = stringResource(strings.install)) }
                         Spacer(modifier = Modifier.height(8.dp))
-                        TextButton(onClick = { finishAffinity() }) {
-                            Text(text = stringResource(strings.not_now))
-                        }
+                        TextButton(onClick = { finishAffinity() }) { Text(text = stringResource(strings.not_now)) }
                     }
                 }
             }
@@ -608,11 +585,7 @@ class Terminal : AppCompatActivity() {
 
                     outputFile.parentFile?.mkdirs()
 
-                    if (
-                        !outputFile.exists() ||
-                        !isValidGzip(outputFile) ||
-                        !sha256Matches(outputFile, file.sha256)
-                    ) {
+                    if (!outputFile.exists() || !isValidGzip(outputFile) || !sha256Matches(outputFile, file.sha256)) {
                         // Existing file is a leftover from a killed download, a
                         // pre-resume version, or a stale rootfs from an older app
                         // release (hash mismatch): discard it, the download writes
@@ -671,10 +644,7 @@ class Terminal : AppCompatActivity() {
             // 206 with the remainder, or 200 if it ignores the Range header.
             val rangeStart = if (partFile.exists()) partFile.length() else 0L
             val request =
-                Request.Builder()
-                    .url(url)
-                    .apply { if (rangeStart > 0) header("Range", "bytes=$rangeStart-") }
-                    .build()
+                Request.Builder().url(url).apply { if (rangeStart > 0) header("Range", "bytes=$rangeStart-") }.build()
 
             var startedAt = 0L
             client.newCall(request).execute().use { response ->
@@ -743,16 +713,16 @@ class Terminal : AppCompatActivity() {
         }
     }
 
-    private fun isValidGzip(file: File): Boolean =
-        runCatching {
-            GZIPInputStream(file.inputStream()).use { input ->
-                val buffer = ByteArray(8 * 1024)
-                while (input.read(buffer) != -1) {
-                    // Drain to EOF: GZIPInputStream only verifies the trailer CRC
-                    // once the stream is fully consumed.
-                }
+    private fun isValidGzip(file: File): Boolean = runCatching {
+        GZIPInputStream(file.inputStream()).use { input ->
+            val buffer = ByteArray(8 * 1024)
+            while (input.read(buffer) != -1) {
+                // Drain to EOF: GZIPInputStream only verifies the trailer CRC
+                // once the stream is fully consumed.
             }
-        }.isSuccess
+        }
+    }
+        .isSuccess
 
     private fun sha256Matches(file: File, expectedSha256: String?): Boolean {
         if (expectedSha256.isNullOrEmpty()) return true
@@ -765,10 +735,7 @@ class Terminal : AppCompatActivity() {
                     digest.update(buffer, 0, bytesRead)
                 }
             }
-            digest
-                .digest()
-                .joinToString("") { "%02x".format(it) }
-                .equals(expectedSha256, ignoreCase = true)
+            digest.digest().joinToString("") { "%02x".format(it) }.equals(expectedSha256, ignoreCase = true)
         }
             .getOrElse {
                 it.printStackTrace()

@@ -22,8 +22,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Progress popup that survives configuration changes by rendering through [DialogHost].
- * Safe to create from any thread; [show]/[hide]/[setMessage] are idempotent.
+ * Progress popup that survives configuration changes by rendering through [DialogHost]. Safe to create from any thread;
+ * [show]/[hide]/[setMessage] are idempotent.
  */
 class LoadingPopup(private val activity: AppCompatActivity?, hideAfterMillis: Long? = null) {
     private val id = DialogHost.nextId()

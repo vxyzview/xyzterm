@@ -13,8 +13,8 @@ import com.rk.file.localDir
 import com.rk.file.sandboxDir
 import com.rk.file.sandboxHomeDir
 import com.rk.file.toFileWrapper
-import com.rk.resources.getString
 import com.rk.resources.getFilledString
+import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Preference
 import com.rk.settings.Settings
@@ -23,6 +23,7 @@ import com.rk.utils.application
 import com.rk.utils.dialogRes
 import com.rk.utils.toast
 import com.xyzterm.BuildConfig
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,7 +31,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.File
 
 object UpdateManager {
     private const val UPDATE_OWNER = "vxyzview"
@@ -43,41 +43,41 @@ object UpdateManager {
 
     /** Compares "vX.Y.Z" (or "X.Y.Z") tags. Returns true if [latest] > [installed]. */
     private fun isNewer(latest: String, installed: String): Boolean {
-        val parse = { v: String -> Regex("""v?(\d+)\.(\d+)\.(\d+)""").matchEntire(v.trim())?.groupValues?.drop(1)?.map { it.toInt() } }
+        val parse = { v: String ->
+            Regex("""v?(\d+)\.(\d+)\.(\d+)""").matchEntire(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
+        }
         val a = parse(latest) ?: return false
         val b = parse(installed) ?: return true
         return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
     }
 
-    private fun installedVersionName(): String? =
-        runCatching { application!!.packageManager.getPackageInfo(application!!.packageName, 0).versionName }.getOrNull()
+    private fun installedVersionName(): String? = runCatching {
+        application!!.packageManager.getPackageInfo(application!!.packageName, 0).versionName
+    }.getOrNull()
 
     /**
-     * True when a store client (F-Droid, Droid-ify, Play, ...) installed the
-     * app. Those clients deliver updates themselves; an in-app updater would
-     * violate F-Droid policy and bypass the client's signature pinning. Only
+     * True when a store client (F-Droid, Droid-ify, Play, ...) installed the app. Those clients deliver updates
+     * themselves; an in-app updater would violate F-Droid policy and bypass the client's signature pinning. Only
      * sideloaded APKs (null installer) get the self-update prompt.
      */
     @Suppress("DEPRECATION")
-    private fun installedFromStore(): Boolean =
-        runCatching {
-            val pm = application!!.packageManager
-            val installer =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    pm.getInstallSourceInfo(application!!.packageName).initiatingPackageName
-                } else {
-                    pm.getInstallerPackageName(application!!.packageName)
-                }
-            installer != null
-        }.getOrDefault(false)
+    private fun installedFromStore(): Boolean = runCatching {
+        val pm = application!!.packageManager
+        val installer =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                pm.getInstallSourceInfo(application!!.packageName).initiatingPackageName
+            } else {
+                pm.getInstallerPackageName(application!!.packageName)
+            }
+        installer != null
+    }
+        .getOrDefault(false)
 
     /**
-     * Checks the GitHub latest release against the installed app. Throttled to
-     * once per day; only runs when the "Check for updates" setting is on.
-     * If the installed app was built locally (same version as the release),
-     * nothing is offered — no install conflict. If the release is signed with
-     * a different key, the user gets a clear message instead of an install
-     * failure.
+     * Checks the GitHub latest release against the installed app. Throttled to once per day; only runs when the "Check
+     * for updates" setting is on. If the installed app was built locally (same version as the release), nothing is
+     * offered — no install conflict. If the release is signed with a different key, the user gets a clear message
+     * instead of an install failure.
      */
     fun checkForUpdates(activity: Activity) {
         if (!Settings.check_for_update) return
@@ -113,22 +113,24 @@ object UpdateManager {
     private fun downloadAndInstall(activity: Activity, version: String) {
         toast(strings.update_downloading.getString())
         scope.launch(Dispatchers.Main) {
-            val file =
-                runCatching {
-                    withContext(Dispatchers.IO) {
-                        val target = File(application!!.filesDir, "update/xyzterm-$version.apk")
-                        target.parentFile?.mkdirs()
-                        val request =
-                            Request.Builder()
-                                .url("https://github.com/$UPDATE_OWNER/$UPDATE_REPO/releases/latest/download/xyzterm-$version.apk")
-                                .build()
-                        OkHttpClient().newCall(request).execute().use { response ->
-                            if (!response.isSuccessful) error("download failed: ${response.code}")
-                            target.outputStream().use { response.body!!.byteStream().copyTo(it) }
-                        }
-                        target
+            val file = runCatching {
+                withContext(Dispatchers.IO) {
+                    val target = File(application!!.filesDir, "update/xyzterm-$version.apk")
+                    target.parentFile?.mkdirs()
+                    val request =
+                        Request.Builder()
+                            .url(
+                                "https://github.com/$UPDATE_OWNER/$UPDATE_REPO/releases/latest/download/xyzterm-$version.apk"
+                            )
+                            .build()
+                    OkHttpClient().newCall(request).execute().use { response ->
+                        if (!response.isSuccessful) error("download failed: ${response.code}")
+                        target.outputStream().use { response.body!!.byteStream().copyTo(it) }
                     }
-                }.getOrNull()
+                    target
+                }
+            }
+                .getOrNull()
 
             if (file == null) {
                 toast(strings.update_download_failed.getString())
@@ -157,8 +159,10 @@ object UpdateManager {
     private fun signatureMatches(apkPath: String): Boolean {
         val app = application ?: return true
         val pm = app.packageManager
-        val installed = runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return true
-        val archive = runCatching { pm.getPackageArchiveInfo(apkPath, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return false
+        val installed =
+            runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return true
+        val archive =
+            runCatching { pm.getPackageArchiveInfo(apkPath, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return false
         val a = installed.signatures?.firstOrNull() ?: return true
         val b = archive.signatures?.firstOrNull() ?: return false
         return a == b
@@ -276,7 +280,6 @@ object UpdateManager {
                         }
                     }
                 }
-
 
                 if (lastVersionCode <= 94L) {
                     runCatching {

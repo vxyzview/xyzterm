@@ -36,11 +36,10 @@ import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.utils.copyToClipboard
+import com.rk.utils.okHttpClient
 import com.xyzterm.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.rk.utils.okHttpClient
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 
@@ -204,7 +203,6 @@ fun AboutScreen() {
                     context.startActivity(intent)
                 },
             )
-
-            }
+        }
     }
 }

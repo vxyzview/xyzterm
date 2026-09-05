@@ -33,10 +33,9 @@ suspend fun setupTerminalFiles() {
 }
 
 /**
- * Installs a bundled script into [localBinDir], rewriting it when the shipped
- * copy changed (app update) so script fixes reach existing installs instead of
- * only fresh ones. Exec bit is set here — the one-time chmod in sandbox.sh
- * predates rewrites and would leave updated scripts non-executable.
+ * Installs a bundled script into [localBinDir], rewriting it when the shipped copy changed (app update) so script fixes
+ * reach existing installs instead of only fresh ones. Exec bit is set here — the one-time chmod in sandbox.sh predates
+ * rewrites and would leave updated scripts non-executable.
  */
 fun setupAssetFile(fileName: String) {
     val assetContent = application!!.assets.open("terminal/$fileName.sh").bufferedReader().use { it.readText() }
@@ -50,4 +49,3 @@ fun setupAssetFile(fileName: String) {
         }
     }
 }
-

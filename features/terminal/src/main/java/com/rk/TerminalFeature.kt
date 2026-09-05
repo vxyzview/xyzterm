@@ -20,16 +20,15 @@ import com.rk.settings.editor.TerminalFontScreen
 import com.rk.settings.terminal.SettingsTerminalScreen
 import com.rk.settings.terminal.SnippetsScreen
 import com.rk.settings.terminal.TerminalBackupsScreen
-import com.rk.settings.terminal.UserBindingsScreen
 import com.rk.settings.terminal.TerminalCheckScreen
 import com.rk.settings.terminal.TerminalExtraKeys
+import com.rk.settings.terminal.UserBindingsScreen
 import com.rk.utils.toast
 
 /**
- * This build only ships the terminal feature. The file-manager/drawer and code-runner
- * integrations that used to live here (add-project shortcut, "open in terminal" file action,
- * and the UniversalRunner hookup into :features:runner) were removed along with the editor UI
- * they depended on.
+ * This build only ships the terminal feature. The file-manager/drawer and code-runner integrations that used to live
+ * here (add-project shortcut, "open in terminal" file action, and the UniversalRunner hookup into :features:runner)
+ * were removed along with the editor UI they depended on.
  */
 class TerminalFeature : Feature {
     override val toggle =
@@ -56,7 +55,11 @@ class TerminalFeature : Feature {
                 .also { SettingsRegistry.registerCategory(it) }
 
         // Register settings routes
-        routes.add(DynamicRoute(SettingsRoutes.TerminalSettings.route) { navController, _ -> SettingsTerminalScreen(navController) })
+        routes.add(
+            DynamicRoute(SettingsRoutes.TerminalSettings.route) { navController, _ ->
+                SettingsTerminalScreen(navController)
+            }
+        )
         routes.add(DynamicRoute(SettingsRoutes.TerminalExtraKeys.route) { _, _ -> TerminalExtraKeys() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalSnippets.route) { _, _ -> SnippetsScreen() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalCheck.route) { _, _ -> TerminalCheckScreen() })
@@ -96,7 +99,6 @@ class TerminalFeature : Feature {
 
         // Assuming there's at least one item already there
         ToolbarConfiguration.addGlobalToolbarCommand(TerminalCommand, index = 1)
-
     }
 
     override fun dispose(application: Application) {

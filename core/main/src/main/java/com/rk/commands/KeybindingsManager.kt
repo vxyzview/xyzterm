@@ -83,9 +83,7 @@ object KeybindingsManager {
                     old,
                 )
 
-            val migrated = oldActions.associate {
-                it.commandId to it.keyCombination
-            }
+            val migrated = oldActions.associate { it.commandId to it.keyCombination }
 
             keybindingsFile.writeText(json.encodeToString(serializer, migrated))
 
@@ -133,16 +131,12 @@ object KeybindingsManager {
     private fun buildKeybindMap(): MutableMap<KeyCombination, String> {
         val map = mutableMapOf<KeyCombination, String>()
 
-        customKeybinds.forEach { (commandId, keyCombination) ->
-            map[keyCombination] = commandId
-        }
+        customKeybinds.forEach { (commandId, keyCombination) -> map[keyCombination] = commandId }
 
         for (command in CommandProvider.commandList) {
             if (command.id in customKeybinds) continue
 
-            command.defaultKeybinds?.let {
-                map[it] = command.id
-            }
+            command.defaultKeybinds?.let { map[it] = command.id }
         }
 
         return map
@@ -153,9 +147,8 @@ object KeybindingsManager {
     }
 
     /**
-     * Resolves a pressed key combination to its bound command, if any. This is
-     * the runtime half of the keybindings screen: without it, saved binds are
-     * persisted but nothing ever fires them.
+     * Resolves a pressed key combination to its bound command, if any. This is the runtime half of the keybindings
+     * screen: without it, saved binds are persisted but nothing ever fires them.
      */
     fun findCommandForKey(keyCombination: KeyCombination): Command? {
         val commandId = keybindMap[keyCombination] ?: return null

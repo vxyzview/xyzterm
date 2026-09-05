@@ -27,10 +27,13 @@ fun IntRadioController(
             .forEach { option ->
                 Row(
                     modifier =
-                        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.extraSmall).padding(vertical = 1.dp).clickable {
-                            selectedChoice = option
-                            onChoiceSelected(option)
-                        },
+                        Modifier.fillMaxWidth()
+                            .clip(MaterialTheme.shapes.extraSmall)
+                            .padding(vertical = 1.dp)
+                            .clickable {
+                                selectedChoice = option
+                                onChoiceSelected(option)
+                            },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(text = labelFactory(option), modifier = Modifier.weight(1f))

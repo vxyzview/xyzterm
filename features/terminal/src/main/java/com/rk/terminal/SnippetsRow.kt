@@ -13,14 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.rk.resources.strings
 import com.rk.settings.Settings
 
 /**
- * One-tap command chips rendered between the terminal output and the extra-keys
- * row. Tapping a chip writes the command plus a newline into the active session.
+ * One-tap command chips rendered between the terminal output and the extra-keys row. Tapping a chip writes the command
+ * plus a newline into the active session.
  */
 @Composable
 fun SnippetsRow() {
@@ -42,7 +40,7 @@ fun SnippetsRow() {
                 label = { Text(snippet.label, maxLines = 1) },
                 colors =
                     SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     ),
             )
         }

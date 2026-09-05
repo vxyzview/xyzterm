@@ -19,10 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rk.components.compose.preferences.base.PreferenceTemplate
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun SmoothValueSlider(
@@ -101,9 +101,7 @@ fun RoundedValueSlider(
         max = max,
         default = default.coerceIn(min, max),
         steps = ((max - sliderMin) / stepSize).coerceAtLeast(1) - 1,
-        valueMapper = { value ->
-            value.toInt().coerceAtLeast(min)
-        },
+        valueMapper = { value -> value.toInt().coerceAtLeast(min) },
         debounce = debounce,
         onValueChanged = onValueChanged,
     )
@@ -170,7 +168,11 @@ private fun ValueSliderImpl(
                 carded = false,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
             ) {
-                Text(sliderPosition.toString(), modifier = Modifier.padding(start = 16.dp), fontWeight = FontWeight.Bold)
+                Text(
+                    sliderPosition.toString(),
+                    modifier = Modifier.padding(start = 16.dp),
+                    fontWeight = FontWeight.Bold,
+                )
             }
 
             PreferenceTemplate(title = {}, carded = false) {
@@ -187,8 +189,7 @@ private fun ValueSliderImpl(
                     },
                     enabled = enabled,
                     steps = steps,
-                    valueRange =
-                        if (max > min) min.toFloat()..max.toFloat() else min.toFloat()..(min + 1).toFloat(),
+                    valueRange = if (max > min) min.toFloat()..max.toFloat() else min.toFloat()..(min + 1).toFloat(),
                 )
             }
         }

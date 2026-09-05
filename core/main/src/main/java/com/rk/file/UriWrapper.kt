@@ -5,19 +5,16 @@ import android.net.Uri
 import android.webkit.MimeTypeMap
 import androidx.documentfile.provider.DocumentFile
 import com.rk.utils.application
-import com.rk.utils.errorDialog
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.BufferedReader
-import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.OutputStream
-import java.net.URLDecoder
 import java.nio.charset.Charset
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class UriWrapper : FileObject {
     private var uri: String
@@ -28,8 +25,9 @@ class UriWrapper : FileObject {
     var file: DocumentFile
         get() {
             if (_file == null) {
-                _file = Uri.parse(uri).getDocumentFile(isTree)
-                    ?: throw IllegalArgumentException("cannot resolve document uri: $uri")
+                _file =
+                    Uri.parse(uri).getDocumentFile(isTree)
+                        ?: throw IllegalArgumentException("cannot resolve document uri: $uri")
             }
             return _file!!
         }
@@ -44,10 +42,10 @@ class UriWrapper : FileObject {
     }
 
     @Throws(IllegalArgumentException::class)
-    constructor(uri: Uri, isTree: Boolean) : this(
-        uri.getDocumentFile(isTree)
-            ?: throw IllegalArgumentException("cannot resolve document uri: $uri"),
-    )
+    constructor(
+        uri: Uri,
+        isTree: Boolean,
+    ) : this(uri.getDocumentFile(isTree) ?: throw IllegalArgumentException("cannot resolve document uri: $uri"))
 
     override suspend fun listFiles(): List<FileObject> =
         withContext(Dispatchers.IO) {

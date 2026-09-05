@@ -25,7 +25,6 @@ fun Support(modifier: Modifier = Modifier) {
         PreferenceGroup {
             SettingsItem(
                 label = "Ko-fi",
-
                 isEnabled = true,
                 showSwitch = false,
                 default = false,
@@ -53,4 +52,3 @@ fun Support(modifier: Modifier = Modifier) {
         }
     }
 }
-

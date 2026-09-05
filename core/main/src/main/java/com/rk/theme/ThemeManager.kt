@@ -18,7 +18,6 @@ import com.rk.extension.manager.StoreManager
 import com.rk.extension.model.PackageCache
 import com.rk.file.FileOperations
 import com.rk.file.FileWrapper
-import com.rk.file.child
 import com.rk.file.childSafe
 import com.rk.file.themeDir
 import com.rk.resources.getFilledString
@@ -29,6 +28,8 @@ import com.rk.utils.dialogRes
 import com.rk.utils.errorDialog
 import com.rk.utils.logError
 import com.rk.utils.toast
+import java.io.File
+import java.util.Properties
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,8 +40,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.io.File
-import java.util.Properties
 import kotlinx.serialization.json.JsonElement as KJsonElement
 
 @Serializable
@@ -103,9 +102,7 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
         return runCatching {
             json.decodeFromString<PackageCache>(cacheFile.readText())
         }
-            .getOrElse {
-                PackageCache()
-            }
+            .getOrElse { PackageCache() }
     }
 
     private fun writeCache(dir: File, cache: PackageCache) {
@@ -122,9 +119,7 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
             val newSize = calcSize(dir)
             writeCache(dir, cache.copy(size = newSize))
 
-            withContext(Dispatchers.Main) {
-                localThemes[pkg.id]?.size = newSize
-            }
+            withContext(Dispatchers.Main) { localThemes[pkg.id]?.size = newSize }
         }
     }
 
@@ -137,9 +132,7 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
                 if (file.extension == "json") {
                     // Legacy single-file JSON
                     val manifest = validateManifestJson(file.readText())
-                    manifest?.let {
-                        installThemeFromData(it, null)
-                    }
+                    manifest?.let { installThemeFromData(it, null) }
                     return@withContext
                 }
 
@@ -293,9 +286,7 @@ class ThemeManager(private val context: Application) : CoroutineScope by Corouti
                             newLocalThemes[manifest.id] = theme
                         }
                     }
-                        .onFailure {
-                            logError(it, "Failed to index local themes")
-                        }
+                        .onFailure { logError(it, "Failed to index local themes") }
                 }
             }
             withContext(Dispatchers.Main) {

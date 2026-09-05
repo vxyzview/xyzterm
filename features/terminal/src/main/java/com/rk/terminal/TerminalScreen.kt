@@ -33,19 +33,17 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -53,7 +51,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -74,37 +71,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.rk.activities.settings.SettingsActivity
 import com.rk.activities.terminal.Terminal
-import com.rk.components.compose.preferences.base.ProvideIsExpandedScreen
 import com.rk.components.ResponsiveDrawer
 import com.rk.components.SingleInputDialog
-import com.rk.utils.FontCache
-import com.rk.utils.isDarkTheme
+import com.rk.components.compose.preferences.base.ProvideIsExpandedScreen
 import com.rk.exec.pendingCommand
 import com.rk.file.child
 import com.rk.file.sandboxDir
 import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
-import com.rk.settings.Settings
 import com.rk.settings.Preference
-import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
-import com.rk.terminal.virtualkeys.VirtualKeysConstants
-import com.rk.terminal.virtualkeys.VirtualKeysInfo
+import com.rk.settings.Settings
 import com.rk.terminal.virtualkeys.VirtualKeysListener
 import com.rk.terminal.virtualkeys.VirtualKeysView
 import com.rk.theme.LocalThemeHolder
 import com.rk.theme.ThemeHolder
 import com.rk.theme.yellowStatus
+import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
+import com.rk.utils.FontCache
 import com.rk.utils.dpToPx
-import com.rk.utils.toast
+import com.rk.utils.isDarkTheme
 import com.termux.terminal.TerminalColors
 import com.termux.terminal.TextStyle
 import com.termux.view.TerminalView
+import java.lang.ref.WeakReference
+import java.util.Properties
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
-import java.util.Properties
 
 var terminalView = WeakReference<TerminalView?>(null)
 var virtualKeysView = WeakReference<VirtualKeysView?>(null)
@@ -114,9 +108,7 @@ var bellPulse by mutableStateOf(false)
 
 @Composable
 fun TerminalScreen(modifier: Modifier = Modifier, terminalActivity: Terminal) {
-    ProvideIsExpandedScreen {
-        TerminalScreenInternal(terminalActivity = terminalActivity)
-    }
+    ProvideIsExpandedScreen { TerminalScreenInternal(terminalActivity = terminalActivity) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -143,9 +135,7 @@ fun TerminalScreenInternal(modifier: Modifier = Modifier, terminalActivity: Term
             drawerState = drawerState,
             fullscreen = Settings.fullscreen,
             mainContent = {
-                Scaffold(
-                    topBar = { TerminalTopBar(terminalActivity, scope, drawerState) }
-                ) { paddingValues ->
+                Scaffold(topBar = { TerminalTopBar(terminalActivity, scope, drawerState) }) { paddingValues ->
                     Column(modifier = Modifier.padding(paddingValues)) {
                         TerminalView(isDarkMode, currentTheme, surfaceColor, onSurfaceColor, terminalActivity)
 
@@ -187,8 +177,7 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                 }
                 Box(
                     modifier =
-                        Modifier
-                            .size(8.dp)
+                        Modifier.size(8.dp)
                             .background(
                                 if (bellPulse) {
                                     MaterialTheme.colorScheme.yellowStatus
@@ -196,7 +185,7 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                                     MaterialTheme.colorScheme.primary
                                 },
                                 CircleShape,
-                            ),
+                            )
                 )
                 SessionTitle(terminalActivity)
             }
@@ -239,74 +228,75 @@ private fun ColumnScope.TerminalView(
     AndroidView(
         factory = { context ->
             val client = TerminalBackEnd()
-            TerminalView(context, null).apply {
-                val terminalColors =
-                    if (isDarkMode) {
-                        currentTheme.darkTerminalColors
-                    } else {
-                        currentTheme.lightTerminalColors
-                    }
-                applyTerminalColors(
-                    surfaceColor = surfaceColor,
-                    onSurfaceColor = onSurfaceColor,
-                    terminalColors = terminalColors,
-                )
-
-                terminalView = WeakReference(this)
-                terminalActivity.handleIntent(terminalActivity.intent)
-                setTextSize(dpToPx(Settings.terminal_font_size.toFloat(), context))
-                // Wire up the client immediately, independent of session availability
-                // below. TerminalView.onCreateInputConnection() reads mClient
-                // unconditionally as soon as this view is attached/focused, which can
-                // race ahead of an in-flight session restore on cold start
-                // (restorePending below) and NPE if setTerminalViewClient() were
-                // deferred until a session exists.
-                setTerminalViewClient(client)
-
-                // Legacy behavior
-                val fontFile = sandboxDir().child("etc/font.ttf")
-                if (fontFile.exists()) {
-                    setTypeface(Typeface.createFromFile(fontFile))
-                } else {
-                    val fontPath = Settings.terminal_font_path
-                    val font =
-                        if (fontPath.isNotEmpty()) {
-                            FontCache.getTypeface(context, fontPath, Settings.is_terminal_font_asset)
-                                ?: FontCache.getTypeface(context, DEFAULT_TERMINAL_FONT_PATH, true)
+            TerminalView(context, null)
+                .apply {
+                    val terminalColors =
+                        if (isDarkMode) {
+                            currentTheme.darkTerminalColors
                         } else {
-                            FontCache.getTypeface(context, DEFAULT_TERMINAL_FONT_PATH, true)
+                            currentTheme.lightTerminalColors
                         }
+                    applyTerminalColors(
+                        surfaceColor = surfaceColor,
+                        onSurfaceColor = onSurfaceColor,
+                        terminalColors = terminalColors,
+                    )
 
-                    setTypeface(font)
-                }
+                    terminalView = WeakReference(this)
+                    terminalActivity.handleIntent(terminalActivity.intent)
+                    setTextSize(dpToPx(Settings.terminal_font_size.toFloat(), context))
+                    // Wire up the client immediately, independent of session availability
+                    // below. TerminalView.onCreateInputConnection() reads mClient
+                    // unconditionally as soon as this view is attached/focused, which can
+                    // race ahead of an in-flight session restore on cold start
+                    // (restorePending below) and NPE if setTerminalViewClient() were
+                    // deferred until a session exists.
+                    setTerminalViewClient(client)
 
-                addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-                    val widthChanged = (right - left) != (oldRight - oldLeft)
-                    val heightChanged = (bottom - top) != (oldBottom - oldTop)
-
-                    if (widthChanged || heightChanged) {
-                        val terminalColors =
-                            if (isDarkMode) {
-                                currentTheme.darkTerminalColors
+                    // Legacy behavior
+                    val fontFile = sandboxDir().child("etc/font.ttf")
+                    if (fontFile.exists()) {
+                        setTypeface(Typeface.createFromFile(fontFile))
+                    } else {
+                        val fontPath = Settings.terminal_font_path
+                        val font =
+                            if (fontPath.isNotEmpty()) {
+                                FontCache.getTypeface(context, fontPath, Settings.is_terminal_font_asset)
+                                    ?: FontCache.getTypeface(context, DEFAULT_TERMINAL_FONT_PATH, true)
                             } else {
-                                currentTheme.lightTerminalColors
+                                FontCache.getTypeface(context, DEFAULT_TERMINAL_FONT_PATH, true)
                             }
-                        terminalView
-                            .get()
-                            ?.applyTerminalColors(
-                                surfaceColor = surfaceColor,
-                                onSurfaceColor = onSurfaceColor,
-                                terminalColors = terminalColors,
-                            )
+
+                        setTypeface(font)
+                    }
+
+                    addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+                        val widthChanged = (right - left) != (oldRight - oldLeft)
+                        val heightChanged = (bottom - top) != (oldBottom - oldTop)
+
+                        if (widthChanged || heightChanged) {
+                            val terminalColors =
+                                if (isDarkMode) {
+                                    currentTheme.darkTerminalColors
+                                } else {
+                                    currentTheme.lightTerminalColors
+                                }
+                            terminalView
+                                .get()
+                                ?.applyTerminalColors(
+                                    surfaceColor = surfaceColor,
+                                    onSurfaceColor = onSurfaceColor,
+                                    terminalColors = terminalColors,
+                                )
+                        }
+                    }
+
+                    post {
+                        if (Settings.terminal_keep_screen_on) keepScreenOn = true
+                        isFocusableInTouchMode = true
+                        requestFocus()
                     }
                 }
-
-                post {
-                    if (Settings.terminal_keep_screen_on) keepScreenOn = true
-                    isFocusableInTouchMode = true
-                    requestFocus()
-                }
-            }
                 .also { view ->
                     // Session creation performs disk I/O (tmp dir cleanup, sandbox
                     // build, setup scripts) — run it off the main thread and attach
@@ -314,11 +304,7 @@ private fun ColumnScope.TerminalView(
                     scope.launch { view.attachOrCreateSession(scope, client, terminalActivity) }
                 }
         },
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .semantics { contentDescription = terminalOutputLabel },
+        modifier = Modifier.fillMaxWidth().weight(1f).semantics { contentDescription = terminalOutputLabel },
         update = { terminalView ->
             val terminalColors =
                 if (isDarkMode) {
@@ -453,9 +439,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier =
-                        Modifier
-                            .size(52.dp)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
+                        Modifier.size(52.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
                 ) {
                     Icon(
                         painter = painterResource(drawables.terminal),
@@ -485,8 +469,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
         // ── Settings entry ─────────────────────────────────────────────
         Surface(
             modifier =
-                Modifier
-                    .fillMaxWidth()
+                Modifier.fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .padding(top = 8.dp)
                     .semantics { role = Role.Button }
@@ -560,7 +543,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                             terminalActivity.changeSession(info.id)
                         }
                     }
-                },
+                }
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -732,7 +715,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                         showDeleteConfirm = false
                         sessionToDelete?.let { deleteSession(it) }
                         sessionToDelete = null
-                    },
+                    }
                 ) {
                     Text(
                         text = stringResource(strings.delete),
@@ -741,10 +724,12 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showDeleteConfirm = false
-                    sessionToDelete = null
-                }) {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm = false
+                        sessionToDelete = null
+                    }
+                ) {
                     Text(text = stringResource(strings.cancel))
                 }
             },
@@ -760,15 +745,13 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     onClick = {
                         showExitConfirm = false
                         service?.actionExit()
-                    },
+                    }
                 ) {
                     Text(text = stringResource(strings.logout))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showExitConfirm = false }) {
-                    Text(text = stringResource(strings.cancel))
-                }
+                TextButton(onClick = { showExitConfirm = false }) { Text(text = stringResource(strings.cancel)) }
             },
         )
     }

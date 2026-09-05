@@ -50,12 +50,9 @@ object TerminalBackup {
             // pipe deadlocks once tar writes more than the 64KB buffer, and a
             // blocking drain here would make the timeout unreachable.
             var createOk = false
-            val drain =
-                Thread {
-                    runCatching {
-                        process.inputStream.bufferedReader().useLines { lines -> lines.forEach { /* drain */ } }
-                    }
-                }
+            val drain = Thread {
+                runCatching { process.inputStream.bufferedReader().useLines { lines -> lines.forEach { /* drain */ } } }
+            }
             drain.start()
             val timedOut = !process.waitFor(TAR_TIMEOUT_MINUTES, TimeUnit.MINUTES)
             if (timedOut) {
@@ -92,9 +89,8 @@ object TerminalBackup {
     }
 
     /**
-     * Restores [archive] into the sandbox. The archive is extracted into a
-     * staging directory first; the live sandbox is only replaced once tar
-     * exited 0, so a corrupt backup never destroys the current install.
+     * Restores [archive] into the sandbox. The archive is extracted into a staging directory first; the live sandbox is
+     * only replaced once tar exited 0, so a corrupt backup never destroys the current install.
      *
      * Returns null on success, otherwise a human-readable error string.
      */
@@ -106,18 +102,13 @@ object TerminalBackup {
                 staging.mkdirs()
 
                 // -z is explicit: some toybox builds don't sniff gzip.
-                val process =
-                    ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", staging.absolutePath)
-                        .start()
+                val process = ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", staging.absolutePath).start()
                 // Drain stderr concurrently; reading after waitFor() deadlocks if
                 // tar fills the pipe before exiting.
                 var stderr = ""
-                val stderrDrain =
-                    Thread {
-                        stderr =
-                            runCatching { process.errorStream.bufferedReader().use { it.readText() } }
-                                .getOrDefault("")
-                    }
+                val stderrDrain = Thread {
+                    stderr = runCatching { process.errorStream.bufferedReader().use { it.readText() } }.getOrDefault("")
+                }
                 stderrDrain.start()
                 val timedOut = !process.waitFor(TAR_TIMEOUT_MINUTES, TimeUnit.MINUTES)
                 if (timedOut) {
@@ -131,10 +122,8 @@ object TerminalBackup {
 
                 val code = process.exitValue()
                 if (code != 0) {
-                    return@withContext (
-                        stderr.lineSequence().firstOrNull { it.isNotBlank() }
-                            ?: "tar exited with $code"
-                        )
+                    return@withContext (stderr.lineSequence().firstOrNull { it.isNotBlank() }
+                        ?: "tar exited with $code")
                 }
 
                 // Raw child path: the sandboxDir() getter auto-creates the

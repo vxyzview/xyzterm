@@ -39,11 +39,7 @@ fun AppLogs() {
     var logText by remember { mutableStateOf(strings.loading.getString()) }
     var refreshTrigger by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(logLevel, refreshTrigger) {
-        withContext(Dispatchers.IO) {
-            logText = buildLogs(logLevel)
-        }
-    }
+    LaunchedEffect(logLevel, refreshTrigger) { withContext(Dispatchers.IO) { logText = buildLogs(logLevel) } }
 
     val logFlow =
         remember(logLevel) {
@@ -62,7 +58,7 @@ fun AppLogs() {
                 LogCollector.clearLogs()
                 synchronized(LogcatService.logcatLogs) { LogcatService.logcatLogs.clear() }
                 refreshTrigger++
-            },
+            }
         ) {
             Text(stringResource(strings.delete))
         }
@@ -72,16 +68,8 @@ fun AppLogs() {
 private fun buildLogs(logLevel: LogLevel): String {
     val entries =
         if (Settings.enable_logcat) {
-            val logsCopy =
-                synchronized(LogcatService.logcatLogs) {
-                    LogcatService.logcatLogs.toList()
-                }
-            logsCopy
-                .filter { line ->
-                    line.matchesLogLevel(logLevel)
-                }
-                .takeLast(1000)
-                .joinToString("\n")
+            val logsCopy = synchronized(LogcatService.logcatLogs) { LogcatService.logcatLogs.toList() }
+            logsCopy.filter { line -> line.matchesLogLevel(logLevel) }.takeLast(1000).joinToString("\n")
         } else {
             LogCollector.logs
                 .filter { it.level.ordinal <= logLevel.ordinal }

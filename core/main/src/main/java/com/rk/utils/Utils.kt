@@ -22,15 +22,9 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -40,24 +34,21 @@ import androidx.core.net.toUri
 import com.caverock.androidsvg.SVG
 import com.rk.extension.ActivityProvider
 import com.rk.file.BuiltinFileType
-import com.rk.file.FileDecorationRegistry
-import com.rk.file.FileObject
 import com.rk.resources.getQuantityString
 import com.rk.resources.getString
 import com.rk.resources.plurals
 import com.rk.resources.strings
 import com.rk.settings.Settings
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStream
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(DelicateCoroutinesApi::class)
 fun runOnUiThread(runnable: Runnable) {
@@ -249,7 +240,6 @@ suspend fun handleLazyListScroll(lazyListState: LazyListState, dropIndex: Int): 
         launch { lazyListState.animateScrollBy(scrollAmount) }
     }
 }
-
 
 fun hasBinaryChars(text: String): Boolean {
     val threshold = 0.3

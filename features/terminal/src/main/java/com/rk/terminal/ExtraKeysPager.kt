@@ -29,16 +29,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
 import com.rk.resources.strings
-import com.rk.settings.Settings
 import com.rk.settings.DEFAULT_TERMINAL_EXTRA_KEYS
+import com.rk.settings.Settings
 import com.rk.terminal.virtualkeys.VirtualKeysConstants
 import com.rk.terminal.virtualkeys.VirtualKeysInfo
 import com.rk.terminal.virtualkeys.VirtualKeysListener
@@ -47,8 +47,8 @@ import com.rk.utils.toast
 import java.lang.ref.WeakReference
 
 /**
- * The two-page input area under the terminal: page 0 is the extra-keys row,
- * page 1 a quick text-input field. Swipe between them.
+ * The two-page input area under the terminal: page 0 is the extra-keys row, page 1 a quick text-input field. Swipe
+ * between them.
  */
 @Composable
 fun ExtraKeysPager(onSurfaceColor: Int) {
@@ -135,10 +135,9 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                             }
                         },
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(keyRowHeight)
-                                .semantics { contentDescription = extraKeysLabel },
+                            Modifier.fillMaxWidth().height(keyRowHeight).semantics {
+                                contentDescription = extraKeysLabel
+                            },
                     )
                 }
 
@@ -168,10 +167,8 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                     onDone = {
                                         if (text.isEmpty()) {
                                             // Dispatch enter key events if text is empty
-                                            val eventDown =
-                                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
-                                            val eventUp =
-                                                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
+                                            val eventDown = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
+                                            val eventUp = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER)
                                             terminalView.get()?.dispatchKeyEvent(eventDown)
                                             terminalView.get()?.dispatchKeyEvent(eventUp)
                                         } else {
@@ -181,10 +178,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                     }
                                 ),
                             modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp)
-                                    .focusRequester(focusRequester),
+                                Modifier.fillMaxWidth().padding(horizontal = 8.dp).focusRequester(focusRequester),
                         )
                     }
 
@@ -201,8 +195,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
         ) {
             repeat(2) { i ->
                 Box(
-                    Modifier
-                        .padding(horizontal = 3.dp)
+                    Modifier.padding(horizontal = 3.dp)
                         .size(4.dp)
                         .background(
                             if (i == pagerState.currentPage) {
@@ -211,7 +204,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                 Color(onSurfaceColor).copy(alpha = 0.3f)
                             },
                             MaterialTheme.shapes.small,
-                        ),
+                        )
                 )
             }
         }

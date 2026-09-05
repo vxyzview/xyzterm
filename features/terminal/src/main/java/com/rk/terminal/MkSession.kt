@@ -46,8 +46,7 @@ object MkSession {
         isExtraction: Boolean = false,
         cwd: String? = null,
     ): Pair<TerminalSession, SessionPwd> {
-        val prepared =
-            withContext(Dispatchers.IO) { prepareEnvironment(context, sessionId, isExtraction, cwd) }
+        val prepared = withContext(Dispatchers.IO) { prepareEnvironment(context, sessionId, isExtraction, cwd) }
 
         return withContext(Dispatchers.Main.immediate) {
             val session =
@@ -64,7 +63,12 @@ object MkSession {
     }
 
     /** All disk I/O and environment assembly; must not run on the main thread. */
-    private suspend fun prepareEnvironment(context: Context, sessionId: String, isExtraction: Boolean, cwd: String?): Prepared {
+    private suspend fun prepareEnvironment(
+        context: Context,
+        sessionId: String,
+        isExtraction: Boolean,
+        cwd: String?,
+    ): Prepared {
         val workingDir = cwd ?: getPwd(context)
 
         val tmpDir = localDir().child("tmp").childSafe(nameSafe(sessionId))

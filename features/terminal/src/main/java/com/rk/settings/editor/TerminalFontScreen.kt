@@ -71,8 +71,7 @@ fun TerminalFontScreen() {
 
                             context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                                 if (cursor.moveToFirst()) {
-                                    val nameIndex =
-                                        cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                                    val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
                                     if (nameIndex != -1) {
                                         fileName = cursor.getString(nameIndex)
                                     }
@@ -96,10 +95,11 @@ fun TerminalFontScreen() {
                             Settings.terminal_font_path = destinationFile.absolutePath
                             Settings.is_terminal_font_asset = false
                             withContext(Dispatchers.Main) { fontPath = destinationFile.absolutePath }
-                        }.onFailure {
-                            it.printStackTrace()
-                            toast(strings.failed)
                         }
+                            .onFailure {
+                                it.printStackTrace()
+                                toast(strings.failed)
+                            }
                     }
                 }
             },
@@ -136,9 +136,7 @@ fun TerminalFontScreen() {
             )
 
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Button(onClick = { filePickerLauncher.launch("font/*") }) {
-                    Text(stringResource(strings.open))
-                }
+                Button(onClick = { filePickerLauncher.launch("font/*") }) { Text(stringResource(strings.open)) }
             }
 
             Text(

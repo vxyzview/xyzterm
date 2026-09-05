@@ -8,9 +8,7 @@ object ShellUtils {
     data class Result(val exitCode: Int, val output: String, val error: String, val timedOut: Boolean)
 
     suspend fun runUbuntu(vararg command: String, timeoutSeconds: Long? = null): Result =
-        withContext(Dispatchers.IO) {
-            drain(ubuntuProcess(command = command.toList()), timeoutSeconds)
-        }
+        withContext(Dispatchers.IO) { drain(ubuntuProcess(command = command.toList()), timeoutSeconds) }
 
     // ponytail: concurrent stdout/stderr drain; each reader .join() is bounded to the
     // same timeout as waitFor() so a proot grandchild keeping a pipe fd open past
@@ -39,12 +37,13 @@ object ShellUtils {
         outputThread.start()
         errorThread.start()
 
-        val timedOut = if (timeoutSeconds != null) {
-            !process.waitFor(timeoutSeconds, TimeUnit.SECONDS)
-        } else {
-            process.waitFor()
-            false
-        }
+        val timedOut =
+            if (timeoutSeconds != null) {
+                !process.waitFor(timeoutSeconds, TimeUnit.SECONDS)
+            } else {
+                process.waitFor()
+                false
+            }
 
         if (timedOut) process.destroyForcibly()
 

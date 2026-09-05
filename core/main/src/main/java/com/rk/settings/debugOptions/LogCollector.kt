@@ -61,9 +61,7 @@ object LogCollector {
     }
 
     private fun buildMessage(message: String, extensionId: String? = null): String {
-        return extensionId?.let {
-            "[${extensionId}] $message"
-        } ?: message
+        return extensionId?.let { "[${extensionId}] $message" } ?: message
     }
 
     private fun appendEntry(logEntry: LogEntry, extensionId: String? = null) {
@@ -72,9 +70,7 @@ object LogCollector {
         if (logs.size > MAX_LOGS) {
             logs.subList(0, logs.size - MAX_LOGS).clear()
         }
-        DefaultScope.launch {
-            Events.publish(AppEvent.LogEntryWritten(logEntry, extensionId))
-        }
+        DefaultScope.launch { Events.publish(AppEvent.LogEntryWritten(logEntry, extensionId)) }
     }
 
     fun clearLogs() {

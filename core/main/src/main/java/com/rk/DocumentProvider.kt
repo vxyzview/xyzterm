@@ -100,9 +100,7 @@ class DocumentProvider : DocumentsProvider() {
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
         // ponytail: reject path components (incl. "."/"..") so a name with no
         // separator but a ".." segment can't resolve outside sandboxHomeDir.
-        if (displayName.contains("/") || displayName.contains("\\") ||
-            displayName == "." || displayName == ".."
-        ) {
+        if (displayName.contains("/") || displayName.contains("\\") || displayName == "." || displayName == "..") {
             throw FileNotFoundException("Invalid display name: $displayName")
         }
         val parent = getFileForDocId(parentDocumentId)
@@ -189,12 +187,13 @@ class DocumentProvider : DocumentsProvider() {
 
     override fun isChildDocument(parentDocumentId: String, documentId: String): Boolean {
         return runCatching {
-            val parent = File(parentDocumentId).canonicalPath
-            val child = File(documentId).canonicalPath
-            // ponytail: canonical containment, not naive string prefix (a name like
-            // "homeX" would have matched the old prefix check).
-            child != parent && child.startsWith("$parent${File.separator}")
-        }.getOrDefault(false)
+                val parent = File(parentDocumentId).canonicalPath
+                val child = File(documentId).canonicalPath
+                // ponytail: canonical containment, not naive string prefix (a name like
+                // "homeX" would have matched the old prefix check).
+                child != parent && child.startsWith("$parent${File.separator}")
+            }
+            .getOrDefault(false)
     }
 
     /**

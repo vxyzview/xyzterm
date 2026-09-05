@@ -12,12 +12,9 @@ class TerminalTileService : TileService() {
         super.onClick()
         val intent = Intent(this, Terminal::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startActivityAndCollapse(
-                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE),
-            )
+            startActivityAndCollapse(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE))
         } else {
-            @Suppress("DEPRECATION")
-            startActivityAndCollapse(intent)
+            @Suppress("DEPRECATION") startActivityAndCollapse(intent)
         }
     }
 }

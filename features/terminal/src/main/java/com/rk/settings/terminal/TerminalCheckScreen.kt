@@ -104,9 +104,7 @@ fun TerminalCheckScreen() {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                             contentDescription =
-                                stringResource(
-                                    if (check.isExpanded) strings.collapse else strings.expand
-                                ),
+                                stringResource(if (check.isExpanded) strings.collapse else strings.expand),
                             modifier = Modifier.rotate(rotation).size(24.dp),
                         )
                     },

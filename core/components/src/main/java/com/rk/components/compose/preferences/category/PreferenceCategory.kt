@@ -46,10 +46,7 @@ fun PreferenceCategory(
     enabled: Boolean = true,
 ) {
     PreferenceTemplate(
-        modifier =
-            modifier
-                .semantics { role = Role.Button }
-                .clickable(enabled = enabled) { onNavigate() },
+        modifier = modifier.semantics { role = Role.Button }.clickable(enabled = enabled) { onNavigate() },
         verticalPadding = 14.dp,
         title = {
             Text(

@@ -3,14 +3,14 @@ package com.rk.file
 import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.Charset
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class NetWrapper(private val url: URL) : FileObject {
     /** Explicit port, or the scheme default when unspecified (http:80, https:443). */
@@ -116,10 +116,7 @@ class NetWrapper(private val url: URL) : FileObject {
     override fun getAbsolutePath(): String = url.toString()
 
     override suspend fun length(): Long {
-        return runCatching {
-                openConnection().contentLengthLong
-            }
-            .getOrDefault(0L)
+        return runCatching { openConnection().contentLengthLong }.getOrDefault(0L)
     }
 
     override suspend fun delete(): Boolean = false

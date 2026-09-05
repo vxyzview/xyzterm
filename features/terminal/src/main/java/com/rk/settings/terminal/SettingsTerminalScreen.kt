@@ -1,13 +1,11 @@
 package com.rk.settings.terminal
 
+import android.content.Intent
+import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import android.content.Intent
-import android.view.WindowManager
-import com.rk.activities.terminal.Terminal
-import com.rk.exec.isTerminalInstalled
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,10 +15,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import com.rk.DocumentProvider
 import com.rk.DefaultScope
+import com.rk.DocumentProvider
 import com.rk.activities.settings.SettingsActivity
 import com.rk.activities.settings.SettingsRoutes
+import com.rk.activities.terminal.Terminal
 import com.rk.components.NextScreenCard
 import com.rk.components.PreferenceList
 import com.rk.components.RoundedValueSlider
@@ -29,9 +28,9 @@ import com.rk.components.SteppedValueSlider
 import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.components.compose.preferences.base.PreferenceLayout
 import com.rk.components.compose.preferences.switch.PreferenceSwitch
+import com.rk.exec.isTerminalInstalled
 import com.rk.feature.FeatureRegistry
 import com.rk.file.child
-import com.rk.file.createFileIfNot
 import com.rk.file.localBinDir
 import com.rk.file.localDir
 import com.rk.file.localLibDir
@@ -49,13 +48,13 @@ import com.rk.utils.dpToPx
 import com.rk.utils.getTempDir
 import com.rk.utils.toast
 import com.termux.terminal.TerminalEmulator
+import java.io.FileOutputStream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.FileOutputStream
 
 enum class TerminalCursorStyle(val value: String, val stringRes: Int) {
     BLOCK("block", strings.block),
@@ -187,9 +186,7 @@ fun SettingsTerminalScreen(navController: NavController) {
 
                         try {
                             fileObject.getInputStream().use { inputStream ->
-                                FileOutputStream(tempFile).use { outputStream ->
-                                    inputStream.copyTo(outputStream)
-                                }
+                                FileOutputStream(tempFile).use { outputStream -> inputStream.copyTo(outputStream) }
                             }
 
                             // Extraction happens into a staging dir inside restore();

@@ -42,7 +42,9 @@ fun SnippetsScreen() {
     // distinctBy guards LazyColumn item keys (label+command): pairs persisted by
     // older builds without the duplicate check would crash on first composition.
     val snippets =
-        remember(refreshTrigger) { SnippetStore.decode(Settings.terminal_snippets).distinctBy { it.label + it.command } }
+        remember(refreshTrigger) {
+            SnippetStore.decode(Settings.terminal_snippets).distinctBy { it.label + it.command }
+        }
 
     // Index of the snippet being edited, or NO_ADDING sentinel values.
     var editIndex by remember { mutableStateOf<Int?>(null) }
@@ -70,9 +72,7 @@ fun SnippetsScreen() {
             val index = snippets.indexOf(snippet)
             PreferenceTemplate(
                 modifier = Modifier.clickable(onClick = { editIndex = index }),
-                title = {
-                    Text(text = snippet.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                },
+                title = { Text(text = snippet.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 description = {
                     Text(
                         text = snippet.command,
@@ -82,9 +82,7 @@ fun SnippetsScreen() {
                     )
                 },
                 endWidget = {
-                    IconButton(onClick = {
-                        persist(snippets.toMutableList().apply { removeAt(index) })
-                    }) {
+                    IconButton(onClick = { persist(snippets.toMutableList().apply { removeAt(index) }) }) {
                         Icon(imageVector = Icons.Outlined.Delete, contentDescription = stringResource(strings.delete))
                     }
                 },

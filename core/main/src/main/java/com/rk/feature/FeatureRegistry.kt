@@ -29,9 +29,7 @@ data class FeatureToggle(
     val iconRes: Int,
     val onSwitch: ((Activity, Boolean, onComplete: (Boolean) -> Unit) -> Unit)? = null,
 ) {
-    val state: MutableState<Boolean> by lazy {
-        mutableStateOf(Preference.getBoolean(key, default))
-    }
+    val state: MutableState<Boolean> by lazy { mutableStateOf(Preference.getBoolean(key, default)) }
 
     fun setEnable(enable: Boolean) {
         Preference.setBoolean(key, enable)

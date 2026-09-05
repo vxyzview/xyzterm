@@ -26,7 +26,7 @@ fun ResetButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
         onClick = onClick,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Icon(painter = painterResource(drawables.refresh), contentDescription = stringResource(strings.reset_all))
+            Icon(painter = painterResource(drawables.refresh), contentDescription = stringResource(strings.reset_all))
             Text(text = stringResource(id = strings.reset_all))
         }
     }

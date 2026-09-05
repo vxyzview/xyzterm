@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -31,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.core.content.pm.PackageInfoCompat
 import com.rk.crashhandler.CrashHandler.logErrorOrExit
 import com.rk.resources.getString
@@ -188,9 +188,7 @@ class CrashActivity : ComponentActivity() {
                                             Text(stringResource(strings.copy))
                                         }
 
-                                        val showReport = remember {
-                                            intent.getBooleanExtra("force_crash", false).not()
-                                        }
+                                        val showReport = remember { intent.getBooleanExtra("force_crash", false).not() }
 
                                         if (showReport) {
                                             TextButton(
@@ -212,10 +210,7 @@ class CrashActivity : ComponentActivity() {
                             Text(
                                 text = crashText,
                                 modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(paddingValues)
-                                        .verticalScroll(rememberScrollState()),
+                                    Modifier.fillMaxSize().padding(paddingValues).verticalScroll(rememberScrollState()),
                                 fontFamily = FontFamily.Monospace,
                                 fontSize = MaterialTheme.typography.bodySmall.fontSize,
                                 color = MaterialTheme.colorScheme.onSurface,

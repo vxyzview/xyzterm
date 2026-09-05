@@ -1,8 +1,8 @@
 package com.rk.extension.model
 
 import com.rk.common.PackageType
-import kotlinx.serialization.Serializable
 import java.util.Date
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class PackageCache(
