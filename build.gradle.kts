@@ -10,6 +10,14 @@ plugins {
 }
 
 subprojects {
+    // GHSA: force commons-lang3 past the Uncontrolled Recursion CVE (< 3.18.0).
+    // Transitive (no direct reference); re-check with Dependabot after bumping.
+    configurations.configureEach {
+        resolutionStrategy {
+            force("org.apache.commons:commons-lang3:3.18.0")
+        }
+    }
+
     plugins.withId(rootProject.libs.plugins.ktfmt.get().pluginId) {
         configure<com.ncorti.ktfmt.gradle.KtfmtExtension> {
             kotlinLangStyle()
