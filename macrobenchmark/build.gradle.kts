@@ -1,7 +1,6 @@
-import com.android.build.api.variant.VariantBuilder
-
 plugins {
     alias(libs.plugins.android.test)
+    alias(libs.plugins.android.baselineprofile)
 }
 
 android {
@@ -23,14 +22,6 @@ android {
     }
 
     experimentalProperties["android.experimental.self-instrumenting"] = true
-}
-
-// Create a release build type and make sure it's the only one enabled:
-// only the shipped build is worth measuring.
-androidComponents {
-    beforeVariants(selector().all()) { variantBuilder: VariantBuilder ->
-        variantBuilder.enabled = variantBuilder.buildType == "release"
-    }
 }
 
 dependencies {
