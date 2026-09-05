@@ -107,4 +107,5 @@ dependencies {
     implementation(project(":core:resources"))
     implementation(libs.androidx.appcompat)
     implementation(project(":features:terminal"))
+    baselineProfile(project(":baselineprofile"))
 }
