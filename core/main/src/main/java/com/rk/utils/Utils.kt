@@ -10,6 +10,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.PictureDrawable
 import android.os.Build
+import android.os.Handler
 import android.os.Looper
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -44,15 +45,12 @@ import java.io.InputStream
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(DelicateCoroutinesApi::class)
 fun runOnUiThread(runnable: Runnable) {
-    GlobalScope.launch(Dispatchers.Main) { runnable.run() }
+    // No coroutine needed: post directly to the main looper.
+    Handler(Looper.getMainLooper()).post(runnable)
 }
 
 fun toast(@StringRes resId: Int) {

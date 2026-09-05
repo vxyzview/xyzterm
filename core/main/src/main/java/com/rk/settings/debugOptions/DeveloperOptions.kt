@@ -22,16 +22,19 @@ import com.rk.utils.application
 import com.rk.utils.dialogRes
 import com.rk.utils.toast
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private var flipperJob: Job? = null
+
+/** Owner scope for the debug theme flipper; replaces GlobalScope so it is cancellable. */
+private val flipperScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
 @Suppress("ktlint:standard:function-naming")
 @OptIn(DelicateCoroutinesApi::class)
@@ -160,11 +163,10 @@ fun DeveloperOptions(modifier: Modifier = Modifier, navController: NavController
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 fun startThemeFlipperIfNotRunning() {
     if (flipperJob == null || flipperJob?.isActive?.not() == true) {
         flipperJob =
-            GlobalScope.launch(Dispatchers.IO) {
+            flipperScope.launch {
                 runCatching {
                     while (isActive && Settings.theme_flipper) {
                         delay(7000.milliseconds)

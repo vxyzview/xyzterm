@@ -14,11 +14,14 @@ import java.io.File
 import java.io.IOException
 import java.io.OutputStreamWriter
 import kotlin.random.Random
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/** App-lifetime scope that reaps per-spawn proot tmp dirs; replaces GlobalScope. */
+private val reaperScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
 data class Binding(val outside: String, val inside: String? = null)
 
@@ -150,8 +153,7 @@ suspend fun ubuntuProcess(
 
         // The per-invocation PROOT_TMP_DIR binding is never reused; reap it once
         // the process is gone instead of leaking one temp dir per spawn.
-        @OptIn(DelicateCoroutinesApi::class)
-        GlobalScope.launch(Dispatchers.IO) {
+        reaperScope.launch {
             runCatching { process.waitFor() }
             tmpDir.deleteRecursively()
         }

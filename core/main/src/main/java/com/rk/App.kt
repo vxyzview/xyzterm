@@ -23,12 +23,11 @@ import com.rk.utils.application
 import com.rk.utils.getTempDir
 import java.util.Locale
 import java.util.concurrent.Executors
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-@OptIn(DelicateCoroutinesApi::class)
 open class App : Application() {
     companion object {
         val versionCode: Long by lazy {
@@ -61,7 +60,9 @@ open class App : Application() {
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler)
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    /** App-lifetime scope for startup IO; replaces GlobalScope so work is structured and testable. */
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     override fun onCreate() {
         super.onCreate()
         application = this
@@ -78,7 +79,7 @@ open class App : Application() {
         val appLocale = LocaleListCompat.create(currentLocale)
         AppCompatDelegate.setApplicationLocales(appLocale)
 
-        GlobalScope.launch(Dispatchers.IO) {
+        appScope.launch(Dispatchers.IO) {
             // Command registration now runs synchronously in onCreate() before
             // features init; only keybind loading (file IO) stays off the critical path.
             launch(Dispatchers.IO) { KeybindingsManager.loadKeybindings() }
