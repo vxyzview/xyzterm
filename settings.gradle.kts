@@ -26,6 +26,8 @@ include(":app", ":core:main", ":core:components", ":core:resources")
 
 include(":baselineprofile")
 
+include(":macrobenchmark")
+
 include(":features:terminal")
 
 include(":features:terminal:proot")
