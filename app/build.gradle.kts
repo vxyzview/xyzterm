@@ -2,6 +2,7 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.android.baselineprofile)
     alias(libs.plugins.ktfmt)
 }
 
