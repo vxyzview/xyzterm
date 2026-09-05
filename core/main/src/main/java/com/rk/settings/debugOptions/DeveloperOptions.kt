@@ -165,26 +165,25 @@ fun DeveloperOptions(modifier: Modifier = Modifier, navController: NavController
 
 fun startThemeFlipperIfNotRunning() {
     if (flipperJob == null || flipperJob?.isActive?.not() == true) {
-        flipperJob =
-            flipperScope.launch {
-                runCatching {
-                    while (isActive && Settings.theme_flipper) {
-                        delay(7000.milliseconds)
+        flipperJob = flipperScope.launch {
+            runCatching {
+                while (isActive && Settings.theme_flipper) {
+                    delay(7000.milliseconds)
 
-                        val mode =
-                            if (Settings.theme_mode == AppCompatDelegate.MODE_NIGHT_NO) {
-                                AppCompatDelegate.MODE_NIGHT_YES
-                            } else {
-                                AppCompatDelegate.MODE_NIGHT_NO
-                            }
+                    val mode =
+                        if (Settings.theme_mode == AppCompatDelegate.MODE_NIGHT_NO) {
+                            AppCompatDelegate.MODE_NIGHT_YES
+                        } else {
+                            AppCompatDelegate.MODE_NIGHT_NO
+                        }
 
-                        Settings.theme_mode = mode
+                    Settings.theme_mode = mode
 
-                        withContext(Dispatchers.Main) { AppCompatDelegate.setDefaultNightMode(mode) }
-                    }
+                    withContext(Dispatchers.Main) { AppCompatDelegate.setDefaultNightMode(mode) }
                 }
-                    .onFailure { it.printStackTrace() }
             }
+                .onFailure { it.printStackTrace() }
+        }
     }
 }
 
