@@ -387,7 +387,8 @@ class SessionService : Service() {
     private fun saveSession(id: SessionId, pwd: SessionPwd) {
         val existing = runCatching {
             JSONObject(Preference.getString(SAVED_SESSIONS_KEY, "{}"))
-        }.getOrElse { JSONObject() }
+        }
+            .getOrElse { JSONObject() }
         val map = JSONObject()
         existing.keys().forEach { key -> map.put(key, existing.getString(key)) }
         map.put(id, pwd)
