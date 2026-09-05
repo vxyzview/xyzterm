@@ -7,18 +7,28 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        minSdk = 28
+        minSdk = 29
         targetSdk = 37
         testInstrumentationRunner = "androidx.benchmark.macro.junit4.AndroidJUnitRunner"
     }
 
     targetProjectPath = ":app"
 
-    // Benchmark the release app (minified + baseline profiles embedded),
-    // not the debuggable debug variant macrobenchmarks refuse to measure.
-    testBuildType = "release"
+    // Release-only: benchmarks measure the shipped (minified + profiled)
+    // build; the debuggable debug variant is meaningless to measure.
+    buildTypes {
+        release {}
+    }
 
     experimentalProperties["android.experimental.self-instrumenting"] = true
+}
+
+// Create a release build type and make sure it's the only one enabled:
+// only the shipped build is worth measuring.
+androidComponents {
+    beforeVariants(selector().all()) {
+        enabled = buildType == "release"
+    }
 }
 
 dependencies {
