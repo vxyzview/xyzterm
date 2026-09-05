@@ -170,7 +170,8 @@ class DocumentProvider : DocumentsProvider() {
                 try {
                     file.canonicalPath.startsWith("${sandboxHomeDir().canonicalPath}${File.separator}")
                 } catch (e: IOException) {
-                    true
+                    // Fail closed: on canonicalization error, skip rather than search outside $HOME.
+                    false
                 }
             if (isInsideHome) {
                 if (file.isDirectory) {

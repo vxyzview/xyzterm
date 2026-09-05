@@ -123,7 +123,13 @@ fun Context.openUrl(url: String) {
     // wrap an arbitrary intent or execute code from an untrusted theme/extension URL.
     if (scheme !in setOf("http", "https", "mailto", "tel", "sms", "geo", "market")) return
     val intent = Intent(Intent.ACTION_VIEW, uri)
-    startActivity(intent)
+    // A theme/extension-supplied URL may resolve to a scheme with no handler
+    // on this device — don't crash the caller.
+    runCatching {
+        // FLAG_ACTIVITY_NEW_TASK is required when the context is not an Activity.
+        if (this !is android.app.Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+    }
 }
 
 fun hasHardwareKeyboard(context: Context): Boolean {

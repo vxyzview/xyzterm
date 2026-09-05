@@ -23,9 +23,9 @@ import com.rk.utils.application
 import com.rk.utils.dialogRes
 import com.rk.utils.toast
 import com.xyzterm.BuildConfig
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -37,6 +37,9 @@ object UpdateManager {
     private const val UPDATE_REPO = "xyzterm"
     private const val UPDATE_INTERVAL_MS = 24 * 60 * 60 * 1000L
     private const val LAST_UPDATE_CHECK_KEY = "last_update_check"
+
+    /** App-lifetime scope for update work; replaces GlobalScope so jobs are cancellable and testable. */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     /** Compares "vX.Y.Z" (or "X.Y.Z") tags. Returns true if [latest] > [installed]. */
     private fun isNewer(latest: String, installed: String): Boolean {
@@ -76,7 +79,6 @@ object UpdateManager {
      * a different key, the user gets a clear message instead of an install
      * failure.
      */
-    @OptIn(DelicateCoroutinesApi::class)
     fun checkForUpdates(activity: Activity) {
         if (!Settings.check_for_update) return
         if (installedFromStore()) return
@@ -87,7 +89,7 @@ object UpdateManager {
         // "silently dead for another 24h".
         Preference.setLong(LAST_UPDATE_CHECK_KEY, now)
 
-        GlobalScope.launch(Dispatchers.Main) {
+        scope.launch(Dispatchers.Main) {
             val latest = GithubReleasesApi(UPDATE_OWNER, UPDATE_REPO).fetchLatestVersion()
             if (latest == null) {
                 Preference.setLong(LAST_UPDATE_CHECK_KEY, 0L)
@@ -108,10 +110,9 @@ object UpdateManager {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun downloadAndInstall(activity: Activity, version: String) {
         toast(strings.update_downloading.getString())
-        GlobalScope.launch(Dispatchers.Main) {
+        scope.launch(Dispatchers.Main) {
             val file =
                 runCatching {
                     withContext(Dispatchers.IO) {
@@ -178,7 +179,6 @@ object UpdateManager {
             }
         }
 
-    @OptIn(DelicateCoroutinesApi::class)
     @Suppress("DEPRECATION") // migration code intentionally uses deprecated legacy APIs
     fun inspect() =
         with(application!!) {
@@ -264,7 +264,7 @@ object UpdateManager {
                 }
 
                 if (lastVersionCode <= 81) {
-                    GlobalScope.launch {
+                    scope.launch {
                         runCatching {
                             application!!.filesDir.child("projects").toFileWrapper().renameTo("drawerTabs")
                             application!!.filesDir.child("currentTab").toFileWrapper().renameTo("currentDrawerTab")
