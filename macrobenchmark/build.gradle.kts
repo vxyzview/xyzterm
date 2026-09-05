@@ -1,3 +1,5 @@
+import com.android.build.api.variant.VariantBuilder
+
 plugins {
     alias(libs.plugins.android.test)
 }
@@ -26,8 +28,8 @@ android {
 // Create a release build type and make sure it's the only one enabled:
 // only the shipped build is worth measuring.
 androidComponents {
-    beforeVariants(selector().all()) {
-        enabled = buildType == "release"
+    beforeVariants(selector().all()) { variantBuilder: VariantBuilder ->
+        variantBuilder.enabled = variantBuilder.buildType == "release"
     }
 }
 
