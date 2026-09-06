@@ -112,8 +112,15 @@ jobs:
             echo "Release $TAG already published - skipping (immutable)."
             exit 0
           fi
-          git tag -f "$TAG" "${{ env.COMMIT_HASH }}"
-          git push origin "refs/tags/$TAG"
+          # The tag may already exist when this run was triggered by pushing
+          # it manually; only create it when missing (never move a published
+          # tag — releases are immutable, see the check below).
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists - using it."
+          else
+            git tag "$TAG" "${{ env.COMMIT_HASH }}"
+            git push origin "refs/tags/$TAG"
+          fi
           PRERELEASE_FLAG=""
           case "${{ env.VERSION }}" in
             *-* ) PRERELEASE_FLAG="--prerelease" ;;
