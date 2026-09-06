@@ -58,3 +58,28 @@ jobs:
           target: aosp_atd
           arch: x86_64
           script: ./gradlew :macrobenchmark:connectedNonMinifiedReleaseAndroidTest --no-daemon --no-configuration-cache
+
+      - name: Show startup numbers
+        if: always()
+        run: |
+          python3 - <<'EOF'
+          import glob, json
+          for f in sorted(glob.glob("macrobenchmark/build/outputs/**/benchmarkData.json", recursive=True)):
+              print("== " + f)
+              try:
+                  data = json.load(open(f))
+                  benches = data if isinstance(data, list) else data.get("benchmarks", [])
+                  for b in benches:
+                      metrics = b.get("metrics", {})
+                      tid = metrics.get("timeToInitialDisplayMs", {})
+                      print("  " + str(b.get("name")) + " timeToInitialDisplayMs median=" + str(tid.get("median")) + " min=" + str(tid.get("minimum")))
+              except Exception as e:
+                  print("  (unparsed: " + str(e) + ")")
+          EOF
+
+      - name: Upload benchmark results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: macrobenchmark-results
+          path: macrobenchmark/build/outputs/connected_android_test_additional_output/
