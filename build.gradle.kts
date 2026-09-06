@@ -14,7 +14,7 @@ subprojects {
     // Transitive (no direct reference); re-check with Dependabot after bumping.
     configurations.configureEach {
         resolutionStrategy {
-            force("org.apache.commons:commons-lang3:3.18.0")
+            force("org.apache.commons:commons-lang3:3.20.0")
         }
     }
 
