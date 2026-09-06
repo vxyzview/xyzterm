@@ -15,12 +15,6 @@ android {
 
     targetProjectPath = ":app"
 
-    // Release-only: benchmarks measure the shipped (minified + profiled)
-    // build; the debuggable debug variant is meaningless to measure.
-    buildTypes {
-        release {}
-    }
-
     experimentalProperties["android.experimental.self-instrumenting"] = true
 }
 
