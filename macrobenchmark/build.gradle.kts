@@ -10,7 +10,7 @@ android {
     defaultConfig {
         minSdk = 29
         targetSdk = 37
-        testInstrumentationRunner = "androidx.benchmark.macro.junit4.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     targetProjectPath = ":app"
@@ -29,4 +29,5 @@ android {
 dependencies {
     implementation(libs.androidx.benchmark.macro.junit4)
     implementation(libs.androidx.test.junit)
+    implementation(libs.androidx.runner)
 }
