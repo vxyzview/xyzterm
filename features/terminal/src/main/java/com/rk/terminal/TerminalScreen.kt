@@ -358,12 +358,14 @@ private suspend fun TerminalView.attachOrCreateSession(
 
     if (session != null) {
         session.updateTerminalSessionClient(client)
+        // Apply terminal colors BEFORE attaching the session to ensure the shell prompt
+        // uses the correct theme colors, not hardcoded ANSI codes
+        reapplyTerminalColors(this)
         attachSession(session)
         setTerminalViewClient(client)
         // On-screen extra-keys (TAB/arrows) follow the attached session — same
         // as changeSession. Posted to dodge the extra-keys-factory race.
         wireExtraKeysClient()
-        reapplyTerminalColors(this)
     }
 }
 
@@ -765,6 +767,9 @@ suspend fun Terminal.changeSession(sessionId: String) {
     val session = binder.getSession(sessionId) ?: binder.createSession(sessionId, client, this).session
 
     session.updateTerminalSessionClient(client)
+    // Apply terminal colors BEFORE attaching the session to ensure the shell prompt
+    // uses the correct theme colors, not hardcoded ANSI codes
+    reapplyTerminalColors(terminalView)
     terminalView.attachSession(session)
     terminalView.setTerminalViewClient(client)
 
@@ -776,7 +781,6 @@ suspend fun Terminal.changeSession(sessionId: String) {
         }
     }
     wireExtraKeysClient()
-    reapplyTerminalColors(terminalView)
 
     binder.getService().currentSession.value = sessionId
     Preference.setString(ACTIVE_SESSION_KEY, sessionId)
