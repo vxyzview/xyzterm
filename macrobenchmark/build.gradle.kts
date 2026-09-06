@@ -11,6 +11,9 @@ android {
         minSdk = 29
         targetSdk = 37
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Emulator numbers aren't device-representative, but they are stable
+        // run-over-run on the same runner image: valid for comparisons.
+        testInstrumentationRunnerArguments["androidx.benchmark.suppressErrors"] = "EMULATOR"
     }
 
     targetProjectPath = ":app"
