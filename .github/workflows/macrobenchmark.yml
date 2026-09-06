@@ -64,7 +64,7 @@ jobs:
         run: |
           python3 - <<'EOF'
           import glob, json
-          for f in sorted(glob.glob("macrobenchmark/build/outputs/**/benchmarkData.json", recursive=True)):
+          for f in sorted(glob.glob("macrobenchmark/build/outputs/**/*benchmarkData.json", recursive=True)):
               print("== " + f)
               try:
                   data = json.load(open(f))
