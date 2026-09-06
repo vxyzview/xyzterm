@@ -114,9 +114,15 @@ jobs:
           fi
           git tag -f "$TAG" "${{ env.COMMIT_HASH }}"
           git push origin "refs/tags/$TAG"
+          PRERELEASE_FLAG=""
+          case "${{ env.VERSION }}" in
+            *-* ) PRERELEASE_FLAG="--prerelease" ;;
+          esac
+          # shellcheck disable=SC2086
           gh release create "$TAG" \
             "app/xyzterm-${{ env.VERSION }}.apk" \
             --title "xyzterm ${{ env.VERSION }}" \
+            $PRERELEASE_FLAG \
             --notes "Automated build of commit \`${{ env.COMMIT_HASH }}\`.**APK:** \`xyzterm-${{ env.VERSION }}.apk\`F-Droid: built from source via [metadata](fdroid/metadata/com.xyzterm.app.yml)." \
             --repo "${{ github.repository }}"
 
