@@ -57,7 +57,7 @@ jobs:
           api-level: 34
           target: aosp_atd
           arch: x86_64
-          script: ./gradlew :macrobenchmark:connectedNonMinifiedReleaseAndroidTest --no-daemon --no-configuration-cache
+          script: ./gradlew :macrobenchmark:connectedNonMinifiedReleaseAndroidTest -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=Macrobenchmark --no-daemon --no-configuration-cache
 
       - name: Show startup numbers
         if: always()
