@@ -62,6 +62,10 @@ jobs:
       - name: Show startup numbers
         if: always()
         run: |
+          echo "--- outputs tree:"
+          find macrobenchmark/build/outputs -type f | sort | head -n 60
+          echo "--- test result summary:"
+          grep -h -o 'tests="[0-9]*" skipped="[0-9]*" failures="[0-9]*" errors="[0-9]*"' macrobenchmark/build/outputs/androidTest-results/connected/test-result.xml 2>/dev/null || true
           python3 - <<'EOF'
           import glob, json
           for f in sorted(glob.glob("macrobenchmark/build/outputs/**/*benchmarkData.json", recursive=True)):
@@ -82,4 +86,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: macrobenchmark-results
-          path: macrobenchmark/build/outputs/connected_android_test_additional_output/
+          path: |
+            macrobenchmark/build/outputs/connected_android_test_additional_output/
+            macrobenchmark/build/outputs/androidTest-results/
