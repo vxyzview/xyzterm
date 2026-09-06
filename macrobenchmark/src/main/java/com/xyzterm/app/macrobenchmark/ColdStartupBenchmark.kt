@@ -5,9 +5,11 @@ import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.FixMethodOrder
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.MethodSorters
 
 /**
  * Cold-start measurement.
@@ -20,9 +22,13 @@ import org.junit.runner.RunWith
  * Run via the macrobenchmark workflow (emulator) — not locally.
  */
 @RunWith(AndroidJUnit4::class)
+@FixMethodOrder(MethodSorters.JVM)
 class ColdStartupBenchmark {
     @get:Rule val benchmarkRule = MacrobenchmarkRule()
 
+    // Partial FIRST: on shared CI runners the device slows over a run
+    // (thermal/migration drift), which would otherwise flatter whichever
+    // test runs first. If the gap flips with order, the numbers are noise.
     @Test
     fun startupPartial() = startup(CompilationMode.Partial())
 
