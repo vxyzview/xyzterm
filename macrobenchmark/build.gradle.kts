@@ -15,6 +15,14 @@ android {
 
     targetProjectPath = ":app"
 
+    // Plain com.android.test modules only create a debug test variant;
+    // create release so connectedReleaseAndroidTest measures the shipped
+    // (minified + profiled) build. Unlike Groovy's buildTypes { release {} }
+    // (which creates), Kotlin resolves — so create() explicitly.
+    buildTypes {
+        create("release") {}
+    }
+
     experimentalProperties["android.experimental.self-instrumenting"] = true
 }
 
