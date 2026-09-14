@@ -3,7 +3,7 @@
 # kotlin and agp must be compatible with each other after update
 agp = "9.4.0"
 kotlin = "2.4.10"
-ksp = "2.3.11"
+ksp = "2.3.12"
 kotlinReflect = "2.4.10"
 
 annotation = "1.10.0"
