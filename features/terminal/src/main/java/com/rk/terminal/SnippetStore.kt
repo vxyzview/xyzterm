@@ -4,7 +4,12 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /** A one-tap command shown as a chip above the keyboard. */
-data class Snippet(val label: String, val command: String)
+data class Snippet(val label: String, val command: String) {
+    init {
+        require(!command.contains(Regex("[;|&$`()<>]")))
+            { "Snippet command contains dangerous shell metacharacters" }
+    }
+}
 
 object SnippetStore {
     fun decode(json: String): List<Snippet> = runCatching {
@@ -13,7 +18,9 @@ object SnippetStore {
             val obj = array.optJSONObject(i) ?: return@mapNotNull null
             val label = obj.optString("label").trim()
             val command = obj.optString("command")
-            if (label.isEmpty() || command.isEmpty()) null else Snippet(label, command)
+            if (label.isEmpty() || command.isEmpty()) return@mapNotNull null
+            // Skip snippets with shell metacharacters instead of crashing
+            runCatching { Snippet(label, command) }.getOrNull()
         }
     }
         .getOrDefault(emptyList())

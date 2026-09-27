@@ -12,16 +12,16 @@ class VirtualKeyClient(val session: TerminalSession) : IVirtualKeysView {
             return
         }
         when (key) {
-            "ESC" -> session.write("\u001B") // ESC
-            "TAB" -> session.write("\u0009") // TAB
-            "HOME" -> session.write("\u001B[H") // HOME
-            "UP" -> session.write("\u001B[A") // UP Arrow (ANSI escape code)
-            "DOWN" -> session.write("\u001B[B") // DOWN Arrow (ANSI escape code)
-            "LEFT" -> session.write("\u001B[D") // LEFT Arrow (ANSI escape code)
-            "RIGHT" -> session.write("\u001B[C") // RIGHT Arrow (ANSI escape code)
-            "PGUP" -> session.write("\u001B[5~") // Page Up (ANSI escape code)
-            "PGDN" -> session.write("\u001B[6~") // Page Down (ANSI escape code)
-            "END" -> session.write("\u001B[4~") // End (ANSI escape code, may vary)
+            "ESC" -> session.write(TerminalEscapes.ESC)
+            "TAB" -> session.write(TerminalEscapes.TAB)
+            "HOME" -> session.write(TerminalEscapes.HOME)
+            "UP" -> session.write(TerminalEscapes.UP)
+            "DOWN" -> session.write(TerminalEscapes.DOWN)
+            "LEFT" -> session.write(TerminalEscapes.LEFT)
+            "RIGHT" -> session.write(TerminalEscapes.RIGHT)
+            "PGUP" -> session.write(TerminalEscapes.PGUP)
+            "PGDN" -> session.write(TerminalEscapes.PGDN)
+            "END" -> session.write(TerminalEscapes.END)
             else -> session.write(buttonInfo.key)
         }
     }

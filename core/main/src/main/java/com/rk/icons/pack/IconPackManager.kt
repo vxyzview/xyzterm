@@ -207,8 +207,11 @@ class IconPackManager(private val context: Application) : CoroutineScope by Coro
     }
 
     fun uninstallIconPack(iconPackId: String) {
+        require(!iconPackId.contains("/") && !iconPackId.contains("\\") && iconPackId != "." && iconPackId != ".." && !iconPackId.contains("..")) { "Invalid pack id" }
         val iconPack = localIconPacks[iconPackId] ?: return
-        File(iconPack.installPath).deleteRecursively()
+        val installFile = File(iconPack.installPath)
+        require(installFile.canonicalPath.startsWith(iconPackDir.canonicalPath)) { "Pack path escapes install dir" }
+        installFile.deleteRecursively()
         localIconPacks.remove(iconPackId)
     }
 

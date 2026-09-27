@@ -139,6 +139,22 @@ fun TerminalFontScreen() {
                 Button(onClick = { filePickerLauncher.launch("font/*") }) { Text(stringResource(strings.open)) }
             }
 
+            // Quick font-size stepper — avoids digging into the editor settings screen.
+            Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "${stringResource(strings.font_size)}: ${Settings.terminal_font_size}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                )
+                Button(onClick = { if (Settings.terminal_font_size > 8) Settings.terminal_font_size-- }) {
+                    Text("-")
+                }
+                Text(" ${Settings.terminal_font_size} ", style = MaterialTheme.typography.bodyLarge)
+                Button(onClick = { if (Settings.terminal_font_size < 32) Settings.terminal_font_size++ }) {
+                    Text("+")
+                }
+            }
+
             Text(
                 text = fontPath.ifEmpty { DEFAULT_TERMINAL_FONT_PATH },
                 style = MaterialTheme.typography.bodyMedium,

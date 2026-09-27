@@ -1,5 +1,8 @@
 package com.rk.terminal
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
 import androidx.activity.compose.BackHandler
@@ -28,7 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -91,11 +94,13 @@ import com.rk.utils.DEFAULT_TERMINAL_FONT_PATH
 import com.rk.utils.FontCache
 import com.rk.utils.dpToPx
 import com.rk.utils.isDarkTheme
+import com.rk.utils.toast
 import com.termux.terminal.TerminalColors
 import com.termux.terminal.TextStyle
 import com.termux.view.TerminalView
 import java.lang.ref.WeakReference
 import java.util.Properties
+import java.util.WeakHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -261,8 +266,17 @@ private fun ColumnScope.TerminalView(
                         val fontPath = Settings.terminal_font_path
                         val font =
                             if (fontPath.isNotEmpty()) {
-                                FontCache.getTypeface(context, fontPath, Settings.is_terminal_font_asset)
-                                    ?: FontCache.getTypeface(context, DEFAULT_TERMINAL_FONT_PATH, true)
+                                val userFont = FontCache.getTypeface(context, fontPath, Settings.is_terminal_font_asset)
+                                if (userFont == null) {
+                                    scope.launch {
+                                        android.widget.Toast.makeText(
+                                            context,
+                                            "Failed to load custom font, using default",
+                                            android.widget.Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                                userFont ?: FontCache.getTypeface(context, DEFAULT_TERMINAL_FONT_PATH, true)
                             } else {
                                 FontCache.getTypeface(context, DEFAULT_TERMINAL_FONT_PATH, true)
                             }
@@ -330,30 +344,31 @@ private suspend fun TerminalView.attachOrCreateSession(
 ) {
     val session =
         if (pendingCommand != null) {
-            val binder = terminalActivity.sessionBinder?.get() ?: return // service unbound mid-recreate
-            binder.getService().currentSession.value = pendingCommand!!.id
-            binder.getSession(pendingCommand!!.id)
-                ?: binder.createSession(pendingCommand!!.id, client, terminalActivity).session
+            terminalActivity.sessionBinder?.get()?.let { binder ->
+                binder.getService().currentSession.value = pendingCommand!!.id
+                binder.getSession(pendingCommand!!.id)
+                    ?: binder.createSession(pendingCommand!!.id, client, terminalActivity).session
+            } ?: return
         } else {
-            val binder = terminalActivity.sessionBinder?.get() ?: return
-            val service = binder.getService()
-            val current = service.currentSession.value
-            binder.getSession(current)
-                ?: if (service.restorePending) {
-                    // Saved sessions are being spawned off the main
-                    // thread (cold start) — attach the restored
-                    // session to this view when it lands.
-                    service.onRestored {
-                        if (terminalView.get()?.mTermSession != null) return@onRestored
-                        val restoredBinder = terminalActivity.sessionBinder?.get() ?: return@onRestored
-                        scope.launch {
-                            terminalActivity.changeSession(restoredBinder.getService().currentSession.value)
+            terminalActivity.sessionBinder?.get()?.let { binder ->
+                val service = binder.getService()
+                val current = service.currentSession.value
+                binder.getSession(current)
+                    ?: if (service.restorePending) {
+                        // Saved sessions are being spawned off the main
+                        // thread (cold start) — attach the restored
+                        // session to this view when it lands.
+                        service.onRestored {
+                            val restoredBinder = terminalActivity.sessionBinder?.get() ?: return@onRestored
+                            scope.launch {
+                                terminalActivity.changeSession(restoredBinder.getService().currentSession.value)
+                            }
                         }
+                        null
+                    } else {
+                        binder.createSession(current, client, terminalActivity).session
                     }
-                    null
-                } else {
-                    binder.createSession(current, client, terminalActivity).session
-                }
+            } ?: return
         }
 
     if (session != null) {
@@ -561,12 +576,17 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
         service?.sessionList?.let { sessions ->
             val listState = rememberLazyListState()
 
-            // Keep the active session visible when the drawer opens or the
-            // selection changes — with many sessions it can sit off-screen.
-            LaunchedEffect(service.currentSession.value, sessions.size) {
+            // Keep the active session visible when the selection changes.
+            // Only scroll if the item is off-screen — size changes (create/delete)
+            // must not yank the list when the active session is already visible.
+            LaunchedEffect(service.currentSession.value) {
                 val index = sessions.indexOf(service.currentSession.value)
                 if (index >= 0) {
-                    listState.scrollToItem(index)
+                    val layout = listState.layoutInfo
+                    val visible = layout.visibleItemsInfo.map { it.index }.toSet()
+                    if (index !in visible) {
+                        listState.scrollToItem(index)
+                    }
                 }
             }
 
@@ -659,6 +679,46 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                         text = stringResource(strings.delete_session),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Surface(
+                onClick = {
+                    if (service == null || activeSession == null) return@Surface
+                    val session = service?.getSession(activeSession)
+                    session?.let { terminalSession ->
+                        scope.launch {
+                            val text = terminalSession.emulator?.screen?.text
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("Terminal output", text)
+                            clipboard.setPrimaryClip(clip)
+                            toast(strings.copied)
+                        }
+                    }
+                },
+                enabled = activeSession != null,
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ContentCopy,
+                        contentDescription = stringResource(strings.copy),
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(strings.copy),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
@@ -788,8 +848,11 @@ suspend fun Terminal.changeSession(sessionId: String) {
 // ("other") session would otherwise render with the default palette, making the
 // roo@xyz prompt (ANSI 32/34) mismatch the themed app until a relayout. The
 // last-applied signature lives on the view tag, so this is cheap + idempotent.
+private val terminalColorSigs: MutableMap<TerminalView, TerminalColorSignature> =
+    java.util.Collections.synchronizedMap(WeakHashMap())
+
 private fun reapplyTerminalColors(view: TerminalView) {
-    val sig = view.tag as? TerminalColorSignature ?: return
+    val sig = terminalColorSigs[view] ?: return
     if (sig.colors == null || sig.colors.isEmpty) return
     view.applyTerminalColors(sig.onSurface, sig.surface, sig.colors)
 }
@@ -820,11 +883,11 @@ private data class TerminalColorSignature(
 
 private fun TerminalView.applyTerminalColors(onSurfaceColor: Int, surfaceColor: Int, terminalColors: Properties) {
     if (mEmulator == null) return
-    val last = tag as? TerminalColorSignature
+    val last = terminalColorSigs[this]
     if (last?.colors == terminalColors && last.surface == surfaceColor && last.onSurface == onSurfaceColor) {
         return
     }
-    tag = TerminalColorSignature(terminalColors, surfaceColor, onSurfaceColor)
+    terminalColorSigs[this] = TerminalColorSignature(terminalColors, surfaceColor, onSurfaceColor)
 
     this.onScreenUpdated()
 

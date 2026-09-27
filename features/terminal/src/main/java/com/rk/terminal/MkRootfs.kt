@@ -18,10 +18,6 @@ enum class NEXT_STAGE {
 
 suspend fun CoroutineScope.getNextStage(context: Context): NEXT_STAGE =
     withContext(Dispatchers.IO) {
-        if (isMainThread()) {
-            throw RuntimeException("IO operation on the main thread")
-        }
-
         val sandboxFile = File(getTempDir(), "sandbox.tar.gz")
         val rootfsFiles =
             sandboxDir().listFiles()?.filter {
