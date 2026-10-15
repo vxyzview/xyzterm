@@ -1,3 +1,8 @@
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.AnimatedVisibility
 package com.rk.terminal
 
 import android.content.Intent
@@ -159,8 +164,19 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
     // animation; bellPulse on every background-job ring) live HERE, not in
     // TerminalScreenInternal, so a toggle only recomposes the header — not the
     // whole screen (which would re-run the terminal AndroidView update + drawer).
-    if (Settings.smart_toolbar && WindowInsets.isImeVisible) return
-    TopAppBar(
+    // Kept composed and animated, rather than early-returned. Returning here swapped the entire
+    // TopAppBar slot in and out of the Scaffold's topBar, and WindowInsets.isImeVisible flips
+    // on every frame of the keyboard animation -- so the Scaffold re-measured on each one, in
+    // the interaction a terminal is used for most. AnimatedVisibility flips once on the
+    // boolean and then animates its own size.
+    val collapseWithIme = Settings.smart_toolbar && WindowInsets.isImeVisible
+
+    AnimatedVisibility(
+        visible = !collapseWithIme,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
+    ) {
+        TopAppBar(
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -196,9 +212,10 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
             }
         },
         actions = {
-            // no search action
-        },
-    )
+                // no search action
+            },
+        )
+    }
 }
 
 @Composable

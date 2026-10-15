@@ -171,13 +171,18 @@ suspend fun ubuntuProcess(
     return ubuntuProcess(excludeMounts, root, workingDir, command.toMutableList())
 }
 
-/** Extension to read all stdout as a single string */
+/** Extension to read stdout, capped. `readText()` unbounded was an OOM waiting for `apt`. */
 suspend fun Process.readStdout(): String =
     withContext(Dispatchers.IO) {
         try {
-            // readText blocks to EOF — an available() pre-check here would
+            // Blocking to EOF -- an available() pre-check here would
             // return "" whenever the process hasn't flushed yet.
-            inputStream.bufferedReader().use { it.readText() }
+            val buffer = CharArray(ShellUtils.MAX_CAPTURED_BYTES / 2)
+            inputStream.bufferedReader().use { reader ->
+                val read = reader.read(buffer)
+                if (read < 0) ""
+                else String(buffer, 0, read).let { if (read == buffer.size) it + "\n[output truncated]" else it }
+            }
         } catch (e: IOException) {
             e.printStackTrace()
             if (e.message?.contains("Stream closed") == true) "" else throw e

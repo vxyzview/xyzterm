@@ -7,6 +7,16 @@ import kotlinx.coroutines.withContext
 object ShellUtils {
     data class Result(val exitCode: Int, val output: String, val error: String, val timedOut: Boolean)
 
+    /**
+     * Cap on captured output per stream.
+     *
+     * These are the app's generic "run a command and read its output" primitives. With no cap,
+     * `apt-get` — or `cat /dev/urandom` — grows the builder until the process is killed, and
+     * `largeHeap="true"` means the JVM will allow it to get a long way there first. Nothing
+     * downstream needs more than a few KB of `apt` output to report a failure.
+     */
+    const val MAX_CAPTURED_BYTES = 256 * 1024
+
     suspend fun runUbuntu(vararg command: String, timeoutSeconds: Long? = null): Result =
         withContext(Dispatchers.IO) { drain(ubuntuProcess(command = command.toList()), timeoutSeconds) }
 
@@ -19,17 +29,33 @@ object ShellUtils {
         val output = StringBuilder()
         val error = StringBuilder()
 
+        // The readers also leaked the underlying fd: no use {}, and the streams were never
+        // closed. Truncation is marked so a caller can tell a capped read from a complete one.
         val outputThread = Thread {
             runCatching {
-                process.inputStream.bufferedReader().forEachLine { line ->
-                    synchronized(output) { output.appendLine(line) }
+                process.inputStream.bufferedReader().use { reader ->
+                    reader.forEachLine { line ->
+                        synchronized(output) {
+                            if (output.length < MAX_CAPTURED_BYTES) {
+                                output.append(line).append('\n')
+                                if (output.length >= MAX_CAPTURED_BYTES) output.append("\n[output truncated]\n")
+                            }
+                        }
+                    }
                 }
             }
         }
         val errorThread = Thread {
             runCatching {
-                process.errorStream.bufferedReader().forEachLine { line ->
-                    synchronized(error) { error.appendLine(line) }
+                process.errorStream.bufferedReader().use { reader ->
+                    reader.forEachLine { line ->
+                        synchronized(error) {
+                            if (error.length < MAX_CAPTURED_BYTES) {
+                                error.append(line).append('\n')
+                                if (error.length >= MAX_CAPTURED_BYTES) error.append("\n[output truncated]\n")
+                            }
+                        }
+                    }
                 }
             }
         }
