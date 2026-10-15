@@ -71,7 +71,7 @@ class CrashLogTest {
     }
 
     @Test
-    fun `the newest report is always crash.log`() {
+    fun `the newest report always uses the primary file name`() {
         val d = dir()
 
         repeat(50) { CrashLog.append(d, "entry $it\n", maxBytes = 40) }
