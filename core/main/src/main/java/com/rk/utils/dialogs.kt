@@ -69,7 +69,19 @@ object DialogHost {
         isDialogShowing = true
     }
 
+    /**
+     * Adds a loading dialog, ignoring a request whose id is already showing.
+     *
+     * The dedupe lives here rather than at the call site. It used to be
+     * `if (loadings.none { it.id == id }) pushLoading(...)` in [LoadingPopup],
+     * which is a check-then-act: two callers can both observe "absent" and both
+     * push, leaving two identical spinners with the same id -- and [remove]
+     * then takes both out at once, so the second caller's dialog vanishes when
+     * the first one finishes. A caller that forgot the guard got duplicates
+     * with no way to notice.
+     */
     fun pushLoading(request: DialogRequest) {
+        if (loadings.any { it.id == request.id }) return
         loadings.add(request)
     }
 

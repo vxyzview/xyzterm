@@ -52,25 +52,22 @@ class LoadingPopup(private val activity: AppCompatActivity?, hideAfterMillis: Lo
         val activity = activity ?: return this
         if (activity.isFinishing || activity.isDestroyed) return this
 
-        // The class documents itself as safe to create from any thread, and `none { }` followed
-        // by an add is a check-then-act: two callers could both see "absent" and both push,
-        // leaving two identical spinners. Ask the list to add atomically instead.
-        if (DialogHost.loadings.none { it.id == id }) {
-            DialogHost.pushLoading(
-                DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = false) {
-                    Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(48.dp).padding(8.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = message.value, style = MaterialTheme.typography.bodyMedium)
-                        }
+        // Deduped by DialogHost.pushLoading itself. The check used to live here, as a
+        // check-then-act that two callers could both win.
+        DialogHost.pushLoading(
+            DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = false) {
+                Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(48.dp).padding(8.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = message.value, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
-            )
-        }
+            }
+        )
 
         return this
     }
