@@ -169,75 +169,80 @@ object TerminalBackup {
      * first's work mid-flight.
      */
     private suspend fun extractAndSwap(archive: File): String? =
-        // Explicit type argument: the try/catch/finally tail makes inference ambiguous,
-        // and it silently settled on Unit, breaking every return@swap below.
-        withContext<String?>(Dispatchers.IO) swap@{
-            val staging = getTempDir().child("terminal-restore-staging")
-            try {
-                staging.deleteRecursively()
-                staging.mkdirs()
+        withContext(Dispatchers.IO) { swapInternal(archive) }
 
-                // -z is explicit: some toybox builds don't sniff gzip.
-                val process = ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", staging.absolutePath).start()
-                // Drain stderr concurrently; reading after waitFor() deadlocks if
-                // tar fills the pipe before exiting.
-                var stderr = ""
-                val stderrDrain = Thread {
-                    stderr = runCatching { process.errorStream.bufferedReader().use { it.readText() } }.getOrDefault("")
-                }
-                stderrDrain.start()
-                val timedOut = !process.waitFor(TAR_TIMEOUT_MINUTES, TimeUnit.MINUTES)
-                if (timedOut) {
-                    process.destroyForcibly()
-                }
-                stderrDrain.join(5_000)
+    /**
+     * The blocking half, split out so the returns are ordinary ones. Inline in the
+     * withContext lambda the try/catch/finally tail made the lambda's type ambiguous and it
+     * settled on Unit, which turned every `return` below into a compile error.
+     */
+    private fun swapInternal(archive: File): String? {
+        val staging = getTempDir().child("terminal-restore-staging")
+        try {
+            staging.deleteRecursively()
+            staging.mkdirs()
 
-                if (timedOut) {
-                    return@swap "tar timed out"
-                }
-
-                val code = process.exitValue()
-                if (code != 0) {
-                    return@swap (stderr.lineSequence().firstOrNull { it.isNotBlank() }
-                        ?: "tar exited with $code")
-                }
-
-                // Refuse before extracting, not after filling the volume.
-                val base = localDir()
-                val liveBytes = restoreRoots(base).sumOf { runCatching { directorySize(it) }.getOrDefault(0L) }
-                val needed = requiredBytesForRestore(archive.length(), liveBytes)
-                if (!freeSpaceSufficient(availableBytes(base), needed)) {
-                    return@swap
-                        "not enough free space: need about ${needed / MB} MB, " +
-                            "have ${availableBytes(base) / MB} MB"
-                }
-
-                // Raw child paths: the localDir() getter auto-creates the directory,
-                // which would block the renames below.
-                // Archives written before the home root existed stored the sandbox
-                // contents at the archive root; archives written since nest them
-                // under ./sandbox and ./home. Detect by shape rather than version.
-                val legacyFlat = !File(staging, "sandbox").exists()
-
-                if (legacyFlat) {
-                    val sandbox = base.child("sandbox")
-                    swapIn(File(staging), sandbox)?.let { reason -> return@swap reason }
-                } else {
-                    for (target in restoreRoots(base)) {
-                        val extracted = File(staging, target.name)
-                        if (!extracted.exists()) continue
-                        swapIn(extracted, target)?.let { reason -> return@swap reason }
-                    }
-                }
-
-                localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
-                null
-            } catch (e: Exception) {
-                e.message ?: "restore failed"
-            } finally {
-                staging.deleteRecursively()
+            // -z is explicit: some toybox builds don't sniff gzip.
+            val process = ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", staging.absolutePath).start()
+            // Drain stderr concurrently; reading after waitFor() deadlocks if
+            // tar fills the pipe before exiting.
+            var stderr = ""
+            val stderrDrain = Thread {
+                stderr = runCatching { process.errorStream.bufferedReader().use { it.readText() } }.getOrDefault("")
             }
+            stderrDrain.start()
+            val timedOut = !process.waitFor(TAR_TIMEOUT_MINUTES, TimeUnit.MINUTES)
+            if (timedOut) {
+                process.destroyForcibly()
+            }
+            stderrDrain.join(5_000)
+
+            if (timedOut) {
+                return "tar timed out"
+            }
+
+            val code = process.exitValue()
+            if (code != 0) {
+                return stderr.lineSequence().firstOrNull { it.isNotBlank() }
+                    ?: "tar exited with $code"
+            }
+
+            // Refuse before extracting, not after filling the volume.
+            val base = localDir()
+            val liveBytes = restoreRoots(base).sumOf { runCatching { directorySize(it) }.getOrDefault(0L) }
+            val needed = requiredBytesForRestore(archive.length(), liveBytes)
+            if (!freeSpaceSufficient(availableBytes(base), needed)) {
+                return
+                    "not enough free space: need about ${needed / MB} MB, " +
+                        "have ${availableBytes(base) / MB} MB"
+            }
+
+            // Raw child paths: the localDir() getter auto-creates the directory,
+            // which would block the renames below.
+            // Archives written before the home root existed stored the sandbox
+            // contents at the archive root; archives written since nest them
+            // under ./sandbox and ./home. Detect by shape rather than version.
+            val legacyFlat = !File(staging, "sandbox").exists()
+
+            if (legacyFlat) {
+                val sandbox = base.child("sandbox")
+                swapIn(staging, sandbox)?.let { reason -> return reason }
+            } else {
+                for (target in restoreRoots(base)) {
+                    val extracted = File(staging, target.name)
+                    if (!extracted.exists()) continue
+                    swapIn(extracted, target)?.let { reason -> return reason }
+                }
+            }
+
+            localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
+            null
+        } catch (e: Exception) {
+            e.message ?: "restore failed"
+        } finally {
+            staging.deleteRecursively()
         }
+    }
 
     /** Moves [incoming] onto [target], moving the existing tree aside first and rolling back on failure. */
     private fun swapIn(incoming: File, target: File): String? {
