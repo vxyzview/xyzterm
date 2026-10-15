@@ -59,7 +59,15 @@ ARGS="$ARGS --link2symlink"
 ARGS="$ARGS --sysvipc"
 ARGS="$ARGS -L"
 
-COMMAND="(cd $LOCAL/sandbox && tar -xf $TMP_DIR/sandbox.tar.gz)"
+SANDBOX_DIR="$LOCAL/sandbox"
+STAGING_DIR="$LOCAL/sandbox.staging"
+
+# Extract into a staging tree, then swap it in.
+#
+# The previous form untarred straight into the live $SANDBOX_DIR, so a tar killed by an OOM-kill,
+# a battery pull or ENOSPC left a half-extracted rootfs indistinguishable from a complete one.
+# The old tree is only discarded once the new one is known to be whole.
+COMMAND="(rm -rf $STAGING_DIR && mkdir -p $STAGING_DIR && tar -xf $TMP_DIR/sandbox.tar.gz -C $STAGING_DIR)"
 
 set +e
 # Samsung devices doesn't like running system binaries under proot
@@ -80,12 +88,20 @@ if [ "$ret" -ne 0 ]; then
 
     if [ "$ret" -ne 0 ]; then
         error "Extraction failed (exit code $ret)"
+        rm -rf "$STAGING_DIR"
         exit "$ret"
     fi
 fi
 
+if [ -d "$SANDBOX_DIR" ]; then
+  mv "$SANDBOX_DIR" "$SANDBOX_DIR.old" 2>/dev/null || rm -rf "$SANDBOX_DIR"
+fi
+mv "$STAGING_DIR" "$SANDBOX_DIR"
+rm -rf "$SANDBOX_DIR.old" 2>/dev/null || true
 
-SANDBOX_DIR="$LOCAL/sandbox"
+# Marker last: the app treats its presence as "the rootfs is whole", so it must never
+# survive a failed extraction.
+touch "$SANDBOX_DIR/.rootfs-complete"
 
 info "Setting up the Ubuntu container…"
 

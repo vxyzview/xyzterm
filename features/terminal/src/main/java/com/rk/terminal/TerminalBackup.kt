@@ -1,5 +1,6 @@
 package com.rk.terminal
 
+import android.os.StatFs
 import com.rk.file.child
 import com.rk.file.createFileIfNot
 import com.rk.file.localDir
@@ -7,6 +8,8 @@ import com.rk.utils.getTempDir
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /** Creates and prunes terminal environment backups (sandbox tar.gz archives). */
@@ -136,13 +139,36 @@ object TerminalBackup {
         return null
     }
 
+    private val restoreMutex = Mutex()
+
+    /** Free bytes on the volume holding [dir]; `Long.MAX_VALUE` when it cannot be determined. */
+    internal fun availableBytes(dir: File): Long =
+        runCatching { StatFs(dir.absolutePath).availableBytes }.getOrDefault(Long.MAX_VALUE)
+
+    /** Conservative estimate: expanded archive + the live tree it replaces + headroom. */
+    internal fun requiredBytesForRestore(archiveBytes: Long, liveBytes: Long): Long =
+        archiveBytes * EXPANSION_FACTOR + liveBytes + MIN_HEADROOM_BYTES
+
+    internal fun freeSpaceSufficient(available: Long, required: Long): Boolean = available >= required
+
     /**
-     * Restores [archive] into the sandbox. The archive is extracted into a staging directory first; the live sandbox is
-     * only replaced once tar exited 0, so a corrupt backup never destroys the current install.
+     * Restores [archive] into the sandbox.
+     *
+     * The archive is extracted into a staging directory, then swapped in with two renames: the
+     * live tree is moved aside rather than deleted, and moved back if the second rename fails.
+     * The previous version deleted 1–2 GB first, so an app death in that window — very likely,
+     * since the phone is backgrounded — destroyed the rootfs with nothing to restore from.
      *
      * Returns null on success, otherwise a human-readable error string.
      */
-    suspend fun restore(archive: File): String? =
+    suspend fun restore(archive: File): String? = restoreMutex.withLock { extractAndSwap(archive) }
+
+    /**
+     * Serialised behind [restoreMutex]: two taps on "Restore" previously ran two extractions over
+     * the same fixed staging path, and the second one's `deleteRecursively()` destroyed the
+     * first's work mid-flight.
+     */
+    private suspend fun extractAndSwap(archive: File): String? =
         withContext(Dispatchers.IO) {
             val staging = getTempDir().child("terminal-restore-staging")
             try {
@@ -174,9 +200,18 @@ object TerminalBackup {
                         ?: "tar exited with $code")
                 }
 
-                // Raw child paths: the localDir()/sandboxDir() getters auto-create
-                // the directory, which would block the renames below.
+                // Refuse before extracting, not after filling the volume.
                 val base = localDir()
+                val liveBytes = restoreRoots(base).sumOf { runCatching { directorySize(it) }.getOrDefault(0L) }
+                val needed = requiredBytesForRestore(archive.length(), liveBytes)
+                if (!freeSpaceSufficient(availableBytes(base), needed)) {
+                    return@withContext
+                        "not enough free space: need about ${needed / MB} MB, " +
+                            "have ${availableBytes(base) / MB} MB"
+                }
+
+                // Raw child paths: the localDir() getter auto-creates the directory,
+                // which would block the renames below.
                 // Archives written before the home root existed stored the sandbox
                 // contents at the archive root; archives written since nest them
                 // under ./sandbox and ./home. Detect by shape rather than version.
@@ -184,18 +219,12 @@ object TerminalBackup {
 
                 if (legacyFlat) {
                     val sandbox = base.child("sandbox")
-                    sandbox.deleteRecursively()
-                    if (!staging.renameTo(sandbox)) {
-                        return@withContext "could not move extracted files into place"
-                    }
+                    swapIn(File(staging), sandbox)?.let { return@withContext it }
                 } else {
                     for (target in restoreRoots(base)) {
                         val extracted = File(staging, target.name)
                         if (!extracted.exists()) continue
-                        target.deleteRecursively()
-                        if (!extracted.renameTo(target)) {
-                            return@withContext "could not move ${extracted.name} into place"
-                        }
+                        swapIn(extracted, target)?.let { return@withContext it }
                     }
                 }
 
@@ -207,4 +236,32 @@ object TerminalBackup {
                 staging.deleteRecursively()
             }
         }
+
+    /** Moves [incoming] onto [target], moving the existing tree aside first and rolling back on failure. */
+    private fun swapIn(incoming: File, target: File): String? {
+        val aside = File(target.parentFile, target.name + ".old")
+        aside.deleteRecursively()
+        val hadExisting = target.exists()
+        if (hadExisting && !target.renameTo(aside)) {
+            return "could not move the current ${target.name} aside"
+        }
+        if (!incoming.renameTo(target)) {
+            // Roll back: the user must never be left without a rootfs because a rename failed.
+            if (hadExisting) aside.renameTo(target)
+            return "could not move extracted ${target.name} into place"
+        }
+        aside.deleteRecursively()
+        return null
+    }
+
+    private fun directorySize(dir: File): Long =
+        if (!dir.exists()) 0L
+        else dir.walkBottomUp().filter { it.isFile }.sumOf { runCatching { it.length() }.getOrDefault(0L) }
+
+    private const val MB = 1024L * 1024
+
+    /** Ubuntu tarballs are roughly 4x their compressed size once expanded. */
+    private const val EXPANSION_FACTOR = 4L
+
+    private const val MIN_HEADROOM_BYTES = 512L * 1024 * 1024
 }
