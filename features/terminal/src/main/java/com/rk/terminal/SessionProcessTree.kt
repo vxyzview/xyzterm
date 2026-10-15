@@ -79,7 +79,5 @@ object SessionProcessTree {
             .fold(onSuccess = { true }, onFailure = { true })
 
     /** Best-effort check for a diagnostic log; never used to gate a kill. */
-    fun isAlive(pid: Int): Boolean =
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) true
-        else runCatching { File("/proc/$pid").exists() }.getOrDefault(false)
+    fun isAlive(pid: Int): Boolean = runCatching { File("/proc/$pid").exists() }.getOrDefault(false)
 }

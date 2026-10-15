@@ -169,7 +169,7 @@ object TerminalBackup {
      * first's work mid-flight.
      */
     private suspend fun extractAndSwap(archive: File): String? =
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) extract@{
             val staging = getTempDir().child("terminal-restore-staging")
             try {
                 staging.deleteRecursively()
@@ -191,12 +191,12 @@ object TerminalBackup {
                 stderrDrain.join(5_000)
 
                 if (timedOut) {
-                    return@withContext "tar timed out"
+                    return@extract "tar timed out"
                 }
 
                 val code = process.exitValue()
                 if (code != 0) {
-                    return@withContext (stderr.lineSequence().firstOrNull { it.isNotBlank() }
+                    return@extract (stderr.lineSequence().firstOrNull { it.isNotBlank() }
                         ?: "tar exited with $code")
                 }
 
@@ -205,7 +205,7 @@ object TerminalBackup {
                 val liveBytes = restoreRoots(base).sumOf { runCatching { directorySize(it) }.getOrDefault(0L) }
                 val needed = requiredBytesForRestore(archive.length(), liveBytes)
                 if (!freeSpaceSufficient(availableBytes(base), needed)) {
-                    return@withContext
+                    return@extract
                         "not enough free space: need about ${needed / MB} MB, " +
                             "have ${availableBytes(base) / MB} MB"
                 }
@@ -219,12 +219,12 @@ object TerminalBackup {
 
                 if (legacyFlat) {
                     val sandbox = base.child("sandbox")
-                    swapIn(File(staging), sandbox)?.let { reason -> return@withContext reason }
+                    swapIn(File(staging), sandbox)?.let { reason -> return@extract reason }
                 } else {
                     for (target in restoreRoots(base)) {
                         val extracted = File(staging, target.name)
                         if (!extracted.exists()) continue
-                        swapIn(extracted, target)?.let { reason -> return@withContext reason }
+                        swapIn(extracted, target)?.let { reason -> return@extract reason }
                     }
                 }
 
