@@ -10,6 +10,7 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.rk.commands.CommandProvider
 import com.rk.commands.KeybindingsManager
 import com.rk.crashhandler.CrashHandler
+import com.rk.extension.ActivityProvider
 import com.rk.icons.pack.IconPackManager
 import com.rk.resources.Res
 import com.rk.settings.Settings
@@ -67,6 +68,12 @@ open class App : Application() {
         super.onCreate()
         application = this
         Res.application = this
+
+        // Must run before anything that can raise a dialog: errorDialog/dialogRes/toast all
+        // default to ActivityProvider.currentActivity, and without this registration that
+        // reference stays null forever, so every error message in the app was silently
+        // dropped to logcat instead of being shown.
+        registerActivityLifecycleCallbacks(ActivityProvider)
 
         // ponytail: must run BEFORE FeatureRegistry.initFeatures (below chain reaches
         // ToolbarConfiguration, whose object-init reads CommandProvider.SettingsCommand,

@@ -68,11 +68,15 @@ fun toast(message: String?) {
     }
 
     runOnUiThread {
-        val context = ActivityProvider.currentActivity as? Context
+        // Fall back to the Application so errors raised from a service, a background
+        // job, or a screen that has already paused still reach the user.
+        // ActivityProvider.currentActivity is null whenever no Activity is resumed,
+        // which is exactly when these fire.
+        val context: Context? = ActivityProvider.currentActivity ?: application
         if (context != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         } else {
-            Log.w("Utils", "no valid ui context available for making toast: $message")
+            Log.w("Utils", "no context available for making toast: $message")
         }
     }
 }
