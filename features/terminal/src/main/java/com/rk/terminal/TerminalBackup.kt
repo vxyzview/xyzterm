@@ -169,7 +169,9 @@ object TerminalBackup {
      * first's work mid-flight.
      */
     private suspend fun extractAndSwap(archive: File): String? =
-        withContext(Dispatchers.IO) extract@{
+        // Explicit type argument: the try/catch/finally tail makes inference ambiguous,
+        // and it silently settled on Unit, breaking every return@swap below.
+        withContext<String?>(Dispatchers.IO) swap@{
             val staging = getTempDir().child("terminal-restore-staging")
             try {
                 staging.deleteRecursively()
@@ -191,12 +193,12 @@ object TerminalBackup {
                 stderrDrain.join(5_000)
 
                 if (timedOut) {
-                    return@extract "tar timed out"
+                    return@swap "tar timed out"
                 }
 
                 val code = process.exitValue()
                 if (code != 0) {
-                    return@extract (stderr.lineSequence().firstOrNull { it.isNotBlank() }
+                    return@swap (stderr.lineSequence().firstOrNull { it.isNotBlank() }
                         ?: "tar exited with $code")
                 }
 
@@ -205,7 +207,7 @@ object TerminalBackup {
                 val liveBytes = restoreRoots(base).sumOf { runCatching { directorySize(it) }.getOrDefault(0L) }
                 val needed = requiredBytesForRestore(archive.length(), liveBytes)
                 if (!freeSpaceSufficient(availableBytes(base), needed)) {
-                    return@extract
+                    return@swap
                         "not enough free space: need about ${needed / MB} MB, " +
                             "have ${availableBytes(base) / MB} MB"
                 }
@@ -219,12 +221,12 @@ object TerminalBackup {
 
                 if (legacyFlat) {
                     val sandbox = base.child("sandbox")
-                    swapIn(File(staging), sandbox)?.let { reason -> return@extract reason }
+                    swapIn(File(staging), sandbox)?.let { reason -> return@swap reason }
                 } else {
                     for (target in restoreRoots(base)) {
                         val extracted = File(staging, target.name)
                         if (!extracted.exists()) continue
-                        swapIn(extracted, target)?.let { reason -> return@extract reason }
+                        swapIn(extracted, target)?.let { reason -> return@swap reason }
                     }
                 }
 
