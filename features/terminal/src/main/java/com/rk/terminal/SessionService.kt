@@ -49,11 +49,17 @@ import org.json.JSONObject
  */
 internal fun shouldKill(pid: Int): Boolean = pid > 0
 
-/** [shouldKill] applied to a live session. Never throws: a pid that died mid-sweep is fine. */
+/**
+ * [shouldKill] applied to a live session, then its orphaned descendants.
+ *
+ * proot's `--kill-on-exit` runs from `atexit()`, which never fires under the SIGKILL that
+ * `finishIfRunning()` sends. The pid we hold is the tracer; killing it alone detaches its
+ * tracees and leaves every guest process running under this app's UID. Sweep children first.
+ */
 private fun TerminalSession.killIfSpawned() {
-    if (shouldKill(pid)) {
-        runCatching { finishIfRunning() }
-    }
+    if (!shouldKill(pid)) return
+    SessionProcessTree.killTree(pid)
+    runCatching { finishIfRunning() }
 }
 
 class SessionService : Service() {
@@ -175,6 +181,9 @@ class SessionService : Service() {
             // `emulator != null` check skipped the kill and leaked the process.
             sessions[id]?.killIfSpawned()
             sessions.remove(id)
+            // proot never frees PROOT_TMP_DIR on SIGKILL, and prepareEnvironment only
+            // cleaned it on the *next* spawn of the same id.
+            releaseTmpDir(id)
             sessionList.remove(id)
             sessionWorkDirs.remove(id)
             removeSession(id)
@@ -231,8 +240,16 @@ class SessionService : Service() {
         return binder
     }
 
+    /** Kill every live session and release its proot tmp dir. */
+    private fun shutdownAllSessions() {
+        sessions.forEach { (id, session) ->
+            session.killIfSpawned()
+            releaseTmpDir(id)
+        }
+    }
+
     override fun onDestroy() {
-        sessions.forEach { s -> s.value.killIfSpawned() }
+        shutdownAllSessions()
 
         restoreScope.cancel()
         daemonRunning = false
@@ -284,7 +301,7 @@ class SessionService : Service() {
     var wakeLock: PowerManager.WakeLock? = null
 
     fun actionExit() {
-        sessions.forEach { s -> s.value.killIfSpawned() }
+        shutdownAllSessions()
         if (daemonRunning) {
             daemonRunning = false
         }

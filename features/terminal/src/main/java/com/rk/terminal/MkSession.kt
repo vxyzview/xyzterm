@@ -2,6 +2,7 @@ package com.rk.terminal
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import com.rk.exec.SandboxEnv
 import com.rk.exec.pendingCommand
 import com.rk.file.child
@@ -14,6 +15,19 @@ import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+/**
+ * Removes the per-session proot tmp dir.
+ *
+ * `prepareEnvironment` deletes it before creating it, so a terminated session's directory
+ * lingered until the next spawn of the *same* id — or forever, if the user never recreated it.
+ * proot allocates `PROOT_TMP_DIR` in `path/glue.c` and never frees it on SIGKILL, so the host
+ * side has to.
+ */
+fun releaseTmpDir(sessionId: String) {
+    runCatching { localDir().child("tmp").childSafe(nameSafe(sessionId)).deleteRecursively() }
+        .onFailure { Log.w("MkSession", "could not release tmp dir for '$sessionId'", it) }
+}
 
 object MkSession {
 
