@@ -13,8 +13,8 @@ Repo: https://github.com/vxyzview/xyzterm
 Binaries: https://github.com/vxyzview/xyzterm/releases/download/v%v/xyzterm-%v.apk
 
 Builds:
-  - versionName: 1.0.0-beta1
-    versionCode: 1
+  - versionName: 1.0.0
+    versionCode: 2
     commit: 6046215fa280d359431b6eaf601354749369ad45
     subdir: app
     gradle:
@@ -23,11 +23,16 @@ Builds:
       - sed -ri '/foojay-resolver-convention/d' -i ../settings.gradle.kts
       - sed -r '/signingConfigs.getByName/d' -i build.gradle.kts
 
-AllowedAPKSigningKeys: f665fa36963b20cec9954399d2213331be522aca035ebf56cfa5a6abdf3e3de2
+# The SHA-256 of the DER signing certificate, taken from the actual v1.0.0-beta1
+# release APK rather than from whatever was written down earlier. The old value
+# (f665fa36...) does not match anything this project has ever signed with, so
+# with `Binaries:` set F-Droid would have rejected the download on signature
+# mismatch.
+AllowedAPKSigningKeys: 48a7423209535ba4d47bd142a0d912fccf91bfd797e00c74623f7dd5032d2353
 
 AutoUpdateMode: Version
-# Must also match pre-release tags: app/build.gradle.kts is at 1.0.0-beta1, and
-# ^v[0-9.]+$ can never match "v1.0.0-beta1".
+# Must also match pre-release tags: ^v[0-9.]+$ alone can never match
+# "v1.0.0-beta1", so the prerelease suffix has to stay optional.
 UpdateCheckMode: Tags ^v[0-9.]+(-[0-9A-Za-z.]+)?$
-CurrentVersion: 1.0.0-beta1
-CurrentVersionCode: 1
+CurrentVersion: 1.0.0
+CurrentVersionCode: 2

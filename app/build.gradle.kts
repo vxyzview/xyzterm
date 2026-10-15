@@ -17,8 +17,14 @@ android {
         targetSdk = 37
 
         // versioning
-        versionCode = 1
-        versionName = "1.0.0-beta1"
+        // 2, not 1: the v1.0.0-beta1 release shipped as versionCode 1, and
+        // Android refuses to install over an existing app unless the new
+        // versionCode is >= the installed one. Reusing 1 means every beta
+        // tester has to uninstall first -- which wipes their sandbox, i.e.
+        // their entire rootfs and home directory. F-Droid rejects a reused
+        // versionCode for the same reason.
+        versionCode = 2
+        versionName = "1.0.0"
         vectorDrawables { useSupportLibrary = true }
     }
 
