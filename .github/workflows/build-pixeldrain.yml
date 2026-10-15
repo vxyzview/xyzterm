@@ -90,6 +90,18 @@ jobs:
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
         continue-on-error: false
 
+      # R8 configuration and dependency changes are only meaningful if the size is visible.
+      # Previously every size effect was invisible: -dontobfuscate plus blanket -keep rules
+      # meant the APK grew quietly and nothing reported it.
+      - name: Report APK size
+        run: |
+          APK=$(ls -1 app/xyzterm-release.apk)
+          SIZE=$(stat -c%s "$APK")
+          echo "APK: $APK"
+          echo "size_bytes: $SIZE"
+          echo "size_mb: $((SIZE / 1024 / 1024))"
+          echo "### Release APK: $((SIZE / 1024 / 1024)) MB" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Extract version
         id: version
         run: |
