@@ -38,7 +38,7 @@ object SessionProcessTree {
         return out
     }
 
-    /** Real [childrenOf], backed by `/proc/<pid>/task/*/children`. Empty when unreadable. */
+    /** Real [childrenOf], backed by the `children` file under each of the pid's task dirs. */
     private fun procChildren(pid: Int): List<Int> {
         if (pid <= 0) return emptyList()
         val taskDir = File("/proc/$pid/task")
