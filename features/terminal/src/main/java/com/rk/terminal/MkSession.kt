@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.rk.exec.SandboxEnv
+import com.rk.exec.TerminalCommand
 import com.rk.exec.pendingCommand
 import com.rk.file.child
 import com.rk.file.childSafe
@@ -17,7 +18,47 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Removes the per-session proot tmp dir.
+ * Builds the `(executable, argv)` a session is launched with.
+ *
+ * The previous shape was `ProcessBuilder(shell, "-c", scriptPath, exe, *args)`, which was wrong
+ * twice over:
+ *
+ *  - When the `-c` operand names an existing file, Android's `sh` (mksh) and dash both *run the
+ *    file* instead of treating it as command text and discard the operands after it, so `exe`
+ *    never became `$0` and never reached the shell.
+ *  - Even under the POSIX reading, `sh -c script name a b` puts `name` in `$0`, and sandbox.sh
+ *    ended at `bash -i -c "$*"`, which excludes `$0`. Only `args` ever ran.
+ *
+ * The unsandboxed path had the mirror bug: `ProcessBuilder(exe, "-c", *args)`, handing the binary
+ * a `-c` flag it never asked for.
+ *
+ * The extraction path is left exactly as it was — setup.sh takes its inputs from the environment,
+ * and `sh -c setup.sh` running the file is what it relies on today.
+ */
+internal fun buildSessionCommand(
+    isExtraction: Boolean,
+    sandboxEnabled: Boolean,
+    sandboxScript: String,
+    setupScript: String,
+    pending: TerminalCommand?,
+): Pair<String, Array<String>> {
+    if (isExtraction) {
+        return "/system/bin/sh" to arrayOf("-c", setupScript, *if (sandboxEnabled) arrayOf(sandboxScript) else emptyArray())
+    }
+    if (pending == null) {
+        // No -c: the script is executed directly, and with no operands it opens an
+        // interactive shell (sandbox.sh branches on $#).
+        return "/system/bin/sh" to arrayOf(sandboxScript)
+    }
+    if (!pending.sandbox) {
+        return pending.exe to pending.args
+    }
+    // sandbox.sh ends at `bash -i -c "$1"`, and bash -c takes exactly one string, so the
+    // argv is re-encoded as a single quoted positional parameter.
+    return "/system/bin/sh" to arrayOf(sandboxScript, shellCommandLine(arrayOf(pending.exe, *pending.args)))
+}
+
+/** Removes the per-session proot tmp dir.
  *
  * `prepareEnvironment` deletes it before creating it, so a terminated session's directory
  * lingered until the next spawn of the *same* id — or forever, if the user never recreated it.
@@ -106,37 +147,14 @@ object MkSession {
         val sandboxSH = localBinDir(context).child("sandbox")
         val setupSH = localBinDir(context).child("setup")
 
-        val args: Array<String>
-
-        val shell =
-            if (pendingCommand == null) {
-                args =
-                    if (Settings.sandbox) {
-                        arrayOf(sandboxSH.absolutePath)
-                    } else {
-                        arrayOf()
-                    }
-                "/system/bin/sh"
-            } else if (pendingCommand!!.sandbox.not()) {
-                args = pendingCommand!!.args
-                pendingCommand!!.exe
-            } else {
-                args =
-                    mutableListOf(sandboxSH.absolutePath, pendingCommand!!.exe, *pendingCommand!!.args)
-                        .toTypedArray<String>()
-
-                "/system/bin/sh"
-            }
-
-        val actualShell: String
-        val actualArgs: Array<String> =
-            if (isExtraction) {
-                actualShell = "/system/bin/sh"
-                mutableListOf("-c", setupSH.absolutePath, *args).toTypedArray()
-            } else {
-                actualShell = shell
-                arrayOf("-c", *args)
-            }
+        val (actualShell, actualArgs) =
+            buildSessionCommand(
+                isExtraction = isExtraction,
+                sandboxEnabled = Settings.sandbox,
+                sandboxScript = sandboxSH.absolutePath,
+                setupScript = setupSH.absolutePath,
+                pending = pendingCommand,
+            )
 
         pendingCommand = null
 
