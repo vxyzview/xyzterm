@@ -34,6 +34,27 @@ fun File.childSafe(fileName: String): File {
     return File(this, fileName)
 }
 
+/**
+ * Like [childSafe], but sanitises instead of throwing.
+ *
+ * For names that come from outside the app and are expected to be *usable* rather than
+ * validated — notably a SAF provider's `OpenableColumns.DISPLAY_NAME`, which is attacker-chosen.
+ * `File(parent, "../../databases/app.db")` writes outside the parent; this cannot.
+ *
+ * The name is flattened to its last path component, then any remaining character outside a safe
+ * set is replaced, and a name that reduces to nothing becomes "file".
+ */
+fun File.sanitizedChild(fileName: String): File {
+    val flattened = fileName.replace('\\', '/').substringAfterLast('/')
+    val cleaned = flattened.map { c -> if (c.isLetterOrDigit() || c in "._-") c else '_' }.joinToString("")
+    val safe =
+        when {
+            cleaned.isEmpty() || cleaned.all { it == '.' } -> "file"
+            else -> cleaned
+        }
+    return File(this, safe)
+}
+
 fun File.createFileIfNot(): File {
     if (parentFile?.exists()?.not() == true) {
         parentFile!!.mkdirs()

@@ -205,8 +205,12 @@ class UriWrapper : FileObject {
                 if (!documentFile.isDirectory) {
                     return documentFile.delete()
                 }
-                documentFile.listFiles().forEach { child -> deleteFolder(child, visited) }
-                return documentFile.delete()
+                // The recursive result used to be discarded, so a partially-deleted tree
+                // reported whatever documentFile.delete() said -- false for a directory that
+                // still has contents -- and the user saw "Failed to delete" for a directory
+                // that was now half empty, with no idea what had actually gone.
+                val childrenOk = documentFile.listFiles().all { deleteFolder(it, visited) }
+                return childrenOk && documentFile.delete()
             }
 
             return@withContext deleteFolder(file, mutableSetOf())

@@ -3,7 +3,24 @@ package com.rk.utils
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import android.provider.DocumentsContract
+
+/**
+ * Returned by [toPath] when a content provider cannot be read.
+ *
+ * This is NOT a usable location. Downstream, `File(path).exists()` is true for it and it is
+ * writable, so `Uri.toFileObject()` used to hand back a FileWrapper for the storage root and a
+ * transient provider failure turned into a copy or delete against the wrong directory. Callers
+ * must reject it with [isStorageRootFallback].
+ */
+const val STORAGE_ROOT_FALLBACK = "/storage/emulated/0/"
+
+private const val TAG = "PathUtils"
+
+/** True when [path] is the unusable [STORAGE_ROOT_FALLBACK] rather than a real location. */
+fun isStorageRootFallback(path: String): Boolean =
+    path == STORAGE_ROOT_FALLBACK || path == STORAGE_ROOT_FALLBACK.trimEnd('/')
 
 object PathUtils {
     fun Uri.toPath(): String {
@@ -79,27 +96,29 @@ object PathUtils {
                                 "audio" -> contentUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                             }
                             val selection = "_id=?"
-                            val selectionArgs = arrayOf(split[1])
+                            // split[1] is unguarded for a document id with no ':', which threw
+                            // IndexOutOfBoundsException straight out of toPath().
+                            val selectionArgs = arrayOf(split.getOrElse(1) { "" })
                             return getDataColumn(context, contentUri, selection, selectionArgs)
-                                ?: "/storage/emulated/0/media/"
+                                ?: STORAGE_ROOT_FALLBACK
                         }
                     }
                 }
 
                 "content".equals(it.scheme, ignoreCase = true) -> {
                     // Handle content URI
-                    return getDataColumn(context, it, null, null) ?: "/storage/emulated/0/"
+                    return getDataColumn(context, it, null, null) ?: STORAGE_ROOT_FALLBACK
                 }
 
                 "file".equals(it.scheme, ignoreCase = true) -> {
                     // Handle file URI
-                    return it.path ?: "/storage/emulated/0/"
+                    return it.path ?: STORAGE_ROOT_FALLBACK
                 }
 
                 else -> {}
             }
         }
-        return "/storage/emulated/0/"
+        return STORAGE_ROOT_FALLBACK
     }
 
     private fun getDataColumn(context: Context, uri: Uri?, selection: String?, selectionArgs: Array<String>?): String? {
@@ -113,7 +132,9 @@ object PathUtils {
                 }
             }
         } catch (e: Exception) {
-            // Log the exception or handle it as needed
+            // Swallowed silently before, which made every provider failure look like a
+            // successful resolve to the storage-root fallback below.
+            Log.w(TAG, "could not read $column from $uri", e)
         }
         return null
     }

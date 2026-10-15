@@ -160,22 +160,32 @@ class DocumentProvider : DocumentsProvider() {
         pending.add(parent)
 
         val MAX_SEARCH_RESULTS = 50
+        val homePrefix = "${sandboxHomeDir().canonicalPath}${File.separator}"
+        // Lowercased once with the same locale as the filenames below.
+        val needle = query.lowercase(Locale.ROOT)
         while (!pending.isEmpty() && result.count < MAX_SEARCH_RESULTS) {
             val file = pending.removeFirst()
             // Avoid directories outside the $HOME directory linked with symlinks (to avoid e.g. search
             // through the whole SD card).
-            var isInsideHome: Boolean =
+            // Hoisted: sandboxHomeDir() was re-evaluated -- with its mkdirs() chain -- once per
+            // candidate file, and getCanonicalPath is a syscall each time.
+            val isInsideHome: Boolean =
                 try {
-                    file.canonicalPath.startsWith("${sandboxHomeDir().canonicalPath}${File.separator}")
+                    file.canonicalPath.startsWith(homePrefix)
                 } catch (e: IOException) {
                     // Fail closed: on canonicalization error, skip rather than search outside $HOME.
                     false
                 }
             if (isInsideHome) {
                 if (file.isDirectory) {
-                    file.listFiles()?.let { Collections.addAll(pending, *it) }
+                    // addAll, not Collections.addAll(pending, *it): spreading a File[] into
+                    // varargs allocates a full array per directory, on a 100k-entry dir.
+                    file.listFiles()?.let { pending.addAll(it) }
                 } else {
-                    if (file.name.lowercase(Locale.getDefault()).contains(query)) {
+                    // Locale.ROOT so a Turkish locale does not fold 'I' to a dotless one.
+                    // The query was lowercased in neither branch before, so searching
+                    // README matched nothing while readme matched.
+                    if (file.name.lowercase(Locale.ROOT).contains(needle)) {
                         includeFile(result, null, file)
                     }
                 }

@@ -4,7 +4,9 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.util.Log
 import com.rk.utils.PathUtils.toPath
+import com.rk.utils.isStorageRootFallback
 import com.rk.utils.getTempDir
 import java.io.File
 import java.io.IOException
@@ -315,7 +317,10 @@ suspend fun FileObject.resolve(path: String): FileObject? {
 }
 
 suspend fun FileObject.copyToTempDir() = run {
-    val file = File(getTempDir(), getName()).createFileIfNot()
+    // getName() is a SAF provider's OpenableColumns.DISPLAY_NAME for a UriWrapper, so it is
+    // chosen by whichever app served the document. Raw File(parent, name) let a provider
+    // return "../../databases/app.db" and write outside the temp dir.
+    val file = getTempDir().sanitizedChild(getName()).createFileIfNot()
 
     getInputStream().use { input -> file.outputStream().use { output -> input.copyTo(output) } }
 
@@ -327,8 +332,16 @@ fun Uri.toFileObject(expectedIsFile: Boolean): FileObject {
         return NetWrapper(URL(toString()))
     }
 
-    // First, try to resolve to a real File (for direct access when possible)
-    val file = File(this.toPath())
+    // First, try to resolve to a real File (for direct access when possible).
+    // toPath() returns the storage-root fallback when a provider cannot be read. That path
+    // exists and is writable, so without this check a transient provider failure produced a
+    // FileWrapper for /storage/emulated/0 — and the next copy or delete acted on it.
+    val path = this.toPath()
+    if (isStorageRootFallback(path)) {
+        Log.w("FileObject", "could not resolve $scheme://$authority to a path; using the Uri path")
+        return UriWrapper(this, !expectedIsFile)
+    }
+    val file = File(path)
 
     // On Android 11+, force Uri if we lack full storage access (scoped storage rules)
     if (needsUriFallback()) {

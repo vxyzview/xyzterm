@@ -79,13 +79,22 @@ class NetWrapper(private val url: URL) : FileObject {
     }
 
     override suspend fun exists(): Boolean {
-        return try {
-            openConnection().run {
-                connect()
-                responseCode in 200..299
+        // Dispatcher was missing here and in length(): every other IO member wraps itself, so
+        // these two did a blocking TCP connect on whatever thread called them -- including a
+        // LaunchedEffect on the main thread. Neither disconnected either, so each call burned
+        // a socket from the keep-alive pool; calculateContent calls length() per file.
+        return withContext(Dispatchers.IO) {
+            try {
+                val connection = openConnection()
+                try {
+                    connection.connect()
+                    connection.responseCode in 200..299
+                } finally {
+                    connection.disconnect()
+                }
+            } catch (e: Exception) {
+                false
             }
-        } catch (e: Exception) {
-            false
         }
     }
 
@@ -115,9 +124,19 @@ class NetWrapper(private val url: URL) : FileObject {
 
     override fun getAbsolutePath(): String = url.toString()
 
-    override suspend fun length(): Long {
-        return runCatching { openConnection().contentLengthLong }.getOrDefault(0L)
-    }
+    override suspend fun length(): Long =
+        withContext(Dispatchers.IO) {
+            try {
+                val connection = openConnection()
+                try {
+                    connection.contentLengthLong
+                } finally {
+                    connection.disconnect()
+                }
+            } catch (e: Exception) {
+                0L
+            }
+        }
 
     override suspend fun delete(): Boolean = false
 
