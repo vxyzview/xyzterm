@@ -212,9 +212,8 @@ object TerminalBackup {
             val liveBytes = restoreRoots(base).sumOf { runCatching { directorySize(it) }.getOrDefault(0L) }
             val needed = requiredBytesForRestore(archive.length(), liveBytes)
             if (!freeSpaceSufficient(availableBytes(base), needed)) {
-                return
-                    "not enough free space: need about ${needed / MB} MB, " +
-                        "have ${availableBytes(base) / MB} MB"
+                val short = needed / MB - availableBytes(base) / MB
+                return "not enough free space: need about ${needed / MB} MB, have ${availableBytes(base) / MB} MB (short by $short MB)"
             }
 
             // Raw child paths: the localDir() getter auto-creates the directory,
