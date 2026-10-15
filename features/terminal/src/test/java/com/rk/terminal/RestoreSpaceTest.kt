@@ -20,43 +20,43 @@ class RestoreSpaceTest {
 
     @Test
     fun `plenty of room passes`() {
-        assertThat(freeSpaceSufficient(available = 20L * GB, required = 3 * GB)).isTrue()
+        assertThat(TerminalBackup.freeSpaceSufficient(available = 20L * GB, required = 3 * GB)).isTrue()
     }
 
     @Test
     fun `exactly enough room passes`() {
-        assertThat(freeSpaceSufficient(available = 3 * GB, required = 3 * GB)).isTrue()
+        assertThat(TerminalBackup.freeSpaceSufficient(available = 3 * GB, required = 3 * GB)).isTrue()
     }
 
     @Test
     fun `one byte short fails`() {
-        assertThat(freeSpaceSufficient(available = 3 * GB - 1, required = 3 * GB)).isFalse()
+        assertThat(TerminalBackup.freeSpaceSufficient(available = 3 * GB - 1, required = 3 * GB)).isFalse()
     }
 
     @Test
     fun `zero room fails`() {
-        assertThat(freeSpaceSufficient(available = 0, required = 3 * GB)).isFalse()
+        assertThat(TerminalBackup.freeSpaceSufficient(available = 0, required = 3 * GB)).isFalse()
     }
 
     @Test
     fun `a large archive alone can exceed the budget`() {
         // 400 MB compressed Ubuntu tarball; expanded this is well over 1.5 GB.
-        val required = requiredBytesForRestore(archiveBytes = 400 * MB, liveBytes = 0)
+        val required = TerminalBackup.requiredBytesForRestore(archiveBytes = 400 * MB, liveBytes = 0)
 
         assertThat(required).isGreaterThan(GB)
     }
 
     @Test
     fun `an empty live tree still needs headroom`() {
-        val required = requiredBytesForRestore(archiveBytes = 10 * MB, liveBytes = 0)
+        val required = TerminalBackup.requiredBytesForRestore(archiveBytes = 10 * MB, liveBytes = 0)
 
-        assertThat(required).isAtLeast(MIN_HEADROOM_BYTES)
+        assertThat(required).isAtLeast(TerminalBackup.MIN_HEADROOM_BYTES)
     }
 
     @Test
     fun `an existing live tree is counted, since it is deleted before the rename`() {
-        val empty = requiredBytesForRestore(archiveBytes = 10 * MB, liveBytes = 0)
-        val withLive = requiredBytesForRestore(archiveBytes = 10 * MB, liveBytes = 2 * GB)
+        val empty = TerminalBackup.requiredBytesForRestore(archiveBytes = 10 * MB, liveBytes = 0)
+        val withLive = TerminalBackup.requiredBytesForRestore(archiveBytes = 10 * MB, liveBytes = 2 * GB)
 
         assertThat(withLive).isGreaterThan(empty)
     }
@@ -64,7 +64,7 @@ class RestoreSpaceTest {
     @Test
     fun `a multi-gigabyte archive is refused rather than started`() {
         // A device with 500 MB free must be told no up front, not after filling the volume.
-        assertThat(freeSpaceSufficient(available = 500 * MB, required = requiredBytesForRestore(400 * MB, 2 * GB)))
+        assertThat(TerminalBackup.freeSpaceSufficient(available = 500 * MB, required = TerminalBackup.requiredBytesForRestore(400 * MB, 2 * GB)))
             .isFalse()
     }
 

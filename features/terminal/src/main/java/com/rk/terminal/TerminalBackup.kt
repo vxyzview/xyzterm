@@ -270,5 +270,5 @@ object TerminalBackup {
     /** Ubuntu tarballs are roughly 4x their compressed size once expanded. */
     private const val EXPANSION_FACTOR = 4L
 
-    private const val MIN_HEADROOM_BYTES = 512L * 1024 * 1024
+    internal const val MIN_HEADROOM_BYTES = 512L * 1024 * 1024
 }
