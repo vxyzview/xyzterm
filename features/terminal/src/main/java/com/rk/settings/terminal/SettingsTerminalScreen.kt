@@ -235,12 +235,12 @@ fun SettingsTerminalScreen(navController: NavController) {
                                     withContext(Dispatchers.Main) { runCatching { loading.show() } }
 
                                     try {
-                                        val ok = TerminalBackup.create(targetFile)
+                                        val failure = TerminalBackup.create(targetFile)
 
                                         // Copy into the SAF target first, then toast:
                                         // success must mean the archive actually landed.
                                         var copied = false
-                                        if (ok) {
+                                        if (failure == null) {
                                             copied =
                                                 runCatching {
                                                     targetFile.inputStream().use { inputStream ->
@@ -256,9 +256,9 @@ fun SettingsTerminalScreen(navController: NavController) {
                                         withContext(Dispatchers.Main + NonCancellable) {
                                             runCatching { loading.hide() }
                                             when {
-                                                ok && copied -> toast(strings.success)
-                                                ok -> toast(strings.export_failed)
-                                                else -> toast(strings.failed)
+                                                failure == null && copied -> toast(strings.success)
+                                                failure == null -> toast(strings.export_failed)
+                                                else -> toast("${strings.failed.getString()}: $failure")
                                             }
                                         }
                                     } catch (e: CancellationException) {

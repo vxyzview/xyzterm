@@ -1,6 +1,7 @@
 package com.rk.settings.terminal
 
 import android.text.format.Formatter
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
@@ -73,19 +74,18 @@ fun TerminalBackupsScreen() {
                         val loading = LoadingPopup(activity, null)
                         loading.show()
                         DefaultScope.launch(Dispatchers.IO) {
-                            val ok = runCatching {
-                                TerminalBackup.autoBackup()
-                            }
-                                .getOrElse {
-                                    it.printStackTrace()
-                                    false
-                                }
+                            val reason =
+                                runCatching { TerminalBackup.autoBackup() }
+                                    .getOrElse { it.message ?: it.javaClass.simpleName }
                             withContext(Dispatchers.Main + NonCancellable) {
                                 runCatching { loading.hide() }
-                                if (ok) {
+                                if (reason == null) {
                                     toast(strings.success)
                                 } else {
-                                    toast(strings.failed)
+                                    // tar's own words, e.g. "file changed as we read it" —
+                                    // a bare "failed" told the user nothing actionable.
+                                    Log.w("TerminalBackup", "backup failed: $reason")
+                                    toast("${strings.failed.getString()}: $reason")
                                 }
                             }
                             refreshTrigger++
