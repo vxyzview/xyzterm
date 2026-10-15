@@ -76,6 +76,7 @@ import com.rk.terminal.ROOTFS_ARM_SHA256
 import com.rk.terminal.ROOTFS_X64
 import com.rk.terminal.ROOTFS_X64_SHA256
 import com.rk.terminal.SessionService
+import com.rk.terminal.TerminalBackup
 import com.rk.terminal.canCreateSession
 import com.rk.terminal.TerminalBackEnd
 import com.rk.terminal.TerminalScreen
@@ -592,7 +593,18 @@ class Terminal : AppCompatActivity() {
 
                     outputFile.parentFile?.mkdirs()
 
-                    if (!outputFile.exists() || !isValidGzip(outputFile) || !sha256Matches(outputFile, file.sha256)) {
+                    // Refuse before writing 400 MB into a volume that cannot hold it. The rootfs
+                        // expands to several times the archive size, and running out mid-extraction
+                        // used to leave a half-unpacked tree.
+                        val free = TerminalBackup.availableBytes(getTempDir())
+                        if (!TerminalBackup.freeSpaceSufficient(free, TerminalBackup.requiredBytesForRestore(0, 0))) {
+                            throw Exception(
+                                "Not enough free space to install Ubuntu: need about " +
+                                    "${TerminalBackup.requiredBytesForRestore(0, 0) / (1024 * 1024)} MB, " +
+                                    "have ${free / (1024 * 1024)} MB"
+                            )
+                        }
+                        if (!outputFile.exists() || !verifyDownload(outputFile, file.sha256)) {
                         // Existing file is a leftover from a killed download, a
                         // pre-resume version, or a stale rootfs from an older app
                         // release (hash mismatch): discard it, the download writes
@@ -609,9 +621,15 @@ class Terminal : AppCompatActivity() {
                     }
                     completedFiles++
 
-                    if (file.sha256 != null && !sha256Matches(outputFile, file.sha256)) {
+                    if (!verifyDownload(outputFile, file.sha256)) {
                         outputFile.delete()
-                        throw Exception("Rootfs checksum mismatch: ${outputFile.name}")
+                        throw Exception(
+                            if (file.sha256 != null) {
+                                "Rootfs checksum mismatch: ${outputFile.name}"
+                            } else {
+                                "Rootfs archive is corrupt: ${outputFile.name}"
+                            }
+                        )
                     }
 
                     runCatching { outputFile.setExecutable(true) }.onFailure { it.printStackTrace() }
@@ -627,6 +645,20 @@ class Terminal : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Verifies a downloaded rootfs.
+     *
+     * The downloaded file used to be read end-to-end three times: written once, then inflated in
+     * full just to check the gzip CRC, then SHA-256'd. A pinned SHA-256 already proves the bytes
+     * are the expected bytes, and the inflate was the expensive one — ~400 MB expanding to ~1.5 GB
+     * of decompression on a phone CPU. So the inflate now runs only when there is no pinned hash
+     * to check against.
+     */
+    private fun verifyDownload(file: File, expectedSha256: String?): Boolean {
+        if (!file.exists()) return false
+        return if (expectedSha256 != null) sha256Matches(file, expectedSha256) else isValidGzip(file)
     }
 
     private suspend fun downloadFile(
