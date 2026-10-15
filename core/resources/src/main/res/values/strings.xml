@@ -21,6 +21,7 @@
 <string name="cant_handle">No app found to handle the file</string>
     <string name="terminal">Terminal</string>
     <string name="default_session_name">main</string>
+    <string name="session_limit_reached">Session limit reached. Close one first.</string>
     <string name="default_session_numbered">main #%1$d</string>
     <string name="notification_title">xyz terminal</string>
 <string name="apply">Apply</string>

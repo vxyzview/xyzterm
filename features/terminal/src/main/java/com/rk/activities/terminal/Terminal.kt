@@ -76,6 +76,7 @@ import com.rk.terminal.ROOTFS_ARM_SHA256
 import com.rk.terminal.ROOTFS_X64
 import com.rk.terminal.ROOTFS_X64_SHA256
 import com.rk.terminal.SessionService
+import com.rk.terminal.canCreateSession
 import com.rk.terminal.TerminalBackEnd
 import com.rk.terminal.TerminalScreen
 import com.rk.terminal.changeSession
@@ -207,11 +208,18 @@ class Terminal : AppCompatActivity() {
                 if (name.isEmpty() || name == "." || name == ".." || name.contains("/") || name.contains("\\")) {
                     return
                 }
-                lifecycleScope.launch(Dispatchers.Main) {
-                    if (name !in binder.getService().sessionList) {
-                        binder.createSession(name, TerminalBackEnd(), this@Terminal)
+                // This activity is BROWSABLE, so any web page can open sessions here. Each one
+                // costs a proot tracer plus a private tmp dir, and there was no ceiling — a
+                // flood of links made every cold start spawn a tracer per entry.
+                if (canCreateSession(binder.getService().sessionList.size)) {
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        if (name !in binder.getService().sessionList) {
+                            binder.createSession(name, TerminalBackEnd(), this@Terminal)
+                        }
+                        this@Terminal.changeSession(name)
                     }
-                    this@Terminal.changeSession(name)
+                } else {
+                    toast(strings.session_limit_reached)
                 }
             }
         // "run" and "?cmd=" intentionally dropped: a BROWSABLE link writing commands

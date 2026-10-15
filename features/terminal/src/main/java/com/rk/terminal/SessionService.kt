@@ -122,20 +122,26 @@ class SessionService : Service() {
             // until the current session is published below.
             restorePending = true
             restoreScope.launch {
-                // Spawn the saved shells in parallel — proot startup takes hundreds
-                // of ms per session, and restoring N sessions serially multiplied
-                // that into seconds of cold-start delay.
-                val built =
-                    saved
-                        .map { (id, pwd) ->
-                            async {
-                                runCatching { MkSession.createSession(activity, TerminalBackEnd(), id, false, pwd) }
-                                    .getOrNull()
-                                    ?.let { id to it }
+                // Spawn chunk by chunk, awaiting each before starting the next: one proot
+                // tracer per session, all concurrently, is tens of MB each and expensive to
+                // ptrace. Capped and ordered — see restoreChunks().
+                val built = mutableListOf<Pair<SessionId, Pair<TerminalSession, SessionPwd>>>()
+                for (chunk in restoreChunks(saved.keys.toList())) {
+                    val batch =
+                        chunk
+                            .map { id ->
+                                async {
+                                    runCatching {
+                                            MkSession.createSession(activity, TerminalBackEnd(), id, false, saved[id])
+                                        }
+                                        .getOrNull()
+                                        ?.let { id to it }
+                                }
                             }
-                        }
-                        .awaitAll()
-                        .filterNotNull()
+                            .awaitAll()
+                            .filterNotNull()
+                    built += batch
+                }
                 withContext(Dispatchers.Main) {
                     // App exited while the restore was in flight — drop the shells.
                     if (!daemonRunning) {
@@ -446,6 +452,40 @@ class SessionService : Service() {
 typealias SessionId = String
 
 typealias SessionPwd = String
+
+/**
+ * Sessions restored on a cold start, and how many may spawn at once.
+ *
+ * Restoring was `saved.map { async { createSession(...) } }.awaitAll()`: one proot tracer, one
+ * bash and one private tmp dir per saved session, all concurrently. ptrace is CPU-expensive and
+ * each pair costs tens of MB, so a user who left several sessions around hit the watchdog or the
+ * low-memory killer on cold start.
+ *
+ * [MAX_RESTORE] is a hard ceiling rather than a default: `Terminal` is `exported="true"` with a
+ * `BROWSABLE` filter, so `xyzterm://session/<anything>` adds entries to that map for free.
+ */
+const val MAX_RESTORE = 3
+
+const val MAX_CONCURRENT_RESTORE = 2
+
+/** Total sessions one user may have open, however they were created. */
+const val MAX_SESSIONS = 16
+
+/** Restore batches: capped, ordered, and never wider than [MAX_CONCURRENT_RESTORE]. */
+internal fun restoreChunks(saved: Collection<SessionId>): List<List<SessionId>> =
+    saved.take(MAX_RESTORE).chunked(MAX_CONCURRENT_RESTORE)
+
+internal fun canCreateSession(currentCount: Int): Boolean = currentCount < MAX_SESSIONS
+
+/**
+ * A guest working directory supplied from outside the app.
+ *
+ * `Terminal` is exported and accepts `ACTION_SEND`, so any app can put a `cwd` extra on the
+ * intent. It reaches `cd "$WKDIR"` in init.sh, which falls back cleanly to `$HOME` — but an
+ * externally-controlled string reaching `cd` unvalidated is not a thing to leave in place.
+ */
+internal fun isSafeGuestCwd(value: String): Boolean =
+    value.isNotEmpty() && value.startsWith("/") && !value.contains("..")
 
 /** Preference key holding the id of the last active session (restored on restart). */
 const val ACTIVE_SESSION_KEY = "active_session"

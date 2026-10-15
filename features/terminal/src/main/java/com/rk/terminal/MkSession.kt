@@ -175,7 +175,10 @@ fun getPwd(context: Context): String {
     }
 
     if (context is Activity && context.intent.hasExtra("cwd")) {
-        return context.intent.getStringExtra("cwd").toString()
+        // Terminal is exported and accepts ACTION_SEND, so any app can put a `cwd` extra on
+        // the intent. It reaches `cd "$WKDIR"` in init.sh.
+        val external = context.intent.getStringExtra("cwd").orEmpty()
+        if (isSafeGuestCwd(external)) return external
     }
 
     return if (Settings.sandbox) {
