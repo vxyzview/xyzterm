@@ -17,8 +17,6 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.jvm.isAccessible
 
 // NOTE: USE snake_case FOR KEYS!
 object Settings {
@@ -126,22 +124,59 @@ object Preference {
     private var sharedPreferences: SharedPreferences =
         application!!.getSharedPreferences("Settings", Context.MODE_PRIVATE)
 
-    val preferenceTypes: Map<String, KClass<*>> by lazy {
-        Settings::class
-            .declaredMemberProperties
-            .mapNotNull { prop ->
-                try {
-                    prop.isAccessible = true
-                    val delegate = prop.getDelegate(Settings)
-                    if (delegate is CachedPreference<*>) {
-                        delegate.key to delegate.defaultValue!!::class
-                    } else null
-                } catch (_: Exception) {
-                    null
-                }
-            }
-            .toMap()
-    }
+    /**
+ * The declared type of each preference, used to coerce values read back from an imported
+ * settings file.
+ *
+ * This used to walk `Settings::class.declaredMemberProperties` with `isAccessible = true` and
+ * `getDelegate`, which requires the full `kotlin-reflect` library — several megabytes of APK
+ * and real class-load cost — to answer a question this map answers.
+ *
+ * Keeping it by hand means adding a preference means adding it here too. The SettingsAppScreen
+ * `else ->` branch already drops unknown keys rather than guessing, so a missing entry degrades
+ * to "ignore that value" instead of a wrong type.
+ */
+val preferenceTypes: Map<String, KClass<*>> =
+        mapOf(
+            "shown_disclaimer" to Boolean::class,
+            "amoled" to Boolean::class,
+            "check_update" to Boolean::class,
+            "is_app_font_asset" to Boolean::class,
+            "is_terminal_font_asset" to Boolean::class,
+            "ignore_storage_permission" to Boolean::class,
+            "anr" to Boolean::class,
+            "strict_mode" to Boolean::class,
+            "expose_home_dir" to Boolean::class,
+            "verbose_error" to Boolean::class,
+            "terminate_sessions_on_exit" to Boolean::class,
+            "auto_backup" to Boolean::class,
+            "donated" to Boolean::class,
+            "sandbox" to Boolean::class,
+            "seccomp_mode" to String::class,
+            "custom_bindings" to String::class,
+            "desktop_mode" to Boolean::class,
+            "theme_flipper" to Boolean::class,
+            "fullscreen" to Boolean::class,
+            "smart_toolbar" to Boolean::class,
+            "confirm_exit" to Boolean::class,
+            "terminal_keep_screen_on" to Boolean::class,
+            "terminal_show_extra_keys" to Boolean::class,
+            "terminal_clipboard_keybindings" to Boolean::class,
+            "terminal_snippets" to String::class,
+            "enable_logcat" to Boolean::class,
+            "default_night_mode" to Int::class,
+            "terminal_font_size" to Int::class,
+            "terminal_scrollback_buffer" to Int::class,
+            "theme" to String::class,
+            "icon_pack" to String::class,
+            "app_font_path" to String::class,
+            "terminal_font_path" to String::class,
+            "terminal_cursor_style" to String::class,
+            "terminal_extra_keys" to String::class,
+            "current_lang" to String::class,
+            "last_version_code" to Long::class,
+            "action_items" to String::class,
+        )
 
     // Registry mapping preference keys to their CachedPreference delegates so that
     // external Preference.setXxx() calls can propagate updates into the MutableState.
