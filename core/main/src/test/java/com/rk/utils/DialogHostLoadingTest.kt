@@ -62,7 +62,7 @@ class DialogHostLoadingTest {
 
         // The regression: two entries under id 1 would mean remove(1) also
         // silently killed spinner 2.
-        assertThat(DialogHost.loadings.map { it.id }).containsExactly(2)
+        assertThat(DialogHost.loadings.map { it.id }).containsExactly(2L)
     }
 
     @Test
@@ -71,6 +71,6 @@ class DialogHostLoadingTest {
         DialogHost.remove(1)
         DialogHost.pushLoading(request(1))
 
-        assertThat(DialogHost.loadings.map { it.id }).containsExactly(1)
+        assertThat(DialogHost.loadings.map { it.id }).containsExactly(1L)
     }
 }
