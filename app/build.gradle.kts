@@ -29,6 +29,14 @@ android {
         resValues = true
     }
 
+    testOptions {
+        unitTests {
+            // Robolectric needs merged resources + the manifest to assert on
+            // backup policy XML and Application lifecycle callbacks.
+            isIncludeAndroidResources = true
+        }
+    }
+
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
@@ -108,4 +116,9 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(project(":features:terminal"))
     baselineProfile(project(":baselineprofile"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.tests.google.truth)
+    testImplementation(libs.tests.robolectric)
+    testImplementation(libs.androidx.test.junit)
 }

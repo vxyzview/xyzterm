@@ -68,6 +68,12 @@ android {
         compose = true
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     buildTypes {
         release {
             buildConfigField("String", "GIT_COMMIT_HASH", "\"${fullGitCommitHash.get()}\"")
@@ -153,6 +159,11 @@ dependencies {
     // Modules
     implementation(project(":core:resources"))
     implementation(project(":core:components"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.tests.google.truth)
+    testImplementation(libs.tests.robolectric)
+    testImplementation(libs.androidx.test.junit)
 }
 
 abstract class GenerateSupportedLocales : DefaultTask() {

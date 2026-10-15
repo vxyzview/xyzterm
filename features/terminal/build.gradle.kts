@@ -18,6 +18,12 @@ android {
         compose = true
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -49,4 +55,9 @@ dependencies {
 
     implementation("com.github.termux.termux-app:terminal-view:v0.118.3")
     implementation("com.github.termux.termux-app:terminal-emulator:v0.118.3")
+
+    testImplementation(libs.junit)
+    testImplementation(libs.tests.google.truth)
+    testImplementation(libs.tests.robolectric)
+    testImplementation(libs.androidx.test.junit)
 }
