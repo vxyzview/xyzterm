@@ -13,7 +13,7 @@ Repo: https://github.com/vxyzview/xyzterm
 Binaries: https://github.com/vxyzview/xyzterm/releases/download/v%v/xyzterm-%v.apk
 
 Builds:
-  - versionName: 1.0.0
+  - versionName: 1.0.0-beta1
     versionCode: 1
     commit: 6046215fa280d359431b6eaf601354749369ad45
     subdir: app
@@ -26,6 +26,8 @@ Builds:
 AllowedAPKSigningKeys: f665fa36963b20cec9954399d2213331be522aca035ebf56cfa5a6abdf3e3de2
 
 AutoUpdateMode: Version
-UpdateCheckMode: Tags ^v[0-9.]+$
-CurrentVersion: 1.0.0
+# Must also match pre-release tags: app/build.gradle.kts is at 1.0.0-beta1, and
+# ^v[0-9.]+$ can never match "v1.0.0-beta1".
+UpdateCheckMode: Tags ^v[0-9.]+(-[0-9A-Za-z.]+)?$
+CurrentVersion: 1.0.0-beta1
 CurrentVersionCode: 1

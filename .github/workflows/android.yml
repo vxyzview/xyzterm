@@ -6,8 +6,13 @@ name: Android CI
 
 on:
   push:
+    branches:
+      - dev
     tags:
       - "v*"
+  pull_request:
+    branches:
+      - dev
   workflow_dispatch:
     inputs:
       use_cache:
@@ -81,7 +86,7 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build with Gradle
-        run: ./gradlew assembleRelease --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-release.apk
+        run: ./gradlew assembleRelease && mv app/build/outputs/apk/release/*.apk app/xyzterm-release.apk
         env:
           KEYSTORE_FILE: /tmp/xyzterm.keystore
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties

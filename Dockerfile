@@ -45,11 +45,11 @@ ENV GITHUB_ACTIONS=true
 # Decode credentials (if provided), ensure submodules are present, and run the Gradle build task
 RUN if [ -n "$RELEASE_KEYSTORE_BASE64" ] && [ -n "$RELEASE_PROPERTIES_BASE64" ]; then \
         echo "Decoding release keys..." && \
-        echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > /tmp/xed.keystore && \
+        echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > /tmp/xyzterm.keystore && \
         echo "$RELEASE_PROPERTIES_BASE64" | base64 -d > /tmp/signing.properties; \
     fi && \
     chmod +x gradlew && \
-    ./gradlew ${BUILD_TASK} --no-daemon
+    ./gradlew ${BUILD_TASK}
 
 # ==========================================
 # Stage 2: Export Built APKs (BuildKit friendly)

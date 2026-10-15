@@ -7,9 +7,12 @@
             android:name="com.rk.terminal.SessionService"
             android:foregroundServiceType="specialUse" />
 
+        <!-- Quick-settings tiles are bound by the system, but the permission still has to be
+             declared: without it any app on the device could bind this service. -->
         <service
             android:name="com.rk.terminal.TerminalTileService"
             android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:icon="@drawable/terminal"
             android:label="@string/app_name">
             <intent-filter>
