@@ -3,6 +3,12 @@ project(proot C ASM)
 
 # Compatibility flags and headers
 add_definitions(-D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__STDC_WANT_LIB_EXT1__=1)
+
+# The generated build.h MUST win over the source tree. A stale committed copy was
+# shadowing it (CMake searches -I paths in declaration order), which silently
+# dropped HAVE_PROCESS_VM and with it seven hot memory-access paths in
+# tracee/mem.c -- every guest read/write fell back to a PTRACE_PEEKDATA round trip.
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/talloc)
 
 # Compiler flags
@@ -56,13 +62,17 @@ int main(void) {
 }" HAVE_SECCOMP_FILTER)
 
 # Version Detection
+# No --dirty: it baked local working-tree state into libproot.so, so a dirty
+# checkout produced a different binary than a clean one and the reproducible-build
+# verification in .github/workflows/reproducible.yml could not pass.
 execute_process(
-    COMMAND git describe --tags --dirty --abbrev=8 --always
+    COMMAND git describe --tags --abbrev=8 --always
     OUTPUT_VARIABLE GIT_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET
 )
-if(NOT GIT_VERSION)
+string(REGEX REPLACE "-dirty$" "" GIT_VERSION "${GIT_VERSION}")
+if(NOT GIT_VERSION OR GIT_VERSION MATCHES "fatal")
     set(GIT_VERSION "unknown")
 endif()
 
@@ -74,7 +84,13 @@ set(BUILD_H_CONTENT "${BUILD_H_CONTENT}${HAVE_PROCESS_VM_STR}\n")
 set(BUILD_H_CONTENT "${BUILD_H_CONTENT}${HAVE_SECCOMP_FILTER_STR}\n")
 set(BUILD_H_CONTENT "${BUILD_H_CONTENT}#endif /* BUILD_H */\n")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/build.h "${BUILD_H_CONTENT}")
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+# Belt and braces: if this file ever comes back into the source tree it shadows
+# the generated one for any quoted include that resolves via -I, and the whole
+# feature detection above silently stops applying again. Fail the build.
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/build.h)
+    message(FATAL_ERROR "src/main/cpp/build.h must not be committed; it shadows the generated one.")
+endif()
 
 # Architecture-specific info from arch.h
 function(get_arch_define DEFINE_NAME VAR_NAME EXTRA_CFLAGS)
