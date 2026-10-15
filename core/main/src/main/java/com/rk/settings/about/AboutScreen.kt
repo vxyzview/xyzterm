@@ -35,7 +35,9 @@ import com.rk.components.compose.preferences.base.PreferenceTemplate
 import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
+import com.rk.crashhandler.CrashLog
 import com.rk.utils.copyToClipboard
+import com.rk.utils.toast
 import com.rk.utils.okHttpClient
 import com.xyzterm.BuildConfig
 import kotlinx.coroutines.Dispatchers
@@ -123,6 +125,42 @@ fun AboutScreen() {
             // Tap-to-copy build info. The copy action lives on a normal tap so
             // TalkBack announces a real button (a single tap does something) instead
             // of a dead "button" whose action was hidden behind a long-press.
+
+            // Crash report. Written on every crash now (it used to be written only when
+            // there was no UI to show, so a release build produced no file at all).
+            // Without somewhere to reach it from, that file helps nobody.
+            val crashReport =
+                remember {
+                    runCatching { CrashLog.read(context.filesDir) }.getOrDefault("")
+                }
+            if (crashReport.isNotBlank()) {
+                PreferenceTemplate(
+                    modifier =
+                        Modifier.clickable {
+                            copyToClipboard(
+                                CrashLog.shareHeader(
+                                    context.getString(strings.app_name),
+                                    versionName.toString(),
+                                    if (BuildConfig.DEBUG) "debug" else "release",
+                                ) + crashReport
+                            )
+                            toast(strings.crash_report_copied)
+                        },
+                    title = {
+                        Text(
+                            text = stringResource(id = strings.crash_report),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    },
+                    description = {
+                        Text(
+                            text = stringResource(id = strings.crash_report_hint),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                    },
+                )
+            }
+
             PreferenceTemplate(
                 modifier = Modifier.clickable { copyToClipboard(versionName.toString()) },
                 title = {

@@ -3,8 +3,6 @@ package com.rk.crashhandler
 import android.content.Intent
 import android.os.Looper
 import android.util.Log
-import com.rk.file.child
-import com.rk.file.createFileIfNot
 import com.rk.settings.debugOptions.HarmlessException
 import com.rk.utils.application
 import java.io.PrintWriter
@@ -45,11 +43,14 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
                 application
                     ?: run {
                         // Crashed before Application.onCreate assigned it. There is no context to
-                        // launch CrashActivity with, so write the report directly rather than
-                        // dying through the onFailure below with nothing on disk.
-                        writeReport(ex)
+                        // launch CrashActivity with, and no filesDir to write a report into.
                         return@runCatching
                     }
+
+            // Written on every crash, not only the ones with no UI to show. It used to write only
+            // when there was no context to launch CrashActivity with, so an ordinary crash on a
+            // release build produced no file and a user filing an issue had nothing to attach.
+            writeReport(ex)
 
             val intent = Intent(app, CrashActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -79,7 +80,6 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
         }
             .onFailure {
                 it.printStackTrace()
-                writeReport(ex)
                 exitProcess(1)
             }
 
@@ -100,20 +100,15 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
         }
     }
 
-    /** Best-effort on-disk crash report, for the cases where we cannot show [CrashActivity]. */
+    /** Best-effort on-disk crash report. Never throws: this runs inside the crash handler. */
     private fun writeReport(ex: Throwable) {
-        runCatching {
-            application?.filesDir?.child("crash.log")?.createFileIfNot()?.appendText(ex.stackTraceToString())
-        }
+        runCatching { application?.filesDir?.let { CrashLog.append(it, ex.stackTraceToString()) } }
     }
 
     fun logErrorOrExit(throwable: Throwable) {
-        runCatching {
-                application!!.filesDir.child("crash.log").createFileIfNot().appendText(throwable.toString())
-            }
-            .onFailure {
-                it.printStackTrace()
-                exitProcess(-1)
-            }
+        writeReport(throwable)
+        // Nothing else to try: we cannot show UI from here, so the process has to go. The
+        // report above is the only artefact left.
+        exitProcess(-1)
     }
 }
