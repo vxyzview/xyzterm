@@ -78,7 +78,7 @@ fun PropertiesDialog(file: FileObject, onDismiss: () -> Unit) {
 
     // Was `entries.map { rememberScrollState() }`: remember inside a map lambda is positional,
     // so it is only correct while there are exactly two routes. Keyed by route instead.
-    val scrollStates =
+    val scrollStates: Map<PropertyRoutes, ScrollState> =
         remember { PropertyRoutes.entries.associateWith { ScrollState(0) } }
     val currentScrollState = scrollStates.getValue(PropertyRoutes.entries[pagerState.currentPage])
     val showHorizontalDivider by
@@ -117,7 +117,7 @@ fun PropertiesDialog(file: FileObject, onDismiss: () -> Unit) {
             ) { page ->
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize().verticalScroll(scrollStates[page]).padding(all = 24.dp),
+                    modifier = Modifier.fillMaxSize().verticalScroll(scrollStates.getValue(PropertyRoutes.entries[page])).padding(all = 24.dp),
                 ) {
                     when (PropertyRoutes.entries[page]) {
                         PropertyRoutes.GENERAL -> GeneralProperties(file)
@@ -281,7 +281,6 @@ private fun ZipProperties(file: ZipFileObject) {
     comment?.let { InfoRow(stringResource(strings.comment), it) }
 }
 
-@Composable
 /**
  * A read-only property row.
  *
