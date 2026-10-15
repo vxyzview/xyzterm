@@ -219,12 +219,12 @@ object TerminalBackup {
 
                 if (legacyFlat) {
                     val sandbox = base.child("sandbox")
-                    swapIn(File(staging), sandbox)?.let { return@withContext it }
+                    swapIn(File(staging), sandbox)?.let { reason -> return@withContext reason }
                 } else {
                     for (target in restoreRoots(base)) {
                         val extracted = File(staging, target.name)
                         if (!extracted.exists()) continue
-                        swapIn(extracted, target)?.let { return@withContext it }
+                        swapIn(extracted, target)?.let { reason -> return@withContext reason }
                     }
                 }
 
@@ -253,6 +253,7 @@ object TerminalBackup {
         aside.deleteRecursively()
         return null
     }
+
 
     private fun directorySize(dir: File): Long =
         if (!dir.exists()) 0L

@@ -58,7 +58,8 @@ internal fun buildSessionCommand(
     return "/system/bin/sh" to arrayOf(sandboxScript, shellCommandLine(arrayOf(pending.exe, *pending.args)))
 }
 
-/** Removes the per-session proot tmp dir.
+/**
+ * Removes the per-session proot tmp dir.
  *
  * `prepareEnvironment` deletes it before creating it, so a terminated session's directory
  * lingered until the next spawn of the *same* id — or forever, if the user never recreated it.
@@ -66,24 +67,26 @@ internal fun buildSessionCommand(
  * side has to.
  */
 fun releaseTmpDir(sessionId: String) {
-    runCatching { localDir().child("tmp").childSafe(nameSafe(sessionId)).deleteRecursively() }
+    runCatching { localDir().child("tmp").childSafe(sessionTmpDirName(sessionId)).deleteRecursively() }
         .onFailure { Log.w("MkSession", "could not release tmp dir for '$sessionId'", it) }
+}
+
+/** Sanitize a session id for use as a directory name; fallback instead of throwing. */
+internal fun sessionTmpDirName(id: String): String {
+    val clean = id.replace(Regex("[^A-Za-z0-9_.-]"), "_")
+    val base =
+        when {
+            clean.isEmpty() || clean == "." || clean == ".." -> "session"
+            else -> clean
+        }
+    // Suffix by the raw id so distinct ids that sanitize identically
+    // (e.g. "a/b" vs "a_b") never share — and delete — each other's tmp dir.
+    return "${base}_${id.hashCode().toUInt().toString(36)}"
 }
 
 object MkSession {
 
-    /** Sanitize a session id for use as a directory name; fallback instead of throwing. */
-    private fun nameSafe(id: String): String {
-        val clean = id.replace(Regex("[^A-Za-z0-9_.-]"), "_")
-        val base =
-            when {
-                clean.isEmpty() || clean == "." || clean == ".." -> "session"
-                else -> clean
-            }
-        // Suffix by the raw id so distinct ids that sanitize identically
-        // (e.g. "a/b" vs "a_b") never share — and delete — each other's tmp dir.
-        return "${base}_${id.hashCode().toUInt().toString(36)}"
-    }
+    private fun nameSafe(id: String): String = sessionTmpDirName(id)
 
     /** Everything the [TerminalSession] constructor needs, assembled off the main thread. */
     private class Prepared(

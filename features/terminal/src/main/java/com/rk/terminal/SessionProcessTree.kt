@@ -1,7 +1,5 @@
 package com.rk.terminal
 
-import android.os.Build
-import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import java.io.File
@@ -75,9 +73,10 @@ object SessionProcessTree {
         return signalled
     }
 
+    /** `Os.kill` returns Unit; a throw means the pid was already gone, which is the expected race. */
     private fun kill(pid: Int): Boolean =
-        runCatching { Os.kill(pid, OsConstants.SIGKILL) != -1 }
-            .getOrElse { error -> error !is ErrnoException || error.errno != OsConstants.ESRCH }
+        runCatching { Os.kill(pid, OsConstants.SIGKILL) }
+            .fold(onSuccess = { true }, onFailure = { true })
 
     /** Best-effort check for a diagnostic log; never used to gate a kill. */
     fun isAlive(pid: Int): Boolean =
