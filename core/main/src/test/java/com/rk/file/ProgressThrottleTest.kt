@@ -59,7 +59,7 @@ class ProgressThrottleTest {
         throttle.flush()
 
         // The whole point: 10,000 items must not become 10,000 recompositions.
-        assertThat(reports.count).isLessThan(1000L)
+        assertThat(reports.count.toLong()).isLessThan(1000L)
     }
 
     @Test

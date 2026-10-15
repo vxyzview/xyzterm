@@ -244,6 +244,16 @@ private fun ColumnScope.TerminalView(
 ) {
     val terminalOutputLabel = stringResource(strings.terminal_output)
     val scope = rememberCoroutineScope()
+
+    // Held here, in the composable body, because the layout listener below lives inside an
+    // `.apply` block and so has no composable context of its own. These always read the
+    // current values, which is what fixes the bug: the listener used to capture the theme by
+    // value, so after a theme change a rotation re-applied the OLD palette over the new one.
+    val latestTheme by rememberUpdatedState(currentTheme)
+    val latestDark by rememberUpdatedState(isDarkMode)
+    val latestOnSurface by rememberUpdatedState(onSurfaceColor)
+    val latestSurface by rememberUpdatedState(surfaceColor)
+
     AndroidView(
         factory = { context ->
             val client = TerminalBackEnd()
@@ -289,16 +299,10 @@ private fun ColumnScope.TerminalView(
                         setTypeface(font)
                     }
 
-                    // rememberUpdatedState, because a plain lambda cannot read composition state at call
-                    // time -- and capturing the values instead is the bug: the listener was
-                    // registered inside the factory, never removed, and captured `currentTheme`
-                    // by value, so after a theme change a rotation or resize re-applied the
-                    // OLD palette over the new one. These references always hold the latest.
-                    val latestTheme by rememberUpdatedState(currentTheme)
-                    val latestDark by rememberUpdatedState(isDarkMode)
-                    val latestOnSurface by rememberUpdatedState(onSurfaceColor)
-                    val latestSurface by rememberUpdatedState(surfaceColor)
-
+                    // A plain View.OnLayoutChangeListener cannot read composition state at call
+                    // time; it reads the rememberUpdatedState refs declared above. Registered
+                    // inside the factory and never removed, and it captured the theme by value,
+                    // which is the bug this fixes.
                     val layoutListener =
                         View.OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
                             val widthChanged = (right - left) != (oldRight - oldLeft)
