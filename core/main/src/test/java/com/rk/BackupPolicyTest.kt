@@ -3,13 +3,10 @@ package com.rk
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import java.io.InputStream
-import javax.xml.parsers.DocumentBuilderFactory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.w3c.dom.Element
-import org.w3c.dom.Node
+import org.xmlpull.v1.XmlPullParser
 
 /**
  * Pins the cloud-backup policy for a terminal.
@@ -30,52 +27,67 @@ class BackupPolicyTest {
     private val context: Context get() = ApplicationProvider.getApplicationContext()
 
     private fun resId(name: String): Int {
-        val ctx = context
-        val id = ctx.resources.getIdentifier(name, "xml", ctx.packageName)
+        val id = context.resources.getIdentifier(name, "xml", context.packageName)
         assertThat(id).isNotEqualTo(0)
         return id
     }
 
-    private fun parse(name: String): Element {
-        val stream: InputStream = context.resources.openRawResource(resId(name))
-        return stream.use {
-            DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it).documentElement
+    /**
+     * Walks the compiled resource with a pull parser.
+     *
+     * `openRawResource` returns AAPT2's *binary* XML, so a DOM parser fails with
+     * MalformedByteSequenceException. Resources.getXml gives a parser that decodes it.
+     */
+    private fun entries(resName: String, section: String, tag: String): List<String> {
+        val parser = context.resources.getXml(resId(resName))
+        val found = mutableListOf<String>()
+        var inSection = false
+        var event = parser.eventType
+        while (event != XmlPullParser.END_DOCUMENT) {
+            when (event) {
+                XmlPullParser.START_TAG -> {
+                    when (parser.name) {
+                        section -> inSection = true
+                        tag ->
+                            if (inSection) {
+                                val domain = parser.getAttributeValue(null, "domain")
+                                val path = parser.getAttributeValue(null, "path")
+                                found += "$domain/$path"
+                            }
+                    }
+                }
+                XmlPullParser.END_TAG ->
+                    if (parser.name == section) {
+                        inSection = false
+                    }
+            }
+            event = parser.next()
         }
-    }
-
-    private fun entries(root: Element, section: String, tag: String): List<String> {
-        val container = root.getElementsByTagName(section).item(0)
-        return (0 until container.childNodes.length)
-            .map { container.childNodes.item(it) }
-            .filter { it.nodeType == Node.ELEMENT_NODE && (it as Element).tagName == tag }
-            .map { (it as Element).let { e -> e.attributes.getNamedItem("domain").nodeValue + "/" + e.attributes.getNamedItem("path").nodeValue } }
+        return found
     }
 
     @Test
     fun `cloud backup does not upload the sandbox or the guest home directory`() {
-        val excludes = entries(parse("data_extraction_rules"), "cloud-backup", "exclude")
-
-        assertThat(excludes).contains("file/.")
+        assertThat(entries("data_extraction_rules", "cloud-backup", "exclude")).contains("file/.")
     }
 
     @Test
     fun `cloud backup does not upload databases`() {
-        val excludes = entries(parse("data_extraction_rules"), "cloud-backup", "exclude")
-
-        assertThat(excludes).contains("database/.")
+        assertThat(entries("data_extraction_rules", "cloud-backup", "exclude")).contains("database/.")
     }
 
     @Test
     fun `cloud backup still keeps settings, which are small and safe to restore`() {
-        val includes = entries(parse("data_extraction_rules"), "cloud-backup", "include")
+        assertThat(entries("data_extraction_rules", "cloud-backup", "include")).contains("sharedpref/.")
+    }
 
-        assertThat(includes).contains("sharedpref/.")
+    @Test
+    fun `device transfer does carry files, which is a different contract`() {
+        assertThat(entries("data_extraction_rules", "device-transfer", "include")).contains("file/.")
     }
 
     @Test
     fun `legacy backup rules for pre-31 devices also exclude files`() {
-        val root = parse("backup_rules")
-
-        assertThat(entries(root, "full-backup-content", "exclude")).contains("file/.")
+        assertThat(entries("backup_rules", "full-backup-content", "exclude")).contains("file/.")
     }
 }

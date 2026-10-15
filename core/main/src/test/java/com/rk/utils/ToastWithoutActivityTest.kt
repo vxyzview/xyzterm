@@ -5,6 +5,7 @@ import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.rk.extension.ActivityProvider
+import com.rk.resources.Res
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,6 +30,11 @@ class ToastWithoutActivityTest {
     fun setUp() {
         app = ApplicationProvider.getApplicationContext()
         application = app
+        // Utils.kt's top-level `binaryExtensions` val touches BuiltinFileType, whose
+        // enum entries resolve their titles through Res.getString() -> Res.application!!.
+        // App.onCreate assigns both globals in the same breath; mirroring that here
+        // is what keeps the first call into any UtilsKt function from NPE-ing.
+        Res.application = app
     }
 
     @Test
