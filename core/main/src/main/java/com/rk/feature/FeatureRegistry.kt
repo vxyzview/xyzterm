@@ -12,6 +12,8 @@ import com.rk.settings.Preference
 import com.rk.utils.application
 import com.rk.utils.dialogRes
 import com.xyzterm.BuildConfig
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 interface Feature {
     fun init(application: Application)
@@ -39,8 +41,8 @@ data class FeatureToggle(
 }
 
 object FeatureRegistry {
-    private val features = mutableMapOf<String, Feature>()
-    private val featuresWithoutToggles = mutableListOf<Feature>()
+    private val features = ConcurrentHashMap<String, Feature>()
+    private val featuresWithoutToggles = CopyOnWriteArrayList<Feature>()
     val toggles = mutableStateListOf<FeatureToggle>()
 
     init {

@@ -21,6 +21,7 @@ import com.rk.resources.drawables
 import com.rk.resources.getFilledString
 import com.rk.resources.getString
 import com.rk.resources.strings
+import com.rk.utils.toast
 import com.rk.settings.Preference
 import com.rk.settings.Settings
 import com.termux.terminal.TerminalSession
@@ -162,6 +163,14 @@ class SessionService : Service() {
                         }
                     }
                     restorePending = false
+                    // Tell the user when the cap deferred some of their sessions, instead of
+                    // letting three appear to be all they have.
+                    val deferred = deferredSessions(saved.keys)
+                    if (deferred.isNotEmpty()) {
+                        runCatching {
+                            toast(strings.sessions_deferred.getFilledString(deferred.size, MAX_RESTORE))
+                        }
+                    }
                     if (sessionList.isNotEmpty()) {
                         // Restore the session the user was actually using when
                         // the app closed, not whichever restored last.
@@ -474,6 +483,20 @@ const val MAX_SESSIONS = 16
 /** Restore batches: capped, ordered, and never wider than [MAX_CONCURRENT_RESTORE]. */
 internal fun restoreChunks(saved: Collection<SessionId>): List<List<SessionId>> =
     saved.take(MAX_RESTORE).chunked(MAX_CONCURRENT_RESTORE)
+
+/**
+ * Sessions the cap deferred rather than dropped.
+ *
+ * Capping the restore is what stops a `BROWSABLE` deep-link flood from spawning an unbounded
+ * number of proot tracers on cold start. But silently keeping only [MAX_RESTORE] means a user
+ * with six saved sessions opens three and has no idea where the other three went — they are still
+ * on disk, they are simply not running, and nothing says so.
+ *
+ * These are returned so the UI can say "3 more sessions not started". The preference is not
+ * touched: nothing is lost, and the rest come back on the next launch.
+ */
+internal fun deferredSessions(saved: Collection<SessionId>): List<SessionId> =
+    saved.drop(MAX_RESTORE)
 
 internal fun canCreateSession(currentCount: Int): Boolean = currentCount < MAX_SESSIONS
 

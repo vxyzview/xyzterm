@@ -11,7 +11,6 @@ import com.rk.commands.ToolbarConfiguration
 import com.rk.feature.FeatureRegistry
 import com.rk.utils.application
 import com.xyzterm.BuildConfig
-import java.lang.ref.WeakReference
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.properties.ReadWriteProperty
@@ -192,7 +191,10 @@ val preferenceTypes: Map<String, KClass<*>> =
     }
 
     // Weak reference caches to allow garbage collection of unused settings
-    private val stringCache = ConcurrentHashMap<String, WeakReference<String?>>()
+    // Plain values, not WeakReferences: a few dozen short strings here are never going to be
+    // collected, so the WeakReference bought a nullable indirection and a silent fall-through
+    // to a disk-backed SharedPreferences read on every access.
+    private val stringCache = ConcurrentHashMap<String, String?>()
     private val boolCache = ConcurrentHashMap<String, Boolean>()
     private val intCache = ConcurrentHashMap<String, Int>()
     private val longCache = ConcurrentHashMap<String, Long>()
@@ -277,7 +279,7 @@ val preferenceTypes: Map<String, KClass<*>> =
     }
 
     fun getString(key: String, default: String): String {
-        return stringCache[key]?.get()
+        return stringCache[key]
             ?: run {
                 val value =
                     try {
@@ -287,14 +289,14 @@ val preferenceTypes: Map<String, KClass<*>> =
                         setString(key, default)
                         default
                     }
-                stringCache[key] = WeakReference(value)
+                stringCache[key] = value
                 value
             }
     }
 
     fun setString(key: String, value: String?) {
         notifyDelegate(key, value)
-        stringCache[key] = WeakReference(value)
+        stringCache[key] = value
         runCatching {
             sharedPreferences.edit {
                 putString(
@@ -397,11 +399,7 @@ val preferenceTypes: Map<String, KClass<*>> =
     }
 }
 
-class CachedExtensionPreference<T>(
-    id: String,
-    key: String,
-    defaultValue: T,
-) : CachedPreference<T>("$id.$key", defaultValue)
+
 
 @Suppress("UNCHECKED_CAST")
 open class CachedPreference<T>(val key: String, val defaultValue: T) : ReadWriteProperty<Any?, T> {

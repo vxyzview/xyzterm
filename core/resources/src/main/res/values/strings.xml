@@ -25,6 +25,7 @@
     <string name="crash_report">Crash report</string>
     <string name="crash_report_hint">Tap to copy the last crash, with build and device details</string>
     <string name="crash_report_copied">Crash report copied to clipboard</string>
+    <string name="sessions_deferred">%1$d more saved sessions were not started (limit %2$d). They are still saved and will start next time.</string>
     <string name="default_session_numbered">main #%1$d</string>
     <string name="notification_title">xyz terminal</string>
 <string name="apply">Apply</string>

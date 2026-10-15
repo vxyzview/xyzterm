@@ -4,7 +4,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -17,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.svg.SvgDecoder
+import com.rk.utils.application
 
 @Composable
 fun XedIcon(
@@ -73,8 +73,17 @@ fun XedIcon(
     }
 }
 
-@Composable
-fun rememberSvgImageLoader(): ImageLoader {
-    val context = LocalContext.current
-    return remember { ImageLoader.Builder(context).components { add(SvgDecoder.Factory()) }.build() }
+/**
+ * One loader for the process.
+ *
+ * This was `remember { ImageLoader.Builder(context)... }` -- `remember` keyed on nothing, so it
+ * ran once per *composition*, not once per app. An icon-pack-backed list with 200 visible rows
+ * built 200 ImageLoaders, each with its own memory cache, disk cache and dispatcher pool, and
+ * Coil will not share decode results between them, so every SVG was re-parsed.
+ */
+private val svgImageLoader: ImageLoader by lazy {
+    ImageLoader.Builder(application!!).components { add(SvgDecoder.Factory()) }.build()
 }
+
+@Composable
+fun rememberSvgImageLoader(): ImageLoader = svgImageLoader

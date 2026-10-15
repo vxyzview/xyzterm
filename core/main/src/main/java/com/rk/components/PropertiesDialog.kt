@@ -1,5 +1,6 @@
 package com.rk.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,13 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -58,9 +58,16 @@ import kotlinx.coroutines.withContext
 
 data class ContentProgress(val totalSize: Long, val totalItems: Long)
 
-enum class PropertyRoutes(val label: String, val route: String) {
-    GENERAL(strings.general.getString(), "general"),
-    ADVANCED(strings.advanced.getString(), "advanced"),
+/**
+ * Tab labels are a `@StringRes`, not a resolved String.
+ *
+ * Enum constructor arguments evaluate exactly once, at class-init. `setApplicationLocales` runs
+ * later in `App.onCreate`, so a resolved label here froze in whichever locale happened to be
+ * active at class-load and never followed a language change.
+ */
+enum class PropertyRoutes(@StringRes val labelRes: Int, val route: String) {
+    GENERAL(strings.general, "general"),
+    ADVANCED(strings.advanced, "advanced"),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,8 +76,11 @@ fun PropertiesDialog(file: FileObject, onDismiss: () -> Unit) {
     val pagerState = rememberPagerState(initialPage = 0) { PropertyRoutes.entries.size }
     val scope = rememberCoroutineScope()
 
-    val scrollStates = PropertyRoutes.entries.map { rememberScrollState() }
-    val currentScrollState = scrollStates[pagerState.currentPage]
+    // Was `entries.map { rememberScrollState() }`: remember inside a map lambda is positional,
+    // so it is only correct while there are exactly two routes. Keyed by route instead.
+    val scrollStates =
+        remember { PropertyRoutes.entries.associateWith { ScrollState(0) } }
+    val currentScrollState = scrollStates.getValue(PropertyRoutes.entries[pagerState.currentPage])
     val showHorizontalDivider by
         remember(pagerState.currentPage) { derivedStateOf { currentScrollState.canScrollForward } }
 
@@ -91,7 +101,7 @@ fun PropertiesDialog(file: FileObject, onDismiss: () -> Unit) {
                     Tab(
                         selected = pagerState.currentPage == index,
                         onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                        text = { Text(text = destination.label, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+                        text = { Text(text = stringResource(destination.labelRes), maxLines = 2, overflow = TextOverflow.Ellipsis) },
                         selectedContentColor = MaterialTheme.colorScheme.primary,
                         unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -100,7 +110,8 @@ fun PropertiesDialog(file: FileObject, onDismiss: () -> Unit) {
 
             HorizontalPager(
                 state = pagerState,
-                beyondViewportPageCount = PropertyRoutes.entries.size,
+                // The API caps this at 1; passing entries.size was silently coerced.
+                beyondViewportPageCount = 1,
                 pageSpacing = 16.dp,
                 modifier = Modifier.fillMaxWidth().weight(1f),
             ) { page ->
@@ -271,17 +282,28 @@ private fun ZipProperties(file: ZipFileObject) {
 }
 
 @Composable
+/**
+ * A read-only property row.
+ *
+ * This was a `readOnly = true` `OutlinedTextField`, so every row instantiated a full
+ * `BasicTextField` with its own focus, selection and IME plumbing, purely to display static text.
+ * Eight rows meant eight text fields. Text plus a divider renders the same thing.
+ */
+@Composable
 fun InfoRow(label: String, value: String, customTextColor: Color? = null) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = {},
-        label = { Text(label) },
-        readOnly = true,
-        colors =
-            OutlinedTextFieldDefaults.colors().run {
-                customTextColor?.let { copy(focusedTextColor = it, unfocusedTextColor = it) } ?: this
-            },
-    )
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = customTextColor ?: MaterialTheme.colorScheme.onSurface,
+        )
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 }
 
 private fun getPseudoPermissions(file: FileObject): String {

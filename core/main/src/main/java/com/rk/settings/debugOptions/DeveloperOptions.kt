@@ -48,10 +48,14 @@ fun DeveloperOptions(modifier: Modifier = Modifier, navController: NavController
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             while (isActive) {
-                delay(300.milliseconds)
+                // 300ms was 12,000 wakeups an hour, each writing a snapshot from a background
+                // thread, for a debug readout nobody watches that closely.
+                delay(1.seconds)
                 val runtime = Runtime.getRuntime()
                 val usedMem = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)
-                memoryUsage.value = "$usedMem/${runtime.maxMemory() / (1024 * 1024)}MB"
+                val text = "$usedMem/${runtime.maxMemory() / (1024 * 1024)}MB"
+                // Only publish when it actually changed, so an idle screen stays idle.
+                if (memoryUsage.value != text) memoryUsage.value = text
             }
         }
     }

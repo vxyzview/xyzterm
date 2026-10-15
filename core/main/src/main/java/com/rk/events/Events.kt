@@ -1,6 +1,8 @@
 package com.rk.events
 
 import com.rk.extension.api.XedExtensionPoint
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import com.rk.file.FileObject
 import com.rk.icons.pack.LocalIconPack
 import com.rk.settings.debugOptions.LogEntry
@@ -65,7 +67,18 @@ interface EventSubscription {
 /** Central event bus for the application. */
 object Events {
 
-    @PublishedApi internal val listeners = mutableMapOf<KClass<out Event>, MutableList<suspend (Event) -> Unit>>()
+    /**
+     * ConcurrentHashMap of CopyOnWriteArrayLists.
+     *
+     * Plain collections before: `getOrPut` is a check-then-act that loses registrations under
+     * concurrency, and `publish` iterates the map from the main thread while
+     * `LogCollector.appendEntry` publishes from a `DefaultScope` coroutine -- once per log line.
+     * A concurrent subscribe during a publish was a ConcurrentModificationException.
+     */
+    @PublishedApi
+    internal val listeners: MutableMap<KClass<out Event>, MutableList<suspend (Event) -> Unit>> =
+        ConcurrentHashMap()
+
 
     /**
      * Subscribes to events of type [T].
@@ -76,7 +89,7 @@ object Events {
      */
     @XedExtensionPoint
     inline fun <reified T : Event> subscribe(noinline listener: suspend (T) -> Unit): EventSubscription {
-        val list = listeners.getOrPut(T::class) { mutableListOf() }
+        val list = listeners.computeIfAbsent(T::class) { CopyOnWriteArrayList() }
 
         val wrapper: suspend (Event) -> Unit = { listener(it as T) }
 

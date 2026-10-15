@@ -44,10 +44,15 @@ import com.rk.components.compose.edges.StretchEdgeEffect
 @Composable
 fun NestedScrollStretch(modifier: Modifier = Modifier, enabled: Boolean = true, content: @Composable () -> Unit) {
     val invalidateTick = remember { mutableIntStateOf(0) }
-    val invalidate = Runnable { invalidateTick.intValue++ }
 
     val context = LocalContext.current
-    val connection = remember { NestedScrollStretchConnection(context, invalidate) }
+    // Keyed on context: an unkeyed remember could hand a stale Activity context to a
+    // connection that outlives the configuration change.
+    val connection =
+        remember(context) {
+            // One Runnable, not one per recomposition.
+            NestedScrollStretchConnection(context) { invalidateTick.intValue++ }
+        }
     connection.enabled = enabled
 
     val tmpOut = remember { FloatArray(5) }
@@ -96,7 +101,7 @@ private inline fun StretchEdgeEffect.draw(
     }
 }
 
-private class NestedScrollStretchConnection(context: Context, invalidate: Runnable) : NestedScrollConnection {
+private class NestedScrollStretchConnection(context: Context, private val invalidate: () -> Unit) : NestedScrollConnection {
 
     var height = 0
     var enabled = true
@@ -109,7 +114,8 @@ private class NestedScrollStretchConnection(context: Context, invalidate: Runnab
             field = value
         }
 
-    val topEdgeEffect = StretchEdgeEffect(context, invalidate, invalidate)
+    val topEdgeEffect =
+        StretchEdgeEffect(context, { invalidate() }, { invalidate() })
     val bottomEdgeEffect = StretchEdgeEffect(context, invalidate, invalidate)
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {

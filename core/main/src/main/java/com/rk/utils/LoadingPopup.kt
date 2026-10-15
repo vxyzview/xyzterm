@@ -52,6 +52,9 @@ class LoadingPopup(private val activity: AppCompatActivity?, hideAfterMillis: Lo
         val activity = activity ?: return this
         if (activity.isFinishing || activity.isDestroyed) return this
 
+        // The class documents itself as safe to create from any thread, and `none { }` followed
+        // by an add is a check-then-act: two callers could both see "absent" and both push,
+        // leaving two identical spinners. Ask the list to add atomically instead.
         if (DialogHost.loadings.none { it.id == id }) {
             DialogHost.pushLoading(
                 DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = false) {

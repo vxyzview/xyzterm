@@ -2,6 +2,7 @@ package com.rk.file
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import java.util.concurrent.CopyOnWriteArrayList
 
 data class FileDecoration(
     val color: Color? = null,
@@ -14,7 +15,8 @@ fun interface FileDecorationProvider {
 
 object FileDecorationRegistry {
 
-    private val providers = mutableListOf<FileDecorationProvider>()
+    // CopyOnWrite: registered rarely, iterated on every composable that renders a file.
+    private val providers = CopyOnWriteArrayList<FileDecorationProvider>()
 
     fun register(provider: FileDecorationProvider) {
         providers += provider
@@ -47,7 +49,7 @@ fun interface FilePropertiesProvider {
 
 object FilePropertiesRegistry {
 
-    private val providers = mutableListOf<FilePropertiesProvider>()
+    private val providers = CopyOnWriteArrayList<FilePropertiesProvider>()
 
     fun register(provider: FilePropertiesProvider) {
         providers += provider

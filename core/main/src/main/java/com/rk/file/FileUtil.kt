@@ -125,6 +125,19 @@ fun File.unzipTo(destDir: File) {
             } else {
                 target.parentFile?.mkdirs()
                 zip.getInputStream(entry).use { input -> target.outputStream().use { output -> input.copyTo(output) } }
+
+                // Restore the Unix mode from the zip's external attributes. Without this every
+                // extracted file comes out non-executable, which silently breaks any archive
+                // that ships scripts or binaries rather than just throwing an error.
+                val unixMode = entry.unixMode
+                if (unixMode and 0b001_001_001 != 0) {
+                    // Intentionally best-effort: some providers cannot set the bit.
+                    runCatching { target.setExecutable(true, false) }
+                }
+                (unixMode ushr 16 and 0o777).takeIf { it != 0 }?.let { mode ->
+                    runCatching { target.setReadable(mode and 0o444 != 0) }
+                    runCatching { target.setWritable(mode and 0o222 != 0) }
+                }
             }
         }
     }
