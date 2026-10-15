@@ -235,9 +235,9 @@ object TerminalBackup {
             }
 
             localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
-            null
+            return null
         } catch (e: Exception) {
-            e.message ?: "restore failed"
+            return e.message ?: "restore failed"
         } finally {
             staging.deleteRecursively()
         }
