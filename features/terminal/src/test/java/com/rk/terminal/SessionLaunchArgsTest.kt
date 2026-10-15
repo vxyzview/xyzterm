@@ -62,7 +62,7 @@ class SessionLaunchArgsTest {
 
         val (_, args) = command(pending = pending)
 
-        assertThat(args).doesNotContain("-c")
+        assertThat(args.asList()).doesNotContain("-c")
         assertThat(args.first()).isEqualTo(sandboxSh)
     }
 
@@ -85,8 +85,8 @@ class SessionLaunchArgsTest {
 
         assertThat(shell).isEqualTo("/system/bin/ls")
         // The old shape handed the binary a `-c` flag it never asked for.
-        assertThat(args).isEqualTo(arrayOf("-la"))
-        assertThat(args).doesNotContain("-c")
+        assertThat(args.asList()).containsExactly("-la").inOrder()
+        assertThat(args.asList()).doesNotContain("-c")
     }
 
     @Test

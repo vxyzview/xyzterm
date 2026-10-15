@@ -21,7 +21,7 @@ import org.junit.Test
 class SessionProcessTreeTest {
 
     private fun walk(children: Map<Int, List<Int>>, root: Int): List<Int> =
-        descendants(root) { children[it].orEmpty() }
+        SessionProcessTree.descendants(root) { children[it].orEmpty() }
 
     @Test
     fun `a leaf has no descendants`() {
