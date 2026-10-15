@@ -1,7 +1,7 @@
 package com.rk.utils
 
 import android.util.Log
-import com.rk.BuildConfig
+import com.xyzterm.BuildConfig
 import com.rk.settings.Settings
 import com.rk.resources.getString
 import com.rk.resources.strings
