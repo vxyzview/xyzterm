@@ -4,6 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import java.io.File
 import java.nio.file.Files
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 /**
  * Pins the on-disk crash report's retention and shape.
@@ -17,6 +19,7 @@ import org.junit.Test
  * The production change these tests catch: dropping the rotation, or reverting to
  * `appendText` with no cap.
  */
+@RunWith(RobolectricTestRunner::class)
 class CrashLogTest {
 
     private fun dir(): File = Files.createTempDirectory("crashlog").toFile()

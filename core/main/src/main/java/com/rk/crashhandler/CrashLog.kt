@@ -1,5 +1,6 @@
 package com.rk.crashhandler
 
+import android.os.Build
 import java.io.File
 
 /**
@@ -57,9 +58,11 @@ object CrashLog {
     fun shareHeader(appLabel: String, versionName: String, buildType: String): String =
         buildString {
             appendLine("=== $appLabel $versionName ($buildType) ===")
-            appendLine("Device: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
-            appendLine("Android: ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})")
-            appendLine("Abi: ${android.os.Build.SUPPORTED_ABIS.joinToString()}")
+            appendLine("Device: ${Build.MANUFACTURER} ${Build.MODEL}")
+            appendLine("Android: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
+            // SUPPORTED_ABIS is null under a plain JVM test and can be empty on odd builds;
+            // a report with a blank line is still worth sending.
+            appendLine("Abi: ${Build.SUPPORTED_ABIS?.joinToString().orEmpty().ifEmpty { "unknown" }}")
             appendLine()
         }
 
