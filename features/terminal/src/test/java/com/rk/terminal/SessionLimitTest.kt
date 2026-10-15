@@ -31,8 +31,18 @@ class SessionLimitTest {
     }
 
     @Test
-    fun `three saved sessions fit in one chunk at the concurrency limit`() {
-        assertThat(restoreChunks(listOf("a", "b", "c"))).containsExactly(listOf("a", "b", "c"))
+    fun `three saved sessions are chunked at the concurrency limit, not one batch`() {
+        // Three tracers at once is exactly what the cap exists to prevent, so a third
+        // session must wait for a free slot rather than joining the first batch.
+        assertThat(restoreChunks(listOf("a", "b", "c"))).containsExactly(listOf("a", "b"), listOf("c"))
+    }
+
+    @Test
+    fun `a batch never exceeds the concurrency limit`() {
+        val plan = restoreChunks((1..3).map { "session-$it" })
+
+        plan.forEach { assertThat(it.size).isAtMost(MAX_CONCURRENT_RESTORE) }
+        assertThat(plan.flatten()).hasSize(3)
     }
 
     @Test

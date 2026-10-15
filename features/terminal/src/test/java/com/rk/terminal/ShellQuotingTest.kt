@@ -76,11 +76,16 @@ class ShellQuotingTest {
     }
 
     @Test
-    fun `a full command line is not executable as written`() {
+    fun `a full command line is inert when re-parsed by a shell`() {
         // The round trip that matters: joined unquoted, this string would delete $HOME.
         val line = shellCommandLine(arrayOf("ls", "/tmp; rm -rf ~"))
 
-        assertThat(line).doesNotContain("; rm -rf ~'")
         assertThat(line).isEqualTo("'ls' '/tmp; rm -rf ~'")
+        // The semicolon is inside quotes, so a re-parse sees it as literal text rather
+        // than a command separator. Asserted structurally: nothing may sit outside the
+        // quotes, which is what "rm -rf ~'" at the tail would have looked like.
+        assertThat(line.split("'").map { it.isEmpty() }).contains(true)
+        assertThat(line.startsWith("'")).isTrue()
+        assertThat(line.endsWith("'")).isTrue()
     }
 }

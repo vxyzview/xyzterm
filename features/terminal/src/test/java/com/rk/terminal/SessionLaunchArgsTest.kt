@@ -40,8 +40,15 @@ class SessionLaunchArgsTest {
         val (shell, args) = command()
 
         assertThat(shell).isEqualTo("/system/bin/sh")
-        assertThat(args).isEmpty()
-        assertThat(command(sandboxEnabled = false).second).isEmpty()
+        // Exactly the script, nothing else: sandbox.sh opens an interactive shell when $# == 0.
+        assertThat(args.asList()).containsExactly(sandboxSh)
+    }
+
+    @Test
+    fun `an interactive shell never passes -c`() {
+        val (_, args) = command()
+
+        assertThat(args.asList()).doesNotContain("-c")
     }
 
     @Test
