@@ -104,7 +104,13 @@ jobs:
 
       - name: Create GitHub Release
         id: release
-        if: ${{ success() }}
+        # Tag pushes only. This was `if: success()`, which fired on every push
+        # to dev -- so the first dev push carrying a new versionName published
+        # a release whether or not anyone meant to ship. That is how v1.0.0 got
+        # published at all: by a dev-push build, before any tag was pushed.
+        # Publishing has to be an explicit act, and `git ls-remote` below is
+        # only a guard against re-publishing, not a substitute for intent.
+        if: ${{ success() && startsWith(github.ref, 'refs/tags/v') }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
