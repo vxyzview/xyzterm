@@ -14,7 +14,12 @@
             </intent-filter>
         </provider>
 
-        <service android:name="com.rk.settings.debugOptions.LogcatService" />
+        <!-- specialUse: a debug-gated logcat reader. FOREGROUND_SERVICE_SPECIAL_USE is declared by the
+             app module; the type must match here or startForeground() throws. -->
+    <service
+        android:name="com.rk.settings.debugOptions.LogcatService"
+        android:exported="false"
+        android:foregroundServiceType="specialUse" />
 
     </application>
 </manifest>

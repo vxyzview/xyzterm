@@ -7,10 +7,13 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.os.IBinder
 import androidx.compose.runtime.mutableStateListOf
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.rk.activities.settings.SettingsActivity
+import java.util.Locale
 import com.rk.resources.drawables
 import com.rk.resources.getString
 import com.rk.resources.strings
@@ -36,9 +39,19 @@ class LogcatService : Service() {
         private val _logFlow = MutableSharedFlow<String>(extraBufferCapacity = 512)
         val logFlow = _logFlow.asSharedFlow()
 
+        /**
+         * Starts in the foreground.
+         *
+         * `startService()` from the background throws IllegalStateException on API 26+ and
+         * ForegroundServiceStartNotAllowedException on 31+. This was called from a coroutine on
+         * Dispatchers.IO whose scheduling relative to the app going background is not
+         * guaranteed, and appScope carries only a SupervisorJob — so a throw here was an
+         * uncaught startup crash.
+         */
         fun start(context: Context) {
             val intent = Intent(context, LogcatService::class.java)
-            context.startService(intent)
+            runCatching { ContextCompat.startForegroundService(context, intent) }
+                .onFailure { Log.w("LogcatService", "could not start the logcat service", it) }
         }
 
         fun stop(context: Context) {
@@ -49,35 +62,43 @@ class LogcatService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    /**
+         * Hoisted to a file-level constant, lowercased once.
+         *
+         * This runs for every line logcat emits — thousands per second — and was allocating a
+         * 20-element `List` plus up to 20 `contains(ignoreCase = true)` scans per line. Pure
+         * allocation churn for as long as the service was on.
+         */
+    private val noisyKeywords =
+        setOf(
+            "viewrootimpl",
+            "choreographer",
+            "openglrenderer",
+            "inputmethodmanager",
+            "renderthread",
+            "libegl",
+            "egl_emulation",
+            "compatchangereporter",
+            "vndksupport",
+            "configstore",
+            "mono",
+            "me.weishu.reflection",
+            "chatty",
+            "hostconnection",
+            "gralloc",
+            "gesturedetector",
+            "windowmanager",
+            "imefocuscontroller",
+            "insets",
+        )
+
     private fun shouldCaptureLog(line: String): Boolean {
         if (line.isEmpty()) {
             return false
         }
 
-        // Filter out known noisy system verbose logs
-        val noisyKeywords =
-            listOf(
-                "ViewRootImpl",
-                "Choreographer",
-                "OpenGLRenderer",
-                "InputMethodManager",
-                "RenderThread",
-                "libEGL",
-                "EGL_emulation",
-                "CompatChangeReporter",
-                "vndksupport",
-                "ConfigStore",
-                "Mono",
-                "me.weishu.reflection",
-                "chatty",
-                "HostConnection",
-                "gralloc",
-                "GestureDetector",
-                "WindowManager",
-                "ImeFocusController",
-                "Insets",
-            )
-        if (noisyKeywords.any { line.contains(it, ignoreCase = true) }) {
+        val lower = line.lowercase(Locale.ROOT)
+        if (noisyKeywords.any { lower.contains(it) }) {
             return false
         }
 
@@ -112,6 +133,11 @@ class LogcatService : Service() {
         super.onCreate()
         createNotificationChannel()
         val notification = createNotification()
+
+        // Required: startForegroundService() promises a startForeground() within a few seconds.
+        // Without this the system kills the service with a ForegroundServiceDidNotStartInTime
+        // crash. The separate notify(99) is kept for the persistent notification the UI reads.
+        startForeground(98, notification)
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.notify(99, notification)
 
@@ -181,12 +207,24 @@ class LogcatService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        return START_STICKY
+        // START_NOT_STICKY, not START_STICKY: this service wraps a never-terminating `logcat`
+        // child process. With START_STICKY the system restarts it indefinitely once enabled —
+        // a permanent battery drain with no way for the user to see why.
+        return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        // The logcat child is not a ProcessHandle we can signal portably; destroying the
+        // stream is what actually ends it.
+        runCatching { logcatProcess?.destroy() }
+            .onFailure { Log.w("LogcatService", "could not stop logcat", it) }
+        logcatProcess = null
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        super.onDestroy()
     }
 
     override fun onDestroy() {
         serviceScope.cancel()
-        logcatProcess?.destroy()
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancel(99)
         super.onDestroy()

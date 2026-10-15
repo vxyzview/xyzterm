@@ -12,6 +12,7 @@ import com.rk.feature.FeatureRegistry
 import com.rk.utils.application
 import com.xyzterm.BuildConfig
 import java.lang.ref.WeakReference
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
@@ -101,8 +102,15 @@ object Settings {
     var terminal_font_path by CachedPreference("terminal_font_path", "")
     var terminal_cursor_style by CachedPreference("terminal_cursor_style", "block")
     var terminal_extra_keys by CachedPreference("terminal_extra_keys", DEFAULT_TERMINAL_EXTRA_KEYS)
-    var current_lang: String by
-        CachedPreference("current_lang", application!!.resources.configuration.locales[0].language)
+    // Evaluated at Settings class-init, and LocaleList.get(0) throws on an empty list — which
+    // happens on devices with a cleared or restricted locale, and after a bad
+    // setApplicationLocales. That turned into an ExceptionInInitializerError on startup.
+    private fun defaultLocaleLanguage(): String =
+        application!!.resources.configuration.let { cfg ->
+            cfg.locales.takeIf { !it.isEmpty }?.get(0)?.language ?: Locale.getDefault().language
+        }
+
+    var current_lang: String by CachedPreference("current_lang", defaultLocaleLanguage())
 
     // Long settings
     var last_version_code by CachedPreference("last_version_code", -1L)

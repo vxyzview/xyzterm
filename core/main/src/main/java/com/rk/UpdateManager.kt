@@ -23,7 +23,9 @@ import com.rk.utils.application
 import com.rk.utils.dialogRes
 import com.rk.utils.toast
 import com.xyzterm.BuildConfig
+import android.util.Log
 import java.io.File
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,6 +35,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 object UpdateManager {
+    private const val TAG = "UpdateManager"
     private const val UPDATE_OWNER = "vxyzview"
     private const val UPDATE_REPO = "xyzterm"
     private const val UPDATE_INTERVAL_MS = 24 * 60 * 60 * 1000L
@@ -155,16 +158,23 @@ object UpdateManager {
         }
     }
 
-    /** True when the release APK is signed with the same key as the installed app. */
+    /**
+     * True when the release APK is signed with the same key as the installed app.
+     *
+     * This fails *closed* now. It previously returned `true` on three of five error paths —
+     * no application, unreadable installed signatures, or an archive with none — so an APK
+     * whose signature could not be verified was offered for installation. That is the whole
+     * guarantee of a self-updater.
+     */
     @Suppress("DEPRECATION")
     private fun signatureMatches(apkPath: String): Boolean {
-        val app = application ?: return true
+        val app = application ?: return false
         val pm = app.packageManager
         val installed =
-            runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return true
+            runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return false
         val archive =
             runCatching { pm.getPackageArchiveInfo(apkPath, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return false
-        val a = installed.signatures?.firstOrNull() ?: return true
+        val a = installed.signatures?.firstOrNull() ?: return false
         val b = archive.signatures?.firstOrNull() ?: return false
         return a == b
     }
@@ -235,7 +245,11 @@ object UpdateManager {
                     }
                 }
 
-                if (lastVersionCode <= 80) {
+                if (lastVersionCode <= 80L) {
+                    // This block was the only migration not wrapped in runCatching, and
+                    // inspect() runs on a bare SupervisorJob, so anything thrown here was an
+                    // uncaught crash on every cold start for anyone upgrading from <= 80.
+                    runCatching {
                     val oldShownDisclaimer = Preference.getBoolean("shownDisclaimer", false)
                     Preference.removeKey("shownDisclaimer")
                     if (oldShownDisclaimer) {
@@ -260,12 +274,18 @@ object UpdateManager {
                         Preference.setBoolean("desktop_mode", true)
                     }
 
-                    val defaultLang = application!!.resources.configuration.locales[0].language
+                    // LocaleList.get(0) throws on an empty locale list, which happens on devices with
+                    // a cleared or restricted locale and after a bad setApplicationLocales.
+                    val defaultLang = application!!.resources.configuration.let { cfg ->
+                        cfg.locales.takeIf { !it.isEmpty }?.get(0)?.language ?: Locale.getDefault().language
+                    }
                     val oldCurrentLang = Preference.getString("currentLang", defaultLang)
                     Preference.removeKey("currentLang")
                     if (oldCurrentLang != defaultLang) {
                         Preference.setString("current_lang", oldCurrentLang)
                     }
+                    }
+                    .onFailure { Log.w(TAG, "migration from <= 80 failed", it) }
                 }
 
                 if (lastVersionCode <= 81) {

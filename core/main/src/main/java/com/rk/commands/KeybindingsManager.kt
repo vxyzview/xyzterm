@@ -1,11 +1,16 @@
 package com.rk.commands
 
+import android.util.Log
 import android.view.KeyEvent
+import com.rk.DefaultScope
 import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Preference
 import com.rk.settings.keybinds.KeyUtils
 import com.rk.utils.application
+import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -45,6 +50,7 @@ data class KeyCombination(
 }
 
 object KeybindingsManager {
+    private const val TAG = "KeybindingsManager"
     @Deprecated("This is now saved as a file.") private const val KEY_KEYBINDINGS = "keybindings"
     private val keybindingsFile = application!!.filesDir.resolve("keybindings.json")
 
@@ -54,20 +60,34 @@ object KeybindingsManager {
     }
     private val serializer = MapSerializer(String.serializer(), KeyCombination.serializer())
 
-    private val customKeybinds = mutableMapOf<String, KeyCombination>()
+    /**
+     * ConcurrentHashMap, not mutableMapOf.
+     *
+     * `loadKeybindings` runs on Dispatchers.IO and did `customKeybinds.clear(); putAll(...)`,
+     * while `buildKeybindMap()` and `getKeyCombinationForCommand` iterate the same map from the
+     * main thread during composition (KeybindingsScreen). HashMap has no detection for that and
+     * you get a torn read or a ConcurrentModificationException.
+     */
+    private val customKeybinds = ConcurrentHashMap<String, KeyCombination>()
 
-    private var _keybindMap: MutableMap<KeyCombination, String>? = null
-    private val keybindMap: MutableMap<KeyCombination, String>
-        get() {
-            if (_keybindMap == null) {
-                _keybindMap = buildKeybindMap()
+    @Volatile private var _keybindMap: MutableMap<KeyCombination, String>? = null
+
+    /**
+     * Double-checked under a lock.
+     *
+     * The previous form was `if (_keybindMap == null) { _keybindMap = buildKeybindMap() }
+     * return _keybindMap!!`, and `invalidate()` nulls the field from the main thread via
+     * `CommandProvider.registerBuiltin` while a background build is in flight. The `!!` then
+     * threw on a value that was non-null one line earlier.
+     */
+    private val keybindMap: Map<KeyCombination, String>
+        get() =
+            _keybindMap ?: synchronized(this) {
+                _keybindMap ?: buildKeybindMap().also { _keybindMap = it }
             }
 
-            return _keybindMap!!
-        }
-
     fun invalidate() {
-        _keybindMap = null
+        synchronized(this) { _keybindMap = null }
     }
 
     @Deprecated("This is temporary migration code.")
@@ -91,8 +111,19 @@ object KeybindingsManager {
         }
     }
 
+    /**
+     * Writing the whole map to disk.
+     *
+     * Called from `editCustomKey`/`resetCustomKey`/`resetAllKeys`, which fire from click
+     * handlers in KeybindingsScreen — so this was a main-thread file write, and a StrictMode
+     * disk-write violation, on every keybind edit.
+     */
     fun saveKeybindings() {
-        keybindingsFile.writeText(json.encodeToString(serializer, customKeybinds))
+        val encoded = json.encodeToString(serializer, customKeybinds)
+        DefaultScope.launch(Dispatchers.IO) {
+            runCatching { keybindingsFile.writeText(encoded) }
+                .onFailure { Log.w(TAG, "could not persist keybindings", it) }
+        }
     }
 
     fun loadKeybindings() {
