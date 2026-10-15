@@ -36,6 +36,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
+/**
+ * Whether a session's shell process exists and may be signalled.
+ *
+ * Termux's `TerminalSession.isRunning()` is `mShellPid != -1`, and `mShellPid` is a plain `int`
+ * that stays `0` until `TerminalView.attachSession()` triggers `initializeEmulator()` and forks
+ * the shell. A session built by `MkSession.createSession()` and never attached therefore reports
+ * itself as *running*, and `finishIfRunning()` issues `Os.kill(0, SIGKILL)` — POSIX pid 0 means
+ * every process in the caller's process group, which includes this app.
+ *
+ * `0` = constructed but never forked. `-1` = already exited. Anything above `0` is a real pid.
+ */
+internal fun shouldKill(pid: Int): Boolean = pid > 0
+
+/** [shouldKill] applied to a live session. Never throws: a pid that died mid-sweep is fine. */
+private fun TerminalSession.killIfSpawned() {
+    if (shouldKill(pid)) {
+        runCatching { finishIfRunning() }
+    }
+}
+
 class SessionService : Service() {
     private val sessions = hashMapOf<SessionId, TerminalSession>()
     private val sessionWorkDirs = mutableMapOf<SessionId, SessionPwd>()
@@ -113,7 +133,7 @@ class SessionService : Service() {
                 withContext(Dispatchers.Main) {
                     // App exited while the restore was in flight — drop the shells.
                     if (!daemonRunning) {
-                        built.forEach { it.second.first.finishIfRunning() }
+                        built.forEach { it.second.first.killIfSpawned() }
                         restorePending = false
                         return@withContext
                     }
@@ -122,7 +142,7 @@ class SessionService : Service() {
                         if (id in sessions) {
                             // Already created on the main thread meanwhile (e.g.
                             // from the drawer) — drop the duplicate shell.
-                            session.finishIfRunning()
+                            session.killIfSpawned()
                         } else {
                             sessions[id] = session
                             sessionWorkDirs[id] = pwd
@@ -150,11 +170,10 @@ class SessionService : Service() {
         }
 
         fun terminateSession(id: SessionId) {
-            sessions[id]?.apply {
-                if (emulator != null) {
-                    sessions[id]?.finishIfRunning()
-                }
-            }
+            // Guard on the process, not on `emulator`: a session restored in the background and
+            // never opened by the user has no emulator but does have a live shell — the old
+            // `emulator != null` check skipped the kill and leaked the process.
+            sessions[id]?.killIfSpawned()
             sessions.remove(id)
             sessionList.remove(id)
             sessionWorkDirs.remove(id)
@@ -213,7 +232,7 @@ class SessionService : Service() {
     }
 
     override fun onDestroy() {
-        sessions.forEach { s -> s.value.finishIfRunning() }
+        sessions.forEach { s -> s.value.killIfSpawned() }
 
         restoreScope.cancel()
         daemonRunning = false
@@ -265,7 +284,7 @@ class SessionService : Service() {
     var wakeLock: PowerManager.WakeLock? = null
 
     fun actionExit() {
-        sessions.forEach { s -> s.value.finishIfRunning() }
+        sessions.forEach { s -> s.value.killIfSpawned() }
         if (daemonRunning) {
             daemonRunning = false
         }
