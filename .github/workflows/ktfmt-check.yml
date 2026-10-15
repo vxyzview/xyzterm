@@ -24,6 +24,8 @@ jobs:
   format-check:
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
+    # Advisory on a push to dev, blocking on a pull request.
+    continue-on-error: ${{ github.event_name == 'push' }}
     permissions:
       contents: read
 
@@ -42,6 +44,9 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
+      # Advisory on a direct push to dev; blocking on a pull request. A push is the
+      # author's own working branch, and failing it over whitespace while they are mid-run
+      # trains people to ignore the check entirely. Before a PR merges it must pass.
       - name: Check Kotlin formatting
         run: ./gradlew ktfmtCheck
 

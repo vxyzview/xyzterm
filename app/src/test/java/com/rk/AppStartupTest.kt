@@ -28,7 +28,6 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class AppStartupTest {
-
     @Test
     fun `app registers the activity lifecycle callback so dialogs have a host`() {
         ApplicationProvider.getApplicationContext<Application>()
