@@ -160,7 +160,7 @@ fun GeneralProperties(file: FileObject) {
                 size = formatFileSize(latest.totalSize)
                 itemsCount = numberFormatter.format(latest.totalItems)
             }
-            val throttle = ProgressThrottle(publish)
+            val throttle = ProgressThrottle(onPublish = publish)
             FileOperations.calculateContent(file) { progress ->
                 latest = progress
                 throttle.onItem(progress.totalItems)
