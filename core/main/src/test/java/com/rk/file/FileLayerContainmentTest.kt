@@ -96,8 +96,10 @@ class FileLayerContainmentTest {
         val fallback = STORAGE_ROOT_FALLBACK
 
         assertThat(isStorageRootFallback(fallback)).isTrue()
+        // Without the trailing slash it names the same unusable directory.
+        assertThat(isStorageRootFallback("/storage/emulated/0")).isTrue()
         assertThat(isStorageRootFallback("/storage/emulated/0/Download")).isFalse()
-        assertThat(isStorageRootFallback("/storage/emulated/0")).isFalse()
+        assertThat(isStorageRootFallback("/storage/emulated/0/Documents/notes.txt")).isFalse()
         assertThat(isStorageRootFallback("")).isFalse()
     }
 }
