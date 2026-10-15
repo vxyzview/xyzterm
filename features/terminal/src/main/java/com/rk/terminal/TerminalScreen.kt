@@ -58,6 +58,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -288,25 +289,28 @@ private fun ColumnScope.TerminalView(
                         setTypeface(font)
                     }
 
-                    // This listener used to be registered inside the factory and never removed, and it captured
-                    // `currentTheme`, `isDarkMode` and the colours *by value*. So it held the
-                    // state alive for the view's lifetime, and after a theme change a rotation
-                    // or resize re-applied the OLD palette over the new one. Reading the theme
-                    // at call time fixes both: the update block already re-applies on
-                    // recomposition, so this only needs to cover a size change.
+                    // rememberUpdatedState, because a plain lambda cannot read composition state at call
+                    // time -- and capturing the values instead is the bug: the listener was
+                    // registered inside the factory, never removed, and captured `currentTheme`
+                    // by value, so after a theme change a rotation or resize re-applied the
+                    // OLD palette over the new one. These references always hold the latest.
+                    val latestTheme by rememberUpdatedState(currentTheme)
+                    val latestDark by rememberUpdatedState(isDarkMode)
+                    val latestOnSurface by rememberUpdatedState(onSurfaceColor)
+                    val latestSurface by rememberUpdatedState(surfaceColor)
+
                     val layoutListener =
                         View.OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
                             val widthChanged = (right - left) != (oldRight - oldLeft)
                             val heightChanged = (bottom - top) != (oldBottom - oldTop)
 
                             if (widthChanged || heightChanged) {
-                                val theme = LocalThemeHolder.current
-                                val dark = isDarkTheme(v.context)
-                                v.applyTerminalColors(
-                                    onSurfaceColor = onSurfaceColor,
-                                    surfaceColor = surfaceColor,
+                                (v as? TerminalView)?.applyTerminalColors(
+                                    onSurfaceColor = latestOnSurface,
+                                    surfaceColor = latestSurface,
                                     terminalColors =
-                                        if (dark) theme.darkTerminalColors else theme.lightTerminalColors,
+                                        if (latestDark) latestTheme.darkTerminalColors
+                                        else latestTheme.lightTerminalColors,
                                 )
                             }
                         }

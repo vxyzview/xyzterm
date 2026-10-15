@@ -22,61 +22,75 @@ class ProgressThrottleTest {
 
     @Test
     fun `a small tree reports every item`() {
-        var reports = 0
-        val throttle = ProgressThrottle(PROGRESS_EVERY_N_ITEMS) { reports++ }
+        val reports = countingThrottle()
+        val throttle = reports.throttle
 
-        (1L..10L).forEach { throttle(it) }
+        (1L..10L).forEach { throttle.onItem(it) }
         throttle.flush()
 
         // 10 items, every 25th threshold never crossed, so only the final flush reports.
-        assertThat(reports).isEqualTo(1)
+        assertThat(reports.count).isEqualTo(1)
     }
 
     @Test
     fun `a large tree reports roughly every threshold`() {
-        var reports = 0
-        val throttle = ProgressThrottle(PROGRESS_EVERY_N_ITEMS) { reports++ }
+        val reports = countingThrottle()
+        val throttle = reports.throttle
 
-        (1L..5000L).forEach { throttle(it) }
+        (1L..5000L).forEach { throttle.onItem(it) }
         throttle.flush()
 
         // 5000 / 25 == 200 thresholds, plus the flush.
-        assertThat(reports).isEqualTo(201)
+        assertThat(reports.count).isEqualTo(201)
     }
 
     @Test
     fun `a ten thousand item tree produces far fewer reports than items`() {
-        var reports = 0
-        val throttle = ProgressThrottle(PROGRESS_EVERY_N_ITEMS) { reports++ }
+        val reports = countingThrottle()
+        val throttle = reports.throttle
 
-        (1L..10_000L).forEach { throttle(it) }
+        (1L..10_000L).forEach { throttle.onItem(it) }
         throttle.flush()
 
         // The whole point: 10,000 items must not become 10,000 recompositions.
-        assertThat(reports).isLessThan(1000)
+        assertThat(reports.count).isLessThan(1000)
     }
 
     @Test
     fun `the final update is always emitted even below the threshold`() {
-        var reports = 0
-        val throttle = ProgressThrottle(PROGRESS_EVERY_N_ITEMS) { reports++ }
+        val reports = countingThrottle()
 
-        throttle(1L)
-        throttle.flush()
+        reports.throttle.onItem(1L)
+        reports.throttle.flush()
 
-        assertThat(reports).isEqualTo(1)
+        assertThat(reports.count).isEqualTo(1)
     }
 
     @Test
     fun `flushing twice does not report twice`() {
-        var reports = 0
-        val throttle = ProgressThrottle(PROGRESS_EVERY_N_ITEMS) { reports++ }
+        val reports = countingThrottle()
 
-        throttle(1L)
-        throttle.flush()
-        throttle.flush()
+        reports.throttle.onItem(1L)
+        reports.throttle.flush()
+        reports.throttle.flush()
 
-        assertThat(reports).isEqualTo(1)
+        assertThat(reports.count).isEqualTo(1)
+    }
+
+    private class Counter {
+        var count = 0
+    }
+
+    private class Holder(val counter: Counter, val throttle: ProgressThrottle)
+
+    private fun countingThrottle(): Holder {
+        val counter = Counter()
+        val throttle =
+            ProgressThrottle(PROGRESS_EVERY_N_ITEMS) { _: Long ->
+                counter.count += 1
+                Unit
+            }
+        return Holder(counter, throttle)
     }
 
     @Test
