@@ -116,12 +116,17 @@ jobs:
       - name: Upload APK to PixelDrain
         if: ${{ success() }}
         timeout-minutes: 15
+        continue-on-error: true
         env:
           PIXELDRAIN_API_KEY: ${{ secrets.PIXELDRAIN_API_KEY }}
           COMMIT_MSG: ${{ github.event.head_commit.message }}
           VERSION: ${{ env.VERSION }}
           COMMIT_HASH: ${{ env.COMMIT_HASH }}
         run: |
+          # continue-on-error above: PixelDrain is a third-party host and it went down for us
+          # mid-run with {"success":false,"value":"ip_banned"}. An external service refusing
+          # the upload is not a build failure, and it should not mask a green build with a red
+          # one -- the APK is already built, sized and renamed by the steps above.
           RESP=$(curl -s -T "app/xyzterm-$VERSION-$COMMIT_HASH.apk" \
             -u ":$PIXELDRAIN_API_KEY" \
             "https://pixeldrain.com/api/file/")
@@ -132,6 +137,6 @@ jobs:
             echo "Version: $VERSION"
             echo "Commit: $COMMIT_MSG"
           else
+            echo "::warning::APK upload to PixelDrain failed; the build itself succeeded"
             echo "Upload failed: $RESP" >&2
-            exit 1
           fi
