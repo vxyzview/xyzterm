@@ -15,7 +15,7 @@ internal const val PROGRESS_EVERY_N_ITEMS = 25L
 
 class ProgressThrottle(
     private val everyN: Long = PROGRESS_EVERY_N_ITEMS,
-    private val onPublish: (Long) -> Unit,
+    private val onPublish: () -> Unit,
 ) {
     private var seen = 0L
     private var published = false
@@ -24,7 +24,7 @@ class ProgressThrottle(
     fun onItem(count: Long) {
         seen = count
         if (seen % everyN == 0L) {
-            onPublish(seen)
+            onPublish()
             published = true
         }
     }
@@ -32,7 +32,7 @@ class ProgressThrottle(
     /** Publish the final count if it was never published. Idempotent. */
     fun flush() {
         if (!published) {
-            onPublish(seen)
+            onPublish()
             published = true
         }
     }
