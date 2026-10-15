@@ -55,7 +55,7 @@ class OutputCapTest {
     fun `the cap is far below what would exhaust a phone heap`() {
         // A sanity check on the constant itself: this must never be a value that a runaway
         // child could use to exhaust the heap.
-        assertThat(ShellUtils.MAX_CAPTURED_BYTES).isAtMost(2L * 1024 * 1024)
+        assertThat(ShellUtils.MAX_CAPTURED_BYTES.toLong()).isAtMost(2L * 1024 * 1024)
     }
 
     private fun capAppend(value: String, cap: Int): String =
