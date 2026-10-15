@@ -65,12 +65,20 @@ object LogCollector {
     }
 
     private fun appendEntry(logEntry: LogEntry, extensionId: String? = null) {
-        logs.add(logEntry)
+        // Cap the retained message. An entry could carry a multi-KB stack trace, and 1000 of
+        // them is several MB held for the life of the process.
+        val capped =
+            if (logEntry.message.length > MAX_MESSAGE_CHARS) {
+                logEntry.copy(message = logEntry.message.take(MAX_MESSAGE_CHARS) + "\n[truncated]")
+            } else {
+                logEntry
+            }
+        logs.add(capped)
         // Ring-buffer cap: unbounded growth leaks memory in long-lived sessions.
         if (logs.size > MAX_LOGS) {
             logs.subList(0, logs.size - MAX_LOGS).clear()
         }
-        DefaultScope.launch { Events.publish(AppEvent.LogEntryWritten(logEntry, extensionId)) }
+        DefaultScope.launch { Events.publish(AppEvent.LogEntryWritten(capped, extensionId)) }
     }
 
     fun clearLogs() {
@@ -78,4 +86,6 @@ object LogCollector {
     }
 
     private const val MAX_LOGS = 1000
+
+private const val MAX_MESSAGE_CHARS = 4096
 }

@@ -115,12 +115,23 @@ private fun rememberHostResumed(): Boolean {
 
 @Composable
 private fun HostEntry(request: DialogRequest) {
-    LaunchedEffect(request.id) {
+    // Only reap requests that no host ever claimed.
+    //
+    // The TTL ran unconditionally against every request, so a dialog a user had been looking
+    // at for five minutes vanished underneath them -- including cancelable = false error
+    // dialogs such as a failed theme archive parse. The reaper exists to clean up requests
+    // orphaned by a configuration change, so it waits for a claim first.
+    val claimed = remember { mutableStateOf(false) }
+    LaunchedEffect(claimed.value) {
+        if (claimed.value) return@LaunchedEffect
         val remaining = REQUEST_TTL_MS - (System.currentTimeMillis() - request.createdAt)
-        if (remaining > 0) {
-            delay(remaining)
-        }
-        DialogHost.remove(request.id)
+        if (remaining > 0) delay(remaining)
+        if (!claimed.value) DialogHost.remove(request.id)
+    }
+
+    DisposableEffect(Unit) {
+        claimed.value = true
+        onDispose { DialogHost.remove(request.id) }
     }
 
     Dialog(

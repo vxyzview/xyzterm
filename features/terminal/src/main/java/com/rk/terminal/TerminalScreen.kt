@@ -2,6 +2,7 @@ package com.rk.terminal
 
 import android.content.Intent
 import android.graphics.Typeface
+import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -287,26 +288,29 @@ private fun ColumnScope.TerminalView(
                         setTypeface(font)
                     }
 
-                    addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-                        val widthChanged = (right - left) != (oldRight - oldLeft)
-                        val heightChanged = (bottom - top) != (oldBottom - oldTop)
+                    // This listener used to be registered inside the factory and never removed, and it captured
+                    // `currentTheme`, `isDarkMode` and the colours *by value*. So it held the
+                    // state alive for the view's lifetime, and after a theme change a rotation
+                    // or resize re-applied the OLD palette over the new one. Reading the theme
+                    // at call time fixes both: the update block already re-applies on
+                    // recomposition, so this only needs to cover a size change.
+                    val layoutListener =
+                        View.OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+                            val widthChanged = (right - left) != (oldRight - oldLeft)
+                            val heightChanged = (bottom - top) != (oldBottom - oldTop)
 
-                        if (widthChanged || heightChanged) {
-                            val terminalColors =
-                                if (isDarkMode) {
-                                    currentTheme.darkTerminalColors
-                                } else {
-                                    currentTheme.lightTerminalColors
-                                }
-                            terminalView
-                                .get()
-                                ?.applyTerminalColors(
-                                    surfaceColor = surfaceColor,
+                            if (widthChanged || heightChanged) {
+                                val theme = LocalThemeHolder.current
+                                val dark = isDarkTheme(v.context)
+                                v.applyTerminalColors(
                                     onSurfaceColor = onSurfaceColor,
-                                    terminalColors = terminalColors,
+                                    surfaceColor = surfaceColor,
+                                    terminalColors =
+                                        if (dark) theme.darkTerminalColors else theme.lightTerminalColors,
                                 )
+                            }
                         }
-                    }
+                    addOnLayoutChangeListener(layoutListener)
 
                     post {
                         if (Settings.terminal_keep_screen_on) keepScreenOn = true

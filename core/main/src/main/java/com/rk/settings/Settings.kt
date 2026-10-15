@@ -435,11 +435,20 @@ open class CachedPreference<T>(val key: String, val defaultValue: T) : ReadWrite
         }
     }
 
+    /**
+     * Assigns without waking readers when nothing changed.
+     *
+     * Every write pushed an unconditional snapshot invalidation. `TerminalBackEnd.onScale` writes
+     * `Settings.terminal_font_size` on *every frame* of a pinch gesture, so each frame was
+     * invalidating every composable that reads it for no reason.
+     */
     internal fun applyStateValue(value: T) {
+        if (state == value) return
         state = value
     }
 
     internal fun resetToDefault() {
+        if (state == defaultValue) return
         state = defaultValue
     }
 }

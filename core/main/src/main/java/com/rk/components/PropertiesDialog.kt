@@ -43,6 +43,7 @@ import com.rk.file.FilePropertiesRegistry
 import com.rk.file.FileWrapper
 import com.rk.file.ZipCompressionMethod
 import com.rk.file.ZipFileObject
+import com.rk.file.ProgressThrottle
 import com.rk.resources.fillPlaceholders
 import com.rk.resources.getString
 import com.rk.resources.strings
@@ -151,10 +152,20 @@ fun GeneralProperties(file: FileObject) {
         if (file.isFile()) {
             size = formatFileSize(file.length())
         } else {
-            FileOperations.calculateContent(file) {
-                size = formatFileSize(it.totalSize)
-                itemsCount = numberFormatter.format(it.totalItems)
+            // calculateContent reports every entry; assigning two snapshot states per entry
+            // recomposed this dialog once per file. Throttled, with a final flush so the
+            // displayed total is never stale.
+            var latest = ContentProgress(0L, 0)
+            val publish = {
+                size = formatFileSize(latest.totalSize)
+                itemsCount = numberFormatter.format(latest.totalItems)
             }
+            val throttle = ProgressThrottle { publish() }
+            FileOperations.calculateContent(file) { progress ->
+                latest = progress
+                throttle.onItem(progress.totalItems)
+            }
+            throttle.flush()
         }
     }
 
