@@ -1,5 +1,6 @@
 package com.rk.settings.terminal
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import com.rk.components.compose.preferences.base.PreferenceLayoutLazyColumn
 import com.rk.components.compose.preferences.base.PreferenceTemplate
 import com.rk.exec.Binding
 import com.rk.exec.UserBindings
+import com.rk.resources.getString
 import com.rk.resources.strings
 import com.rk.settings.Settings
 
@@ -107,7 +109,7 @@ fun UserBindingsScreen() {
 private fun BindEditDialog(existing: Set<String>, onDismiss: () -> Unit, onSave: (String, String?) -> Unit) {
     var hostPath by remember { mutableStateOf("") }
     var guestPath by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<Int?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -137,7 +139,7 @@ private fun BindEditDialog(existing: Set<String>, onDismiss: () -> Unit, onSave:
                 )
                 if (error != null) {
                     Text(
-                        text = stringResource(error!!),
+                        text = error!!,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                     )
@@ -151,11 +153,16 @@ private fun BindEditDialog(existing: Set<String>, onDismiss: () -> Unit, onSave:
                     val outside = hostPath.trim()
                     val inside = guestPath.trim().ifEmpty { null }
 
+                    // Append the specific reason: a path with a space looks identical to
+                    // a missing folder in the generic message, and the space is the one
+                    // that used to make every session fail to launch.
                     error =
                         when {
-                            !UserBindings.isValidHostPath(outside) -> strings.bind_invalid_host
-                            inside != null && !UserBindings.isValidGuestPath(inside) -> strings.bind_invalid_guest
-                            existing.contains(outside) -> strings.bind_duplicate
+                            !UserBindings.isValidHostPath(outside) ->
+                                describe(strings.bind_invalid_host, UserBindings.rejectionReason(outside))
+                            inside != null && !UserBindings.isValidGuestPath(inside) ->
+                                describe(strings.bind_invalid_guest, UserBindings.rejectionReason(inside))
+                            existing.contains(outside) -> strings.bind_duplicate.getString()
                             else -> null
                         }
                     if (error == null) onSave(outside, inside)
@@ -167,3 +174,6 @@ private fun BindEditDialog(existing: Set<String>, onDismiss: () -> Unit, onSave:
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(strings.cancel)) } },
     )
 }
+
+private fun describe(@StringRes base: Int, reason: String?): String =
+    if (reason == null) base.getString() else "${base.getString()} — $reason"
