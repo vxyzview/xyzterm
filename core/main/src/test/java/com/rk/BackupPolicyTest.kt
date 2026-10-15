@@ -1,7 +1,6 @@
 package com.rk
 
 import android.content.Context
-import androidx.annotation.XmlRes
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import java.io.InputStream
@@ -30,8 +29,15 @@ class BackupPolicyTest {
 
     private val context: Context get() = ApplicationProvider.getApplicationContext()
 
-    private fun parse(@XmlRes resId: Int): Element {
-        val stream: InputStream = context.resources.openRawResource(resId)
+    private fun resId(name: String): Int {
+        val ctx = context
+        val id = ctx.resources.getIdentifier(name, "xml", ctx.packageName)
+        assertThat(id).isNotEqualTo(0)
+        return id
+    }
+
+    private fun parse(name: String): Element {
+        val stream: InputStream = context.resources.openRawResource(resId(name))
         return stream.use {
             DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it).documentElement
         }
@@ -47,28 +53,28 @@ class BackupPolicyTest {
 
     @Test
     fun `cloud backup does not upload the sandbox or the guest home directory`() {
-        val excludes = entries(parse(R.xml.data_extraction_rules), "cloud-backup", "exclude")
+        val excludes = entries(parse("data_extraction_rules"), "cloud-backup", "exclude")
 
         assertThat(excludes).contains("file/.")
     }
 
     @Test
     fun `cloud backup does not upload databases`() {
-        val excludes = entries(parse(R.xml.data_extraction_rules), "cloud-backup", "exclude")
+        val excludes = entries(parse("data_extraction_rules"), "cloud-backup", "exclude")
 
         assertThat(excludes).contains("database/.")
     }
 
     @Test
     fun `cloud backup still keeps settings, which are small and safe to restore`() {
-        val includes = entries(parse(R.xml.data_extraction_rules), "cloud-backup", "include")
+        val includes = entries(parse("data_extraction_rules"), "cloud-backup", "include")
 
         assertThat(includes).contains("sharedpref/.")
     }
 
     @Test
     fun `legacy backup rules for pre-31 devices also exclude files`() {
-        val root = parse(R.xml.backup_rules)
+        val root = parse("backup_rules")
 
         assertThat(entries(root, "full-backup-content", "exclude")).contains("file/.")
     }

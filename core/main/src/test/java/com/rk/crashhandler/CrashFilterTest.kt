@@ -15,7 +15,7 @@ import org.junit.Test
  * It also built the whole flattened stack trace before deciding, on every
  * uncaught exception.
  *
- * The production change these tests catch: widening [shouldIgnore] back to matching
+ * The production change these tests catch: widening [CrashHandler.shouldIgnore] back to matching
  * the stack trace, or dropping the `IllegalStateException` / message-name requirements.
  */
 class CrashFilterTest {
@@ -25,26 +25,26 @@ class CrashFilterTest {
 
     @Test
     fun `a NullPointerException is never ignored`() {
-        assertThat(shouldIgnore(NullPointerException("boom"))).isFalse()
+        assertThat(CrashHandler.shouldIgnore(NullPointerException("boom"))).isFalse()
     }
 
     @Test
     fun `an IllegalStateException without the savedstate name is not ignored`() {
-        assertThat(shouldIgnore(IllegalStateException("something else broke"))).isFalse()
+        assertThat(CrashHandler.shouldIgnore(IllegalStateException("something else broke"))).isFalse()
     }
 
     @Test
     fun `the framework view savedstate complaint is ignored`() {
         val ex = IllegalStateException("Cannot restore state of $viewSavedState")
 
-        assertThat(shouldIgnore(ex)).isTrue()
+        assertThat(CrashHandler.shouldIgnore(ex)).isTrue()
     }
 
     @Test
     fun `the framework scrollview savedstate complaint is ignored`() {
         val ex = IllegalStateException("Cannot restore state of $scrollSavedState")
 
-        assertThat(shouldIgnore(ex)).isTrue()
+        assertThat(CrashHandler.shouldIgnore(ex)).isTrue()
     }
 
     @Test
@@ -58,7 +58,7 @@ class CrashFilterTest {
                 StackTraceElement("com.rk.terminal.SessionService", "restore", "SessionService.kt", 98),
             )
 
-        assertThat(shouldIgnore(ex)).isFalse()
+        assertThat(CrashHandler.shouldIgnore(ex)).isFalse()
     }
 
     @Test
@@ -66,6 +66,6 @@ class CrashFilterTest {
         val ex = IllegalStateException()
         ex.stackTrace = arrayOf(StackTraceElement(viewSavedState, "onSaveInstanceState", "View.java", 1))
 
-        assertThat(shouldIgnore(ex)).isFalse()
+        assertThat(CrashHandler.shouldIgnore(ex)).isFalse()
     }
 }

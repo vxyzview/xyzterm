@@ -73,7 +73,7 @@ object TerminalBackup {
     fun backupDir(): File = localDir().child("backups")
 
     /** Tars the sandbox and home directory into [targetFile]. Returns null on success, else the reason. */
-    suspend fun create(targetFile: File): Boolean =
+    suspend fun create(targetFile: File): String? =
         withContext(Dispatchers.IO) {
             val process =
                 ProcessBuilder(backupCommand(targetFile))
