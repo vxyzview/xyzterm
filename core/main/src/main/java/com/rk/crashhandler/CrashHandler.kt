@@ -17,25 +17,41 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
     private val VIEW_SAVED_STATE = "android.view.View" + '$' + "BaseSavedState"
     private val SCROLL_SAVED_STATE = "android.widget.HorizontalScrollView" + '$' + "SavedState"
 
+    /**
+     * Whether a crash is the framework's own "I cannot restore my saved state" complaint, which
+     * is noise rather than a real defect.
+     *
+     * This used to substring-match `ex.stackTrace.contentToString()`, so *any* uncaught exception
+     * whose frames merely passed through view-state save/restore was dropped: no crash screen, no
+     * crash.log, and the app continuing on un-restored state. Matching on the type and the
+     * message keeps the one case that is genuinely noise and reports everything else.
+     */
+    internal fun shouldIgnore(ex: Throwable): Boolean {
+        if (ex !is IllegalStateException) return false
+        val message = ex.message ?: return false
+        return message.contains(VIEW_SAVED_STATE) || message.contains(SCROLL_SAVED_STATE)
+    }
+
     override fun uncaughtException(thread: Thread, ex: Throwable) {
+        if (shouldIgnore(ex)) {
+            // Always log, even when we go on to ignore it — a swallowed crash that leaves
+            // no trace anywhere is indistinguishable from one that never happened.
+            Log.w("CrashHandler", "Ignoring saved-state restore crash", ex)
+            return
+        }
+
         runCatching {
-            if (
-                ex.message.toString().contains(VIEW_SAVED_STATE) || ex.message.toString().contains(SCROLL_SAVED_STATE)
-            ) {
-                Log.w("CrashHandler", "Ignoring crash")
-                return@runCatching
-            }
+            val app =
+                application
+                    ?: run {
+                        // Crashed before Application.onCreate assigned it. There is no context to
+                        // launch CrashActivity with, so write the report directly rather than
+                        // dying through the onFailure below with nothing on disk.
+                        writeReport(ex)
+                        return@runCatching
+                    }
 
-            if (
-                ex.stackTrace.contentToString().contains(VIEW_SAVED_STATE) ||
-                    ex.stackTrace.contentToString().contains(SCROLL_SAVED_STATE)
-            ) {
-                Log.w("CrashHandler", "Ignoring crash")
-                ex.printStackTrace()
-                return@runCatching
-            }
-
-            val intent = Intent(application!!, CrashActivity::class.java)
+            val intent = Intent(app, CrashActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
             // Top-level exceptions often carry a null cause; toString() on it
@@ -59,10 +75,11 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
             intent.putExtra("stacktrace", stackTraceString)
             intent.putExtra("thread", thread.name)
 
-            application!!.startActivity(intent)
+            app.startActivity(intent)
         }
             .onFailure {
                 it.printStackTrace()
+                writeReport(ex)
                 exitProcess(1)
             }
 
@@ -83,8 +100,17 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
         }
     }
 
+    /** Best-effort on-disk crash report, for the cases where we cannot show [CrashActivity]. */
+    private fun writeReport(ex: Throwable) {
+        runCatching {
+            application?.filesDir?.child("crash.log")?.createFileIfNot()?.appendText(ex.stackTraceToString())
+        }
+    }
+
     fun logErrorOrExit(throwable: Throwable) {
-        runCatching { application!!.filesDir.child("crash.log").createFileIfNot().appendText(throwable.toString()) }
+        runCatching {
+                application!!.filesDir.child("crash.log").createFileIfNot().appendText(throwable.toString())
+            }
             .onFailure {
                 it.printStackTrace()
                 exitProcess(-1)

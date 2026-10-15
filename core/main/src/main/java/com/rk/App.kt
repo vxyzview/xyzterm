@@ -58,7 +58,8 @@ open class App : Application() {
     }
 
     init {
-        Thread.setDefaultUncaughtExceptionHandler(CrashHandler)
+        // Intentionally empty. CrashHandler used to be installed here, in the
+        // Application constructor, which runs before `application` is assigned.
     }
 
     /** App-lifetime scope for startup IO; replaces GlobalScope so work is structured and testable. */
@@ -68,6 +69,12 @@ open class App : Application() {
         super.onCreate()
         application = this
         Res.application = this
+
+        // Installed here rather than in the Application constructor: the handler needs
+        // `application` to launch CrashActivity, and that global is only assigned above.
+        // Registered before it, any crash in that window made the handler dereference a null
+        // `application` and exit(1) with no crash report at all.
+        Thread.setDefaultUncaughtExceptionHandler(CrashHandler)
 
         // Must run before anything that can raise a dialog: errorDialog/dialogRes/toast all
         // default to ActivityProvider.currentActivity, and without this registration that
