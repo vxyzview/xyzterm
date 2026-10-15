@@ -214,19 +214,14 @@ class LogcatService : Service() {
     }
 
     override fun onDestroy() {
+        serviceScope.cancel()
         // The logcat child is not a ProcessHandle we can signal portably; destroying the
-        // stream is what actually ends it.
+        // process handle is what actually ends it.
         runCatching { logcatProcess?.destroy() }
             .onFailure { Log.w("LogcatService", "could not stop logcat", it) }
         logcatProcess = null
         stopForeground(STOP_FOREGROUND_REMOVE)
-        super.onDestroy()
-    }
-
-    override fun onDestroy() {
-        serviceScope.cancel()
-        val notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.cancel(99)
+        getSystemService(NotificationManager::class.java).cancel(99)
         super.onDestroy()
     }
 

@@ -165,7 +165,8 @@ object KeybindingsManager {
         customKeybinds.forEach { (commandId, keyCombination) -> map[keyCombination] = commandId }
 
         for (command in CommandProvider.commandList) {
-            if (command.id in customKeybinds) continue
+            // containsKey, not `in`: on a ConcurrentHashMap `in` resolves to containsValue.
+            if (customKeybinds.containsKey(command.id)) continue
 
             command.defaultKeybinds?.let { map[it] = command.id }
         }
