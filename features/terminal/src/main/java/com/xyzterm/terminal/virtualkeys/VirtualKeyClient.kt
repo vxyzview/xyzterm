@@ -2,8 +2,8 @@ package com.xyzterm.terminal.virtualkeys
 
 import android.view.View
 import android.widget.Button
-import com.xyzterm.terminal.virtualkeys.VirtualKeysView.IVirtualKeysView
 import com.termux.terminal.TerminalSession
+import com.xyzterm.terminal.virtualkeys.VirtualKeysView.IVirtualKeysView
 
 class VirtualKeyClient(val session: TerminalSession) : IVirtualKeysView {
     override fun onVirtualKeyButtonClick(view: View?, buttonInfo: VirtualKeyButton?, button: Button?) {

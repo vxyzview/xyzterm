@@ -14,10 +14,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.xyzterm.R
 import com.xyzterm.settings.Settings
 import com.xyzterm.utils.DEFAULT_APP_FONT_PATH
 import com.xyzterm.utils.FontCache
-import com.xyzterm.R
 
 /*
  * Fallback font family if dynamic loading fails

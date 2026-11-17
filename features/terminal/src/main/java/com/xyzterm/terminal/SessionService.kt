@@ -15,6 +15,8 @@ import android.os.PowerManager
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
+import com.termux.terminal.TerminalSession
+import com.termux.terminal.TerminalSessionClient
 import com.xyzterm.DefaultScope
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.resources.drawables
@@ -23,8 +25,6 @@ import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Preference
 import com.xyzterm.settings.Settings
-import com.termux.terminal.TerminalSession
-import com.termux.terminal.TerminalSessionClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -64,16 +64,15 @@ class SessionService : Service() {
             // exit immediately with "Session ended".
             val extraction = activity.installNextStage == NEXT_STAGE.EXTRACTION
             val info =
-                MkSession.createSession(activity, client, id, extraction, cwd)
-                    .let {
-                        val (session, pwd) = it
-                        sessions[id] = session
-                        sessionWorkDirs[id] = pwd
-                        sessionList.add(id)
-                        saveSession(id, pwd)
-                        updateNotification()
-                        SessionInfo(id, pwd, session)
-                    }
+                MkSession.createSession(activity, client, id, extraction, cwd).let {
+                    val (session, pwd) = it
+                    sessions[id] = session
+                    sessionWorkDirs[id] = pwd
+                    sessionList.add(id)
+                    saveSession(id, pwd)
+                    updateNotification()
+                    SessionInfo(id, pwd, session)
+                }
             if (extraction) activity.installNextStage = NEXT_STAGE.NONE
             return info
         }
@@ -111,8 +110,8 @@ class SessionService : Service() {
                             async {
                                 gate.withPermit {
                                     runCatching {
-                                            MkSession.createSession(activity, TerminalBackEnd(), id, false, pwd)
-                                        }
+                                        MkSession.createSession(activity, TerminalBackEnd(), id, false, pwd)
+                                    }
                                         .getOrNull()
                                         ?.let { id to it }
                                 }

@@ -2,6 +2,8 @@ package com.xyzterm.terminal
 
 import android.app.Activity
 import android.content.Context
+import com.termux.terminal.TerminalSession
+import com.termux.terminal.TerminalSessionClient
 import com.xyzterm.exec.SandboxEnv
 import com.xyzterm.exec.pendingCommand
 import com.xyzterm.file.child
@@ -10,8 +12,6 @@ import com.xyzterm.file.localBinDir
 import com.xyzterm.file.localDir
 import com.xyzterm.file.sandboxHomeDir
 import com.xyzterm.settings.Settings
-import com.termux.terminal.TerminalSession
-import com.termux.terminal.TerminalSessionClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

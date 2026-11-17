@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
+import com.xyzterm.BuildConfig
 import com.xyzterm.components.SettingsItem
 import com.xyzterm.components.compose.preferences.base.PreferenceGroup
 import com.xyzterm.components.compose.preferences.base.PreferenceLayout
@@ -37,7 +38,6 @@ import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.utils.copyToClipboard
 import com.xyzterm.utils.okHttpClient
-import com.xyzterm.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -89,7 +89,7 @@ fun AboutScreen() {
                         text = stringResource(strings.developer_name),
                         style = MaterialTheme.typography.titleMedium,
                     )
-                },
+                }
             )
 
             SettingsItem(

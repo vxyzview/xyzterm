@@ -69,6 +69,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.termux.terminal.TerminalColors
+import com.termux.terminal.TextStyle
+import com.termux.view.TerminalView
 import com.xyzterm.activities.settings.SettingsActivity
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.components.ResponsiveDrawer
@@ -91,9 +94,6 @@ import com.xyzterm.utils.DEFAULT_TERMINAL_FONT_PATH
 import com.xyzterm.utils.FontCache
 import com.xyzterm.utils.dpToPx
 import com.xyzterm.utils.isDarkTheme
-import com.termux.terminal.TerminalColors
-import com.termux.terminal.TextStyle
-import com.termux.view.TerminalView
 import java.lang.ref.WeakReference
 import java.util.Properties
 import kotlinx.coroutines.CoroutineScope

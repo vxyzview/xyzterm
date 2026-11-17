@@ -16,6 +16,10 @@ import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.termux.terminal.TerminalEmulator
+import com.termux.terminal.TerminalSession
+import com.termux.terminal.TerminalSessionClient
+import com.termux.view.TerminalViewClient
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.resources.drawables
 import com.xyzterm.resources.getString
@@ -27,10 +31,6 @@ import com.xyzterm.utils.dialog
 import com.xyzterm.utils.dpToPx
 import com.xyzterm.utils.openUrl
 import com.xyzterm.utils.toast
-import com.termux.terminal.TerminalEmulator
-import com.termux.terminal.TerminalSession
-import com.termux.terminal.TerminalSessionClient
-import com.termux.view.TerminalViewClient
 import kotlinx.coroutines.launch
 
 private val URL_REGEX = Regex("""https?://[^\s"'<>]+|www\.[^\s"'<>]+""")

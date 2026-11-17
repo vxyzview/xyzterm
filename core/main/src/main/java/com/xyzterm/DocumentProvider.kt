@@ -16,7 +16,6 @@ import android.webkit.MimeTypeMap
 import com.xyzterm.file.sandboxHomeDir
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
-import com.xyzterm.R
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException

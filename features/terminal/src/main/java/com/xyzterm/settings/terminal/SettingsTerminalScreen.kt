@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.termux.terminal.TerminalEmulator
 import com.xyzterm.DefaultScope
 import com.xyzterm.DocumentProvider
 import com.xyzterm.activities.settings.SettingsActivity
@@ -47,7 +48,6 @@ import com.xyzterm.utils.dialogRes
 import com.xyzterm.utils.dpToPx
 import com.xyzterm.utils.getTempDir
 import com.xyzterm.utils.toast
-import com.termux.terminal.TerminalEmulator
 import java.io.FileOutputStream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi

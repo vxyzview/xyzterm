@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.core.content.pm.PackageInfoCompat
+import com.xyzterm.BuildConfig
 import com.xyzterm.crashhandler.CrashHandler.logErrorOrExit
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
@@ -41,7 +42,6 @@ import com.xyzterm.utils.SourceCodeProvider
 import com.xyzterm.utils.copyToClipboard
 import com.xyzterm.utils.openUrl
 import com.xyzterm.utils.origin
-import com.xyzterm.BuildConfig
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.net.URLEncoder

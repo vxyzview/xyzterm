@@ -5,13 +5,13 @@ import android.app.Application
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import com.xyzterm.BuildConfig
 import com.xyzterm.resources.drawables
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Preference
 import com.xyzterm.utils.application
 import com.xyzterm.utils.dialogRes
-import com.xyzterm.BuildConfig
 
 interface Feature {
     fun init(application: Application)

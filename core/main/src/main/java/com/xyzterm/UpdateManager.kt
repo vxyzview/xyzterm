@@ -22,7 +22,6 @@ import com.xyzterm.utils.GithubReleasesApi
 import com.xyzterm.utils.application
 import com.xyzterm.utils.dialogRes
 import com.xyzterm.utils.toast
-import com.xyzterm.BuildConfig
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,9 +63,9 @@ object UpdateManager {
         .getOrNull()
 
     /**
-     * True when a store client (F-Droid, Droid-ify, Neo Store, Play) installed the app. Those clients deliver
-     * updates themselves; an in-app updater would violate F-Droid policy and bypass the client's signature pinning.
-     * Browser / package-installer sideloads are not stores and must keep the self-update prompt.
+     * True when a store client (F-Droid, Droid-ify, Neo Store, Play) installed the app. Those clients deliver updates
+     * themselves; an in-app updater would violate F-Droid policy and bypass the client's signature pinning. Browser /
+     * package-installer sideloads are not stores and must keep the self-update prompt.
      */
     @Suppress("DEPRECATION")
     private fun installedFromStore(): Boolean = runCatching {

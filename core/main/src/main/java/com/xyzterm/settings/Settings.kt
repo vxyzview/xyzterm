@@ -7,10 +7,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.edit
+import com.xyzterm.BuildConfig
 import com.xyzterm.commands.ToolbarConfiguration
 import com.xyzterm.feature.FeatureRegistry
 import com.xyzterm.utils.application
-import com.xyzterm.BuildConfig
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.properties.ReadWriteProperty

@@ -19,8 +19,8 @@ internal enum class BackupLayout {
 }
 
 /**
- * Detect the archive layout from its top-level entry names. Kept pure so it can
- * be unit-tested without touching the filesystem.
+ * Detect the archive layout from its top-level entry names. Kept pure so it can be unit-tested without touching the
+ * filesystem.
  */
 internal fun detectBackupLayout(entries: List<String>): BackupLayout =
     if (entries.any { it == "sandbox" || it.startsWith("sandbox/") }) {
@@ -151,18 +151,24 @@ object TerminalBackup {
                 when (detectBackupLayout(staging.list()?.toList().orEmpty())) {
                     BackupLayout.V1_ROOT -> {
                         // Old archives never contained home; leave the user's home alone.
-                        swapDirectory(staging, sandboxTarget)?.let { return@withContext it }
+                        swapDirectory(staging, sandboxTarget)?.let {
+                            return@withContext it
+                        }
                     }
                     BackupLayout.V2_SANDBOX_HOME -> {
                         val stagedSandbox = File(staging, "sandbox")
                         if (!stagedSandbox.isDirectory) {
                             return@withContext "backup is missing its sandbox directory"
                         }
-                        swapDirectory(stagedSandbox, sandboxTarget)?.let { return@withContext it }
+                        swapDirectory(stagedSandbox, sandboxTarget)?.let {
+                            return@withContext it
+                        }
                         // Only replace home when the archive actually carries it.
                         val stagedHome = File(staging, "home")
                         if (stagedHome.isDirectory) {
-                            swapDirectory(stagedHome, sandboxHomeDir())?.let { return@withContext it }
+                            swapDirectory(stagedHome, sandboxHomeDir())?.let {
+                                return@withContext it
+                            }
                         }
                     }
                 }
