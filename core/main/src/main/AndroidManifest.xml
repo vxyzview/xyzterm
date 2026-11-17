@@ -3,7 +3,7 @@
 
     <application>
         <provider
-            android:name="com.rk.DocumentProvider"
+            android:name="com.xyzterm.DocumentProvider"
             android:authorities="${applicationId}.documents"
             android:exported="true"
             android:grantUriPermissions="true"
@@ -14,7 +14,7 @@
             </intent-filter>
         </provider>
 
-        <service android:name="com.rk.settings.debugOptions.LogcatService" />
+        <service android:name="com.xyzterm.settings.debugOptions.LogcatService" />
 
     </application>
 </manifest>

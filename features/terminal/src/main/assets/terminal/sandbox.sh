@@ -1,8 +1,10 @@
 # shellcheck disable=SC2034
 force_color_prompt=yes
 
-ARGS="--kill-on-exit"
-ARGS="$ARGS -w /"
+# Build proot arguments as an argv array, not a string: custom bind paths may
+# contain spaces, and unquoted expansion would split them into broken args.
+# /system/bin/sh is mksh, which supports `set -A name -- ...`.
+set -A ARGS -- --kill-on-exit -w /
 
 for system_mnt in /apex /odm /product /system /system_ext /vendor \
  /linkerconfig/ld.config.txt \
@@ -11,7 +13,7 @@ for system_mnt in /apex /odm /product /system /system_ext /vendor \
 
  if [ -e "$system_mnt" ]; then
   system_mnt=$(realpath "$system_mnt")
-  ARGS="$ARGS -b ${system_mnt}"
+  set -A ARGS -- "${ARGS[@]}" -b "$system_mnt"
  fi
 done
 unset system_mnt
@@ -20,7 +22,7 @@ unset system_mnt
 # and /sdcard (and friends) is absent on some tablets / secondary profiles.
 bind_if_exists() {
   local src="${1%%:*}"
-  [ -n "$src" ] && [ -e "$src" ] && ARGS="$ARGS -b $1"
+  [ -n "$src" ] && [ -e "$src" ] && set -A ARGS -- "${ARGS[@]}" -b "$1"
 }
 
 bind_if_exists /sdcard
@@ -41,24 +43,24 @@ $CUSTOM_BINDS
 __CUSTOM_BINDS__
 
 bind_if_exists /proc
-[ -e "$EXT_HOME" ] && ARGS="$ARGS -b $EXT_HOME:/home"
-[ -e "$EXT_HOME" ] && ARGS="$ARGS -b $EXT_HOME:/root"
+[ -e "$EXT_HOME" ] && set -A ARGS -- "${ARGS[@]}" -b "$EXT_HOME:/home"
+[ -e "$EXT_HOME" ] && set -A ARGS -- "${ARGS[@]}" -b "$EXT_HOME:/root"
 bind_if_exists "$PRIVATE_DIR"
 
 if [ -e "/proc/self/fd" ]; then
-  ARGS="$ARGS -b /proc/self/fd:/dev/fd"
+  set -A ARGS -- "${ARGS[@]}" -b /proc/self/fd:/dev/fd
 fi
 
 if [ -e "/proc/self/fd/0" ]; then
-  ARGS="$ARGS -b /proc/self/fd/0:/dev/stdin"
+  set -A ARGS -- "${ARGS[@]}" -b /proc/self/fd/0:/dev/stdin
 fi
 
 if [ -e "/proc/self/fd/1" ]; then
-  ARGS="$ARGS -b /proc/self/fd/1:/dev/stdout"
+  set -A ARGS -- "${ARGS[@]}" -b /proc/self/fd/1:/dev/stdout
 fi
 
 if [ -e "/proc/self/fd/2" ]; then
-  ARGS="$ARGS -b /proc/self/fd/2:/dev/stderr"
+  set -A ARGS -- "${ARGS[@]}" -b /proc/self/fd/2:/dev/stderr
 fi
 
 
@@ -69,13 +71,9 @@ if [ ! -d "$LOCAL/sandbox/tmp" ]; then
  chmod 1777 "$LOCAL/sandbox/tmp"
 fi
 
-ARGS="$ARGS -b $LOCAL/sandbox/tmp:/dev/shm"
+set -A ARGS -- "${ARGS[@]}" -b "$LOCAL/sandbox/tmp:/dev/shm"
 
-ARGS="$ARGS -r $LOCAL/sandbox"
-ARGS="$ARGS -0"
-ARGS="$ARGS --link2symlink"
-ARGS="$ARGS --sysvipc"
-ARGS="$ARGS -L"
+set -A ARGS -- "${ARGS[@]}" -r "$LOCAL/sandbox" -0 --link2symlink --sysvipc -L
 
 # Exec bits only need restoring once; scripts are written a single time by
 # the app (setupAssetFile skips existing files), so they persist across spawns.
@@ -85,9 +83,7 @@ if [ ! -f "$LOCAL/.bin_chmod_done" ]; then
 fi
 
 if [ $# -gt 0 ]; then
-    # shellcheck disable=SC2086
-    exec $PROOT $ARGS /bin/bash --rcfile "$LOCAL/bin/init" -i -c "$*"
+    exec "$PROOT" "${ARGS[@]}" /bin/bash --rcfile "$LOCAL/bin/init" -i -c "$*"
 else
-    exec $PROOT $ARGS /bin/bash --rcfile "$LOCAL/bin/init" -i
+    exec "$PROOT" "${ARGS[@]}" /bin/bash --rcfile "$LOCAL/bin/init" -i
 fi
-

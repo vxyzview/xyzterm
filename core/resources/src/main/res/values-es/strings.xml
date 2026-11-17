@@ -94,7 +94,6 @@
     <string name="strict_mode">Modo estricto</string>
 <string name="developer">Desarrollador</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">Información de construcción</string>
     <string name="community">Comunidad</string>
@@ -173,10 +172,8 @@
     <string name="export_failed">Exportación incorrecta</string>
     <string name="import_successful">Importación correcta</string>
     <string name="import_failed">Importación incorrecta</string>
-<string name="icon_packs">Paquetes de iconos</string>
 <string name="last_modified">Último modificado</string>
     <string name="content_property">%1$s elementos, total de %2$s</string>
-    <string name="icon_pack_install_failed">Paquete de icono de instalación incorrecto</string>
 <string name="manifest_missing">El archivo manifest.json está ausente. Añádalo e inténtelo de nuevo.</string>
 <string name="general">Común</string>
     <string name="advanced">Avanzado</string>

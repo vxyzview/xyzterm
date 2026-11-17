@@ -22,6 +22,5 @@
     <string name="setup_failed">Quraşdırma uğursuz oldu: %s</string>
     <string name="developer">Tərtibatçı</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
 </resources>

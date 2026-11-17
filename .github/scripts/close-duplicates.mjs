@@ -96,8 +96,8 @@ function parseStacktrace(raw) {
     if (line.startsWith("Suppressed:") || line.startsWith("...")) continue;
     if (!line.startsWith("at ")) continue;
 
-    // "at com.rk.editor.Editor$updateColors$1$1.invokeSuspend(Editor.kt:164)"
-    //  → classAndMethod = "com.rk.editor.Editor$updateColors$1$1.invokeSuspend"
+    // "at com.xyzterm.editor.Editor$updateColors$1$1.invokeSuspend(Editor.kt:164)"
+    //  → classAndMethod = "com.xyzterm.editor.Editor$updateColors$1$1.invokeSuspend"
     const classAndMethod = line.replace(/^at /, "").split("(")[0];
     const lastDot = classAndMethod.lastIndexOf(".");
     const className = lastDot === -1 ? classAndMethod : classAndMethod.substring(0, lastDot);

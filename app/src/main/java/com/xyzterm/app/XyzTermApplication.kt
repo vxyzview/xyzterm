@@ -1,8 +1,8 @@
 package com.xyzterm.app
 
-import com.rk.App
-import com.rk.TerminalFeature
-import com.rk.feature.FeatureRegistry
+import com.xyzterm.App
+import com.xyzterm.TerminalFeature
+import com.xyzterm.feature.FeatureRegistry
 
 class XyzTermApplication : App() {
     override fun onCreate() {

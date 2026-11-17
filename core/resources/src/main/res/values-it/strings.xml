@@ -109,7 +109,6 @@
     <string name="verbose_errors_desc">Inclusi lo stackrace nelle finestre di dialogo di errore</string>
 <string name="developer">Sviluppatore</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">Informazioni build</string>
     <string name="community">Community</string>
@@ -179,10 +178,8 @@
     <string name="import_successful">Importazione riuscita</string>
     <string name="import_failed">Importazione non riuscita</string>
 <string name="drawer">Drawer</string>
-    <string name="icon_packs">Pacchetti icone</string>
 <string name="last_modified">Ultima modifica</string>
     <string name="content_property">%1$s elementi, per un totale di %2$s</string>
-    <string name="icon_pack_install_failed">Installazione del pacchetto di icone non riuscita</string>
     <string name="manifest_missing_fields">Il file manifest.json contiene proprietà mancanti o non valide:\n%s\n\nControlla il file e riprova.</string>
     <string name="manifest_missing">Il file manifest.json è mancante. Aggiungilo e riprova.</string>
 <string name="general">Generale</string>

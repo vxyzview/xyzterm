@@ -110,7 +110,6 @@
     <string name="anr_watchdog">Мониторинг ANR</string>
 <string name="developer">Разработчик</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">Информация о сборке</string>
     <string name="community">Сообщество</string>
@@ -172,10 +171,8 @@
     <string name="import_successful">Импорт выполнен успешно</string>
     <string name="import_failed">Не удалось выполнить импорт</string>
 <string name="drawer">Боковая панель</string>
-    <string name="icon_packs">Наборы иконок</string>
 <string name="last_modified">Дата изменения</string>
     <string name="content_property">%1$s элем., всего %2$s</string>
-    <string name="icon_pack_install_failed">Не удалось установить набор значков</string>
 <string name="manifest_missing">Файл manifest.json отсутствует. Пожалуйста, добавьте его и попробуйте снова.</string>
 <string name="general">Общие</string>
     <string name="advanced">Дополнительно</string>

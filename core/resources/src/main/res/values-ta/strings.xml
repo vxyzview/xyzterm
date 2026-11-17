@@ -110,7 +110,6 @@
     <string name="verbose_errors_desc">பிழை உரையாடல்களில் ச்டேக்ட்ரேசைச் சேர்க்கவும்</string>
 <string name="developer">உருவாக்குநர்</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">செய்தி உருவாக்கவும்</string>
     <string name="community">சமூகம்</string>

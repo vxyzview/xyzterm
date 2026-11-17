@@ -17,8 +17,8 @@ android {
         targetSdk = 37
 
         // versioning
-        versionCode = 1
-        versionName = "1.0.0-beta1"
+        versionCode = 2
+        versionName = "1.1.0"
         vectorDrawables { useSupportLibrary = true }
     }
 
@@ -49,7 +49,7 @@ android {
                 if (isGitHubActions) {
                     "/tmp/signing.properties"
                 } else {
-                    "/home/rohit/Android/xed-signing/signing.properties"
+                    "signing.properties"
                 }
 
             val propertiesFile = File(propertiesFilePath)

@@ -157,7 +157,6 @@
     <string name="logcat_running_desc">Logcat is printing logs to the logs screen.</string>
 <string name="developer">Developer</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">Build info</string>
     <string name="community">Community</string>
@@ -185,7 +184,6 @@
 <string name="theme_flipper">Theme flipper</string>
     <string name="theme_flipper_desc">Constantly change the theme mode every 7s</string>
 <string name="incompatible_theme_warning">This theme is not compatible with your current version of xyzterm. Would you like to proceed anyway?</string>
-    <string name="incompatible_icon_pack_warning">This icon pack is not compatible with your current version of xyzterm. Would you like to proceed anyway?</string>
     <string name="theme_install_failed">Theme installation failed</string>
 <string name="disclaimer_heading">Terms of Use &amp; Disclaimer</string>
     <string name="disclaimer_read_carefully">Please read carefully before using this application.</string>
@@ -228,10 +226,8 @@
     <string name="import_successful">Import successful</string>
     <string name="import_failed">Import failed</string>
 <string name="drawer">Drawer</string>
-    <string name="icon_packs">Icon packs</string>
 <string name="last_modified">Last modified</string>
     <string name="content_property">%1$s items, totaling %2$s</string>
-    <string name="icon_pack_install_failed">Icon pack installation failed</string>
     <string name="manifest_missing_fields">The manifest.json file has missing or invalid properties:\n%s\n\nPlease check the file and try again.</string>
     <string name="manifest_missing">The manifest.json file is missing. Please add it and try again.</string>
 <string name="general">General</string>
@@ -305,7 +301,6 @@
     <string name="compression_method">Compression method</string>
     <string name="crc_32" translatable="false">CRC-32</string>
     <string name="comment">Comment</string>
-<string name="xed_package">xyzterm package</string>
     <string name="migrating_themes">Migrating themes…</string>
     <string name="session_ended">Session ended</string>
     <string name="delete_session_confirm">Kill this session? Its processes will be terminated.</string>

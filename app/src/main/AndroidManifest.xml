@@ -54,10 +54,10 @@
         </provider>
 
         <activity
-            android:name="com.rk.crashhandler.CrashActivity"
+            android:name="com.xyzterm.crashhandler.CrashActivity"
             android:exported="false" />
         <activity
-            android:name="com.rk.activities.settings.SettingsActivity"
+            android:name="com.xyzterm.activities.settings.SettingsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

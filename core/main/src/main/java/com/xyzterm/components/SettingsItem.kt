@@ -1,0 +1,118 @@
+package com.xyzterm.components
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.xyzterm.components.compose.preferences.base.PreferenceTemplate
+import com.xyzterm.components.compose.preferences.switch.PreferenceSwitch
+
+@Composable
+fun BasicToggle(
+    modifier: Modifier = Modifier,
+    label: String,
+    description: String? = null,
+    checked: Boolean,
+    onSwitch: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    startWidget: (@Composable () -> Unit)? = null,
+    endWidget: (@Composable () -> Unit)? = null,
+) {
+    PreferenceSwitch(
+        checked = checked,
+        description = description,
+        onCheckedChange = { onSwitch.invoke(it) },
+        label = label,
+        enabled = enabled,
+        modifier = modifier,
+        startWidget = startWidget,
+        endWidget = endWidget,
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SettingsItem(
+    modifier: Modifier = Modifier,
+    label: String,
+    default: Boolean,
+    state: MutableState<Boolean> = remember(default) { mutableStateOf(default) },
+    description: String? = null,
+    singleLineDescription: Boolean = false,
+    reactiveSideEffect: ((checked: Boolean) -> Boolean)? = null,
+    sideEffect: ((checked: Boolean) -> Unit)? = null,
+    showSwitch: Boolean = true,
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
+    isEnabled: Boolean = true,
+    isSwitchLocked: Boolean = false,
+    startWidget: (@Composable () -> Unit)? = null,
+    endWidget: (@Composable () -> Unit)? = null,
+) {
+    if (showSwitch) {
+        PreferenceSwitch(
+            checked = state.value,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            onCheckedChange = {
+                val target = if (isSwitchLocked) state.value else !state.value
+                if (reactiveSideEffect != null) {
+                    // Validator decides: approved applies the target value,
+                    // denied keeps the current one.
+                    if (reactiveSideEffect.invoke(target)) {
+                        state.value = target
+                    }
+                } else {
+                    if (isSwitchLocked.not()) {
+                        state.value = target
+                    }
+                    sideEffect?.invoke(state.value)
+                }
+            },
+            startWidget = startWidget,
+            endWidget = endWidget,
+            label = label,
+            modifier = modifier,
+            description = description,
+            singleLineDescription = singleLineDescription,
+            enabled = isEnabled,
+        )
+    } else {
+        val interactionSource = remember { MutableInteractionSource() }
+        PreferenceTemplate(
+            modifier =
+                modifier.combinedClickable(
+                    enabled = isEnabled,
+                    indication = ripple(),
+                    interactionSource = interactionSource,
+                    onLongClick = onLongClick,
+                    onClick = { onClick?.invoke() ?: sideEffect?.invoke(false) },
+                ),
+            contentModifier = Modifier.fillMaxHeight().padding(vertical = 16.dp).padding(start = 16.dp),
+            title = { Text(text = label) },
+            description = {
+                description?.let {
+                    Text(
+                        text = it,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = if (singleLineDescription) 1 else Int.MAX_VALUE,
+                    )
+                }
+            },
+            enabled = isEnabled,
+            applyPaddings = false,
+            endWidget = endWidget,
+            startWidget = startWidget,
+        )
+    }
+}

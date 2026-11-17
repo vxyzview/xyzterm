@@ -108,7 +108,6 @@
     <string name="verbose_errors_desc">在錯誤對話框中包含詳細堆疊回溯</string>
 <string name="developer">開發者</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">建置資訊</string>
     <string name="community">社群</string>
@@ -174,10 +173,8 @@
     <string name="import_successful">匯入成功</string>
     <string name="import_failed">匯入失敗</string>
 <string name="drawer">側滑欄</string>
-    <string name="icon_packs">圖示套件</string>
 <string name="last_modified">最後修改時間</string>
     <string name="content_property">%1$s 個項目，總計 %2$s</string>
-    <string name="icon_pack_install_failed">圖示套件安裝失敗</string>
 <string name="manifest_missing">缺少 manifest.json 檔案。請加入後再試一次。</string>
 <string name="general">一般</string>
     <string name="advanced">進階</string>

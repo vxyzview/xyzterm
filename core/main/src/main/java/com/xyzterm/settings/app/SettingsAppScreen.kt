@@ -1,0 +1,253 @@
+package com.xyzterm.settings.app
+
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import androidx.navigation.NavController
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import com.xyzterm.activities.settings.SettingsActivity
+import com.xyzterm.activities.settings.SettingsRoutes
+import com.xyzterm.components.BasicToggle
+import com.xyzterm.components.SettingsItem
+import com.xyzterm.components.compose.preferences.base.PreferenceGroup
+import com.xyzterm.components.compose.preferences.base.PreferenceLayout
+import com.xyzterm.feature.FeatureRegistry
+import com.xyzterm.file.toFileObject
+import com.xyzterm.resources.strings
+import com.xyzterm.settings.Preference
+import com.xyzterm.settings.Settings
+import com.xyzterm.utils.application
+import com.xyzterm.utils.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+@Composable
+fun SettingsAppScreen(activity: SettingsActivity, navController: NavController) {
+    PreferenceLayout(label = stringResource(id = strings.app), backArrowVisible = true) {
+        val scope = rememberCoroutineScope()
+        val gson = remember { GsonBuilder().setPrettyPrinting().create() }
+
+        PreferenceGroup {
+            SettingsItem(
+                label = stringResource(strings.lang),
+                description = stringResource(strings.lang_desc),
+                showSwitch = false,
+                default = false,
+                endWidget = {
+                    Icon(
+                        modifier = Modifier.padding(16.dp),
+                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        contentDescription = null,
+                    )
+                },
+                sideEffect = { navController.navigate(SettingsRoutes.LanguageScreen.route) },
+            )
+
+            SettingsItem(
+                label = stringResource(strings.check_for_updates),
+                description = stringResource(strings.check_for_updates_desc),
+                default = Settings.check_for_update,
+                sideEffect = { Settings.check_for_update = it },
+            )
+
+            SettingsItem(
+                label = stringResource(strings.fullscreen),
+                description = stringResource(strings.fullscreen_desc),
+                default = Settings.fullscreen,
+                sideEffect = { Settings.fullscreen = it },
+            )
+
+            SettingsItem(
+                label = stringResource(strings.smart_toolbar),
+                description = stringResource(strings.smart_toolbar_desc),
+                default = Settings.smart_toolbar,
+                sideEffect = { Settings.smart_toolbar = it },
+            )
+
+            SettingsItem(
+                label = stringResource(strings.confirm_exit_dialog),
+                description = stringResource(strings.confirm_exit_dialog_desc),
+                default = Settings.confirm_exit,
+                sideEffect = { Settings.confirm_exit = it },
+            )
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+                var hasManageExternalStorageDeclared by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    val app = application ?: return@LaunchedEffect
+                    val pm = app.packageManager
+
+                    val pkgInfo =
+                        pm.getPackageInfo(
+                            app.packageName,
+                            PackageManager.GET_PERMISSIONS,
+                        )
+
+                    hasManageExternalStorageDeclared =
+                        pkgInfo.requestedPermissions?.any { it == android.Manifest.permission.MANAGE_EXTERNAL_STORAGE }
+                            ?: false
+                }
+
+                SettingsItem(
+                    label = stringResource(strings.manage_storage),
+                    description = stringResource(strings.manage_storage_desc),
+                    showSwitch = false,
+                    isEnabled = hasManageExternalStorageDeclared,
+                    default = false,
+                    endWidget = {
+                        Icon(
+                            modifier = Modifier.padding(16.dp),
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            contentDescription = null,
+                        )
+                    },
+                    sideEffect = {
+                        val intent = Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                        intent.data = "package:${activity.packageName}".toUri()
+                        activity.startActivity(intent)
+                    },
+                )
+            }
+        }
+
+        PreferenceGroup(heading = stringResource(strings.feature_toggles)) {
+            FeatureRegistry.toggles.forEach { toggle ->
+                BasicToggle(
+                    label = stringResource(toggle.nameRes),
+                    checked = toggle.state.value,
+                    onSwitch = { checked ->
+                        if (toggle.onSwitch != null) {
+                            toggle.onSwitch.invoke(activity, checked) { ok -> toggle.setEnable(ok) }
+                        } else {
+                            toggle.setEnable(checked)
+                        }
+                    },
+                    startWidget = {
+                        Icon(
+                            painter = painterResource(toggle.iconRes),
+                            contentDescription = stringResource(toggle.nameRes),
+                            modifier = Modifier.padding(start = 16.dp),
+                        )
+                    },
+                )
+            }
+        }
+
+        PreferenceGroup(heading = stringResource(strings.backup)) {
+            SettingsItem(
+                label = stringResource(id = strings.backup),
+                description = stringResource(id = strings.settings_backup_desc),
+                showSwitch = false,
+                default = false,
+                sideEffect = {
+                    activity.fileManager.createNewFile(
+                        "application/json",
+                        "xyzterm-settings.json",
+                    ) { fileObject ->
+                        if (fileObject == null) return@createNewFile
+                        scope.launch(Dispatchers.IO) {
+                            try {
+                                val json = gson.toJson(Preference.getAll())
+                                fileObject.getOutputStream(false).use { outputStream ->
+                                    outputStream.write(json.toByteArray())
+                                }
+                                toast(strings.export_successful)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                toast(strings.export_failed)
+                            }
+                        }
+                    }
+                },
+            )
+            SettingsItem(
+                label = stringResource(id = strings.restore),
+                description = stringResource(id = strings.settings_restore_desc),
+                showSwitch = false,
+                default = false,
+                sideEffect = {
+                    activity.fileManager.requestOpenFile("application/json") { uri ->
+                        if (uri == null) return@requestOpenFile
+                        scope.launch(Dispatchers.IO) {
+                            // Snapshot current settings before any wipe so a failed
+                            // restore can roll back instead of leaving them half-cleared.
+                            val snapshot = Preference.getAll()
+                            try {
+                                val type = object : TypeToken<Map<String, Any>>() {}.type
+                                val content = uri.toFileObject(true).readText()
+                                val json: Map<String, Any> = gson.fromJson(content, type)
+
+                                // Coerce and validate BEFORE wiping current settings:
+                                // an unknown key or mismatched type must be skipped,
+                                // never crash after clearData() (partial restore +
+                                // lost settings).
+                                val coerced = mutableMapOf<String, Any>()
+                                json.forEach { (key, value) ->
+                                    if (value !is Number && value !is Boolean && value !is String) {
+                                        return@forEach
+                                    }
+
+                                    val fixedValue =
+                                        when (Preference.preferenceTypes[key]) {
+                                            Float::class -> (value as Number).toFloat()
+                                            Int::class -> (value as Number).toInt()
+                                            Long::class -> (value as Number).toLong()
+                                            Boolean::class -> value as? Boolean ?: return@forEach
+                                            String::class -> value as? String ?: return@forEach
+                                            else -> return@forEach
+                                        }
+
+                                    coerced[key] = fixedValue
+                                }
+
+                                // Snapshot before wiping so a failed write can roll back
+                                // instead of leaving settings half-cleared.
+                                val snapshot = Preference.getAll()
+
+                                Preference.clearData()
+                                coerced.forEach { (key, value) -> Preference.put(key, value) }
+
+                                // Update theme in the UI if the setting changed
+                                withContext(Dispatchers.Main) {
+                                    AppCompatDelegate.setDefaultNightMode(Settings.theme_mode)
+                                }
+
+                                toast(strings.import_successful)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                // ponytail: roll back to the pre-restore snapshot so a
+                                // failed import doesn't leave settings half-wiped.
+                                Preference.clearData()
+                                snapshot.forEach { entry ->
+                                    val v = entry.value
+                                    if (v != null) Preference.put(entry.key, v)
+                                }
+                                toast(strings.import_failed)
+                            }
+                        }
+                    }
+                },
+            )
+        }
+    }
+}

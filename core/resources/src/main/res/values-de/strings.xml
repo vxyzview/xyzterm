@@ -108,7 +108,6 @@
     <string name="verbose_errors_desc">Stacktrace in Fehlermeldungen anzeigen</string>
 <string name="developer">Entwickler</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">Build-Informationen</string>
     <string name="community">Community</string>
@@ -174,10 +173,8 @@
     <string name="import_successful">Import erfolgreich</string>
     <string name="import_failed">Import fehlgeschlagen</string>
 <string name="drawer">Drawer</string>
-    <string name="icon_packs">Icon-Pakete</string>
 <string name="last_modified">Zuletzt geändert</string>
     <string name="content_property">%1$s Einträge, %2$s gesamt</string>
-    <string name="icon_pack_install_failed">Installation des Icon-Pakets fehlgeschlagen</string>
 <string name="manifest_missing">Die Datei manifest.json fehlt. Bitte füge sie hinzu und versuche es erneut.</string>
 <string name="general">Allgemein</string>
     <string name="advanced">Erweitert</string>
@@ -254,7 +251,6 @@
     <string name="enable_logcat_desc">Logcat ausführen und die Logs im Log-Bildschirm ausgeben</string>
     <string name="logcat_running">Logcat läuft</string>
     <string name="logcat_running_desc">Logcat gibt Logs auf dem Log-Bildschirm aus.</string>
-<string name="incompatible_icon_pack_warning">Dieses Icon-Paket ist nicht mit deiner aktuellen Version von xyzterm kompatibel. Möchtest du trotzdem fortfahren?</string>
 <string name="session_name_exists">Sitzungsname existiert bereits</string>
     <string name="rename_session">Sitzung umbenennen</string>
 <string name="compressed_size">Komprimierte Größe</string>
@@ -262,6 +258,5 @@
     <string name="compression_method">Kompressionsverfahren</string>
     <string name="comment">Kommentar</string>
     <string name="theme_migrated">%d Themen erfolgreich migriert</string>
-<string name="xed_package">xyzterm-Paket</string>
     <string name="migrating_themes">Themen werden migriert…</string>
 </resources>

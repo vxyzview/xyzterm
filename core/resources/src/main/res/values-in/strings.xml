@@ -108,7 +108,6 @@
     <string name="verbose_errors_desc">Sertakan stacktrace dalam dialog kesalahan</string>
 <string name="developer">Pengembang</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">Info build</string>
     <string name="community">Komunitas</string>
@@ -174,10 +173,8 @@
     <string name="import_successful">Impor berhasil</string>
     <string name="import_failed">Impor gagal</string>
 <string name="drawer">Laci</string>
-    <string name="icon_packs">Paket ikon</string>
 <string name="last_modified">Terakhir diubah</string>
     <string name="content_property">%1$s item, total %2$s</string>
-    <string name="icon_pack_install_failed">Gagal menginstal paket ikon</string>
 <string name="manifest_missing">File manifest.json tidak ada. Silakan tambahkan lalu coba lagi.</string>
 <string name="general">Umum</string>
     <string name="advanced">Lanjutan</string>
@@ -250,7 +247,6 @@
     <string name="enable_logcat_desc">Jalankan Logcat dan tampilkan log di layar log</string>
     <string name="logcat_running">Logcat sedang berjalan</string>
     <string name="logcat_running_desc">Logcat sedang menampilkan log di layar log.</string>
-<string name="incompatible_icon_pack_warning">Paket ikon ini tidak kompatibel dengan versi xyzterm yang Anda gunakan saat ini. Apakah Anda tetap ingin melanjutkan?</string>
     <string name="session_name_exists">Nama sesi sudah ada</string>
     <string name="rename_session">Ubah nama sesi</string>
 <string name="compressed_size">Ukuran terkompresi</string>

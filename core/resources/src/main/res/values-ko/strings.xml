@@ -112,7 +112,6 @@
     <string name="verbose_errors_desc">오류 대화상자에 스택 트레이스 포함</string>
 <string name="developer">개발자</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">빌드 정보</string>
     <string name="community">커뮤니티</string>

@@ -138,7 +138,7 @@
 # Retain generic signatures of TypeToken and its subclasses with R8 version 3.0 and higher.
 -keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
 -keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
--keep class com.rk.App { *; }
+-keep class com.xyzterm.App { *; }
 # Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
 -keep class * extends com.google.gson.TypeAdapter
@@ -153,8 +153,8 @@
 -keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
 -keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
 # Keep classes and members for all models used with Gson
-#-keep class com.rk.xededitor.** { *; }
-#-keep class com.rk.plugin.** { *; }
+
+
 # Keep all classes that might be used by Gson
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
@@ -178,25 +178,15 @@
 -keep class * extends com.google.gson.TypeAdapter { *; }
 
 
-# Skip shrinking class if it contains the xed extension point or related to extension related code
--keep @com.rk.extension.api.XedExtensionPoint class * { *; }
--keepclassmembers class * {
-    @com.rk.extension.api.XedExtensionPoint *;
-}
--keep class * {
-    @com.rk.extension.api.XedExtensionPoint <methods>;
-    @com.rk.extension.api.XedExtensionPoint <fields>;
-}
 
 
 # Preserve well-known classes that plugins may try to access and keep their names
--keep class com.rk.commands.** { *; }
--keep class com.rk.file.** { *; }
--keep class com.rk.utils.** { *; }
--keep class com.rk.components.** { *; }
--keep class com.rk.extension.** { *; }
--keep class com.rk.App { *; }
--keep class com.rk.XedConstants { *; }
+-keep class com.xyzterm.commands.** { *; }
+-keep class com.xyzterm.file.** { *; }
+-keep class com.xyzterm.utils.** { *; }
+-keep class com.xyzterm.components.** { *; }
+-keep class com.xyzterm.extension.** { *; }
+-keep class com.xyzterm.App { *; }
 -keep class java.io.** { *; }
 -keep class kotlin.** { *; }
 -keep class kotlinx.** { *; }

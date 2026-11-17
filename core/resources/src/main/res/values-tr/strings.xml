@@ -108,7 +108,6 @@
     <string name="verbose_errors_desc">Hata iletişim kutularında stacktrace iznini dahil et</string>
 <string name="developer">Geliştirici</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">Derleme bilgisi</string>
     <string name="community">Topluluk</string>
@@ -174,10 +173,8 @@
     <string name="import_successful">İçe aktarma başarılı</string>
     <string name="import_failed">İçe aktarma başarısız</string>
 <string name="drawer">Çekmece</string>
-    <string name="icon_packs">İkon paketleri</string>
 <string name="last_modified">Son Düzenleme</string>
     <string name="content_property">%1$s öğe, toplam %2$s</string>
-    <string name="icon_pack_install_failed">İkon paketi kurulumu başarısız oldu</string>
 <string name="manifest_missing">manifest.json dosyası eksik. Lütfen ekleyin ve tekrar deneyin.</string>
 <string name="general">Genel</string>
     <string name="advanced">Gelişmiş</string>
@@ -254,7 +251,6 @@
     <string name="enable_logcat_desc">Logcat\'i çalıştır ve günlükleri günlükler ekranında yazdır</string>
     <string name="logcat_running">Logcat çalışıyor</string>
     <string name="logcat_running_desc">Logcat, logları loglar ekranına yazdırıyor.</string>
-<string name="incompatible_icon_pack_warning">Bu simge paketi, xyzterm\'ın mevcut sürümünüzle uyumlu değil. Yine de devam etmek ister misiniz?</string>
     <string name="session_name_exists">Oturum adı zaten mevcut</string>
     <string name="rename_session">Oturum adını değiştir</string>
 <string name="compressed_size">Sıkıştırılmış boyut</string>
@@ -262,6 +258,5 @@
     <string name="compression_method">Sıkıştırma yöntemi</string>
     <string name="comment">Yorum</string>
     <string name="theme_migrated">Başarıyla %d tema geçişi yapıldı</string>
-<string name="xed_package">xyzterm paketi</string>
     <string name="migrating_themes">Temalar taşınıyor…</string>
 </resources>

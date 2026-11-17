@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "org.robok.engine.core.components"
+    namespace = "com.xyzterm.components"
     compileSdk = 37
 
     defaultConfig {

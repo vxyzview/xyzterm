@@ -96,7 +96,6 @@
     <string name="verbose_errors_desc">Zahrnout stacktrace ve chybových zprávách</string>
 <string name="developer">Vývojář</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">Informace o sestavení</string>
     <string name="community">Komunita</string>
@@ -168,10 +167,8 @@
 <string name="manifest_missing">Soubor manifest.json chybí. Prosím přidejte ho a zkuste to znovu.</string>
 <string name="general">Obecné</string>
     <string name="advanced">Pokročilé</string>
-    <string name="icon_packs">Sady ikon</string>
 <string name="last_modified">Posledně změněno</string>
     <string name="content_property">%1$s položky/ek, roven %2$s</string>
-    <string name="icon_pack_install_failed">Instalace sadu ikon selhalo</string>
 <string name="reset_consent_desc">Znovu zobrazit všechny legální podmínky ohledně této aplikace po dalším spuštěním</string>
     <string name="reset_consent">Resetovat souhlas</string>
 <string name="user_data">Uživatelská data</string>
@@ -259,7 +256,6 @@
 <string name="pending">Čekání</string>
 <string name="session_name_exists">Jméno relace už existuje</string>
     <string name="rename_session">Přejmenovat relaci</string>
-<string name="incompatible_icon_pack_warning">Tato sada ikon není kompatibilní s vaší aktuální verzí xyzterm. Chcete i tak pokračovat?</string>
     <string name="comment">Komentář</string>
     <string name="compression_method">Metoda komprese</string>
     <string name="compression_ratio">Poměr komprese</string>

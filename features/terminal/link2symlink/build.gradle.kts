@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.rk.link2symlink"
+    namespace = "com.xyzterm.link2symlink"
     ndkVersion = "28.2.13676358"
     compileSdk {
         version = release(37)

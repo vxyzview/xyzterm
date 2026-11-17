@@ -108,7 +108,6 @@
     <string name="verbose_errors_desc">在对话框中显示详细堆栈跟踪信息</string>
 <string name="developer">开发者</string>
     <string name="developer_name">vxyzview</string>
-    <string name="fork_attribution">Fork of Xed-Editor, stripped to a terminal-only proot Ubuntu environment.</string>
     <string name="upstream_source">Upstream source</string>
     <string name="build_info">构建信息</string>
     <string name="community">社区</string>
@@ -174,9 +173,7 @@
     <string name="import_successful">导入成功</string>
     <string name="import_failed">导入失败</string>
 <string name="drawer">侧滑栏</string>
-    <string name="icon_packs">图标包</string>
 <string name="last_modified">最后修改日期</string>
-    <string name="icon_pack_install_failed">图标包安装失败</string>
 <string name="manifest_missing">缺少 manifest.json 文件。请添加该文件并重试。</string>
 <string name="content_property">共 %1$s 项，总计 %2$s</string>
     <string name="general">通用</string>
@@ -252,7 +249,6 @@
     <string name="enable_logcat_desc">运行 Logcat 并输出日志到画面上</string>
     <string name="logcat_running">正在运行 Logcat</string>
     <string name="logcat_running_desc">Logcat 正在输出日志到画面上。</string>
-<string name="incompatible_icon_pack_warning">图标包与当前 xyzterm 版本不兼容。是否继续？</string>
 <string name="session_name_exists">会话名已存在</string>
     <string name="rename_session">重命名会话</string>
 <string name="compressed_size">压缩后大小</string>
@@ -315,5 +311,4 @@
     <string name="update_downloading">正在下载更新…</string>
     <string name="update_signature_mismatch">发布版使用与已安装应用不同的签名密钥，无法覆盖安装。请先卸载当前应用，或从源码构建。</string>
     <string name="wake_lock_active">（持有唤醒锁）</string>
-    <string name="xed_package">xyzterm 包</string>
 </resources>

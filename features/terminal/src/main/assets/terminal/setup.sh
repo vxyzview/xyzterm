@@ -73,7 +73,7 @@ if [ "$ret" -ne 0 ]; then
     set +e
     LD_PRELOAD="$(realpath "$NATIVE_LIB_DIR/liblink2symlink.so")"
     export LD_PRELOAD
-    /bin/sh -c "$COMMAND"
+    /system/bin/sh -c "$COMMAND"
     unset LD_PRELOAD
     ret=$?
     set -e

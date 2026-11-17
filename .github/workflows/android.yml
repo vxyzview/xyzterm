@@ -80,6 +80,9 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
+      - name: Run unit tests
+        run: ./gradlew :features:terminal:testDebugUnitTest --no-daemon
+
       - name: Build with Gradle
         run: ./gradlew assembleRelease --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-release.apk
         env:
