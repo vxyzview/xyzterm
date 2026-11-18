@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.xyzterm.link2symlink"
-    ndkVersion = "28.2.13676358"
+    ndkVersion = "30.0.16248370"
     compileSdk {
         version = release(37)
     }

@@ -45,7 +45,7 @@ jobs:
           # The build files minify the ndkVersion assignment; read the version
           # string straight out of the native module configs instead.
           NDK_VERSION=$(grep -rhoE '"[0-9]+\.[0-9]+\.[0-9]+"' features/terminal/link2symlink/build.gradle.kts | tr -d '"' | head -n1)
-          [ -n "$NDK_VERSION" ] || NDK_VERSION=28.2.13676358
+          [ -n "$NDK_VERSION" ] || NDK_VERSION=30.0.16248370
           echo "Detected NDK version: $NDK_VERSION"
           echo "Detected NDK version: $NDK_VERSION"
           echo "NDK_VERSION=$NDK_VERSION" >> $GITHUB_ENV
