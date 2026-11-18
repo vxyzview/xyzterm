@@ -34,8 +34,6 @@
     <string name="themes">Теми</string>
 <string name="extra_keys">Допълнителни клавиши</string>
 <string name="text_size">Размер на текста</string>
-<string name="monet">Динамични цветове</string>
-    <string name="monet_desc">Използвайте темата на устройството в приложението</string>
     <string name="app_desc">Общи настройки на приложението</string>
 <string name="terminal_desc">Общи настройки на терминала</string>
     <string name="unknown_error">Неизвестна грешка</string>

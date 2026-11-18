@@ -34,8 +34,6 @@
     <string name="themes">Teman</string>
 <string name="extra_keys">Extra tangenter</string>
 <string name="text_size">Textstorlek</string>
-<string name="monet">Dynamiska färger</string>
-    <string name="monet_desc">Använd enhetens tema i appen</string>
     <string name="app_desc">Generella applikationsinställningar</string>
 <string name="terminal_desc">Generella terminalinställningar</string>
     <string name="unknown_error">Okänt fel</string>

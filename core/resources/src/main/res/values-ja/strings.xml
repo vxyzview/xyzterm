@@ -36,10 +36,8 @@
     <string name="delete_session">セッションを削除</string>
     <string name="oled">ブラックテーマ</string>
 <string name="terminal">ターミナル</string>
-<string name="monet_desc">デバイスのテーマをアプリ内でも使用する</string>
     <string name="app_desc">アプリケーションの一般設定</string>
 <string name="themes">テーマ</string>
-<string name="monet">ダイナミックカラー</string>
     <string name="auto_mode">自動</string>
     <string name="theme_mode_desc">アプリケーションのカラーテーマを変更</string>
 <string name="version_code">バージョンコード</string>

@@ -29,8 +29,6 @@
     <string name="themes">Apparences</string>
 <string name="extra_keys">Touches additionnelles</string>
 <string name="text_size">Taille du texte</string>
-<string name="monet">Couleurs dynamiques</string>
-    <string name="monet_desc">Utiliser l’apparence système dans l’app</string>
 <string name="terminal_desc">Paramètres généraux du terminal</string>
     <string name="unknown_error">Erreur inconnue</string>
 <string name="light_mode">Clair</string>
@@ -231,8 +229,6 @@
     <string name="scrollback_buffer">Taille du tampon de retour arrière</string>
     <string name="scrollback_buffer_desc">Nombre de lignes que le terminal garde dans l\'historique en mémoire</string>
     <string name="file_type">Type de fichier</string>
-<string name="invalid_color">Couleur invalide</string>
-    <string name="color_picker">Choisissez une couleur</string>
 <string name="confirm_exit_dialog">Confirmer la fenêtre de fermeture</string>
     <string name="confirm_exit_dialog_desc">Affiche un message de confirmation avant de fermer le logiciel</string>
 <string name="invalid_terminal_extra_keys">Format invalide pour les touches additionnelles du terminal. Les touches par défaut seront chargées.</string>

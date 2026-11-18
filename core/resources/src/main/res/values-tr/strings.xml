@@ -34,8 +34,6 @@
     <string name="themes">Temalar</string>
 <string name="extra_keys">Ekstra tuşlar</string>
 <string name="text_size">Metin boyutu</string>
-<string name="monet">Dinamik renkler</string>
-    <string name="monet_desc">Cihaz temasını kullan</string>
     <string name="app_desc">Genel uygulama ayarları</string>
 <string name="terminal_desc">Genel terminal ayarları</string>
     <string name="unknown_error">Bilinmeyen hata</string>
@@ -227,8 +225,6 @@
     <string name="scrollback_buffer">Kaydırma arabelleği boyutu</string>
     <string name="scrollback_buffer_desc">Terminalin hafızasında geçmiş olarak tuttuğu satır sayısı</string>
     <string name="file_type">Dosya türü</string>
-<string name="invalid_color">Yanlış renk</string>
-    <string name="color_picker">Bir renk seçin</string>
 <string name="confirm_exit_dialog">Çıkış onaylama diyaloğu</string>
     <string name="confirm_exit_dialog_desc">Uygulamayı kapatmadan önce bir onay iletişim kutusu göster</string>
 <string name="invalid_terminal_extra_keys">Terminal ek tuşları için geçersiz biçim. Varsayılan tuşlar yüklenecektir.</string>

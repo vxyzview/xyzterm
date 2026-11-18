@@ -22,12 +22,10 @@
 <string name="manage_storage">Tárhely kezelése</string>
     <string name="manage_storage_reason">A xyzterm -nak hozzáférésre van szüksége, hogy a tárhelyeden lévő fájlokat írni tudja. Kérlek engedélyezd ezt a következő felugró rendszerbeállítás-ablakban.</string>
 <string name="oled_desc">Teljesen fekete téma használata AMOLED eszközökhöz</string>
-    <string name="monet_desc">Eszköztéma használata</string>
 <string name="app">Applikáció</string>
     <string name="themes">Témák</string>
 <string name="extra_keys">Extra gombok</string>
 <string name="text_size">Szöveg mérete</string>
-<string name="monet">Dinamikus színek</string>
     <string name="app_desc">Alapvető alkalmazásbeállítások</string>
 <string name="terminal_desc">Alapvető terminálbeállítások</string>
     <string name="input">Bemenet</string>

@@ -33,8 +33,6 @@
     <string name="oled_desc">Applica un tema nero puro</string>
 <string name="ok">OK</string>
 <string name="extra_keys">Tasti aggiuntivi</string>
-<string name="monet">Colori dinamici</string>
-    <string name="monet_desc">Usa il tema del dispostivo nell\'app</string>
 <string name="terminal_desc">Impostazioni generali del terminale</string>
 <string name="app_desc">Impostazioni generali dell\'applicazione</string>
 <string name="text_size">Dimensione del testo</string>
@@ -231,8 +229,6 @@
     <string name="scrollback_buffer">Dimensione buffer di scorrimento</string>
     <string name="scrollback_buffer_desc">Numero di righe che il terminale mantiene in memoria come cronologia</string>
     <string name="file_type">Tipo di file</string>
-<string name="invalid_color">Colore non valido</string>
-    <string name="color_picker">Scegli un colore</string>
 <string name="confirm_exit_dialog">Dialogo di conferma uscita</string>
     <string name="confirm_exit_dialog_desc">Mostra una finestra di dialogo di conferma prima di chiudere l\'app</string>
 <string name="invalid_terminal_extra_keys">Formato non valido per i tasti extra nel terminale. Verranno caricati i tasti predefiniti.</string>

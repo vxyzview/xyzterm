@@ -34,8 +34,6 @@
     <string name="themes">Теми</string>
 <string name="extra_keys">Додаткові клавіші</string>
 <string name="text_size">Розмір тексту</string>
-<string name="monet">Динамічні кольори</string>
-    <string name="monet_desc">Використати тему пристрою в застосунку</string>
     <string name="app_desc">Загальні налаштування програми</string>
 <string name="terminal_desc">Загальні налаштування терміналу</string>
     <string name="unknown_error">Невідома помилка</string>
@@ -214,11 +212,9 @@
     <string name="check_ubuntu">Перевірка Ubuntu</string>
 <string name="cursor_style">Вигляд курсора</string>
     <string name="file_type">Тип файлу</string>
-    <string name="invalid_color">Неправильний колір</string>
 <string name="check_network_access">Перевірити доступ до мережі</string>
 <string name="check_system_shell">Перевірка системної оболонки</string>
     <string name="scrollback_buffer">Розмір буфера прокрутки</string>
-    <string name="color_picker">Виберіть колір</string>
     <string name="view_github">Переглянути на GitHub</string>
     <string name="view_gitlab">Переглянути на GitLab</string>
     <string name="view_bitbucket">Переглянути на BitBucket</string>

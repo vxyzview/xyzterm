@@ -34,8 +34,6 @@
     <string name="themes">السمات</string>
 <string name="extra_keys">مفاتيح اضافية</string>
 <string name="text_size">حجم النص</string>
-<string name="monet">الألوان الديناميكية</string>
-    <string name="monet_desc">استخدم سمة الجهاز في التطبيق</string>
     <string name="app_desc">الإعدادات العامة للتطبيق</string>
 <string name="terminal_desc">الإعدادات العامة للمحطة</string>
     <string name="unknown_error">خطأ غير معروف</string>

@@ -28,7 +28,6 @@
     <string name="manage_storage">管理存储空间</string>
     <string name="ok">确定</string>
 <string name="extra_keys">额外符号栏</string>
-<string name="monet">动态颜色</string>
     <string name="app_desc">应用通用设置</string>
 <string name="terminal_desc">终端通用设置</string>
 <string name="file_open_denied">无法通过其他应用打开此文件</string>
@@ -37,7 +36,6 @@
     <string name="unsupported_cpu_desc">此架构没有Ubuntu。应用无法在此设备上运行。</string>
     <string name="manage_storage_reason">xyzterm 需要存储空间权限以访问和读写文件。请稍后在系统设置中允许访问此权限。</string>
 <string name="text_size">字体大小</string>
-    <string name="monet_desc">跟随系统主题</string>
     <string name="unknown_error">未知错误</string>
 <string name="theme_mode">主题模式</string>
     <string name="check_for_updates">检查更新</string>
@@ -225,8 +223,6 @@
     <string name="scrollback_buffer">滚动缓冲区大小</string>
     <string name="scrollback_buffer_desc">终端在内存中保留的历史行数</string>
     <string name="file_type">文件类型</string>
-<string name="color_picker">选择颜色</string>
-    <string name="invalid_color">无效的颜色</string>
 <string name="confirm_exit_dialog">确认退出对话框</string>
     <string name="confirm_exit_dialog_desc">在关闭 App 前显示确认对话框</string>
 <string name="invalid_terminal_extra_keys">终端的符号栏格式不正确。将加载默认符号。</string>

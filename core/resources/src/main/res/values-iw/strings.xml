@@ -22,8 +22,6 @@
 <string name="app">אפלקציה</string>
 <string name="oled_desc">שימוש בעיצוב שחור לגמרי עבור מכשירי AMOLED</string>
 <string name="text_size">גודל טקסט</string>
-<string name="monet">צבעים דינאמים</string>
-    <string name="monet_desc">השתמש בעיצוב מכשיר</string>
 <string name="terminal_desc">הגדרות מסוף כלליות</string>
 <string name="unknown_error">שגיאה לא ידועה ץ</string>
     <string name="light_mode">מואר</string>

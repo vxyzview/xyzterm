@@ -34,8 +34,6 @@
     <string name="themes">Темы</string>
 <string name="extra_keys">Дополнительные клавиши</string>
 <string name="text_size">Размер текста</string>
-<string name="monet">Динамическая тема</string>
-    <string name="monet_desc">Использовать тему устройства в приложении</string>
     <string name="app_desc">Общие настройки приложения</string>
 <string name="terminal_desc">Общие настройки терминала</string>
     <string name="unknown_error">Неизвестная ошибка</string>
@@ -235,8 +233,6 @@
     <string name="scrollback_buffer">Размер буфера прокрутки</string>
     <string name="scrollback_buffer_desc">Количество строк, которые терминал хранит в памяти в качестве истории</string>
     <string name="file_type">Тип файла</string>
-<string name="invalid_color">Недопустимый цвет</string>
-    <string name="color_picker">Выберите цвет</string>
 <string name="seccomp_unspecified">Не указано</string>
 <string name="confirm_exit_dialog">Подтвердить закрытие диалога</string>
     <string name="confirm_exit_dialog_desc">Показывать подтверждающий диалог перед закрытием приложения</string>

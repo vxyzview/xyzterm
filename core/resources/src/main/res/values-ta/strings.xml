@@ -41,8 +41,6 @@
     <string name="themes">கருப்பொருள்கள்</string>
 <string name="extra_keys">கூடுதல் விசைகள்</string>
 <string name="text_size">உரை அளவு</string>
-<string name="monet">மாறும் நிறங்கள்</string>
-    <string name="monet_desc">பயன்பாட்டில் சாதன கருப்பொருளைப் பயன்படுத்து</string>
 <string name="app_desc">பொது பயன்பாட்டு அமைப்புகள்</string>
     <string name="terminal_desc">பொது முனைய அமைப்புகள்</string>
     <string name="unknown_error">தெரியாத பிழை</string>

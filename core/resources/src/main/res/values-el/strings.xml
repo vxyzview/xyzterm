@@ -34,8 +34,6 @@
     <string name="themes">Θέματα</string>
 <string name="extra_keys">Επιπλέον κλειδιά</string>
 <string name="text_size">Μέγεθος κειμένου</string>
-<string name="monet">Δυναμικά χρώματα</string>
-    <string name="monet_desc">Χρήση θέματος συσκευής στην εφαρμογή</string>
     <string name="app_desc">Γενικές ρυθμίσεις εφαρμογής</string>
 <string name="terminal_desc">Γενικές ρυθμίσεις τερματικού</string>
     <string name="unknown_error">Άγνωστο σφάλμα</string>

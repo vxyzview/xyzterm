@@ -23,7 +23,6 @@
     <string name="folder">Složka</string>
     <string name="backup">Zálohovat</string>
     <string name="restore">Obnovit</string>
-    <string name="monet_desc">Použít téma zařízení</string>
     <string name="unknown_error">Neznámá chyba</string>
 <string name="downloading">Stažení…</string>
     <string name="network_err">Chyba Sítě. Prosím zkontrolujte zda vaše připojení funguje správně.</string>
@@ -45,7 +44,6 @@
 <string name="delete">Odstranit</string>
     <string name="delete_session">Smazat relaci</string>
 <string name="cancel">Zrušit</string>
-<string name="monet">Dynamické barvy</string>
     <string name="light_mode">Světlé</string>
     <string name="dark_mode">Tmavé</string>
     <string name="theme_mode">Režim téma</string>
@@ -214,8 +212,6 @@
 <string name="logs_too_long_desc">Protokolový soubor, který jste chtěli nahlásit je příliš dlouhý. Prosím manuálně vložte zkopírovaný protokolový soubor do hlášení o chyb.</string>
 <string name="scrollback_buffer_desc">Počet řádků terminál zanechává v paměti jako historii</string>
     <string name="file_type">Typ souboru</string>
-<string name="invalid_color">Neplatná barva</string>
-    <string name="color_picker">Vyberte barvu</string>
 <string name="manifest_missing_fields">Soubor manifest.json má chybějící nebo neplatné vlastnosti:\n%s\n\nProsím zkontrolujte soubor a zkuste to znovu.</string>
 <string name="view_github">Zobrazit na GitHubu</string>
     <string name="view_gitlab">Zobrazit na GitLabu</string>

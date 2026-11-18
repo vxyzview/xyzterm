@@ -34,8 +34,6 @@
     <string name="themes">主題</string>
 <string name="extra_keys">額外關鍵詞</string>
 <string name="text_size">文字大小</string>
-<string name="monet">動態配色</string>
-    <string name="monet_desc">跟隨系統主題</string>
     <string name="app_desc">應用程式一般設定</string>
 <string name="terminal_desc">終端機一般設定</string>
     <string name="unknown_error">未知錯誤</string>
@@ -223,8 +221,6 @@
     <string name="scrollback_buffer">回溯緩衝區大小</string>
     <string name="scrollback_buffer_desc">終端機保留於記憶體中的歷史行數</string>
     <string name="file_type">檔案類型</string>
-<string name="invalid_color">無效的顏色</string>
-    <string name="color_picker">選擇顏色</string>
 <string name="confirm_exit_dialog">結束確認對話框</string>
     <string name="confirm_exit_dialog_desc">關閉應用程式前顯示確認對話框</string>
 <string name="invalid_terminal_extra_keys">終端機額外按鍵格式無效。將載入預設按鍵。</string>

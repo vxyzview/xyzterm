@@ -36,11 +36,9 @@
 <string name="app">Anwendung</string>
 <string name="oled_desc">Wendet ein rein schwarzes Thema an</string>
 <string name="text_size">Textgröße</string>
-<string name="monet">Dynamische Farben</string>
 <string name="app_desc">Allgemeine Anwendungseinstellungen</string>
     <string name="terminal_desc">Allgemeine Terminal-Einstellungen</string>
 <string name="theme_settings">Themeneinstellungen</string>
-<string name="monet_desc">Gerätethema in App verwenden</string>
 <string name="extra_keys">Zusatztasten</string>
 <string name="light_mode">Hell</string>
     <string name="dark_mode">Dunkel</string>
@@ -227,8 +225,6 @@
     <string name="scrollback_buffer">Größe des Scrollback-Puffers</string>
     <string name="scrollback_buffer_desc">Anzahl der Zeilen, die das Terminal als Verlauf im Speicher behält</string>
     <string name="file_type">Dateityp</string>
-<string name="invalid_color">Ungültige Farbe</string>
-    <string name="color_picker">Wähle eine Farbe</string>
     <string name="confirm_exit_dialog_desc">Einen Bestätigungsdialog anzeigen, bevor die App geschlossen wird</string>
 <string name="confirm_exit_dialog">Beenden bestätigen</string>
 <string name="invalid_terminal_extra_keys">Ungültiges Format für die Terminal-Zusatztasten. Standardtasten werden geladen.</string>

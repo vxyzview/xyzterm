@@ -29,7 +29,6 @@
 <string name="oled_desc">Aplicar un tema oscuro puro</string>
     <string name="themes">Temas</string>
 <string name="text_size">Tamaño del texto</string>
-<string name="monet_desc">Utilizar el tema del dispositivo en app</string>
 <string name="extra_keys">Teclas adicionales</string>
     <string name="unknown_error">Error desconocido</string>
 <string name="dark_mode">Oscuro</string>
@@ -48,7 +47,6 @@
 <string name="content">Contenido</string>
 <string name="warning">Advertencia</string>
 <string name="ignore">Ignorar</string>
-<string name="monet">Colores dinámicos</string>
 <string name="app">Aplicación</string>
 <string name="manage_storage_reason">xyzterm necesita permisos para poder editar archivos en tu almacenamiento. Por favor, otorga acceso a la aplicación en el diálogo siguiente.</string>
 <string name="error">Error</string>
@@ -211,8 +209,6 @@
     <string name="scrollback_buffer">Tamaño del tampón de retroceso</string>
     <string name="scrollback_buffer_desc">Número de lineas que el terminal conserva en memoria como historial</string>
     <string name="file_type">Tipo de archivo</string>
-<string name="invalid_color">Color no válido</string>
-    <string name="color_picker">Elije un color</string>
 <string name="confirm_exit_dialog">Confirmar diálogo de salida</string>
     <string name="confirm_exit_dialog_desc">Muestra un diálogo de confirmación antes de cerrar la aplicación</string>
 <string name="invalid_terminal_extra_keys">Formato no válido para teclas de terminal extras. Se cargaran las teclas por defecto.</string>

@@ -35,8 +35,6 @@
     <string name="themes">थीम्स</string>
 <string name="extra_keys">अतिरिक्त कुंजियाँ</string>
 <string name="text_size">टेक्स्ट साइज़</string>
-<string name="monet">डायनेमिक रंग</string>
-    <string name="monet_desc">ऐप में डिवाइस थीम उपयोग करें</string>
     <string name="app_desc">सामान्य ऐप्लिकेशन सेटिंग्स</string>
 <string name="terminal_desc">सामान्य टर्मिनल सेटिंग्स</string>
     <string name="unknown_error">अज्ञात त्रुटि</string>

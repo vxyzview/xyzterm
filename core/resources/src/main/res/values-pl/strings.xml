@@ -20,8 +20,6 @@
     <string name="terminal">Terminal</string>
 <string name="extra_keys">Dodatkowe klawisze</string>
 <string name="text_size">Rozmiar tekstu</string>
-<string name="monet">Dynamiczne kolory</string>
-    <string name="monet_desc">Użyj systemowego motywu w aplikacji</string>
     <string name="app_desc">Ogólne ustawienia aplikacji</string>
 <string name="terminal_desc">Ogólne ustawienia terminalu</string>
     <string name="unknown_error">Nieznany błąd</string>
@@ -221,8 +219,6 @@
 <string name="manifest_missing_fields">Plik manifest.json ma brakujące lub nieprawidłowe właściwości:\n%s\n\nProszę, sprawdź plik oraz spróbuj ponownie.</string>
 <string name="manage_terminal_font">Zarządzaj czcionkami terminalu</string>
 <string name="file_type">Typ pliku</string>
-<string name="invalid_color">Nieprawidłowy kolor</string>
-    <string name="color_picker">Wybierz kolor</string>
     <string name="terminal_font_warning">Plik czcionki terminalu w katalogu \'etc/font.ttf\' nadpisuje niestandardową czcionkę ustawioną poniżej. Usuń plik ze środowiska terminalu, aby stosować niestandardowe czcionki.</string>
 <string name="view_github">Zobacz na GitHub</string>
     <string name="view_gitlab">Zobacz na GitLab</string>

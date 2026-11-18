@@ -39,7 +39,6 @@
 <string name="about">Về ứng dụng</string>
     <string name="about_desc">Về xyzterm</string>
     <string name="text_size">Kích thước văn bản</string>
-<string name="monet">Màu động</string>
     <string name="light_mode">Sáng</string>
     <string name="dark_mode">Tối</string>
     <string name="auto_mode">Tự động</string>
@@ -76,7 +75,6 @@
     <string name="folder">Thư mục</string>
     <string name="backup">Sao lưu</string>
     <string name="restore">Khôi phục</string>
-<string name="monet_desc">Sử dụng chủ đề thiết bị trong ứng dụng</string>
     <string name="theme_mode">Chế độ chủ đề</string>
     <string name="theme_mode_desc">Thay đổi chủ đề màu ứng dụng</string>
     <string name="check_for_updates">Kiểm tra cập nhật</string>
@@ -96,8 +94,6 @@
     <string name="upstream_source">Upstream source</string>
     <string name="community">Cộng đồng</string>
     <string name="file_type">Loại tệp</string>
-    <string name="invalid_color">Màu không hợp lệ</string>
-    <string name="color_picker">Chọn màu</string>
 <string name="view_github">Xem trên GitHub</string>
     <string name="view_gitlab">Xem trên GitLab</string>
     <string name="view_bitbucket">Xem trên BitBucket</string>
