@@ -120,6 +120,7 @@ jobs:
             echo "Version: $VERSION"
             echo "Commit: $COMMIT_MSG"
           else
-            echo "Upload failed: $RESP" >&2
-            exit 1
+            # A revoked/expired key must not fail the whole build; the APK is
+            # still produced and the GitHub release path is unaffected.
+            echo "::warning::PixelDrain upload failed: $RESP"
           fi
