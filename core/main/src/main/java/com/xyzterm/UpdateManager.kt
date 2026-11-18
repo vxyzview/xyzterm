@@ -127,7 +127,7 @@ object UpdateManager {
                     val request =
                         Request.Builder()
                             .url(
-                                "https://github.com/$UPDATE_OWNER/$UPDATE_REPO/releases/latest/download/xyzterm-$version.apk"
+                                "https://github.com/$UPDATE_OWNER/$UPDATE_REPO/releases/latest/download/xyzterm-$version.apk",
                             )
                             .build()
                     OkHttpClient().newCall(request).execute().use { response ->

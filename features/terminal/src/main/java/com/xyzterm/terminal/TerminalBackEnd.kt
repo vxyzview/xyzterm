@@ -97,7 +97,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
                     BELL_CHANNEL_ID,
                     strings.bell_notification.getString(),
                     NotificationManager.IMPORTANCE_DEFAULT,
-                )
+                ),
             )
         }
 

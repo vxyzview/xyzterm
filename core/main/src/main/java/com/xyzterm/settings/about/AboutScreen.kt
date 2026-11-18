@@ -89,7 +89,7 @@ fun AboutScreen() {
                         text = stringResource(strings.developer_name),
                         style = MaterialTheme.typography.titleMedium,
                     )
-                }
+                },
             )
 
             SettingsItem(

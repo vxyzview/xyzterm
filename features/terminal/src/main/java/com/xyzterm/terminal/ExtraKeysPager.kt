@@ -98,7 +98,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                             Settings.terminal_extra_keys,
                                             "",
                                             VirtualKeysConstants.CONTROL_CHARS_ALIASES,
-                                        )
+                                        ),
                                     )
                                 }
                                     .onFailure {
@@ -108,7 +108,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                                 DEFAULT_TERMINAL_EXTRA_KEYS,
                                                 "",
                                                 VirtualKeysConstants.CONTROL_CHARS_ALIASES,
-                                            )
+                                            ),
                                         )
                                     }
                             }
@@ -119,7 +119,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                 appliedExtraKeys = current
                                 runCatching {
                                     view.reload(
-                                        VirtualKeysInfo(current, "", VirtualKeysConstants.CONTROL_CHARS_ALIASES)
+                                        VirtualKeysInfo(current, "", VirtualKeysConstants.CONTROL_CHARS_ALIASES),
                                     )
                                 }
                                     .onFailure {
@@ -129,7 +129,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                                 DEFAULT_TERMINAL_EXTRA_KEYS,
                                                 "",
                                                 VirtualKeysConstants.CONTROL_CHARS_ALIASES,
-                                            )
+                                            ),
                                         )
                                     }
                             }
@@ -175,7 +175,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                             terminalView.get()?.currentSession?.write(text)
                                             text = ""
                                         }
-                                    }
+                                    },
                                 ),
                             modifier =
                                 Modifier.fillMaxWidth().padding(horizontal = 8.dp).focusRequester(focusRequester),
@@ -204,7 +204,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                 Color(onSurfaceColor).copy(alpha = 0.3f)
                             },
                             MaterialTheme.shapes.small,
-                        )
+                        ),
                 )
             }
         }

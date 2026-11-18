@@ -272,7 +272,7 @@ fun dialog(
                         },
                 )
             }
-        }
+        },
     )
 }
 
@@ -333,6 +333,6 @@ fun composableDialog(
     DialogHost.push(
         DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = cancelable) {
             Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) { composable(null) }
-        }
+        },
     )
 }

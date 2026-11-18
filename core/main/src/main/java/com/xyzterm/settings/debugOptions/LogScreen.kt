@@ -59,7 +59,7 @@ fun LogScreen(
             TextButton(onClick = { copyToClipboard(copyLabel, logs, true) }) { Text(stringResource(strings.copy)) }
 
             TextButton(
-                onClick = { runCatching { reportLogs(logs, issueTitle, copyLabel) }.onFailure { logErrorOrExit(it) } }
+                onClick = { runCatching { reportLogs(logs, issueTitle, copyLabel) }.onFailure { logErrorOrExit(it) } },
             ) {
                 Text(stringResource(strings.report_issue))
             }

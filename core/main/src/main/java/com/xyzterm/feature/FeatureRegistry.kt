@@ -63,7 +63,7 @@ object FeatureRegistry {
                         onComplete(false)
                     }
                 },
-            )
+            ),
         )
     }
 

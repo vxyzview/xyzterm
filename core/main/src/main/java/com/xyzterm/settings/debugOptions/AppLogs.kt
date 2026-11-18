@@ -58,7 +58,7 @@ fun AppLogs() {
                 LogCollector.clearLogs()
                 synchronized(LogcatService.logcatLogs) { LogcatService.logcatLogs.clear() }
                 refreshTrigger++
-            }
+            },
         ) {
             Text(stringResource(strings.delete))
         }

@@ -84,7 +84,7 @@ class FileManager(private val activity: ComponentActivity) {
             Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 type = mimeType
                 putExtra(Intent.EXTRA_TITLE, title)
-            }
+            },
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 this.activity.lifecycleScope.launch {
@@ -107,7 +107,7 @@ class FileManager(private val activity: ComponentActivity) {
             Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "*/*"
-            }
+            },
         ) { result ->
             if (result.resultCode != Activity.RESULT_OK) {
                 callback(null)

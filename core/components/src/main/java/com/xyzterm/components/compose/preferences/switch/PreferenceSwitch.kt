@@ -87,7 +87,7 @@ fun PreferenceSwitch(
                             Modifier.height(32.dp)
                                 .width(1.dp)
                                 .fillMaxHeight()
-                                .background(MaterialTheme.colorScheme.outlineVariant)
+                                .background(MaterialTheme.colorScheme.outlineVariant),
                     )
                 }
                 Switch(

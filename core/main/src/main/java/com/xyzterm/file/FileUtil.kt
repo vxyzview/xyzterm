@@ -27,7 +27,7 @@ fun File.childSafe(fileName: String): File {
             fileName != "." &&
             fileName != ".." &&
             !fileName.contains('/') &&
-            !fileName.contains('\\')
+            !fileName.contains('\\'),
     ) {
         "invalid path segment: $fileName"
     }
@@ -95,7 +95,7 @@ fun File.unzipTo(destDir: File) {
             // separator boundary so a sibling-prefix dir (destXYZ) can't pass as inside dest.
             require(
                 targetCanonical.startsWith("$destCanonical${File.separator}") &&
-                    targetCanonical.length > destCanonical.length
+                    targetCanonical.length > destCanonical.length,
             ) {
                 "zip entry escapes destination: ${entry.name}"
             }

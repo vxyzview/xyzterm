@@ -49,7 +49,7 @@ object PathUtils {
                             if ("primary".equals(type, ignoreCase = true)) {
                                 return "${Environment.getExternalStorageDirectory()}/${
                                     split.getOrElse(
-                                        1
+                                        1,
                                     ) { "" }
                                 }"
                             } else {

@@ -90,7 +90,7 @@ fun SingleInputDialog(
                             onDone = {
                                 onConfirm()
                                 onFinish()
-                            }
+                            },
                         ),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                 )
@@ -114,7 +114,7 @@ fun SingleInputDialog(
                 onClick = {
                     onDismiss()
                     onFinish()
-                }
+                },
             ) {
                 Text(stringResource(id = strings.cancel))
             }

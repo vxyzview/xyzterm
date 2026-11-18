@@ -357,7 +357,7 @@ class Terminal : AppCompatActivity() {
                             url = rootfs.first,
                             outputFile = getTempDir().child("sandbox.tar.gz"),
                             sha256 = rootfs.second,
-                        )
+                        ),
                     )
 
                 try {

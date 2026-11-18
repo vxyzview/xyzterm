@@ -164,7 +164,7 @@ class CrashActivity : ComponentActivity() {
                                                 } else {
                                                     onBackPressedDispatcher.onBackPressed()
                                                 }
-                                            }
+                                            },
                                         ) {
                                             Icon(
                                                 imageVector =
@@ -183,7 +183,7 @@ class CrashActivity : ComponentActivity() {
                                             onClick = {
                                                 runCatching { copyToClipboard("crash_report", crashText, true) }
                                                     .onFailure { logErrorOrExit(it) }
-                                            }
+                                            },
                                         ) {
                                             Text(stringResource(strings.copy))
                                         }
@@ -195,7 +195,7 @@ class CrashActivity : ComponentActivity() {
                                                 onClick = {
                                                     runCatching { reportLogs(crashText, context) }
                                                         .onFailure { logErrorOrExit(it) }
-                                                }
+                                                },
                                             ) {
                                                 Text(stringResource(strings.report_issue))
                                             }
@@ -204,7 +204,7 @@ class CrashActivity : ComponentActivity() {
                                 )
                                 HorizontalDivider()
                             }
-                        }
+                        },
                     ) { paddingValues ->
                         SelectionContainer {
                             Text(

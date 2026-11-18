@@ -118,7 +118,7 @@ fun TerminalCheckScreen() {
                                 .fillMaxWidth()
                                 .clip(MaterialTheme.shapes.extraSmall)
                                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .padding(12.dp)
+                                .padding(12.dp),
                     ) {
                         Column {
                             if (check.logs.isEmpty()) {

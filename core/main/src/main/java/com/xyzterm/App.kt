@@ -112,7 +112,7 @@ open class App : Application() {
                             }
                         }
                     }
-                    .build()
+                    .build(),
             )
         }
     }

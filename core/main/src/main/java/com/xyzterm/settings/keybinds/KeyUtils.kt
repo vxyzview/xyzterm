@@ -96,7 +96,7 @@ data object KeyUtils {
                 KeyEvent.KEYCODE_FORWARD_DEL -> drawables.backspace_mirrored
                 KeyEvent.KEYCODE_TAB -> drawables.kbd_tab
                 else -> drawables.keyboard
-            }
+            },
         )
     }
 

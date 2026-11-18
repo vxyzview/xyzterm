@@ -159,7 +159,7 @@ object FileOperations {
                 val targetName = sourceFile.getName()
                 if (destinationFolder.hasChild(targetName)) {
                     throw IllegalStateException(
-                        "A file or folder with name '$targetName' already exists in destination"
+                        "A file or folder with name '$targetName' already exists in destination",
                     )
                 }
 

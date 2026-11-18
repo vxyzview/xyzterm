@@ -15,7 +15,7 @@ val okHttpClient: OkHttpClient by lazy {
             Cache(
                 directory = File(context.cacheDir, "http_cache"),
                 maxSize = 10L * 1024L * 1024L, // 10 MiB
-            )
+            ),
         )
         .build()
 }

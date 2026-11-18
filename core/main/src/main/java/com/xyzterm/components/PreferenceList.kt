@@ -66,7 +66,7 @@ fun <T> PreferenceList(
                     onClick = {
                         showDialog = false
                         onItemSelected(tempSelectedItem)
-                    }
+                    },
                 ) {
                     Text(text = strings.apply.getString())
                 }

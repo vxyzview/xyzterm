@@ -65,7 +65,7 @@ class LoadingPopup(private val activity: AppCompatActivity?, hideAfterMillis: Lo
                             Text(text = message.value, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
-                }
+                },
             )
         }
 

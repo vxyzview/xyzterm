@@ -145,7 +145,7 @@ fun DayNightDialog(showBottomSheet: MutableState<Boolean>, context: Context) {
                                 bottomSheetState.hide()
                                 showBottomSheet.value = false
                             }
-                        }
+                        },
                     ) {
                         Text(text = stringResource(id = strings.cancel))
                     }

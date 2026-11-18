@@ -70,7 +70,7 @@ fun NestedScrollStretch(modifier: Modifier = Modifier, enabled: Boolean = true, 
                             drawContent()
                         }
                     }
-                }
+                },
     ) {
         content()
     }

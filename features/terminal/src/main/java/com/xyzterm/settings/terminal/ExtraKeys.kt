@@ -78,7 +78,7 @@ fun TerminalExtraKeys() {
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(
-                    onClick = { context.openUrl("https://wiki.termux.com/wiki/Touch_Keyboard#Extra_Keys_Row") }
+                    onClick = { context.openUrl("https://wiki.termux.com/wiki/Touch_Keyboard#Extra_Keys_Row") },
                 ) {
                     Icon(
                         painter = painterResource(drawables.open_in_new),

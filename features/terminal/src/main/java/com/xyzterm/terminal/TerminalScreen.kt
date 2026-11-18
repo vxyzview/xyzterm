@@ -185,7 +185,7 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                                     MaterialTheme.colorScheme.primary
                                 },
                                 CircleShape,
-                            )
+                            ),
                 )
                 SessionTitle(terminalActivity)
             }
@@ -543,7 +543,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                             terminalActivity.changeSession(info.id)
                         }
                     }
-                }
+                },
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -715,7 +715,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                         showDeleteConfirm = false
                         sessionToDelete?.let { deleteSession(it) }
                         sessionToDelete = null
-                    }
+                    },
                 ) {
                     Text(
                         text = stringResource(strings.delete),
@@ -728,7 +728,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     onClick = {
                         showDeleteConfirm = false
                         sessionToDelete = null
-                    }
+                    },
                 ) {
                     Text(text = stringResource(strings.cancel))
                 }
@@ -745,7 +745,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     onClick = {
                         showExitConfirm = false
                         service?.actionExit()
-                    }
+                    },
                 ) {
                     Text(text = stringResource(strings.logout))
                 }

@@ -40,7 +40,7 @@ fun SnippetsRow() {
                 label = { Text(snippet.label, maxLines = 1) },
                 colors =
                     SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     ),
             )
         }

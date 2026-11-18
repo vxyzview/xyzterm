@@ -122,7 +122,7 @@ fun DoubleInputDialog(
                             onDone = {
                                 onConfirm()
                                 onFinish()
-                            }
+                            },
                         ),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                 )
@@ -146,7 +146,7 @@ fun DoubleInputDialog(
                 onClick = {
                     onDismiss()
                     onFinish()
-                }
+                },
             ) {
                 Text(stringResource(id = strings.cancel))
             }

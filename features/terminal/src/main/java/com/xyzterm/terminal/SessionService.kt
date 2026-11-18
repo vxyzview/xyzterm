@@ -348,7 +348,7 @@ class SessionService : Service() {
                         },
                         wakelockPendingIntent,
                     )
-                    .build()
+                    .build(),
             )
             .setOngoing(true)
             .build()
