@@ -27,7 +27,7 @@
     <string name="ok">OK</string>
 <string name="error">Terjadi kesalahan</string>
     <string name="unsupported_cpu">CPU tidak didukung</string>
-    <string name="unsupported_cpu_desc">Tidak ada Ubuntu untuk arsitektur ini. Aplikasi tidak dapat berjalan di perangkat ini.</string>
+    <string name="unsupported_cpu_desc">Tidak ada Arch Linux untuk arsitektur ini. Aplikasi tidak dapat berjalan di perangkat ini.</string>
 <string name="app">Aplikasi</string>
     <string name="oled_desc">Terapkan tema hitam pekat</string>
     <string name="themes">Tema</string>
@@ -86,7 +86,7 @@
 <string name="acquire_wakelock">Dapatkan wakelock</string>
     <string name="release_wakelock">Lepaskan wakelock</string>
 <string name="install">Instal</string>
-<string name="uninstall_terminal_warning">Hapus Ubuntu secara permanen? Tindakan ini tidak dapat dibatalkan.</string>
+<string name="uninstall_terminal_warning">Hapus Arch Linux secara permanen? Tindakan ini tidak dapat dibatalkan.</string>
     <string name="uninstall">Hapus instalasi</string>
     <string name="uninstall_terminal">Hapus instalasi terminal</string>
 <string name="seccomp_desc">Perbaiki kesalahan \"fungsi tidak diimplementasikan\" pada beberapa perangkat</string>
@@ -233,7 +233,7 @@
     <string name="check_proot">Periksa PRoot</string>
     <string name="check_system_shell">Periksa shell sistem</string>
     <string name="check_storage_permissions">Periksa penyimpanan dan izin</string>
-    <string name="check_ubuntu">Periksa Ubuntu</string>
+    <string name="check_ubuntu">Periksa Arch Linux</string>
     <string name="check_network_access">Periksa akses jaringan</string>
     <string name="check_abnormalities">Periksa kelainan</string>
 <string name="seccomp_unspecified">Tidak ditentukan</string>

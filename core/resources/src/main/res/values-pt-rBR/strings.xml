@@ -27,7 +27,7 @@
     <string name="ok">OK</string>
 <string name="error">Erro</string>
     <string name="unsupported_cpu">Unsupported CPU</string>
-    <string name="unsupported_cpu_desc">No Ubuntu is available for this architecture. The app cannot run on this device.</string>
+    <string name="unsupported_cpu_desc">No Arch Linux is available for this architecture. The app cannot run on this device.</string>
 <string name="app">Aplicativo</string>
     <string name="oled_desc">Aplica um tema preto puro</string>
     <string name="themes">Temas</string>
@@ -86,7 +86,7 @@
 <string name="acquire_wakelock">Obter wakelock</string>
     <string name="release_wakelock">Liberar wakelock</string>
 <string name="install">Instalar</string>
-<string name="uninstall_terminal_warning">Deletar Ubuntu permanentemente? Essa ação não pode ser revertida.</string>
+<string name="uninstall_terminal_warning">Deletar Arch Linux permanentemente? Essa ação não pode ser revertida.</string>
     <string name="uninstall">Desinstalar</string>
     <string name="uninstall_terminal">Desinstalar Terminal</string>
 <string name="seccomp_desc">Resolver erro \"Função não Implementada\" em alguns dispositivos</string>

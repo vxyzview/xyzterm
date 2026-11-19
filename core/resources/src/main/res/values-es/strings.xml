@@ -51,7 +51,7 @@
 <string name="manage_storage_reason">xyzterm necesita permisos para poder editar archivos en tu almacenamiento. Por favor, otorga acceso a la aplicación en el diálogo siguiente.</string>
 <string name="error">Error</string>
     <string name="unsupported_cpu">CPU no compatible</string>
-    <string name="unsupported_cpu_desc">No hay Ubuntu para esta arquitectura. La app no puede ejecutarse en este dispositivo.</string>
+    <string name="unsupported_cpu_desc">No hay Arch Linux para esta arquitectura. La app no puede ejecutarse en este dispositivo.</string>
 <string name="terminal_desc">Ajustes generales del terminal</string>
     <string name="github">GitHub</string>
 <string name="theme_mode_desc">Cambiar tema de color de app</string>
@@ -82,7 +82,7 @@
 <string name="theme_settings">Ajustes de temas</string>
 <string name="confirm_exit">¿Estás seguro de querer salir?</string>
 <string name="install">Instalar</string>
-    <string name="uninstall_terminal_warning">¿Desinstalar permanentemente Ubuntu? Esta acción no se puede deshacer.</string>
+    <string name="uninstall_terminal_warning">¿Desinstalar permanentemente Arch Linux? Esta acción no se puede deshacer.</string>
     <string name="uninstall">Desinstalar</string>
     <string name="uninstall_terminal">Desinstalar terminal</string>
 <string name="type">Tipo</string>
@@ -244,7 +244,7 @@
     <string name="check_storage_permissions">Comprobar almacén y permisos</string>
     <string name="check_abnormalities">Comprobar anomalías</string>
 <string name="check_network_access">Comprobar acceso de red</string>
-<string name="check_ubuntu">Comprobar Ubuntu</string>
+<string name="check_ubuntu">Comprobar Arch Linux</string>
     <string name="check_proot">Comprobar PRoot</string>
     <string name="check_system_shell">Comprobar consola del sistema</string>
 <string name="enable_logcat">Habilitar logcar</string>

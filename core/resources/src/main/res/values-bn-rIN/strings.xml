@@ -28,7 +28,7 @@
     <string name="ok">সব ঠিক</string>
 <string name="error">ত্রুটি</string>
     <string name="unsupported_cpu">Unsupported CPU</string>
-    <string name="unsupported_cpu_desc">No Ubuntu is available for this architecture. The app cannot run on this device.</string>
+    <string name="unsupported_cpu_desc">No Arch Linux is available for this architecture. The app cannot run on this device.</string>
 <string name="oled_desc">সম্পুর্ন কালো থিম অবলম্বন করে</string>
     <string name="themes">থিমগুলি</string>
 <string name="continue_action">চালিয়ে যান</string>

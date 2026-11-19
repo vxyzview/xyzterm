@@ -28,7 +28,7 @@
     <string name="ok">حسنا</string>
 <string name="error">خطأ</string>
     <string name="unsupported_cpu">معالج غير مدعوم</string>
-    <string name="unsupported_cpu_desc">لا يتوفر إصدار Ubuntu لهذه البنية. التطبيق لا يمكن تشغيله على هذا الجهاز.</string>
+    <string name="unsupported_cpu_desc">لا يتوفر إصدار Arch Linux لهذه البنية. التطبيق لا يمكن تشغيله على هذا الجهاز.</string>
 <string name="app">برنامج</string>
     <string name="oled_desc">تطبيق سمة سوداء نقية</string>
     <string name="themes">السمات</string>
@@ -87,7 +87,7 @@
 <string name="theme_settings">اعدادات المظهر</string>
 <string name="confirm_exit">هل أنت متأكد من رغبتك بالخروج؟</string>
 <string name="install">تثبيت</string>
-<string name="uninstall_terminal_warning">الغاء تثبيت Ubuntu نهائيًا؟ هذا القرار غير قابل للتراجع.</string>
+<string name="uninstall_terminal_warning">الغاء تثبيت Arch Linux نهائيًا؟ هذا القرار غير قابل للتراجع.</string>
     <string name="uninstall">إلغاء التثبيت</string>
     <string name="uninstall_terminal">إلغاء تثبيت الطرفية</string>
     <string name="restore_terminal">استعادة النسخة الإحتياطية للطرفية</string>

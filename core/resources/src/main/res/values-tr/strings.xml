@@ -28,7 +28,7 @@
     <string name="ok">TAMAM</string>
 <string name="error">Yanlış</string>
     <string name="unsupported_cpu">Desteklenmeyen CPU</string>
-    <string name="unsupported_cpu_desc">Bu mimari için Ubuntu yok. Uygulama bu cihazda çalışamaz.</string>
+    <string name="unsupported_cpu_desc">Bu mimari için Arch Linux yok. Uygulama bu cihazda çalışamaz.</string>
 <string name="app">Uygulama</string>
     <string name="oled_desc">Saf siyah bir tema uygular</string>
     <string name="themes">Temalar</string>
@@ -86,7 +86,7 @@
     <string name="lang_desc">Dil ayarları</string>
 <string name="copied">Kopyalandı</string>
 <string name="install">Yükle</string>
-<string name="uninstall_terminal_warning">Ubuntu kalıcı olarak kaldırılsın mı? Bu işlem geri alınamaz.</string>
+<string name="uninstall_terminal_warning">Arch Linux kalıcı olarak kaldırılsın mı? Bu işlem geri alınamaz.</string>
     <string name="uninstall">Kaldır</string>
     <string name="uninstall_terminal">Terminali kaldır</string>
 <string name="seccomp_desc">Bazı cihazlarda görülen \"function not implemented\" hatasını düzeltir</string>
@@ -237,7 +237,7 @@
     <string name="check_proot">PRoot\'u kontrol et</string>
     <string name="check_system_shell">Sistem kabuğunu kontrol et</string>
     <string name="check_storage_permissions">Depolama ve izinleri kontrol et</string>
-    <string name="check_ubuntu">Ubuntu\'yu kontrol et</string>
+    <string name="check_ubuntu">Arch Linux\'yu kontrol et</string>
     <string name="check_network_access">Ağ erişimini kontrol et</string>
     <string name="check_abnormalities">Anormallikleri kontrol et</string>
 <string name="seccomp_unspecified">Belirtilmemiş</string>

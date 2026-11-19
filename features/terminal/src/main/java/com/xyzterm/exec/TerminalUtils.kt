@@ -17,7 +17,9 @@ fun isTerminalInstalled(): Boolean {
                 it.absolutePath != sandboxDir().child("tmp").absolutePath
         } ?: emptyList()
 
-    return localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").exists() && rootfs.isNotEmpty()
+    return localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").exists() &&
+        rootfs.isNotEmpty() &&
+        sandboxDir().child("etc/pacman.conf").exists()
 }
 
 suspend fun isTerminalWorking(): Boolean =

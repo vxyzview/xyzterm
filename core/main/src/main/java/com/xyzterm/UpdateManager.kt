@@ -21,6 +21,7 @@ import com.xyzterm.settings.Settings
 import com.xyzterm.utils.GithubReleasesApi
 import com.xyzterm.utils.application
 import com.xyzterm.utils.dialogRes
+import com.xyzterm.utils.getTempDir
 import com.xyzterm.utils.toast
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -314,6 +315,24 @@ object UpdateManager {
                     runCatching {
                         KeybindingsManager.migrate()
                         KeybindingsManager.loadKeybindings()
+                    }
+                }
+
+                if (lastVersionCode <= 2L) {
+                    // The container moved from Ubuntu to Arch Linux. An Ubuntu
+                    // rootfs cannot run the pacman-based setup scripts, and a
+                    // leftover Ubuntu download would be extracted again. The
+                    // rootfs is replaceable; user data lives in local/home.
+                    runCatching {
+                        File(getTempDir(), "sandbox.tar.gz").delete()
+                        File(getTempDir(), "sandbox.tar.gz.part").delete()
+
+                        val rootfs = sandboxDir()
+                        val isArch = rootfs.child("etc/pacman.conf").exists()
+                        if (!isArch && rootfs.list()?.isNotEmpty() == true) {
+                            rootfs.deleteRecursively()
+                            localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
+                        }
                     }
                 }
 

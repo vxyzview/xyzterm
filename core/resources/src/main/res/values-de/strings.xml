@@ -31,7 +31,7 @@
     <string name="permission_denied">Zugriff verweigert</string>
 <string name="error">Fehler</string>
     <string name="unsupported_cpu">Nicht unterstützte CPU</string>
-    <string name="unsupported_cpu_desc">Kein Ubuntu für diese Architektur. Die App kann auf diesem Gerät nicht laufen.</string>
+    <string name="unsupported_cpu_desc">Kein Arch Linux für diese Architektur. Die App kann auf diesem Gerät nicht laufen.</string>
 <string name="themes">Themen</string>
 <string name="app">Anwendung</string>
 <string name="oled_desc">Wendet ein rein schwarzes Thema an</string>
@@ -86,7 +86,7 @@
 <string name="acquire_wakelock">Wakelock aktivieren</string>
     <string name="release_wakelock">Wakelock freigeben</string>
 <string name="install">Installieren</string>
-<string name="uninstall_terminal_warning">Ubuntu endgültig deinstallieren? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+<string name="uninstall_terminal_warning">Arch Linux endgültig deinstallieren? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="uninstall">Deinstallieren</string>
     <string name="uninstall_terminal">Terminal deinstallieren</string>
 <string name="seccomp_desc">Fehler „Funktion nicht implementiert“ auf einigen Geräten beheben</string>
@@ -237,7 +237,7 @@
     <string name="check_proot">PRoot überprüfen</string>
     <string name="check_system_shell">System-Shell überprüfen</string>
     <string name="check_storage_permissions">Speicher und Berechtigungen überprüfen</string>
-    <string name="check_ubuntu">Ubuntu überprüfen</string>
+    <string name="check_ubuntu">Arch Linux überprüfen</string>
     <string name="check_network_access">Netzwerkzugriff überprüfen</string>
     <string name="check_abnormalities">Auf Auffälligkeiten überprüfen</string>
 <string name="seccomp_unspecified">Nicht angegeben</string>

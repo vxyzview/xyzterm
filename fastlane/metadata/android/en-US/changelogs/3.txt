@@ -1,0 +1,3 @@
+- Arch Linux replaces Ubuntu as the bundled container
+- pacman-based setup with a leaner, prebuilt rootfs
+- proot seccomp acceleration stays on by default

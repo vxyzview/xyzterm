@@ -26,7 +26,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
     val checkProot = stringResource(strings.check_proot)
     val checkSystemShell = stringResource(strings.check_system_shell)
     val checkStoragePermissions = stringResource(strings.check_storage_permissions)
-    val checkUbuntu = stringResource(strings.check_ubuntu)
+    val checkArch = stringResource(strings.check_ubuntu)
     val checkNetworkAccess = stringResource(strings.check_network_access)
     val checkAbnormalities = stringResource(strings.check_abnormalities)
 
@@ -129,17 +129,17 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     printLog("Sandbox Home Writable: ${sandboxHome.canWrite()}")
 
                     if (freeSpace < 500) {
-                        printLog("Warning: Low storage space (< 500 MB). Ubuntu might fail to install or update.")
+                        printLog("Warning: Low storage space (< 500 MB). Arch Linux might fail to install or update.")
                     }
 
                     freeSpace > 100 && filesDir.canWrite() && sandboxHome.canWrite()
                 },
             ),
             Check(
-                label = checkUbuntu,
+                label = checkArch,
                 run = { printLog ->
                     if (!isTerminalInstalled()) {
-                        printLog("Ubuntu not installed, skipping")
+                        printLog("Arch Linux not installed, skipping")
                         return@Check true
                     }
 
@@ -152,8 +152,8 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                         printLog("Bash executable: ${bash.canExecute()}")
                     }
 
-                    val apt = rootfs.child("usr/bin/apt")
-                    printLog("Apt exists: ${apt.exists()}")
+                    val pacman = rootfs.child("usr/bin/pacman")
+                    printLog("Pacman exists: ${pacman.exists()}")
 
                     val osRelease = rootfs.child("etc/os-release")
                     if (osRelease.exists()) {
@@ -161,7 +161,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                         osRelease.readLines().take(5).forEach { printLog("  $it") }
                     }
 
-                    printLog("Testing Ubuntu execution...")
+                    printLog("Testing Arch Linux execution...")
                     var working = false
                     try {
                         // Route through ShellUtils.runUbuntu so stdout/stderr drain
@@ -183,7 +183,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                 label = checkNetworkAccess,
                 run = { printLog ->
                     if (!isTerminalInstalled()) {
-                        printLog("Ubuntu not installed, skipping network check.")
+                        printLog("Arch Linux not installed, skipping network check.")
                         return@Check true
                     }
 
@@ -209,7 +209,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                             } else {
                                 printLog("/etc/resolv.conf is MISSING!")
                             }
-                            printLog("Abnormality: Ubuntu will not have internet access without DNS.")
+                            printLog("Abnormality: Arch Linux will not have internet access without DNS.")
                         }
                         dns.exitCode == 0 && !dns.timedOut
                     } catch (e: Exception) {
@@ -222,7 +222,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                 label = checkAbnormalities,
                 run = { printLog ->
                     if (!isTerminalInstalled()) {
-                        printLog("Ubuntu not installed, skipping")
+                        printLog("Arch Linux not installed, skipping")
                         return@Check true
                     }
                     var abnormalities = 0

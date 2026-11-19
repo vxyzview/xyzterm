@@ -23,7 +23,7 @@
     <string name="ok">OK</string>
 <string name="error">Erreur</string>
     <string name="unsupported_cpu">Processeur non pris en charge</string>
-    <string name="unsupported_cpu_desc">Aucun Ubuntu pour cette architecture. L\'application ne peut pas fonctionner sur cet appareil.</string>
+    <string name="unsupported_cpu_desc">Aucun Arch Linux pour cette architecture. L\'application ne peut pas fonctionner sur cet appareil.</string>
 <string name="app">Application</string>
     <string name="oled_desc">Applique l\'apparence Noir profond</string>
     <string name="themes">Apparences</string>
@@ -86,7 +86,7 @@
 <string name="acquire_wakelock">Activer le wakelock</string>
     <string name="release_wakelock">Désactiver le wakelock</string>
 <string name="install">Installer</string>
-<string name="uninstall_terminal_warning">Désinstaller Ubuntu de manière permanente ? Vous ne pourrez plus revenir en arrière.</string>
+<string name="uninstall_terminal_warning">Désinstaller Arch Linux de manière permanente ? Vous ne pourrez plus revenir en arrière.</string>
     <string name="uninstall">Désinstaller</string>
     <string name="uninstall_terminal">Désinstaller le terminal</string>
 <string name="seccomp_desc">Corriger l’erreur \"function not implemented\" sur certains appareils</string>
@@ -240,7 +240,7 @@
     <string name="pending">En attente</string>
     <string name="check_proot">Vérifier PRoot</string>
     <string name="check_storage_permissions">Vérifier le stockage et les permissions</string>
-    <string name="check_ubuntu">Vérifier Ubuntu</string>
+    <string name="check_ubuntu">Vérifier Arch Linux</string>
     <string name="check_network_access">Vérifier les accès réseau</string>
     <string name="check_abnormalities">Vérifier les anomalies</string>
 <string name="check_system_shell">Vérifier le shell du système</string>

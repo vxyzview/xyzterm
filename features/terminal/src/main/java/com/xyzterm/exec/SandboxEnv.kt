@@ -48,7 +48,9 @@ object SandboxEnv {
                 "EXT_HOME" to sandboxHomeDir(context).absolutePath,
                 "LD_LIBRARY_PATH" to localLibDir(context).absolutePath,
                 "TMP_DIR" to getTempDir().absolutePath,
-                "TMPDIR" to getTempDir().absolutePath,
+                // Guest tools (gpg, pacman, pip) must not inherit the app's
+                // private /data path: sandbox mode hides /data from the shell.
+                "TMPDIR" to if (Settings.sandbox) "/tmp" else getTempDir().absolutePath,
                 "TZ" to TimeZone.getDefault().id,
                 "DOTNET_GCHeapHardLimit" to "1C0000000",
                 "SOURCE_DIR" to context.applicationInfo.sourceDir,

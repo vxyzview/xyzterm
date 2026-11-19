@@ -18,7 +18,7 @@
     <string name="ok">OK</string>
 <string name="error">エラー</string>
     <string name="unsupported_cpu">対応していないCPU</string>
-    <string name="unsupported_cpu_desc">このアーキテクチャ用のUbuntuはありません。この端末ではアプリを実行できません。</string>
+    <string name="unsupported_cpu_desc">このアーキテクチャ用のArch Linuxはありません。この端末ではアプリを実行できません。</string>
 <string name="app">アプリケーション</string>
     <string name="oled_desc">純粋な黒色のテーマを適用する</string>
 <string name="extra_keys">追加キー</string>
@@ -86,7 +86,7 @@
 <string name="acquire_wakelock">ウェークロックを取得</string>
     <string name="release_wakelock">ウェークロックを開放</string>
 <string name="install">インストール</string>
-<string name="uninstall_terminal_warning">Ubuntuを完全にアンインストールしますか？ この操作は元に戻せません。</string>
+<string name="uninstall_terminal_warning">Arch Linuxを完全にアンインストールしますか？ この操作は元に戻せません。</string>
     <string name="uninstall">アンインストール</string>
     <string name="uninstall_terminal">ターミナルをアンインストール</string>
 <string name="seccomp_desc">一部のデバイスで発生する「関数が実装されていません」エラーを修正する</string>

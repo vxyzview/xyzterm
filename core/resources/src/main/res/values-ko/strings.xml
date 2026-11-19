@@ -87,7 +87,7 @@
 <string name="acquire_wakelock">절전 방지 활성화</string>
     <string name="release_wakelock">절전 방지 끄기</string>
 <string name="install">설치</string>
-<string name="uninstall_terminal_warning">Ubuntu를 영구적으로 제거하실 건가요? 다시는 되돌릴 수 없습니다.</string>
+<string name="uninstall_terminal_warning">Arch Linux를 영구적으로 제거하실 건가요? 다시는 되돌릴 수 없습니다.</string>
     <string name="uninstall">제거</string>
     <string name="uninstall_terminal">터미널 제거</string>
     <string name="restore_terminal">터미널 백업 복구</string>

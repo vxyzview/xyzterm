@@ -2,7 +2,7 @@
 
 ## Scope
 
-xyzterm is deliberately minimal: a terminal running a proot Ubuntu environment, and nothing else.
+xyzterm is deliberately minimal: a terminal running a proot Arch Linux environment, and nothing else.
 Features that add editors, file managers, or extension marketplaces are out of scope — see the
 [README](/README.md) for the project's design goals.
 

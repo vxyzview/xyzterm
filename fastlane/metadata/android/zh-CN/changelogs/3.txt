@@ -1,0 +1,3 @@
+- 用 Arch Linux 容器替换 Ubuntu
+- 基于 pacman 的安装流程，rootfs 更精简
+- proot seccomp 加速默认开启

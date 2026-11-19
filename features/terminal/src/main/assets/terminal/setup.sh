@@ -2,7 +2,7 @@ set -e
 
 source "$LOCAL/bin/utils"
 
-info "Extracting the Ubuntu container…"
+info "Extracting the Arch Linux container…"
 
 ARGS="--kill-on-exit"
 ARGS="$ARGS -w /"
@@ -59,6 +59,16 @@ ARGS="$ARGS --link2symlink"
 ARGS="$ARGS --sysvipc"
 ARGS="$ARGS -L"
 
+SANDBOX_DIR="$LOCAL/sandbox"
+mkdir -p "$SANDBOX_DIR"
+
+# Replace whatever distro was installed before (the app used to ship Ubuntu).
+# User data lives outside the rootfs ($LOCAL/home), so wiping the extracted
+# rootfs only costs packages.
+for entry in "$SANDBOX_DIR"/* "$SANDBOX_DIR"/.[!.]* "$SANDBOX_DIR"/..?*; do
+  [ -e "$entry" ] && rm -rf "$entry"
+done
+
 COMMAND="(cd $LOCAL/sandbox && tar -xf $TMP_DIR/sandbox.tar.gz)"
 
 set +e
@@ -85,9 +95,7 @@ if [ "$ret" -ne 0 ]; then
 fi
 
 
-SANDBOX_DIR="$LOCAL/sandbox"
-
-info "Setting up the Ubuntu container…"
+info "Setting up the Arch Linux container…"
 
 # values you want written
 nameserver="nameserver 8.8.8.8
@@ -109,8 +117,10 @@ mkdir -p "$SANDBOX_DIR/etc"
 # write hostname
 printf '%s\n' "xyz" > "$SANDBOX_DIR/etc/hostname"
 
-# write resolv.conf (create file if not exists, then overwrite)
-: > "$SANDBOX_DIR/etc/resolv.conf"
+# replace the stock resolv.conf: Arch Linux ARM ships it as a symlink into
+# /run/systemd, which does not exist in the container, so writing through it
+# would fail with ENOENT.
+rm -f "$SANDBOX_DIR/etc/resolv.conf"
 printf '%s\n' "$nameserver" > "$SANDBOX_DIR/etc/resolv.conf"
 
 # write hosts
@@ -151,83 +161,9 @@ rm "$TMP_DIR"/sandbox.tar.gz
 touch $LOCAL/.terminal_setup_ok_DO_NOT_REMOVE
 
 
-
-info "Installing Node.js APT hook…"
-
-mkdir -p "$SANDBOX_DIR/etc/apt/apt.conf.d"
-mkdir -p "$SANDBOX_DIR/usr/local/bin"
-
-cat > "$SANDBOX_DIR/etc/apt/apt.conf.d/99node-hook" << 'EOF'
-DPkg::Post-Invoke {
-    "if [ -x /usr/bin/node ]; then /usr/local/bin/node-postinstall.sh; fi";
-};
-EOF
-
-cat > "$SANDBOX_DIR/usr/local/bin/node-postinstall.sh" << 'EOF'
-#!/bin/sh
-set -e
-
-echo "[node-hook] Running Node.js post-install hook..."
-
-JEMALLOC=""
-
-echo "[node-hook] Searching for jemalloc..."
-
-for path in \
-    /usr/lib/*/libjemalloc.so* \
-    /usr/lib/libjemalloc.so* \
-    /lib/*/libjemalloc.so* \
-    /lib/libjemalloc.so*; do
-
-    if [ -e "$path" ]; then
-        JEMALLOC="$path"
-        echo "[node-hook] Found jemalloc: $JEMALLOC"
-        break
-    fi
-done
-
-if [ -z "$JEMALLOC" ]; then
-    echo "[node-hook] jemalloc not installed, skipping"
-    exit 0
-fi
-
-if [ ! -e /usr/bin/node ]; then
-    echo "[node-hook] Node binary not found, skipping"
-    exit 0
-fi
-
-if [ -e /usr/bin/node.distrib ]; then
-    echo "[node-hook] Node already wrapped, skipping"
-    exit 0
-fi
-
-echo "[node-hook] Verifying node binary..."
-
-if file /usr/bin/node | grep -q ELF; then
-    echo "[node-hook] Wrapping Node.js with jemalloc..."
-
-    mv /usr/bin/node /usr/bin/node.distrib
-
-    cat > /usr/bin/node << WRAP
-#!/bin/sh
-LD_PRELOAD=$JEMALLOC exec /usr/bin/node.distrib "\$@"
-WRAP
-
-    chmod +x /usr/bin/node
-
-    echo "[node-hook] Node wrapper installed successfully"
-else
-    echo "[node-hook] /usr/bin/node is not an ELF binary, skipping"
-fi
-EOF
-
-chmod +x "$SANDBOX_DIR/usr/local/bin/node-postinstall.sh"
-
-info "Node.js APT hook installed"
-
-# One-time base package + Node.js install. Done here, during setup, so the
-# first shell opens instantly instead of blocking for minutes. If it fails,
-# init.sh retries it on the first shell start.
+# One-time base package install. Done here, during setup, so the first shell
+# opens instantly instead of blocking for minutes. If it fails, init.sh
+# retries it on the first shell start.
 info "Installing base packages (one-time, takes a few minutes)…"
 
 mkdir -p "$SANDBOX_DIR/tmp"
@@ -240,8 +176,8 @@ SANDBOX_ARGS="$SANDBOX_ARGS -b $SANDBOX_DIR/tmp:/dev/shm"
 set +e
 # The proot child inherits the Android-side PATH, which lacks the
 # container's /usr/bin etc.; set the same container PATH init.sh uses
-# or dpkg/apt are not found.
-$PROOT $SANDBOX_ARGS /bin/bash -c 'export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$LOCAL/bin:$PATH && source "$LOCAL/bin/utils" && ensure_packages_once && ensure_nodejs_once'
+# or pacman is not found.
+$PROOT $SANDBOX_ARGS /bin/bash -c 'export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$LOCAL/bin:$PATH && source "$LOCAL/bin/utils" && ensure_packages_once'
 ret=$?
 set -e
 

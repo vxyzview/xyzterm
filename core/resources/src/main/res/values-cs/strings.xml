@@ -14,7 +14,7 @@
     <string name="permission_denied">Přístup odepřen</string>
     <string name="error">Chyba</string>
     <string name="unsupported_cpu">Nepodporované CPU</string>
-    <string name="unsupported_cpu_desc">Žádný Ubuntu pro tuto architekturu. Aplikace na tomto zařízení nemůže běžet.</string>
+    <string name="unsupported_cpu_desc">Žádný Arch Linux pro tuto architekturu. Aplikace na tomto zařízení nemůže běžet.</string>
 <string name="extra_keys">Extra klávesy</string>
     <string name="auto_mode">Automatické</string>
     <string name="about">O aplikaci</string>
@@ -81,7 +81,7 @@
 <string name="theme_settings">Nastavení téma</string>
 <string name="confirm_exit">Chcete opravdu ukončit aplikaci?</string>
 <string name="install">Instalovat</string>
-    <string name="uninstall_terminal_warning">Nenávratně odinstalovat Ubuntu? Táto akce nemůže být vrácena zpět.</string>
+    <string name="uninstall_terminal_warning">Nenávratně odinstalovat Arch Linux? Táto akce nemůže být vrácena zpět.</string>
     <string name="uninstall">Odinstalovat</string>
     <string name="uninstall_terminal">Odinstalovat terminál</string>
 <string name="type">Typ</string>
@@ -242,7 +242,7 @@
     <string name="check_proot">Zkontrolovat PRoot</string>
     <string name="check_system_shell">Zkontrolovat shell systému</string>
     <string name="check_storage_permissions">Zkontrolovat úložiště a oprávění</string>
-    <string name="check_ubuntu">Zkontrolovat Ubuntu</string>
+    <string name="check_ubuntu">Zkontrolovat Arch Linux</string>
     <string name="check_network_access">Zkontrolovat přístup k síti</string>
     <string name="check_abnormalities">Zkontrolovat abnormality</string>
 <string name="enable_logcat">Zapnout Logcat</string>

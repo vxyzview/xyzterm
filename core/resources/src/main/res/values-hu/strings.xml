@@ -34,5 +34,5 @@
     <string name="developer_name">vxyzview</string>
     <string name="upstream_source">Upstream source</string>
     <string name="unsupported_cpu">Nem támogatott CPU</string>
-    <string name="unsupported_cpu_desc">Nincs Ubuntu ehhez az architektúrához. Az alkalmazás nem futhat ezen az eszközön.</string>
+    <string name="unsupported_cpu_desc">Nincs Arch Linux ehhez az architektúrához. Az alkalmazás nem futhat ezen az eszközön.</string>
 </resources>

@@ -1,12 +1,12 @@
-xyzterm is a minimal, terminal-only Android app that runs a real proot-based Ubuntu environment with a full terminal emulator. Tap the icon, and you are in a shell — no code editor, no file manager, no git UI, no extensions.
+xyzterm is a minimal, terminal-only Android app that runs a real proot-based Arch Linux environment with a full terminal emulator. Tap the icon, and you are in a shell — no code editor, no file manager, no git UI, no extensions.
 
 Getting started
 1. Install xyzterm and open it.
-2. On first launch, choose to install Ubuntu — a one-time rootfs download for your device (arm, arm64, or x64).
-3. Start typing. You are in a real Ubuntu shell.
+2. On first launch, choose to install Arch Linux — a one-time rootfs download for your device (arm, arm64, or x64).
+3. Start typing. You are in a real Arch Linux shell.
 
 Features
-- Real Ubuntu, no root — proot userspace rootfs per ABI (arm, arm64, x64)
+- Real Arch Linux, no root — proot userspace rootfs per ABI (arm, arm64, x64)
 - Full terminal emulator — configurable font, size, colors, and an extra-keys row
 - Multiple named sessions — add, rename, delete, switch; persisted across restarts
 - Terminal themes — including AMOLED and dynamic color (Monet)

@@ -1,1 +1,1 @@
-Ubuntu proot Linux 终端，适用于 Android
+Arch Linux proot Linux 终端，适用于 Android

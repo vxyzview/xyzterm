@@ -1,12 +1,12 @@
-xyzterm 是一款极简的纯终端 Android 应用，运行真实的 proot Ubuntu 环境，内置完整的终端模拟器。点开图标即进入 shell——没有代码编辑器，没有文件管理器，没有 git 界面，没有扩展。
+xyzterm 是一款极简的纯终端 Android 应用，运行真实的 proot Arch Linux 环境，内置完整的终端模拟器。点开图标即进入 shell——没有代码编辑器，没有文件管理器，没有 git 界面，没有扩展。
 
 入门步骤
 1. 安装并打开 xyzterm。
-2. 首次启动时选择安装 Ubuntu——一次性下载适合您设备的 rootfs（arm、arm64 或 x64）。
-3. 开始输入。您已进入真实的 Ubuntu shell。
+2. 首次启动时选择安装 Arch Linux——一次性下载适合您设备的 rootfs（arm、arm64 或 x64）。
+3. 开始输入。您已进入真实的 Arch Linux shell。
 
 功能特性
-- 真实 Ubuntu，无需 root——按 ABI（arm、arm64、x64）提供 proot 用户空间 rootfs
+- 真实 Arch Linux，无需 root——按 ABI（arm、arm64、x64）提供 proot 用户空间 rootfs
 - 完整终端模拟器——可配置字体、字号、配色和附加按键行
 - 多命名会话——添加、重命名、删除、切换；重启后依然保留
 - 终端主题——包括 AMOLED 和动态取色（Monet）

@@ -1,1 +1,1 @@
-Ubuntu proot Linux shell for Android
+Arch Linux proot Linux shell for Android

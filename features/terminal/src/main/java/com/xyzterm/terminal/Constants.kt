@@ -1,13 +1,13 @@
 package com.xyzterm.terminal
 
-private const val ROOTFS_BASE = "https://github.com/Xed-Editor/Karbon-PackagesX/releases/download/ubuntu"
+private const val ROOTFS_BASE = "https://github.com/vxyzview/xyzterm/releases/download/arch-rootfs"
 
-const val ROOTFS_ARM = "$ROOTFS_BASE/ubuntu-base-24.04.3-base-armhf.tar.gz"
-const val ROOTFS_ARM64 = "$ROOTFS_BASE/ubuntu-base-24.04.3-base-arm64.tar.gz"
-const val ROOTFS_X64 = "$ROOTFS_BASE/ubuntu-base-24.04.3-base-amd64.tar.gz"
+const val ROOTFS_ARM = "$ROOTFS_BASE/archlinux-armv7.tar.gz"
+const val ROOTFS_ARM64 = "$ROOTFS_BASE/archlinux-aarch64.tar.gz"
+const val ROOTFS_X64 = "$ROOTFS_BASE/archlinux-x86_64.tar.gz"
 
 // SHA-256 of each release asset (from the GitHub release API). When the URL
 // constants are bumped to a new rootfs release, update these alongside them.
-const val ROOTFS_ARM_SHA256 = "747909a2f81d816fc6252f076757fcf6bd75a55f848a1c049ee79c0e88c0b9a0"
-const val ROOTFS_ARM64_SHA256 = "7b2dced6dd56ad5e4a813fa25c8de307b655fdabc6ea9213175a92c48dabb048"
-const val ROOTFS_X64_SHA256 = "6bc2cde3930ad088b3bb46fa45279e96d25bc3810f209850ecbe4722711874f9"
+const val ROOTFS_ARM_SHA256 = "603fa393159e313552839eb858a1c9092a7f31e2173df255186694e975f1907c"
+const val ROOTFS_ARM64_SHA256 = "67e0ace557c7b8e108b57498c491b9ce41eb9d99ac1158f2db2aca356c83fccf"
+const val ROOTFS_X64_SHA256 = "ffd226e6b36e52e2aeb1fb8bf29203eecbf690b29548d0dc5d0fbd8baf0c6aff"

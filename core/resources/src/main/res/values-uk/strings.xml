@@ -28,7 +28,7 @@
     <string name="ok">Добре</string>
 <string name="error">Помилка</string>
     <string name="unsupported_cpu">Непідтримуваний процесор</string>
-    <string name="unsupported_cpu_desc">Немає Ubuntu для цієї архітектури. Додаток не може працювати на цьому пристрої.</string>
+    <string name="unsupported_cpu_desc">Немає Arch Linux для цієї архітектури. Додаток не може працювати на цьому пристрої.</string>
 <string name="app">Застосунок</string>
     <string name="oled_desc">Застосувати чорну тему amoled</string>
     <string name="themes">Теми</string>
@@ -82,7 +82,7 @@
     <string name="theme_settings">Налаштування теми</string>
 <string name="confirm_exit">Ви впевнені, що бажаєте вийти?</string>
 <string name="install">Встановити</string>
-    <string name="uninstall_terminal_warning">Повністю видалити Ubuntu? Цю дію неможливо скасувати.</string>
+    <string name="uninstall_terminal_warning">Повністю видалити Arch Linux? Цю дію неможливо скасувати.</string>
     <string name="uninstall">Видалити</string>
     <string name="uninstall_terminal">Видалити термінал</string>
     <string name="restore_terminal">Відновити резервну копію терміналу</string>
@@ -209,7 +209,7 @@
 <string name="time_just_now">Прямо зараз</string>
 <string name="check_abnormalities">Перевірка на ненормальності</string>
     <string name="check_proot">Перевірка PRoot</string>
-    <string name="check_ubuntu">Перевірка Ubuntu</string>
+    <string name="check_ubuntu">Перевірка Arch Linux</string>
 <string name="cursor_style">Вигляд курсора</string>
     <string name="file_type">Тип файлу</string>
 <string name="check_network_access">Перевірити доступ до мережі</string>

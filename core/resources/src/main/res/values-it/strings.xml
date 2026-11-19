@@ -28,7 +28,7 @@
     <string name="manage_storage">Gestisci spazio</string>
 <string name="error">Errore</string>
     <string name="unsupported_cpu">CPU non supportata</string>
-    <string name="unsupported_cpu_desc">Nessuna Ubuntu per questa architettura. L\'app non può girare su questo dispositivo.</string>
+    <string name="unsupported_cpu_desc">Nessuna Arch Linux per questa architettura. L\'app non può girare su questo dispositivo.</string>
 <string name="app">Applicazione</string>
     <string name="oled_desc">Applica un tema nero puro</string>
 <string name="ok">OK</string>
@@ -84,7 +84,7 @@
 <string name="theme_settings">Impostazioni tema</string>
 <string name="confirm_exit">Sei sicuro di voler uscire?</string>
 <string name="install">Installa</string>
-<string name="uninstall_terminal_warning">Disinstallare Ubuntu in modo permanente? Questa azione non può essere annullata.</string>
+<string name="uninstall_terminal_warning">Disinstallare Arch Linux in modo permanente? Questa azione non può essere annullata.</string>
     <string name="uninstall">Disinstalla</string>
     <string name="uninstall_terminal">Disinstalla terminale</string>
 <string name="seccomp_desc">Corregge l\'errore \"funzione non implementata\" su alcuni dispositivi</string>
@@ -241,7 +241,7 @@
     <string name="check_proot">Verifica PRoot</string>
     <string name="check_system_shell">Verifica shell di sistema</string>
     <string name="check_storage_permissions">Verifica spazio di archiviazione e autorizzazioni</string>
-    <string name="check_ubuntu">Verifica Ubuntu</string>
+    <string name="check_ubuntu">Verifica Arch Linux</string>
     <string name="check_network_access">Verifica accesso alle rete</string>
     <string name="check_abnormalities">Verifica anomalie</string>
 <string name="seccomp_unspecified">Non specificato</string>
