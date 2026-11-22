@@ -59,7 +59,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -74,13 +73,13 @@ import com.termux.terminal.TextStyle
 import com.termux.view.TerminalView
 import com.xyzterm.activities.settings.SettingsActivity
 import com.xyzterm.activities.terminal.Terminal
+import com.xyzterm.components.BrandHeader
 import com.xyzterm.components.ResponsiveDrawer
 import com.xyzterm.components.SingleInputDialog
 import com.xyzterm.components.compose.preferences.base.ProvideIsExpandedScreen
 import com.xyzterm.exec.pendingCommand
 import com.xyzterm.file.child
 import com.xyzterm.file.sandboxDir
-import com.xyzterm.resources.drawables
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Preference
@@ -185,7 +184,13 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                                     MaterialTheme.colorScheme.primary
                                 },
                                 CircleShape,
-                            ),
+                            )
+                            .semantics {
+                                contentDescription =
+                                    stringResource(
+                                        if (bellPulse) strings.session_attention else strings.session_running
+                                    )
+                            },
                 )
                 SessionTitle(terminalActivity)
             }
@@ -194,9 +199,6 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
             IconButton(onClick = { scope.launch { drawerState.open() } }) {
                 Icon(Icons.Default.Menu, stringResource(strings.drawer))
             }
-        },
-        actions = {
-            // no search action
         },
     )
 }
@@ -426,45 +428,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // ── Branded header ─────────────────────────────────────────────
-        Surface(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier =
-                        Modifier.size(52.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
-                ) {
-                    Icon(
-                        painter = painterResource(drawables.terminal),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(26.dp),
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(14.dp))
-
-                Column {
-                    Text(
-                        text = stringResource(strings.app_name),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = stringResource(strings.developed_by),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
+        BrandHeader()
 
         // ── Settings entry ─────────────────────────────────────────────
         Surface(
@@ -593,6 +557,19 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                             modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
+                            Box(
+                                modifier =
+                                    Modifier.size(8.dp)
+                                        .background(
+                                            if (isSelected) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.outline
+                                            },
+                                            CircleShape,
+                                        ),
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = sessionId,
                                 style = MaterialTheme.typography.bodyLarge,

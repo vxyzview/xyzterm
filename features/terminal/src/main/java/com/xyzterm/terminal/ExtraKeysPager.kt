@@ -204,7 +204,10 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                                 Color(onSurfaceColor).copy(alpha = 0.3f)
                             },
                             MaterialTheme.shapes.small,
-                        ),
+                        )
+                        .semantics {
+                            contentDescription = stringResource(strings.pager_page).format(i + 1, 2)
+                        },
                 )
             }
         }
