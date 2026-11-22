@@ -39,6 +39,7 @@ fun settingsEntries(): List<SettingsEntry> = buildList {
         )
     }
     add(SettingsEntry(strings.advanced.getString(), "", SettingsRoutes.TerminalAdvanced.route))
+    add(SettingsEntry(strings.desktop.getString(), strings.desktop_desc.getString(), SettingsRoutes.TerminalDesktop.route))
     add(SettingsEntry(strings.appearance.getString(), "", SettingsRoutes.TerminalAppearance.route))
     add(SettingsEntry(strings.input.getString(), "", SettingsRoutes.TerminalInput.route))
     add(SettingsEntry(strings.user_data.getString(), "", SettingsRoutes.TerminalData.route))

@@ -23,6 +23,7 @@ import com.xyzterm.settings.terminal.TerminalAdvancedSettings
 import com.xyzterm.settings.terminal.TerminalAppearanceSettings
 import com.xyzterm.settings.terminal.TerminalBackupsScreen
 import com.xyzterm.settings.terminal.TerminalCheckScreen
+import com.xyzterm.settings.terminal.TerminalDesktopScreen
 import com.xyzterm.settings.terminal.TerminalDataSettings
 import com.xyzterm.settings.terminal.TerminalExtraKeys
 import com.xyzterm.settings.terminal.TerminalInputSettings
@@ -85,6 +86,11 @@ class TerminalFeature : Feature {
         routes.add(DynamicRoute(SettingsRoutes.TerminalExtraKeys.route) { _, _ -> TerminalExtraKeys() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalSnippets.route) { _, _ -> SnippetsScreen() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalCheck.route) { _, _ -> TerminalCheckScreen() })
+        routes.add(
+            DynamicRoute(SettingsRoutes.TerminalDesktop.route) { navController, _ ->
+                TerminalDesktopScreen(navController)
+            }
+        )
         routes.add(DynamicRoute(SettingsRoutes.TerminalFontScreen.route) { _, _ -> TerminalFontScreen() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalBackups.route) { _, _ -> TerminalBackupsScreen() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalBinds.route) { _, _ -> UserBindingsScreen() })

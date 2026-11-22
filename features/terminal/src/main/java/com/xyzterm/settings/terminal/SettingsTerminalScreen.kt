@@ -101,6 +101,12 @@ fun SettingsTerminalScreen(navController: NavController) {
                 navController = navController,
                 route = SettingsRoutes.TerminalAdvanced,
             )
+            NextScreenCard(
+                label = stringResource(strings.desktop),
+                description = stringResource(strings.desktop_desc),
+                navController = navController,
+                route = SettingsRoutes.TerminalDesktop,
+            )
         }
     }
 }

@@ -73,6 +73,7 @@ import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
 import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.SetupFlow
+import com.xyzterm.terminal.gamepadBytes
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
 import com.xyzterm.terminal.archmAssetForAbi
@@ -288,6 +289,23 @@ class Terminal : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun writeToShell(text: String) {
+        val service = sessionBinder?.get()?.getService() ?: return
+        val id = service.currentSession.value ?: return
+        service.getSession(id)?.write(text)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (Settings.gamepad_input && event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+            val bytes = gamepadBytes(event.keyCode)
+            if (bytes != null) {
+                writeToShell(bytes)
+                return true
+            }
+        }
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

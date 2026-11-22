@@ -332,4 +332,13 @@
     <string name="permission_skip">Not now</string>
     <string name="install_heading">Preparing your Linux shell</string>
     <string name="install_desc">Copying the bundled Arch Linux environment into place. This happens only once.</string>
+    <string name="desktop">Graphical desktop</string>
+    <string name="desktop_desc">Start XFCE, KDE or a window manager inside the Linux container.</string>
+    <string name="desktop_display">Display</string>
+    <string name="desktop_session">Session</string>
+    <string name="desktop_start">Start desktop</string>
+    <string name="desktop_requires_x11">Install Termux:X11 (com.termux.x11) and a desktop with pacman, e.g. pacman -S xfce4.</string>
+    <string name="desktop_x11_missing">Termux:X11 is not installed. The desktop cannot start without it.</string>
+    <string name="gamepad_input">Gamepad input</string>
+    <string name="gamepad_input_desc">Map controller buttons to Enter, Escape, Tab and page keys in the shell.</string>
 </resources>

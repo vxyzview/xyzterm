@@ -55,6 +55,8 @@ $ pfetch
 - **Full terminal emulator** — configurable font, font size, cursor style, scrollback buffer, and colors.
 - **Extra-keys row** — ESC / CTRL / ALT / arrows / TAB / HOME / END / PGUP / PGDN always one tap away. Fully customizable in [Termux extra-keys JSON format](https://wiki.termux.com/wiki/Touch_Keyboard#Extra_Keys_Row), with live validation while you edit.
 - **Hardware keyboard support** — a wide set of default shortcuts, searchable and remappable in-app. See [KEYBINDS.md](docs/KEYBINDS.md).
+- **Hardware keyboard, mouse and gamepad** — Ctrl/Alt/Shift pass through to the shell, mouse reporting works in TUI apps, and controller buttons map to Enter/Esc/Tab/Page keys (toggle in Terminal settings).
+- **Graphical desktop (bring your own X server)** — start XFCE, KDE Plasma or Openbox from Terminal settings with [Termux:X11](https://github.com/termux/termux-x11) installed; install the desktop itself with `pacman -S xfce4` (or `kde`/`openbox`).
 - **Clipboard keybindings** — paste multi-line input safely, without auto-execution surprises.
 
 ### Sessions & data
