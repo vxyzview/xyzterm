@@ -11,7 +11,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.compose.setContent
@@ -32,7 +31,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -63,19 +60,13 @@ import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.exec.isTerminalInstalled
 import com.xyzterm.file.FilePermission
 import com.xyzterm.file.child
-import com.xyzterm.file.localBinDir
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import com.xyzterm.terminal.NEXT_STAGE
-import com.xyzterm.terminal.ROOTFS_ARM
-import com.xyzterm.terminal.ROOTFS_ARM64
-import com.xyzterm.terminal.ROOTFS_ARM64_SHA256
-import com.xyzterm.terminal.ROOTFS_ARM_SHA256
-import com.xyzterm.terminal.ROOTFS_X64
-import com.xyzterm.terminal.ROOTFS_X64_SHA256
 import com.xyzterm.terminal.SessionService
+import com.xyzterm.terminal.archmAssetForAbi
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
 import com.xyzterm.terminal.changeSession
@@ -85,21 +76,15 @@ import com.xyzterm.theme.XyzTheme
 import com.xyzterm.utils.AppDialogHost
 import com.xyzterm.utils.errorDialog
 import com.xyzterm.utils.getTempDir
-import com.xyzterm.utils.toast
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.lang.ref.WeakReference
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import java.security.MessageDigest
-import java.util.concurrent.TimeUnit
-import java.util.zip.GZIPInputStream
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 class Terminal : AppCompatActivity() {
     var sessionBinder by mutableStateOf<WeakReference<SessionService.SessionBinder>?>(null)
@@ -320,112 +305,57 @@ class Terminal : AppCompatActivity() {
     @OptIn(DelicateCoroutinesApi::class)
     @Composable
     fun TerminalScreenHost(context: Context) {
-        var currentFileName by remember { mutableStateOf("") }
         var downloadedBytes by remember { mutableLongStateOf(0L) }
         var totalBytes by remember { mutableLongStateOf(0L) }
         var unsupportedCpu by remember { mutableStateOf(false) }
-        var downloadStarted by remember { mutableStateOf(false) }
         var ubuntuInstalled by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { ubuntuInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() } }
 
-        // Helper function to format bytes to MB string
-        fun formatBytesToMB(bytes: Long): String {
-            return "%.2f".format(bytes / (1024.0 * 1024.0))
-        }
+        LaunchedEffect(Unit) {
+            if (withContext(Dispatchers.IO) { isTerminalInstalled() }) {
+                ubuntuInstalled = true
+                return@LaunchedEffect
+            }
 
-        fun startInstall() {
-            progressText = strings.installing.getString()
-            downloadStarted = true
+            val asset = archmAssetForAbi(Build.SUPPORTED_ABIS)
+            if (asset == null) {
+                unsupportedCpu = true
+                return@LaunchedEffect
+            }
 
-            lifecycleScope.launch(Dispatchers.Main) {
-                val abi = Build.SUPPORTED_ABIS
-
-                val rootfs =
-                    when {
-                        abi.contains("x86_64") -> ROOTFS_X64 to ROOTFS_X64_SHA256
-                        abi.contains("arm64-v8a") -> ROOTFS_ARM64 to ROOTFS_ARM64_SHA256
-                        abi.contains("armeabi-v7a") -> ROOTFS_ARM to ROOTFS_ARM_SHA256
-                        else -> {
-                            unsupportedCpu = true
-                            return@launch
+            try {
+                withContext(Dispatchers.IO) {
+                    val output = getTempDir().child("sandbox.tar.gz")
+                    // aapt may leave .tar.gz uncompressed (openFd works) or store
+                    // it deflated; both paths must produce the same staged file.
+                    val descriptor = runCatching { context.assets.openFd("terminal/${asset.name}") }.getOrNull()
+                    val input: InputStream = descriptor?.createInputStream() ?: context.assets.open("terminal/${asset.name}")
+                    totalBytes = descriptor?.length ?: -1L
+                    input.use { stream ->
+                        FileOutputStream(output).use { fileOut ->
+                            val buffer = ByteArray(64 * 1024)
+                            while (true) {
+                                val read = stream.read(buffer)
+                                if (read < 0) break
+                                fileOut.write(buffer, 0, read)
+                                downloadedBytes += read
+                            }
                         }
                     }
+                    descriptor?.close()
 
-                val filesToDownload =
-                    mutableListOf(
-                        DownloadFile(
-                            url = rootfs.first,
-                            outputFile = getTempDir().child("sandbox.tar.gz"),
-                            sha256 = rootfs.second,
-                        ),
-                    )
-
-                try {
-                    setupEnvironment(
-                        context = context,
-                        filesToDownload = filesToDownload,
-                        onProgress = { fileName, downloaded, total ->
-                            downloadedBytes = downloaded
-                            totalBytes = total
-                            currentFileName = fileName
-
-                            if (total > 0) {
-                                val downloadedMB = formatBytesToMB(downloaded)
-                                val totalMB = formatBytesToMB(total)
-                                progressText =
-                                    "${strings.downloading.getString()} ${fileName.removeSuffix(".so").removePrefix("lib")} ($downloadedMB/$totalMB MB)"
-                            }
-                        },
-                        onComplete = {
-                            installNextStage = it
-                            ubuntuInstalled = it != NEXT_STAGE.NONE || isTerminalInstalled()
-                        },
-                        onError = { error, file ->
-                            when (error) {
-                                is UnknownHostException -> {
-                                    toast(strings.network_err.getString())
-                                }
-
-                                is SocketTimeoutException -> {
-                                    errorDialog(strings.timeout)
-                                }
-
-                                else -> {
-                                    error.printStackTrace()
-                                    lifecycleScope.launch(Dispatchers.IO) {
-                                        if (file?.absolutePath?.contains(localBinDir().absolutePath) == true) {
-                                            localBinDir().deleteRecursively()
-                                        }
-
-                                        if (file?.name == "sandbox.tar.gz") {
-                                            // Drop only the bad tarball so the retry
-                                            // starts clean. Never wipe sandboxDir()
-                                            // here: it may hold a working rootfs
-                                            // from an earlier successful install,
-                                            // and a transient download failure must
-                                            // not destroy it.
-                                            File(getTempDir(), "sandbox.tar.gz").delete()
-                                        }
-                                    }
-                                    errorDialog(msg = strings.setup_failed.getFilledString(error.message))
-                                }
-                            }
-                            downloadStarted = false
-                        },
-                    )
-                } catch (e: Exception) {
-                    if (e is UnknownHostException) {
-                        toast(strings.network_err.getString())
-                    } else if (e is SocketTimeoutException) {
-                        errorDialog(strings.timeout)
-                    } else {
-                        e.printStackTrace()
-                        toast(strings.setup_failed.getFilledString(e.message))
+                    if (!sha256Matches(output, asset.sha256)) {
+                        output.delete()
+                        throw IllegalStateException("Bundled rootfs checksum mismatch: ${asset.name}")
                     }
-                    downloadStarted = false
+                    installNextStage = getNextStage(this@Terminal)
                 }
+                ubuntuInstalled = true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                errorDialog(msg = strings.setup_failed.getFilledString(e.message))
             }
         }
+
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val context = LocalContext.current
@@ -481,7 +411,11 @@ class Terminal : AppCompatActivity() {
                     TerminalScreen(terminalActivity = this@Terminal)
                 }
 
-                downloadStarted -> {
+
+                ubuntuInstalled -> {
+                    TerminalScreen(terminalActivity = this@Terminal)
+                }
+                else -> {
                     Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                         Column(
                             modifier = Modifier.align(Alignment.Center),
@@ -491,20 +425,20 @@ class Terminal : AppCompatActivity() {
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            LinearProgressIndicator(
-                                progress = { if (totalBytes > 0) downloadedBytes.toFloat() / totalBytes else 0f },
-                                modifier = Modifier.fillMaxWidth(0.8f),
-                            )
-
                             if (totalBytes > 0) {
+                                LinearProgressIndicator(
+                                    progress = { downloadedBytes.toFloat() / totalBytes },
+                                    modifier = Modifier.fillMaxWidth(0.8f),
+                                )
                                 val percent = (downloadedBytes.toFloat() / totalBytes * 100).toInt()
-
                                 Text(
                                     text = "$percent%",
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier =
                                         Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
                                 )
+                            } else {
+                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(0.8f))
                             }
                         }
 
@@ -519,200 +453,9 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
-                ubuntuInstalled -> {
-                    TerminalScreen(terminalActivity = this@Terminal)
-                }
-
-                else -> {
-                    // Ubuntu not installed and no download in progress: offer the
-                    // optional install instead of forcing the rootfs download.
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(24.dp).semantics(mergeDescendants = true) {},
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(
-                            text = stringResource(strings.install_ubuntu_optional),
-                            style = MaterialTheme.typography.headlineSmall,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.semantics { heading() },
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(strings.install_ubuntu_optional_desc),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Button(onClick = { startInstall() }) { Text(text = stringResource(strings.install)) }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TextButton(onClick = { finishAffinity() }) { Text(text = stringResource(strings.not_now)) }
-                    }
-                }
             }
         }
     }
-
-    data class DownloadFile(val url: String, val outputFile: File, val sha256: String? = null)
-
-    @OptIn(DelicateCoroutinesApi::class)
-    private suspend fun setupEnvironment(
-        context: Context,
-        filesToDownload: List<DownloadFile>,
-        onProgress: (fileName: String, downloadedBytes: Long, totalBytes: Long) -> Unit,
-        onComplete: (NEXT_STAGE) -> Unit,
-        onError: (Exception, File?) -> Unit,
-    ) {
-        var currentFile: File? = null
-
-        withContext(Dispatchers.IO) {
-            try {
-                var completedFiles = 0
-
-                filesToDownload.forEach { file ->
-                    val outputFile = file.outputFile
-                    currentFile = outputFile
-
-                    outputFile.parentFile?.mkdirs()
-
-                    if (!outputFile.exists() || !isValidGzip(outputFile) || !sha256Matches(outputFile, file.sha256)) {
-                        // Existing file is a leftover from a killed download, a
-                        // pre-resume version, or a stale rootfs from an older app
-                        // release (hash mismatch): discard it, the download writes
-                        // a .part sibling and only renames it once verified.
-                        outputFile.delete()
-                        downloadFile(
-                            url = file.url,
-                            outputFile = outputFile,
-                            onProgress = { downloaded, total -> onProgress(file.outputFile.name, downloaded, total) },
-                        )
-                    } else {
-                        // Report existing file as already downloaded
-                        onProgress(file.outputFile.name, outputFile.length(), outputFile.length())
-                    }
-                    completedFiles++
-
-                    if (file.sha256 != null && !sha256Matches(outputFile, file.sha256)) {
-                        outputFile.delete()
-                        throw Exception("Rootfs checksum mismatch: ${outputFile.name}")
-                    }
-
-                    runCatching { outputFile.setExecutable(true) }.onFailure { it.printStackTrace() }
-                }
-
-                val stage = getNextStage(this@Terminal)
-                onComplete(stage)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) { onError(e, currentFile) }
-                if (currentFile?.exists() == true) {
-                    currentFile.delete()
-                }
-            }
-        }
-    }
-
-    private suspend fun downloadFile(
-        url: String,
-        outputFile: File,
-        onProgress: (downloadedBytes: Long, totalBytes: Long) -> Unit,
-    ) {
-        withContext(Dispatchers.IO) {
-            val client =
-                OkHttpClient.Builder()
-                    .connectTimeout(1, TimeUnit.MINUTES)
-                    .readTimeout(1, TimeUnit.MINUTES)
-                    .writeTimeout(1, TimeUnit.MINUTES)
-                    .callTimeout(10, TimeUnit.MINUTES)
-                    .build()
-
-            // Download to a .part sibling: a killed download leaves a resumable
-            // partial, and a partial can never be mistaken for a complete rootfs.
-            val partFile = File(outputFile.parentFile, outputFile.name + ".part")
-
-            // Resume from where the previous attempt stopped; the server answers
-            // 206 with the remainder, or 200 if it ignores the Range header.
-            val rangeStart = if (partFile.exists()) partFile.length() else 0L
-            val request =
-                Request.Builder().url(url).apply { if (rangeStart > 0) header("Range", "bytes=$rangeStart-") }.build()
-
-            var startedAt = 0L
-            client.newCall(request).execute().use { response ->
-                when (response.code) {
-                    206 -> startedAt = rangeStart
-                    200 -> {
-                        startedAt = 0
-                        partFile.delete()
-                    }
-                    416 -> {
-                        // Server reports nothing past what we already have: the
-                        // partial is complete, integrity is verified below.
-                    }
-                    else -> {
-                        // e.g. 404 after a re-release: the partial is stale, drop
-                        // it so the next attempt starts clean.
-                        partFile.delete()
-                        throw Exception("Failed to download file: ${response.code}")
-                    }
-                }
-
-                val body = response.body
-                // contentLength is -1 when the server omits it: propagate -1 as
-                // "unknown" (callers guard total > 0) instead of a bogus total
-                // that would push progress past 100%.
-                val contentLength = body.contentLength()
-                val totalBytes = if (contentLength < 0) -1 else startedAt + contentLength
-
-                var downloadedBytes = startedAt
-                // Throttle progress: hopping to the main thread and recomposing the
-                // progress UI on every 8 KiB block (tens of thousands of times for a
-                // 200-400 MB rootfs) janks the setup screen. Emit at most every ~250ms
-                // and always send the final 100% update.
-                val THROTTLE_MS = 250L
-                var lastEmit = 0L
-
-                FileOutputStream(partFile, startedAt > 0).use { output ->
-                    body.byteStream().use { input ->
-                        val buffer = ByteArray(8 * 1024)
-                        var bytesRead: Int
-
-                        while (input.read(buffer).also { bytesRead = it } != -1) {
-                            output.write(buffer, 0, bytesRead)
-                            downloadedBytes += bytesRead
-                            val now = SystemClock.elapsedRealtime()
-                            if (now - lastEmit >= THROTTLE_MS) {
-                                lastEmit = now
-                                withContext(Dispatchers.Main) { onProgress(downloadedBytes, totalBytes) }
-                            }
-                        }
-                        withContext(Dispatchers.Main) { onProgress(downloadedBytes, totalBytes) }
-                    }
-                }
-            }
-
-            // Reading the file to EOF verifies the gzip CRC-32 trailer: a stream
-            // cut short cannot pass, so the file is only promoted to the real name
-            // once it is actually complete and uncorrupted.
-            if (!isValidGzip(partFile)) {
-                partFile.delete()
-                throw Exception("Downloaded file failed integrity check: ${outputFile.name}")
-            }
-            if (!partFile.renameTo(outputFile)) {
-                throw Exception("Failed to move downloaded file: ${outputFile.name}")
-            }
-        }
-    }
-
-    private fun isValidGzip(file: File): Boolean = runCatching {
-        GZIPInputStream(file.inputStream()).use { input ->
-            val buffer = ByteArray(8 * 1024)
-            while (input.read(buffer) != -1) {
-                // Drain to EOF: GZIPInputStream only verifies the trailer CRC
-                // once the stream is fully consumed.
-            }
-        }
-    }
-        .isSuccess
 
     private fun sha256Matches(file: File, expectedSha256: String?): Boolean {
         if (expectedSha256.isNullOrEmpty()) return true

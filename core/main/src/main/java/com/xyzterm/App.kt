@@ -76,9 +76,9 @@ open class App : Application() {
 
             launch(Dispatchers.IO) {
                 getTempDir().listFiles()?.forEach { file ->
-                    // Keep the resumable rootfs download across process restarts;
-                    // everything else in tmp is safe to drop.
-                    if (file.name != "sandbox.tar.gz.part") file.deleteRecursively()
+                    // Keep the bundled rootfs staged for extraction across
+                    // process restarts; everything else in tmp is safe to drop.
+                    if (file.name != "sandbox.tar.gz") file.deleteRecursively()
                 }
             }
 

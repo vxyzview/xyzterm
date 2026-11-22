@@ -1,6 +1,5 @@
 package com.xyzterm.settings.terminal
 
-import android.content.Intent
 import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -158,18 +157,6 @@ fun SettingsTerminalScreen(navController: NavController) {
         }
 
         PreferenceGroup(heading = stringResource(strings.user_data)) {
-            // Ubuntu install is optional now: show a one-tap entry that opens the
-            // terminal's opt-in install screen instead of forcing the download.
-            if (!terminalInstalled) {
-                SettingsItem(
-                    label = stringResource(strings.install),
-                    description = stringResource(strings.install_ubuntu_optional_desc),
-                    showSwitch = false,
-                    default = false,
-                    sideEffect = { context.startActivity(Intent(context, Terminal::class.java)) },
-                )
-            }
-
             val restore =
                 rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
                     if (uri == null) {
