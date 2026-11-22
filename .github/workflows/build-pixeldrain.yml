@@ -114,6 +114,8 @@ jobs:
       # opens the .tar.gz name, so fail the build if that ever changes again.
       - name: Verify bundled rootfs assets
         run: |
+          echo "Bundled terminal assets:"
+          unzip -l app/xyzterm-release.apk | grep "assets/terminal/" || true
           unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm64.tar.gz"
           unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm.tar.gz"
 
