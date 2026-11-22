@@ -162,6 +162,7 @@ jobs:
           - **Arch Linux instead of Ubuntu.** Rootfs images come from [vxyzview/archm](https://github.com/vxyzview/archm) release `2026.11.21`, pinned and SHA-256 verified at build time.
           - **Bundled, not downloaded.** Both `arm64` and `arm` rootfs images ship inside one APK. First launch stages the right one locally and unpacks it directly; there is no separate download step.
           - **Session-first UI.** A session-first terminal header and drawer, a searchable settings hub, and terminal settings grouped into Appearance / Input / Data / Advanced.
+          - **Guided setup.** Terms, optional permissions, then a single install progress card — no raw logs and no unthemed first shell.
           - **No proot extraction.** First launch unpacks the rootfs directly on the device instead of paying a ptrace stop per syscall.
           - **Honest setup states.** Live copy progress plus a working Retry path if staging fails.
           - **Smoother UI.** Parallel terminal health checks, batched log rendering, off-main font parsing, memoized theme shapes and stable list keys.
