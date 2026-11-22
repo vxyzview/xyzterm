@@ -70,11 +70,13 @@ object RootfsInstaller {
             val modes = manifest.entries.associate { it.path to it.mode }
             // Android creates dirs with 0700; pacman compares them to the
             // package's 0755, so apply the archived modes to every directory.
-            manifest.entries.filter { it.type == "d" }.forEach { entry ->
-                val dir = File(root, entry.path)
-                dir.mkdirs()
-                if (entry.mode != 0) runCatching { Os.chmod(dir.absolutePath, entry.mode) }
-            }
+            manifest.entries
+                .filter { it.type == "d" }
+                .forEach { entry ->
+                    val dir = File(root, entry.path)
+                    dir.mkdirs()
+                    if (entry.mode != 0) runCatching { Os.chmod(dir.absolutePath, entry.mode) }
+                }
             runCatching { Os.chmod(root.absolutePath, 493) }
             manifest.entries
                 .filter { it.type == "l" }
