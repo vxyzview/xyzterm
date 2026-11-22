@@ -110,6 +110,13 @@ jobs:
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
         continue-on-error: false
 
+      # aapt renames and decompresses gz assets listed in noCompress; the app
+      # opens the .tar.gz name, so fail the build if that ever changes again.
+      - name: Verify bundled rootfs assets
+        run: |
+          unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm64.tar.gz"
+          unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm.tar.gz"
+
       - name: Extract version
         id: version
         run: |

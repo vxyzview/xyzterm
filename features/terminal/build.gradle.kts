@@ -21,8 +21,6 @@ android {
         compose = true
     }
 
-    androidResources { noCompress += "tar.gz" }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
