@@ -73,11 +73,11 @@ import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
 import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.SetupFlow
-import com.xyzterm.terminal.gamepadBytes
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
 import com.xyzterm.terminal.archmAssetForAbi
 import com.xyzterm.terminal.changeSession
+import com.xyzterm.terminal.gamepadBytes
 import com.xyzterm.terminal.pickRootfsAsset
 import com.xyzterm.terminal.terminalView
 import com.xyzterm.theme.XyzTheme
