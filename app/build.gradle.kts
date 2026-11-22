@@ -49,7 +49,6 @@ android {
         getByName("arm64") { assets.srcDirs("src/arm64/assets") }
     }
 
-
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
