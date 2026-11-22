@@ -148,11 +148,53 @@ jobs:
           case "${{ env.VERSION }}" in
             *-* ) PRERELEASE_FLAG="--prerelease" ;;
           esac
+          NOTES_FILE="$RUNNER_TEMP/xyzterm-release-notes.md"
+          cat > "$NOTES_FILE" <<'RELEASE_NOTES'
+          ## xyzterm 1.0.0 — a real Arch Linux shell in your pocket
+
+          This is the first packaged 1.0.0 release. It ships a proot-based **Arch Linux ARM (archm)** userspace inside the APK — no root, no telemetry, no tracking, and no runtime rootfs download.
+
+          ### Highlights
+          - **Arch Linux instead of Ubuntu.** Rootfs images come from [vxyzview/archm](https://github.com/vxyzview/archm) release `2026.11.21`, pinned and SHA-256 verified at build time.
+          - **Bundled, not downloaded.** Both `arm64` and `arm` rootfs images ship inside one APK. First launch extracts the right one locally; there is no separate download step.
+          - **Session Deck UI.** A session-first terminal header and drawer, a searchable settings hub, and terminal settings grouped into Appearance / Input / Data / Advanced.
+          - **Honest setup states.** Live copy progress plus a working Retry path if staging fails.
+          - **Smoother UI.** Parallel terminal health checks, batched log rendering, off-main font parsing, memoized theme shapes and stable list keys.
+          - **Faster startup.** Off-main font preload, no duplicate directory scan on composition, and signature checks off the UI thread.
+
+          ### Features
+          - Full terminal emulator with named, persistent sessions
+          - 5 built-in themes plus Material You dynamic color and AMOLED black
+          - Remappable keybindings, extra-keys row, snippets and custom binds
+          - Backup / restore of the whole sandbox as `.tar.gz`
+          - Optional SAF document provider, quick-settings tile and `xyzterm://session/...` deep links
+          - No analytics, no crash reporting to third parties
+
+          ### Requirements and install
+          - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`
+          - **x86_64 is not supported** — archm publishes no x86_64 rootfs
+          - Download `xyzterm-1.0.0.apk`, install it, then open the app. The bundled rootfs extracts automatically on first launch.
+          - The APK is large (~400 MB) because it contains both rootfs images. This may exceed F-Droid's size limits; F-Droid build metadata is included in the repo.
+
+          ### Verification
+          - The rootfs images are pinned to SHA-256 `f1a7c3c710592d1d9484662c9474b92c17bf27f3c517c596ee5c094011369d0f` (arm64) and `5bcaa84710df04bbd38c682a32b3247bcae8f9738fc1851e33b1535a693e6347` (arm).
+          - CI verifies both bundled APK asset names and bytes before publishing.
+          - Releases are signed with the repository's persistent signing key; see `docs/CONTRIBUTING.md` for reproducible-build steps.
+
+          ### Known limitations
+          - First launch takes time while ~200 MB of rootfs is staged and extracted.
+          - Existing installs that already contain an Ubuntu sandbox keep that userspace until the app data is removed and reinstalled.
+          - Some localized strings still fall back to English.
+
+          Licensed under GPL-3.0-or-later. Built from source on GitHub Actions.
+          RELEASE_NOTES
+          printf '\nBuilt from commit `%s`. APK: `xyzterm-%s.apk`. F-Droid metadata: [fdroid/metadata/com.xyzterm.app.yml](fdroid/metadata/com.xyzterm.app.yml).\n' \
+            "${{ env.COMMIT_HASH }}" "${{ env.VERSION }}" >> "$NOTES_FILE"
           # shellcheck disable=SC2086
           gh release create "$TAG" \
             "app/xyzterm-${{ env.VERSION }}.apk" \
             --title "xyzterm ${{ env.VERSION }}" \
             $PRERELEASE_FLAG \
-            --notes "Automated build of commit \`${{ env.COMMIT_HASH }}\`.**APK:** \`xyzterm-${{ env.VERSION }}.apk\`F-Droid: built from source via [metadata](fdroid/metadata/com.xyzterm.app.yml)." \
+            --notes-file "$NOTES_FILE" \
             --repo "${{ github.repository }}"
 
