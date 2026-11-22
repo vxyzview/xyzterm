@@ -54,6 +54,116 @@ fun nameSafe(id: String): String {
     return "${base}_${id.hashCode().toUInt().toString(36)}"
 }
 
+/** Binary-content sniffing (verbatim from Utils.kt:hasBinaryChars). */
+fun hasBinaryChars(text: String): Boolean {
+    val threshold = 0.3
+    val checkedCharacters = 1024
+
+    val checkText = text.take(checkedCharacters)
+    if (checkText.isEmpty()) return false
+
+    if (checkText.any { it.toInt() == 0 }) return true
+
+    val unusualCharCount = checkText.count { c ->
+        c.isISOControl() && c.toInt() != 9 && c.toInt() != 10 && c.toInt() != 12 && c.toInt() != 13
+    }
+
+    return unusualCharCount.toDouble() / checkText.length > threshold
+}
+
+/** Extension parsing (verbatim from Utils.kt:parseExtensions). */
+fun parseExtensions(input: String): List<String> {
+    return input.split(",", " ").map { it.trim().trimStart('.') }.filter { it.isNotEmpty() }
+}
+
+/** String-only seam for the list-returning parser above. */
+fun parseExtensionsJoined(input: String): String = parseExtensions(input).joinToString("\n")
+
+/** Path-traversal predicate (verbatim condition from FileUtil.kt:childSafe). */
+fun isSafeFileName(fileName: String): Boolean =
+    fileName.isNotEmpty() &&
+        fileName != "." &&
+        fileName != ".." &&
+        !fileName.contains('/') &&
+        !fileName.contains('\\')
+
+/** Log-priority match (verbatim from AppLogs.kt:matchesLogLevel; level value replaces the enum). */
+fun matchesLogLevel(line: String, levelValue: Int): Boolean {
+    if (line.isEmpty()) return true
+
+    val idx = line.indexOf('/')
+    if (idx != 1) return true
+
+    val priority =
+        when (line[0]) {
+            'V',
+            'D' -> 5
+            'I' -> 3
+            'W' -> 2
+            'E',
+            'F' -> 1
+            else -> 5
+        }
+
+    return priority <= levelValue
+}
+
+/** Noisy-log filter (verbatim from LogcatService.kt:shouldCaptureLog). */
+fun shouldCaptureLog(line: String): Boolean {
+    if (line.isEmpty()) {
+        return false
+    }
+
+    val noisyKeywords =
+        listOf(
+            "ViewRootImpl",
+            "Choreographer",
+            "OpenGLRenderer",
+            "InputMethodManager",
+            "RenderThread",
+            "libEGL",
+            "EGL_emulation",
+            "CompatChangeReporter",
+            "vndksupport",
+            "ConfigStore",
+            "Mono",
+            "me.weishu.reflection",
+            "chatty",
+            "HostConnection",
+            "gralloc",
+            "GestureDetector",
+            "WindowManager",
+            "ImeFocusController",
+            "Insets"
+        )
+    if (noisyKeywords.any { line.contains(it, ignoreCase = true) }) {
+        return false
+    }
+
+    if (!line.contains('/') || !line.contains('(')) {
+        return true
+    }
+
+    val slashIdx = line.indexOf('/')
+    val parenIdx = line.indexOf('(')
+    if (slashIdx != 1 || parenIdx <= slashIdx) {
+        return true
+    }
+
+    val priority = line[0]
+    val tag = line.substring(slashIdx + 1, parenIdx).trim()
+
+    if (priority == 'W' || priority == 'E' || priority == 'F' || priority == 'A') {
+        return true
+    }
+
+    if (tag.startsWith("System.out") || tag.startsWith("System.err")) {
+        return true
+    }
+
+    return true
+}
+
 /** Compare "vX.Y.Z" (or "X.Y.Z") tags (verbatim from UpdateManager.isNewer). */
 fun isNewer(latest: String, installed: String): Boolean {
     val parse = { v: String ->

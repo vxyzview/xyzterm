@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 object MkSession {
 
     /** Sanitize a session id for use as a directory name; fallback instead of throwing. */
-    private fun nameSafe(id: String): String {
+    internal fun nameSafe(id: String): String {
         val clean = id.replace(Regex("[^A-Za-z0-9_.-]"), "_")
         val base =
             when {
@@ -71,7 +71,7 @@ object MkSession {
     ): Prepared {
         val workingDir = cwd ?: getPwd(context)
 
-        val tmpDir = localDir().child("tmp").childSafe(nameSafe(sessionId))
+        val tmpDir = localDir().child("tmp").childSafe(nameSafeViaRust(sessionId))
 
         if (tmpDir.exists()) {
             tmpDir.deleteRecursively()

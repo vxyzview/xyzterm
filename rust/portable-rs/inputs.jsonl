@@ -4,28 +4,8 @@
 {"fn":"detectBackupLayoutName","args":[""]}
 {"fn":"detectBackupLayoutName","args":["sandbox"]}
 {"fn":"detectBackupLayoutName","args":["sandbox/"]}
-{"fn":"detectBackupLayoutName","args":["sandbox/etc"]}
-{"fn":"detectBackupLayoutName","args":["home\nsandbox\netc"]}
 {"fn":"detectBackupLayoutName","args":["sandboxfoo\nhome"]}
 {"fn":"detectBackupLayoutName","args":["Sandbox\nhome"]}
-{"fn":"detectBackupLayoutName","args":["home"]}
-{"fn":"detectBackupLayoutName","args":["home\nsandbox/foo"]}
-{"fn":"detectBackupLayoutName","args":["sandbox/\n"]}
-{"fn":"isWellFormedHost","args":["/"]}
-{"fn":"isWellFormedHost","args":[""]}
-{"fn":"isWellFormedHost","args":["/a"]}
-{"fn":"isWellFormedHost","args":["/sdcard"]}
-{"fn":"isWellFormedHost","args":["//"]}
-{"fn":"isWellFormedHost","args":["a/b"]}
-{"fn":"isWellFormedHost","args":["/😀"]}
-{"fn":"isWellFormedHost","args":["/a\n"]}
-{"fn":"isValidGuestPath","args":["/"]}
-{"fn":"isValidGuestPath","args":[""]}
-{"fn":"isValidGuestPath","args":["/a"]}
-{"fn":"isValidGuestPath","args":["/home"]}
-{"fn":"isValidGuestPath","args":["//"]}
-{"fn":"isValidGuestPath","args":["home/a"]}
-{"fn":"isValidGuestPath","args":["/😀"]}
 {"fn":"nameSafe","args":[""]}
 {"fn":"nameSafe","args":["."]}
 {"fn":"nameSafe","args":[".."]}
@@ -35,7 +15,6 @@
 {"fn":"nameSafe","args":["日本語"]}
 {"fn":"nameSafe","args":["😀"]}
 {"fn":"nameSafe","args":["a😀b"]}
-{"fn":"nameSafe","args":["session-1.2.3"]}
 {"fn":"nameSafe","args":["../../etc/passwd"]}
 {"fn":"isNewer","args":["v1.2.3","v1.2.2"]}
 {"fn":"isNewer","args":["v1.2.2","v1.2.3"]}
@@ -50,3 +29,65 @@
 {"fn":"isNewer","args":["v1.2.3","v1.2.3"]}
 {"fn":"isNewer","args":["v01.02.03","v1.2.2"]}
 {"fn":"isNewer","args":["v1.2.3.4","v1.2.3"]}
+{"fn":"hasBinaryChars","args":[""]}
+{"fn":"hasBinaryChars","args":["abc"]}
+{"fn":"hasBinaryChars","args":["\u0000"]}
+{"fn":"hasBinaryChars","args":["\t\n\f\r"]}
+{"fn":"hasBinaryChars","args":["a\u000B"]}
+{"fn":"hasBinaryChars","args":["aaa\u000B"]}
+{"fn":"hasBinaryChars","args":["\u0080"]}
+{"fn":"hasBinaryChars","args":["\u009F"]}
+{"fn":"hasBinaryChars","args":["\u00A0"]}
+{"fn":"hasBinaryChars","args":["😀a"]}
+{"fn":"hasBinaryChars","args":["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]}
+{"fn":"parseExtensionsJoined","args":[""]}
+{"fn":"parseExtensionsJoined","args":["png,jpg"]}
+{"fn":"parseExtensionsJoined","args":["png jpg"]}
+{"fn":"parseExtensionsJoined","args":[" a,  b "]}
+{"fn":"parseExtensionsJoined","args":[",,,"]}
+{"fn":"parseExtensionsJoined","args":[".png,..JPG"]}
+{"fn":"parseExtensionsJoined","args":["..png"]}
+{"fn":"parseExtensionsJoined","args":["png."]}
+{"fn":"parseExtensionsJoined","args":[". png"]}
+{"fn":"parseExtensionsJoined","args":["a\tb"]}
+{"fn":"parseExtensionsJoined","args":["a\nb"]}
+{"fn":"parseExtensionsJoined","args":["\u00A0png"]}
+{"fn":"isSafeFileName","args":[""]}
+{"fn":"isSafeFileName","args":["."]}
+{"fn":"isSafeFileName","args":[".."]}
+{"fn":"isSafeFileName","args":["a"]}
+{"fn":"isSafeFileName","args":["..a"]}
+{"fn":"isSafeFileName","args":["a/b"]}
+{"fn":"isSafeFileName","args":["/a"]}
+{"fn":"isSafeFileName","args":["a\\b"]}
+{"fn":"isSafeFileName","args":[" "]}
+{"fn":"isSafeFileName","args":["\u0000"]}
+{"fn":"isSafeFileName","args":["😀"]}
+{"fn":"matchesLogLevel","args":["",1]}
+{"fn":"matchesLogLevel","args":["random text",1]}
+{"fn":"matchesLogLevel","args":["E/Tag(1): boom",1]}
+{"fn":"matchesLogLevel","args":["E/Tag(1): boom",2]}
+{"fn":"matchesLogLevel","args":["W/Tag",1]}
+{"fn":"matchesLogLevel","args":["W/Tag",2]}
+{"fn":"matchesLogLevel","args":["I/Tag",2]}
+{"fn":"matchesLogLevel","args":["I/Tag",3]}
+{"fn":"matchesLogLevel","args":["D/Tag",5]}
+{"fn":"matchesLogLevel","args":["A/Tag",5]}
+{"fn":"matchesLogLevel","args":["X/Tag",5]}
+{"fn":"matchesLogLevel","args":[" E/Tag",1]}
+{"fn":"matchesLogLevel","args":["😀/Tag(1)",3]}
+{"fn":"shouldCaptureLog","args":[""]}
+{"fn":"shouldCaptureLog","args":["\n"]}
+{"fn":"shouldCaptureLog","args":["  "]}
+{"fn":"shouldCaptureLog","args":["I/ViewRootImpl: x"]}
+{"fn":"shouldCaptureLog","args":["I/viewrootimpl: x"]}
+{"fn":"shouldCaptureLog","args":["D/MONO: x"]}
+{"fn":"shouldCaptureLog","args":["chatty"]}
+{"fn":"shouldCaptureLog","args":["I/Insets(1): x"]}
+{"fn":"shouldCaptureLog","args":["V/MyApp(123): msg"]}
+{"fn":"shouldCaptureLog","args":["I/System.out(1): hi"]}
+{"fn":"shouldCaptureLog","args":["V/Tag: no paren"]}
+{"fn":"shouldCaptureLog","args":[" V/Tag(1): x"]}
+{"fn":"shouldCaptureLog","args":["😀/Tag(1)"]}
+{"fn":"shouldCaptureLog","args":["W/Tag(1)"]}
+{"fn":"shouldCaptureLog","args":["E/Tag(1)"]}

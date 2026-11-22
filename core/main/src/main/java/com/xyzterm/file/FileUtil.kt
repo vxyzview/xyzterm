@@ -21,14 +21,15 @@ fun File.child(fileName: String): File {
  * Like [child], but rejects path-traversal segments (`..`, `/`, `\`, `.`). Guards callers that build paths from
  * untrusted names (e.g. session ids from a BROWSABLE deep link). Throws IllegalArgumentException on a bad segment.
  */
+fun isSafeFileName(fileName: String): Boolean =
+    fileName.isNotEmpty() &&
+        fileName != "." &&
+        fileName != ".." &&
+        !fileName.contains('/') &&
+        !fileName.contains('\\')
+
 fun File.childSafe(fileName: String): File {
-    require(
-        fileName.isNotEmpty() &&
-            fileName != "." &&
-            fileName != ".." &&
-            !fileName.contains('/') &&
-            !fileName.contains('\\'),
-    ) {
+    require(isSafeFileName(fileName)) {
         "invalid path segment: $fileName"
     }
     return File(this, fileName)

@@ -20,37 +20,18 @@ public final class TerminalRsNative {
 
     // Typed methods: primitives and strings cross JNI directly, without JSON.
     public static native String n_detectBackupLayoutName(String entriesJoined, String[] slot);
-    public static native boolean n_isWellFormedHost(String path, String[] slot);
-    public static native boolean n_isValidGuestPath(String path, String[] slot);
     public static native String n_nameSafe(String id, String[] slot);
+    public static native boolean n_hasBinaryChars(String text, String[] slot);
+    public static native String n_parseExtensionsJoined(String input, String[] slot);
+    public static native boolean n_isSafeFileName(String fileName, String[] slot);
+    public static native boolean n_matchesLogLevel(String line, int levelValue, String[] slot);
+    public static native boolean n_shouldCaptureLog(String line, String[] slot);
     public static native boolean n_isNewer(String latest, String installed, String[] slot);
 
     public static String call_detectBackupLayoutName(String entriesJoined) {
         try {
             String[] slot = RustAnythingError.slot();
             String out = n_detectBackupLayoutName(entriesJoined, slot);
-            RustAnythingError.check(slot);
-            return out;
-        } catch (RustAnythingError e) {
-            throw e.real();
-        }
-    }
-
-    public static boolean call_isWellFormedHost(String path) {
-        try {
-            String[] slot = RustAnythingError.slot();
-            boolean out = n_isWellFormedHost(path, slot);
-            RustAnythingError.check(slot);
-            return out;
-        } catch (RustAnythingError e) {
-            throw e.real();
-        }
-    }
-
-    public static boolean call_isValidGuestPath(String path) {
-        try {
-            String[] slot = RustAnythingError.slot();
-            boolean out = n_isValidGuestPath(path, slot);
             RustAnythingError.check(slot);
             return out;
         } catch (RustAnythingError e) {
@@ -69,12 +50,84 @@ public final class TerminalRsNative {
         }
     }
 
+    public static boolean call_hasBinaryChars(String text) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            boolean out = n_hasBinaryChars(text, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static String call_parseExtensionsJoined(String input) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            String out = n_parseExtensionsJoined(input, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static boolean call_isSafeFileName(String fileName) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            boolean out = n_isSafeFileName(fileName, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static boolean call_matchesLogLevel(String line, int levelValue) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            boolean out = n_matchesLogLevel(line, levelValue, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static boolean call_shouldCaptureLog(String line) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            boolean out = n_shouldCaptureLog(line, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
     public static boolean call_isNewer(String latest, String installed) {
         try {
             String[] slot = RustAnythingError.slot();
             boolean out = n_isNewer(latest, installed, slot);
             RustAnythingError.check(slot);
             return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    private static native byte[] w_parseExtensions(byte[] args, String[] slot);
+
+    @SuppressWarnings("unchecked")
+    public static List<String> call_parseExtensions(String input) {
+        try {
+        RustAnythingWire.Writer w = new RustAnythingWire.Writer();
+        w.str(input);
+        String[] slot = RustAnythingError.slot();
+        byte[] out = w_parseExtensions(w.bytes(), slot);
+        RustAnythingError.check(slot);
+        RustAnythingWire.Reader r = new RustAnythingWire.Reader(out);
+        return r.list(() -> r.str());
         } catch (RustAnythingError e) {
             throw e.real();
         }

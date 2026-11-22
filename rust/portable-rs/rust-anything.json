@@ -28,48 +28,6 @@
       "prototype": "com.xyzterm.terminal.PortableLogicKt.detectBackupLayoutName(String entriesJoined)"
     },
     {
-      "name": "isWellFormedHost",
-      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 41,
-      "params": [
-        {
-          "name": "path",
-          "ts_type": "string",
-          "optional": false,
-          "rest": false,
-          "native_type": "String"
-        }
-      ],
-      "returns": "boolean",
-      "is_async": false,
-      "is_generator": false,
-      "type_params": [],
-      "uses_instanceof": false,
-      "native_return": "boolean",
-      "prototype": "com.xyzterm.terminal.PortableLogicKt.isWellFormedHost(String path)"
-    },
-    {
-      "name": "isValidGuestPath",
-      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 44,
-      "params": [
-        {
-          "name": "path",
-          "ts_type": "string",
-          "optional": false,
-          "rest": false,
-          "native_type": "String"
-        }
-      ],
-      "returns": "boolean",
-      "is_async": false,
-      "is_generator": false,
-      "type_params": [],
-      "uses_instanceof": false,
-      "native_return": "boolean",
-      "prototype": "com.xyzterm.terminal.PortableLogicKt.isValidGuestPath(String path)"
-    },
-    {
       "name": "nameSafe",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
       "line": 47,
@@ -91,9 +49,142 @@
       "prototype": "com.xyzterm.terminal.PortableLogicKt.nameSafe(String id)"
     },
     {
-      "name": "isNewer",
+      "name": "hasBinaryChars",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
       "line": 58,
+      "params": [
+        {
+          "name": "text",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.hasBinaryChars(String text)"
+    },
+    {
+      "name": "parseExtensions",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 75,
+      "params": [
+        {
+          "name": "input",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "string[]",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "List<String>",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.parseExtensions(String input)"
+    },
+    {
+      "name": "parseExtensionsJoined",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 80,
+      "params": [
+        {
+          "name": "input",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "string",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "String",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.parseExtensionsJoined(String input)"
+    },
+    {
+      "name": "isSafeFileName",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 83,
+      "params": [
+        {
+          "name": "fileName",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.isSafeFileName(String fileName)"
+    },
+    {
+      "name": "matchesLogLevel",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 91,
+      "params": [
+        {
+          "name": "line",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        },
+        {
+          "name": "levelValue",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.matchesLogLevel(String line, Int levelValue)"
+    },
+    {
+      "name": "shouldCaptureLog",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 112,
+      "params": [
+        {
+          "name": "line",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.shouldCaptureLog(String line)"
+    },
+    {
+      "name": "isNewer",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 168,
       "params": [
         {
           "name": "latest",
@@ -120,5 +211,18 @@
     }
   ],
   "classes": [],
-  "js_only": []
+  "js_only": [
+    {
+      "name": "isWellFormedHost",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 41,
+      "reason": "kept on request"
+    },
+    {
+      "name": "isValidGuestPath",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 44,
+      "reason": "kept on request"
+    }
+  ]
 }

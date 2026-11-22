@@ -62,16 +62,32 @@ fn dispatch(name: &str, args: &[Value]) -> Result<Value, String> {
             let out = port::detect_backup_layout_name(arg(args, 0)?)?;
             Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
         }
-        "isWellFormedHost" => {
-            let out = port::is_well_formed_host(arg(args, 0)?)?;
-            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
-        }
-        "isValidGuestPath" => {
-            let out = port::is_valid_guest_path(arg(args, 0)?)?;
-            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
-        }
         "nameSafe" => {
             let out = port::name_safe(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "hasBinaryChars" => {
+            let out = port::has_binary_chars(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "parseExtensions" => {
+            let out = port::parse_extensions(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "parseExtensionsJoined" => {
+            let out = port::parse_extensions_joined(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "isSafeFileName" => {
+            let out = port::is_safe_file_name(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "matchesLogLevel" => {
+            let out = port::matches_log_level(arg(args, 0)?, arg(args, 1)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "shouldCaptureLog" => {
+            let out = port::should_capture_log(arg(args, 0)?)?;
             Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
         }
         "isNewer" => {
@@ -273,48 +289,6 @@ pub extern "system" fn Java_rustanything_TerminalRsNative_n_1detectBackupLayoutN
     }
 }
 
-/// `com.xyzterm.terminal.PortableLogicKt.isWellFormedHost(String path)`: typed, no JSON.
-// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_isWellFormedHost`; nothing else defines it.
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_rustanything_TerminalRsNative_n_1isWellFormedHost<'local>(
-    mut env: jni::JNIEnv<'local>,
-    _class: jni::objects::JClass<'local>,
-    path: jni::objects::JString<'local>,
-    slot: jni::objects::JObjectArray<'local>,
-) -> jni::sys::jboolean {
-    let Some(path) = string_arg(&mut env, &path) else {
-        return 0;
-    };
-    match run(|| port::is_well_formed_host(path)) {
-        Ok(out) => jni::sys::jboolean::from(out),
-        Err(message) => {
-            report(&mut env, &slot, &message);
-            0
-        }
-    }
-}
-
-/// `com.xyzterm.terminal.PortableLogicKt.isValidGuestPath(String path)`: typed, no JSON.
-// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_isValidGuestPath`; nothing else defines it.
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_rustanything_TerminalRsNative_n_1isValidGuestPath<'local>(
-    mut env: jni::JNIEnv<'local>,
-    _class: jni::objects::JClass<'local>,
-    path: jni::objects::JString<'local>,
-    slot: jni::objects::JObjectArray<'local>,
-) -> jni::sys::jboolean {
-    let Some(path) = string_arg(&mut env, &path) else {
-        return 0;
-    };
-    match run(|| port::is_valid_guest_path(path)) {
-        Ok(out) => jni::sys::jboolean::from(out),
-        Err(message) => {
-            report(&mut env, &slot, &message);
-            0
-        }
-    }
-}
-
 /// `com.xyzterm.terminal.PortableLogicKt.nameSafe(String id)`: typed, no JSON.
 // SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_nameSafe`; nothing else defines it.
 #[unsafe(no_mangle)]
@@ -332,6 +306,112 @@ pub extern "system" fn Java_rustanything_TerminalRsNative_n_1nameSafe<'local>(
         Err(message) => {
             report(&mut env, &slot, &message);
             std::ptr::null_mut()
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.hasBinaryChars(String text)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_hasBinaryChars`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1hasBinaryChars<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    text: jni::objects::JString<'local>,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jboolean {
+    let Some(text) = string_arg(&mut env, &text) else {
+        return 0;
+    };
+    match run(|| port::has_binary_chars(text)) {
+        Ok(out) => jni::sys::jboolean::from(out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            0
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.parseExtensionsJoined(String input)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_parseExtensionsJoined`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1parseExtensionsJoined<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    input: jni::objects::JString<'local>,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jstring {
+    let Some(input) = string_arg(&mut env, &input) else {
+        return std::ptr::null_mut();
+    };
+    match run(|| port::parse_extensions_joined(input)) {
+        Ok(out) => java_string(&mut env, &out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.isSafeFileName(String fileName)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_isSafeFileName`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1isSafeFileName<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    file_name: jni::objects::JString<'local>,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jboolean {
+    let Some(file_name) = string_arg(&mut env, &file_name) else {
+        return 0;
+    };
+    match run(|| port::is_safe_file_name(file_name)) {
+        Ok(out) => jni::sys::jboolean::from(out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            0
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.matchesLogLevel(String line, Int levelValue)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_matchesLogLevel`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1matchesLogLevel<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    line: jni::objects::JString<'local>,
+    level_value: jni::sys::jint,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jboolean {
+    let Some(line) = string_arg(&mut env, &line) else {
+        return 0;
+    };
+    match run(|| port::matches_log_level(line, i64::from(level_value))) {
+        Ok(out) => jni::sys::jboolean::from(out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            0
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.shouldCaptureLog(String line)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_shouldCaptureLog`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1shouldCaptureLog<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    line: jni::objects::JString<'local>,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jboolean {
+    let Some(line) = string_arg(&mut env, &line) else {
+        return 0;
+    };
+    match run(|| port::should_capture_log(line)) {
+        Ok(out) => jni::sys::jboolean::from(out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            0
         }
     }
 }
@@ -357,6 +437,41 @@ pub extern "system" fn Java_rustanything_TerminalRsNative_n_1isNewer<'local>(
         Err(message) => {
             report(&mut env, &slot, &message);
             0
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.parseExtensions(String input)`: binary wire.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.w_parseExtensions`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_w_1parseExtensions<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    args: jni::objects::JByteArray<'local>,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jbyteArray {
+    let Ok(input) = env.convert_byte_array(&args) else {
+        return std::ptr::null_mut();
+    };
+    let result = run(|| {
+        let r = &mut wire::Reader::new(&input);
+        let input: String = r.string()?;
+        let w = &mut wire::Writer::default();
+        let out = &port::parse_extensions(input)?;
+        w.tag(1);
+        w.count(out.len());
+        for x0 in out.iter() {
+            w.string(x0);
+        }
+        Ok(std::mem::take(&mut w.0))
+    });
+    match result {
+        Ok(bytes) => env
+            .byte_array_from_slice(&bytes)
+            .map_or(std::ptr::null_mut(), jni::objects::JByteArray::into_raw),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            std::ptr::null_mut()
         }
     }
 }

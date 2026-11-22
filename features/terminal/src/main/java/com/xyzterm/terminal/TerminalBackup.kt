@@ -148,7 +148,7 @@ object TerminalBackup {
                 }
 
                 val sandboxTarget = localDir().child("sandbox")
-                when (detectBackupLayout(staging.list()?.toList().orEmpty())) {
+                when (detectBackupLayoutViaRust(staging.list()?.toList().orEmpty())) {
                     BackupLayout.V1_ROOT -> {
                         // Old archives never contained home; leave the user's home alone.
                         swapDirectory(staging, sandboxTarget)?.let {

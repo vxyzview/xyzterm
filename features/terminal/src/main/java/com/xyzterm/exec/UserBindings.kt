@@ -50,5 +50,5 @@ object UserBindings {
 
     fun isValidGuestPath(path: String): Boolean = path.startsWith("/") && path.length > 1
 
-    private fun isWellFormedHost(path: String): Boolean = path.startsWith("/") && path.length > 1
+    internal fun isWellFormedHost(path: String): Boolean = path.startsWith("/") && path.length > 1
 }
