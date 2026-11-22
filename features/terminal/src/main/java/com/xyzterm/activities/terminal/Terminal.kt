@@ -74,7 +74,6 @@ import com.xyzterm.terminal.getNextStage
 import com.xyzterm.terminal.terminalView
 import com.xyzterm.theme.XyzTheme
 import com.xyzterm.utils.AppDialogHost
-import com.xyzterm.utils.errorDialog
 import com.xyzterm.utils.getTempDir
 import java.io.File
 import java.io.FileOutputStream
@@ -85,6 +84,24 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+enum class InstallStage { Copying, Extracting, Ready, UnsupportedCpu, Failed }
+
+/** Pure transition used by the first-run host; Retry clears failed/copyDone. */
+internal fun nextInstallStage(
+    installed: Boolean,
+    supported: Boolean,
+    copyDone: Boolean,
+    extractionDone: Boolean,
+    failed: Boolean,
+): InstallStage =
+    when {
+        failed -> InstallStage.Failed
+        !supported -> InstallStage.UnsupportedCpu
+        installed || extractionDone -> InstallStage.Ready
+        copyDone -> InstallStage.Extracting
+        else -> InstallStage.Copying
+    }
 
 class Terminal : AppCompatActivity() {
     var sessionBinder by mutableStateOf<WeakReference<SessionService.SessionBinder>?>(null)
@@ -307,18 +324,26 @@ class Terminal : AppCompatActivity() {
     fun TerminalScreenHost(context: Context) {
         var downloadedBytes by remember { mutableLongStateOf(0L) }
         var totalBytes by remember { mutableLongStateOf(0L) }
-        var unsupportedCpu by remember { mutableStateOf(false) }
-        var ubuntuInstalled by remember { mutableStateOf(false) }
+        var supported by remember { mutableStateOf(true) }
+        var copyDone by remember { mutableStateOf(false) }
+        var extractionDone by remember { mutableStateOf(false) }
+        var failed by remember { mutableStateOf(false) }
+        var errorMessage by remember { mutableStateOf("") }
+        var retryKey by remember { mutableStateOf(0) }
 
-        LaunchedEffect(Unit) {
+        LaunchedEffect(retryKey) {
+            failed = false
+            copyDone = false
+            errorMessage = ""
+            downloadedBytes = 0L
             if (withContext(Dispatchers.IO) { isTerminalInstalled() }) {
-                ubuntuInstalled = true
+                extractionDone = true
                 return@LaunchedEffect
             }
 
             val asset = archmAssetForAbi(Build.SUPPORTED_ABIS)
             if (asset == null) {
-                unsupportedCpu = true
+                supported = false
                 return@LaunchedEffect
             }
 
@@ -331,6 +356,7 @@ class Terminal : AppCompatActivity() {
                     val input: InputStream =
                         descriptor?.createInputStream() ?: context.assets.open("terminal/${asset.name}")
                     totalBytes = descriptor?.length ?: -1L
+                    var lastCopyEmit = 0L
                     input.use { stream ->
                         FileOutputStream(output).use { fileOut ->
                             val buffer = ByteArray(64 * 1024)
@@ -339,6 +365,18 @@ class Terminal : AppCompatActivity() {
                                 if (read < 0) break
                                 fileOut.write(buffer, 0, read)
                                 downloadedBytes += read
+                                val now = System.currentTimeMillis()
+                                if (now - lastCopyEmit >= 250L) {
+                                    lastCopyEmit = now
+                                    withContext(Dispatchers.Main) {
+                                        progressText =
+                                            if (totalBytes > 0) {
+                                                "${strings.installing.getString()} ${downloadedBytes * 100 / totalBytes}%"
+                                            } else {
+                                                strings.installing.getString()
+                                            }
+                                    }
+                                }
                             }
                         }
                     }
@@ -348,14 +386,32 @@ class Terminal : AppCompatActivity() {
                         output.delete()
                         throw IllegalStateException("Bundled rootfs checksum mismatch: ${asset.name}")
                     }
-                    installNextStage = getNextStage(this@Terminal)
+                    val next = getNextStage(this@Terminal)
+                    installNextStage = next
+                    extractionDone = next == NEXT_STAGE.NONE
+                    copyDone = true
                 }
-                ubuntuInstalled = true
             } catch (e: Exception) {
                 e.printStackTrace()
-                errorDialog(msg = strings.setup_failed.getFilledString(e.message))
+                failed = true
+                errorMessage = strings.setup_failed.getFilledString(e.message)
             }
         }
+
+        // SessionService clears the one-shot stage after setup.sh consumes the
+        // tarball; follow it so the UI leaves the extraction screen.
+        LaunchedEffect(installNextStage) {
+            if (copyDone && installNextStage == NEXT_STAGE.NONE) extractionDone = true
+        }
+
+        val stage =
+            nextInstallStage(
+                installed = extractionDone,
+                supported = supported,
+                copyDone = copyDone,
+                extractionDone = extractionDone,
+                failed = failed,
+            )
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val context = LocalContext.current
@@ -385,8 +441,8 @@ class Terminal : AppCompatActivity() {
                 }
             }
 
-            when {
-                unsupportedCpu -> {
+            when (stage) {
+                InstallStage.UnsupportedCpu -> {
                     Column(
                         modifier = Modifier.fillMaxSize().padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -407,14 +463,25 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
-                installNextStage != null && (installNextStage != NEXT_STAGE.NONE || ubuntuInstalled) -> {
-                    TerminalScreen(terminalActivity = this@Terminal)
+                InstallStage.Ready -> TerminalScreen(terminalActivity = this@Terminal)
+
+                InstallStage.Failed -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            text = errorMessage.ifBlank { stringResource(strings.install_failed) },
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { retryKey++ }) { Text(text = stringResource(strings.retry)) }
+                    }
                 }
 
-                ubuntuInstalled -> {
-                    TerminalScreen(terminalActivity = this@Terminal)
-                }
-                else -> {
+                InstallStage.Copying, InstallStage.Extracting -> {
                     Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                         Column(
                             modifier = Modifier.align(Alignment.Center),
@@ -434,7 +501,9 @@ class Terminal : AppCompatActivity() {
                                     text = "$percent%",
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier =
-                                        Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                                        Modifier.padding(top = 8.dp).semantics {
+                                            liveRegion = LiveRegionMode.Polite
+                                        },
                                 )
                             } else {
                                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth(0.8f))

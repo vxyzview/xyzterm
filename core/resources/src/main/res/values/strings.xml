@@ -92,8 +92,6 @@
 <string name="name_empty_err">Name cannot be empty</string>
 <string name="installing">Installing…</string>
 <string name="loading">Loading…</string>
-<string name="downloading">Downloading…</string>
-    <string name="network_err">Network error. Please check that your internet connection is working properly.</string>
 <string name="file">File</string>
     <string name="folder">Folder</string>
     <string name="feature_toggles">Feature toggles</string>
@@ -124,9 +122,6 @@
 <string name="acquire_wakelock">Acquire wakelock</string>
     <string name="release_wakelock">Release wakelock</string>
 <string name="install">Install</string>
-    <string name="install_ubuntu_optional">archm is not installed</string>
-    <string name="install_ubuntu_optional_desc">archm installs automatically on first launch — there is nothing to download.</string>
-    <string name="not_now">Not now</string>
 <string name="uninstall_terminal_warning">Permanently uninstall archm? This action cannot be undone.</string>
     <string name="uninstall">Uninstall</string>
     <string name="uninstall_terminal">Uninstall terminal</string>
@@ -232,6 +227,7 @@
 <string name="pager_page">Page %1$d of %2$d</string>
 <string name="no_results">No settings match that search.</string>
 <string name="clear_search">Clear search</string>
+<string name="install_failed">Setup could not finish. Check free storage and try again.</string>
 <string name="last_modified">Last modified</string>
     <string name="content_property">%1$s items, totaling %2$s</string>
     <string name="manifest_missing_fields">The manifest.json file has missing or invalid properties:\n%s\n\nPlease check the file and try again.</string>
