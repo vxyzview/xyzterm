@@ -1,1 +1,1 @@
-Ubuntu proot Linux shell for Android
+Real Arch Linux shell — no root, no telemetry

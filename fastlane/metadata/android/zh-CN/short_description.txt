@@ -1,1 +1,1 @@
-Ubuntu proot Linux 终端，适用于 Android
+真正的 Arch Linux 终端 — 无需 root，无遥测

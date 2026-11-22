@@ -1,17 +1,25 @@
-xyzterm is a minimal, terminal-only Android app that runs a real proot-based Ubuntu environment with a full terminal emulator. Tap the icon, and you are in a shell — no code editor, no file manager, no git UI, no extensions.
+xyzterm is a minimal, terminal-only Android app that runs a real proot-based
+Arch Linux environment with a full terminal emulator. Tap the icon and you are
+in a shell — no code editor, no file manager, no git UI, no extensions.
+
+The Arch Linux rootfs is bundled inside the APK and verified and extracted
+locally on first launch: no runtime download, no root, no setup friction.
+Supports arm64 and armv7 devices; x86_64 is not supported.
 
 Getting started
 1. Install xyzterm and open it.
-2. On first launch, choose to install Ubuntu — a one-time rootfs download for your device (arm, arm64, or x64).
-3. Start typing. You are in a real Ubuntu shell.
+2. The bundled rootfs is verified and extracted on first launch.
+3. Start typing. You are in a real Arch Linux shell.
 
 Features
-- Real Ubuntu, no root — proot userspace rootfs per ABI (arm, arm64, x64)
-- Full terminal emulator — configurable font, size, colors, and an extra-keys row
-- Multiple named sessions — add, rename, delete, switch; persisted across restarts
-- Terminal themes — including AMOLED and dynamic color (Monet)
-- Session-safe — sessions survive backgrounding and app restarts
-- Backup and restore of the terminal environment from terminal settings
+- Real Arch Linux, no root — proot userspace bundled for arm64 and armv7
+- Full terminal emulator — font, size, colors, cursor and extra-keys row
+- Multiple named sessions — add, rename, delete, switch; survive restarts
+- Terminal themes — AMOLED black and Material You dynamic color
+- Hardware keyboard support — searchable, remappable keybindings
+- Backup and restore of your sandbox, including installed packages
+- Optional SAF provider so file managers can reach your files
 
 Privacy
-xyzterm is licensed GPL-3.0-or-later and contains no telemetry and no third-party analytics. Available on F-Droid and GitHub Releases. Your shell is your business.
+xyzterm is free software (GPL-3.0-or-later) with no telemetry and no
+third-party analytics. Your shell is your business.

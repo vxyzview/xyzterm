@@ -1,17 +1,20 @@
-xyzterm 是一款极简的纯终端 Android 应用，运行真实的 proot Ubuntu 环境，内置完整的终端模拟器。点开图标即进入 shell——没有代码编辑器，没有文件管理器，没有 git 界面，没有扩展。
+xyzterm 是一款极简的纯终端 Android 应用，运行真实的 proot Arch Linux 环境，内置完整的终端模拟器。点开图标即进入 shell——没有代码编辑器，没有文件管理器，没有 git 界面，没有扩展。
+
+Arch Linux 的 rootfs 已打包在 APK 内，首次启动时在本地完成校验与解压：无需运行时下载、无需 root、无需额外设置。支持 arm64 与 armv7 设备，不支持 x86_64。
 
 入门步骤
 1. 安装并打开 xyzterm。
-2. 首次启动时选择安装 Ubuntu——一次性下载适合您设备的 rootfs（arm、arm64 或 x64）。
-3. 开始输入。您已进入真实的 Ubuntu shell。
+2. 首次启动时自动校验并解压内置的 rootfs。
+3. 开始输入。您已进入真实的 Arch Linux shell。
 
 功能特性
-- 真实 Ubuntu，无需 root——按 ABI（arm、arm64、x64）提供 proot 用户空间 rootfs
-- 完整终端模拟器——可配置字体、字号、配色和附加按键行
+- 真实 Arch Linux，无需 root——为 arm64 与 armv7 打包的 proot 用户空间
+- 完整终端模拟器——可配置字体、字号、配色、光标和附加按键行
 - 多命名会话——添加、重命名、删除、切换；重启后依然保留
-- 终端主题——包括 AMOLED 和动态取色（Monet）
-- 会话安全——会话在后台切换和应用重启后继续存活
-- 从终端设置备份和恢复终端环境
+- 终端主题——AMOLED 纯黑与 Material You 动态取色
+- 硬件键盘支持——可搜索、可重映射的快捷键
+- 沙盒备份与恢复，包含已安装的软件包
+- 可选的 SAF 文档提供者，让文件管理器访问你的文件
 
 隐私
-xyzterm 采用 GPL-3.0-or-later 许可证，不含任何遥测和第三方分析。可通过 F-Droid 与 GitHub Releases 获取。您的 shell 只属于您。
+xyzterm 是自由软件（GPL-3.0-or-later），不含任何遥测和第三方分析。您的 shell 只属于您。
