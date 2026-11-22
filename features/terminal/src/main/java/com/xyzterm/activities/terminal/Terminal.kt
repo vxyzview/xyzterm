@@ -66,9 +66,9 @@ import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.SessionService
-import com.xyzterm.terminal.archmAssetForAbi
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
+import com.xyzterm.terminal.archmAssetForAbi
 import com.xyzterm.terminal.changeSession
 import com.xyzterm.terminal.getNextStage
 import com.xyzterm.terminal.terminalView
@@ -328,7 +328,8 @@ class Terminal : AppCompatActivity() {
                     // aapt may leave .tar.gz uncompressed (openFd works) or store
                     // it deflated; both paths must produce the same staged file.
                     val descriptor = runCatching { context.assets.openFd("terminal/${asset.name}") }.getOrNull()
-                    val input: InputStream = descriptor?.createInputStream() ?: context.assets.open("terminal/${asset.name}")
+                    val input: InputStream =
+                        descriptor?.createInputStream() ?: context.assets.open("terminal/${asset.name}")
                     totalBytes = descriptor?.length ?: -1L
                     input.use { stream ->
                         FileOutputStream(output).use { fileOut ->
@@ -355,7 +356,6 @@ class Terminal : AppCompatActivity() {
                 errorDialog(msg = strings.setup_failed.getFilledString(e.message))
             }
         }
-
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             val context = LocalContext.current
@@ -411,7 +411,6 @@ class Terminal : AppCompatActivity() {
                     TerminalScreen(terminalActivity = this@Terminal)
                 }
 
-
                 ubuntuInstalled -> {
                     TerminalScreen(terminalActivity = this@Terminal)
                 }
@@ -452,7 +451,6 @@ class Terminal : AppCompatActivity() {
                         )
                     }
                 }
-
             }
         }
     }

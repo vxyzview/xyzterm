@@ -17,8 +17,8 @@ enum class NEXT_STAGE {
 internal const val INSTALL_MARKER = ".terminal_setup_ok_DO_NOT_REMOVE"
 
 /**
- * The marker, not the directory contents, decides whether extraction finished.
- * A kill mid-`tar` leaves partial files behind; they must not block a retry.
+ * The marker, not the directory contents, decides whether extraction finished. A kill mid-`tar` leaves partial files
+ * behind; they must not block a retry.
  */
 internal fun nextStageFor(tarballExists: Boolean, markerExists: Boolean): NEXT_STAGE =
     if (tarballExists && !markerExists) NEXT_STAGE.EXTRACTION else NEXT_STAGE.NONE

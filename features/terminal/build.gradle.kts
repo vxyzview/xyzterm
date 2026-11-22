@@ -56,30 +56,29 @@ private fun sha256(file: File): String {
     return digest.digest().joinToString("") { "%02x".format(it) }
 }
 
-val downloadRootfs by
-    tasks.registering {
-        group = "build"
-        description = "Downloads and verifies the archm rootfs tarballs into the app assets."
-        val abis = listOf("arm64", "arm")
-        val assetsDir = layout.projectDirectory.dir("src/main/assets/terminal").asFile
-        inputs.property("archmTag", ARCHM_TAG)
-        doLast {
-            for (abi in abis) {
-                val name = "archm-$abi.tar.gz"
-                val expected = ARCHM_SHA256[abi] ?: error("No pinned SHA-256 for $name in Constants.kt")
-                val target = File(assetsDir, name)
-                if (target.exists() && sha256(target) == expected) continue
-                target.parentFile.mkdirs()
-                val partial = File(target.parentFile, "$name.part")
-                URL("$ARCHM_BASE/$name").openStream().use { input ->
-                    FileOutputStream(partial).use { output -> input.copyTo(output) }
-                }
-                val actual = sha256(partial)
-                check(actual == expected) { "SHA-256 mismatch for $name: expected $expected, got $actual" }
-                check(partial.renameTo(target)) { "Failed to move $name into assets" }
+val downloadRootfs by tasks.registering {
+    group = "build"
+    description = "Downloads and verifies the archm rootfs tarballs into the app assets."
+    val abis = listOf("arm64", "arm")
+    val assetsDir = layout.projectDirectory.dir("src/main/assets/terminal").asFile
+    inputs.property("archmTag", ARCHM_TAG)
+    doLast {
+        for (abi in abis) {
+            val name = "archm-$abi.tar.gz"
+            val expected = ARCHM_SHA256[abi] ?: error("No pinned SHA-256 for $name in Constants.kt")
+            val target = File(assetsDir, name)
+            if (target.exists() && sha256(target) == expected) continue
+            target.parentFile.mkdirs()
+            val partial = File(target.parentFile, "$name.part")
+            URL("$ARCHM_BASE/$name").openStream().use { input ->
+                FileOutputStream(partial).use { output -> input.copyTo(output) }
             }
+            val actual = sha256(partial)
+            check(actual == expected) { "SHA-256 mismatch for $name: expected $expected, got $actual" }
+            check(partial.renameTo(target)) { "Failed to move $name into assets" }
         }
     }
+}
 
 tasks.named("preBuild") { dependsOn(downloadRootfs) }
 
