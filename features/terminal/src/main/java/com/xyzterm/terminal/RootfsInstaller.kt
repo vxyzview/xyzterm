@@ -2,7 +2,6 @@ package com.xyzterm.terminal
 
 import android.content.Context
 import android.system.Os
-import com.google.gson.Gson
 import com.xyzterm.file.child
 import java.io.File
 import java.io.FileOutputStream
@@ -10,15 +9,36 @@ import java.util.zip.ZipInputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private data class RootfsEntry(
-    val p: String,
-    val t: String,
-    val m: Int = 0,
-    val s: Long = 0,
-    val to: String? = null,
+internal data class RootfsEntry(
+    val path: String,
+    val type: String,
+    val mode: Int,
+    val size: Long,
+    val target: String?,
 )
 
-private data class RootfsManifest(val bytes: Long, val entries: List<RootfsEntry>)
+internal data class RootfsManifest(val bytes: Long, val entries: List<RootfsEntry>)
+
+/** Hand-rolled TSV parse: no reflection, so R8 cannot break first launch. */
+internal fun parseRootfsManifest(text: String): RootfsManifest {
+    var bytes = 0L
+    val entries = mutableListOf<RootfsEntry>()
+    text.lineSequence().forEach { line ->
+        val parts = line.split('\t')
+        when (parts.firstOrNull()) {
+            "B" -> bytes = parts.getOrNull(1)?.toLongOrNull() ?: 0L
+            "D", "L", "F" -> {
+                val path = parts.getOrNull(1) ?: return@forEach
+                val type = parts[0]
+                val mode = parts.getOrNull(2)?.toIntOrNull() ?: 0
+                val size = if (type == "F") parts.getOrNull(3)?.toLongOrNull() ?: 0L else 0L
+                val target = if (type == "L") parts.getOrNull(3) else null
+                entries += RootfsEntry(path, type, mode, size, target)
+            }
+        }
+    }
+    return RootfsManifest(bytes, entries)
+}
 
 /**
  * Copies a rootfs that was already unpacked at build time. No tar, no proot, no ptrace overhead on the device — just
@@ -27,7 +47,7 @@ private data class RootfsManifest(val bytes: Long, val entries: List<RootfsEntry
 object RootfsInstaller {
     fun isAvailable(context: Context, asset: ArchmAsset): Boolean {
         val files = context.assets.list("terminal")?.toSet().orEmpty()
-        return "rootfs-${asset.abi}.zip" in files && "rootfs-${asset.abi}.json" in files
+        return "rootfs-${asset.abi}.zip" in files && "rootfs-${asset.abi}.tsv" in files
     }
 
     suspend fun install(
@@ -37,19 +57,18 @@ object RootfsInstaller {
         onProgress: suspend (copied: Long, total: Long) -> Unit,
     ) =
         withContext(Dispatchers.IO) {
-            val manifestName = "terminal/rootfs-${asset.abi}.json"
+            val manifestName = "terminal/rootfs-${asset.abi}.tsv"
             val zipName = "terminal/rootfs-${asset.abi}.zip"
-            val manifest =
-                context.assets.open(manifestName).use { Gson().fromJson(it.reader(), RootfsManifest::class.java) }
+            val manifest = context.assets.open(manifestName).use { parseRootfsManifest(it.reader().readText()) }
 
             if (root.exists()) root.deleteRecursively()
             root.mkdirs()
 
-            val modes = manifest.entries.associate { it.p to it.m }
-            manifest.entries.filter { it.t == "d" }.forEach { File(root, it.p).mkdirs() }
+            val modes = manifest.entries.associate { it.path to it.mode }
+            manifest.entries.filter { it.type == "d" }.forEach { File(root, it.path).mkdirs() }
             manifest.entries
-                .filter { it.t == "l" }
-                .forEach { entry -> runCatching { Os.symlink(entry.to, File(root, entry.p).absolutePath) } }
+                .filter { it.type == "l" }
+                .forEach { entry -> runCatching { Os.symlink(entry.target, File(root, entry.path).absolutePath) } }
 
             var copied = 0L
             context.assets.open(zipName).use { raw ->

@@ -53,9 +53,9 @@ signing.properties
 # Rootfs tarballs are downloaded by the build, never committed
 
 app/src/arm/assets/terminal/rootfs-arm.zip
-app/src/arm/assets/terminal/rootfs-arm.json
+app/src/arm/assets/terminal/rootfs-arm.tsv
 app/src/arm/assets/terminal/rootfs-arm.zip.part
 
 app/src/arm64/assets/terminal/rootfs-arm64.zip
-app/src/arm64/assets/terminal/rootfs-arm64.json
+app/src/arm64/assets/terminal/rootfs-arm64.tsv
 app/src/arm64/assets/terminal/rootfs-arm64.zip.part

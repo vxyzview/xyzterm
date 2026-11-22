@@ -117,7 +117,7 @@ jobs:
             echo "=== $apk ==="
             unzip -l "$apk" | grep "assets/terminal/" || true
             unzip -l "$apk" | grep -q "assets/terminal/rootfs-$abi.zip"
-            unzip -l "$apk" | grep -q "assets/terminal/rootfs-$abi.json"
+            unzip -l "$apk" | grep -q "assets/terminal/rootfs-$abi.tsv"
             other=$([ "$abi" = arm ] && echo arm64 || echo arm)
             if unzip -l "$apk" | grep -q "assets/terminal/rootfs-$other.zip"; then
               echo "Wrong rootfs bundled in $apk" >&2

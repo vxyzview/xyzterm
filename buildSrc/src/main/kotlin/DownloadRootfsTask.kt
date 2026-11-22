@@ -72,9 +72,9 @@ abstract class DownloadRootfsTask : DefaultTask() {
 
             val assets = dirs.getValue(abi)
             assets.mkdirs()
-            val entries = StringBuilder("[")
-            var first = true
+            val manifest = StringBuilder("B\t0\n")
             var totalBytes = 0L
+            var entryCount = 0
             val zip = File(assets, "rootfs-$abi.zip")
             ZipOutputStream(FileOutputStream(zip)).use { out ->
                 Files.walk(tree.toPath()).use { paths ->
@@ -94,12 +94,15 @@ abstract class DownloadRootfsTask : DefaultTask() {
                             val target = if (kind == "l") Files.readSymbolicLink(path).toString() else null
                             val size = if (kind == "f") Files.size(path) else 0L
                             totalBytes += size
-                            if (!first) entries.append(',')
-                            first = false
-                            entries.append("{\"p\":\"").append(escape(rel)).append("\",\"t\":\"").append(kind)
-                                .append("\",\"m\":").append(mode).append(",\"s\":").append(size)
-                            if (target != null) entries.append(",\"to\":\"").append(escape(target)).append("\"")
-                            entries.append('}')
+                            when (kind) {
+                                "d" -> manifest.append("D\t").append(rel).append('\t').append(mode)
+                                "l" -> manifest.append("L\t").append(rel).append('\t').append(mode).append('\t')
+                                    .append(target)
+                                else -> manifest.append("F\t").append(rel).append('\t').append(mode).append('\t')
+                                    .append(size)
+                            }
+                            manifest.append('\n')
+                            entryCount++
 
                             if (kind == "f") {
                                 val entry = ZipEntry(rel)
@@ -112,8 +115,9 @@ abstract class DownloadRootfsTask : DefaultTask() {
                     }
                 }
             }
-            entries.append(']')
-            File(assets, "rootfs-$abi.json").writeText("{\"bytes\":$totalBytes,\"entries\":$entries}")
+            val body = manifest.substringAfter('\n')
+            File(assets, "rootfs-$abi.tsv").writeText("B\t$totalBytes\n$body")
+            logger.lifecycle("archm $abi: $entryCount entries, $totalBytes bytes")
             File(assets, "archm-$abi.bin").delete()
             File(assets, "archm-$abi.bin.part").delete()
         }
@@ -144,8 +148,6 @@ private fun posixMode(path: Path): Int {
     if (PosixFilePermission.OTHERS_EXECUTE in permissions) mode = mode or 0b000000001
     return mode
 }
-
-private fun escape(value: String): String = value.replace("\\", "\\\\").replace("\"", "\\\"")
 
 private fun sha256(file: File): String {
     val digest = MessageDigest.getInstance("SHA-256")
