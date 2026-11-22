@@ -305,3 +305,278 @@ mod tests {
         assert!(!is_newer("garbage".into(), "v1.2.3".into()).unwrap());
     }
 }
+
+// ---- wave 2: six new exports ---------------------------------------------------------------
+
+/// Java `String.format("%.1f %s", …)`: HALF_UP on positive values.
+fn format_size_unit(value: f64, unit: &str) -> String {
+    let scaled = (value * 10.0).round() as i64;
+    format!("{}.{} {}", scaled / 10, scaled.rem_euclid(10), unit)
+}
+
+/// Port of `formatFileSize`.
+pub fn format_file_size(bytes: i64) -> Result<String, String> {
+    if bytes < 1024 {
+        return Ok(format!("{} B", bytes));
+    }
+    let kb = bytes as f64 / 1024.0;
+    if kb < 1024.0 {
+        return Ok(format_size_unit(kb, "KB"));
+    }
+    let mb = kb / 1024.0;
+    if mb < 1024.0 {
+        return Ok(format_size_unit(mb, "MB"));
+    }
+    Ok(format_size_unit(mb / 1024.0, "GB"))
+}
+
+/// Port of `formatNumberCompact`.
+pub fn format_number_compact(number: i64) -> Result<String, String> {
+    if number < 1000 {
+        return Ok(number.to_string());
+    }
+    let suffixes = ["k", "m", "b"];
+    let mut value = number as f64;
+    let mut index: i32 = -1;
+    while value >= 1000.0 && index < suffixes.len() as i32 - 1 {
+        value /= 1000.0;
+        index += 1;
+    }
+    let suffix = suffixes[index as usize];
+    let scaled = (value * 10.0).round() as i64;
+    let whole = scaled / 10;
+    let frac = scaled.rem_euclid(10);
+    Ok(if frac == 0 {
+        format!("{}{}", whole, suffix)
+    } else {
+        format!("{}.{}{}", whole, frac, suffix)
+    })
+}
+
+/// Port of `roundedSliderMin`.
+pub fn rounded_slider_min(min: i64) -> Result<i64, String> {
+    if min <= 0 {
+        return Ok(0);
+    }
+    let mut magnitude: i64 = 1;
+    while magnitude <= min / 10 {
+        magnitude *= 10;
+    }
+    Ok((min / magnitude) * magnitude)
+}
+
+fn parse_hex_radix(s: &str) -> Result<i64, String> {
+    i64::from_str_radix(s, 16).map_err(|_| {
+        format!(
+            "NumberFormatException: For input string: \"{}\" under radix 16",
+            s
+        )
+    })
+}
+
+/// Port of `parseHexArgb`.
+pub fn parse_hex_argb(input: String) -> Result<String, String> {
+    let trimmed = input.trim_matches(kotlin_is_whitespace);
+    let hex = trimmed.strip_prefix('#').unwrap_or(trimmed);
+    if hex.is_empty() {
+        return Ok("null".to_string());
+    }
+    let argb: i32 = match hex.encode_utf16().count() {
+        3 => {
+            let mut units = hex.encode_utf16();
+            let repeated = |_u: u16| -> Result<i32, String> {
+                let unit = char::from_u32(_u as u32).unwrap_or('\u{fffd}');
+                Ok(parse_hex_radix(&format!("{}{}", unit, unit))? as i32)
+            };
+            let r = repeated(units.next().unwrap_or(0))?;
+            let g = repeated(units.next().unwrap_or(0))?;
+            let b = repeated(units.next().unwrap_or(0))?;
+            -16777216i32 | (r << 16) | (g << 8) | b
+        }
+        6 => -16777216i32 | (parse_hex_radix(hex)? as i32),
+        8 => parse_hex_radix(hex)? as i32,
+        _ => return Ok("null".to_string()),
+    };
+    Ok(argb.to_string())
+}
+
+/// Kotlin `Float.roundToInt()` is `floor(x + 0.5)` with saturation; NaN throws.
+fn kotlin_round_to_int(x: f32) -> Result<i32, String> {
+    if x.is_nan() {
+        return Err("IllegalArgumentException: Cannot round NaN value.".to_string());
+    }
+    Ok((x + 0.5).floor() as i32)
+}
+
+/// Port of `hslLabel`.
+pub fn hsl_label(rf: f64, gf: f64, bf: f64) -> Result<String, String> {
+    let (r, g, b) = (rf as f32, gf as f32, bf as f32);
+    // Kotlin's maxOf/minOf on Float use Math.max/min, which propagate NaN.
+    let nan_max = |a: f32, c: f32| {
+        if a.is_nan() || c.is_nan() {
+            f32::NAN
+        } else {
+            a.max(c)
+        }
+    };
+    let nan_min = |a: f32, c: f32| {
+        if a.is_nan() || c.is_nan() {
+            f32::NAN
+        } else {
+            a.min(c)
+        }
+    };
+    let max = nan_max(nan_max(r, g), b);
+    let min = nan_min(nan_min(r, g), b);
+    let delta = max - min;
+
+    let mut h = 0f32;
+    let l = (max + min) / 2f32;
+    let s = if delta == 0f32 {
+        0f32
+    } else {
+        delta / (1f32 - (2f32 * l - 1f32).abs())
+    };
+
+    if delta != 0f32 {
+        h = if max == r {
+            ((g - b) / delta) % 6f32
+        } else if max == g {
+            ((b - r) / delta) + 2f32
+        } else {
+            ((r - g) / delta) + 4f32
+        };
+        h /= 6f32;
+        if h < 0f32 {
+            h += 1f32;
+        }
+    }
+
+    Ok(format!(
+        "{}|{}|{}",
+        kotlin_round_to_int(h * 360f32)?,
+        kotlin_round_to_int(s * 100f32)?,
+        kotlin_round_to_int(l * 100f32)?
+    ))
+}
+
+/// Port of `fromUrlName`.
+pub fn from_url_name(url: String) -> Result<String, String> {
+    let colon = url.find(':');
+    let scheme = match colon {
+        Some(i)
+            if i > 0
+                && url[..i]
+                    .chars()
+                    .next()
+                    .is_some_and(|c| c.is_ascii_alphabetic())
+                && url[..i]
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '-' | '.')) =>
+        {
+            &url[..i]
+        }
+        _ => {
+            return Err(format!("RuntimeException: no protocol: {}", url));
+        }
+    };
+    let lower = scheme.to_ascii_lowercase();
+    if !matches!(lower.as_str(), "http" | "https" | "ftp" | "file") {
+        return Err(format!("RuntimeException: unknown protocol: {}", scheme));
+    }
+    let rest = &url[colon.unwrap_or(0) + 1..];
+    let host = match rest.strip_prefix("//") {
+        Some(authority) => {
+            let authority = authority.split(['/', '?', '#']).next().unwrap_or("");
+            let after_user = authority.rsplit('@').next().unwrap_or("");
+            after_user.split(':').next().unwrap_or("")
+        }
+        None => "",
+    };
+    Ok(match host {
+        "github.com" => "GitHub",
+        "gitlab.com" => "GitLab",
+        "bitbucket.org" => "BitBucket",
+        _ => "Other",
+    }
+    .to_string())
+}
+
+#[cfg(test)]
+mod wave2_tests {
+    use super::*;
+
+    #[test]
+    fn file_size_rounding_and_units() {
+        assert_eq!(format_file_size(0).unwrap(), "0 B");
+        assert_eq!(format_file_size(1023).unwrap(), "1023 B");
+        assert_eq!(format_file_size(1024).unwrap(), "1.0 KB");
+        assert_eq!(format_file_size(1280).unwrap(), "1.3 KB");
+        assert_eq!(format_file_size(1536).unwrap(), "1.5 KB");
+        assert_eq!(format_file_size(1048575).unwrap(), "1024.0 KB");
+        assert_eq!(format_file_size(1048576).unwrap(), "1.0 MB");
+        assert_eq!(format_file_size(1073741824).unwrap(), "1.0 GB");
+        assert_eq!(format_file_size(i64::MAX).unwrap(), "8589934592.0 GB");
+        assert_eq!(format_file_size(-1).unwrap(), "-1 B");
+    }
+
+    #[test]
+    fn compact_number_rounding_and_suffixes() {
+        assert_eq!(format_number_compact(999).unwrap(), "999");
+        assert_eq!(format_number_compact(1000).unwrap(), "1k");
+        assert_eq!(format_number_compact(1250).unwrap(), "1.3k");
+        assert_eq!(format_number_compact(999999).unwrap(), "1000k");
+        assert_eq!(format_number_compact(1000000).unwrap(), "1m");
+        assert_eq!(format_number_compact(1000000000).unwrap(), "1b");
+        assert_eq!(format_number_compact(i32::MAX as i64).unwrap(), "2.1b");
+    }
+
+    #[test]
+    fn slider_rounding() {
+        assert_eq!(rounded_slider_min(-1).unwrap(), 0);
+        assert_eq!(rounded_slider_min(11).unwrap(), 10);
+        assert_eq!(rounded_slider_min(99).unwrap(), 90);
+        assert_eq!(rounded_slider_min(101).unwrap(), 100);
+    }
+
+    #[test]
+    fn hex_argb_lengths_and_errors() {
+        assert_eq!(parse_hex_argb("".into()).unwrap(), "null");
+        assert_eq!(parse_hex_argb("abc".into()).unwrap(), "-5588020");
+        assert_eq!(parse_hex_argb("#ABC".into()).unwrap(), "-5588020");
+        assert_eq!(parse_hex_argb("112233".into()).unwrap(), "-15654349");
+        assert_eq!(parse_hex_argb("11223344".into()).unwrap(), "287454020");
+        assert!(parse_hex_argb("zzz".into()).is_err());
+    }
+
+    #[test]
+    fn hsl_labels() {
+        assert_eq!(hsl_label(0.0, 0.0, 0.0).unwrap(), "0|0|0");
+        assert_eq!(hsl_label(1.0, 0.0, 0.0).unwrap(), "0|100|50");
+        assert_eq!(hsl_label(0.0, 1.0, 0.0).unwrap(), "120|100|50");
+        assert_eq!(hsl_label(0.0, 0.0, 1.0).unwrap(), "240|100|50");
+        assert_eq!(hsl_label(1.0, 1.0, 1.0).unwrap(), "0|0|100");
+        assert!(hsl_label(f64::NAN, 0.0, 0.5).is_err());
+        assert!(hsl_label(f64::NAN, 2.0, 2.0).is_err());
+    }
+
+    #[test]
+    fn url_hosts_and_errors() {
+        assert_eq!(
+            from_url_name("https://github.com/x".into()).unwrap(),
+            "GitHub"
+        );
+        assert_eq!(from_url_name("http://gitlab.com".into()).unwrap(), "GitLab");
+        assert_eq!(
+            from_url_name("https://example.com".into()).unwrap(),
+            "Other"
+        );
+        assert_eq!(from_url_name("HTTP://github.com".into()).unwrap(), "GitHub");
+        assert_eq!(from_url_name("https://GitHub.com".into()).unwrap(), "Other");
+        assert!(
+            from_url_name("github.com".into())
+                .unwrap_err()
+                .starts_with("RuntimeException:")
+        );
+    }
+}
