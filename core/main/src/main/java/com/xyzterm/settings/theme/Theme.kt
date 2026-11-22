@@ -36,7 +36,7 @@ import com.xyzterm.events.Events
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import com.xyzterm.theme.DYNAMIC_THEME_ID
-import com.xyzterm.theme.blueberry
+import com.xyzterm.theme.lime
 import com.xyzterm.theme.builtInThemes
 import com.xyzterm.theme.currentTheme
 import kotlinx.coroutines.launch
@@ -82,7 +82,7 @@ fun ThemeScreen(navController: NavController, modifier: Modifier = Modifier) {
                 sideEffect = {
                     val oldTheme = currentTheme.value
                     Settings.theme = DYNAMIC_THEME_ID
-                    DefaultScope.launch { Events.publish(AppEvent.ThemeChanged(blueberry, oldTheme)) }
+                    DefaultScope.launch { Events.publish(AppEvent.ThemeChanged(lime, oldTheme)) }
                 },
             )
 

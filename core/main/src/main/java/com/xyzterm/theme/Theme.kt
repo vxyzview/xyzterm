@@ -21,7 +21,7 @@ import com.google.android.material.color.MaterialColors
 import com.xyzterm.settings.Settings
 import com.xyzterm.utils.isDarkTheme
 
-val currentTheme = derivedStateOf { builtInThemes.find { it.id == Settings.theme } ?: blueberry }
+val currentTheme = derivedStateOf { builtInThemes.find { it.id == Settings.theme } ?: lime }
 
 /** Sentinel theme id for the device's wallpaper-derived dynamic (Material You) colors. Always on. */
 const val DYNAMIC_THEME_ID = "dynamic"
@@ -49,7 +49,7 @@ fun XyzTheme(
             var holder: ThemeHolder
             val scheme =
                 if (dynamicState && supportsDynamicTheming()) {
-                    holder = blueberry
+                    holder = lime
                     when {
                         darkThemeState && amoledState -> dynamicDarkColorScheme(context).amoledScheme()
                         darkThemeState -> dynamicDarkColorScheme(context)

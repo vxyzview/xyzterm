@@ -164,7 +164,7 @@ jobs:
 
           ### Features
           - Full terminal emulator with named, persistent sessions
-          - 5 built-in themes plus Material You dynamic color and AMOLED black
+          - 4 built-in themes plus Material You dynamic color and AMOLED black
           - Remappable keybindings, extra-keys row, snippets and custom binds
           - Backup / restore of the whole sandbox as `.tar.gz`
           - Optional SAF document provider, quick-settings tile and `xyzterm://session/...` deep links

@@ -50,8 +50,6 @@ fun SettingsScreen(navController: NavController) {
     val entries = remember { settingsEntries() }
 
     PreferenceLayout(label = stringResource(id = strings.settings), backArrowVisible = true) {
-        BrandHeader()
-        Spacer(modifier = Modifier.height(12.dp))
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
@@ -60,6 +58,8 @@ fun SettingsScreen(navController: NavController) {
             singleLine = true,
             modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
         )
+        Spacer(modifier = Modifier.height(12.dp))
+        BrandHeader()
         Spacer(modifier = Modifier.height(8.dp))
 
         if (query.isBlank()) {
