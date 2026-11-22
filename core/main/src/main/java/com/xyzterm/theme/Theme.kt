@@ -79,7 +79,6 @@ fun XyzTheme(
                 extraLarge = RoundedCornerShape(40.dp),
             )
         }
-(fix: hoist MaterialTheme.shapes read out of remember)
 
     CompositionLocalProvider(LocalThemeHolder provides themeHolder) {
         MaterialTheme(
