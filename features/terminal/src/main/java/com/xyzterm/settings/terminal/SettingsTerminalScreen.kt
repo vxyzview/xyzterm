@@ -220,6 +220,12 @@ fun TerminalDataSettings(navController: NavController) {
                     if (uri == null) {
                         return@rememberLauncherForActivityResult
                     }
+                    val activeSessions =
+                        Terminal.instance?.sessionBinder?.get()?.getService()?.sessionList?.isNotEmpty() == true
+                    if (activeSessions) {
+                        toast(strings.restore_sessions_active)
+                        return@rememberLauncherForActivityResult
+                    }
 
                     val loading = LoadingPopup(activity, null)
                     loading.show()

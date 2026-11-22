@@ -341,4 +341,5 @@
     <string name="desktop_x11_missing">Termux:X11 is not installed. The desktop cannot start without it.</string>
     <string name="gamepad_input">Gamepad input</string>
     <string name="gamepad_input_desc">Map controller buttons to Enter, Escape, Tab and page keys in the shell.</string>
+    <string name="restore_sessions_active">Close all sessions before restoring a backup.</string>
 </resources>
