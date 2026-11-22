@@ -61,20 +61,23 @@ ARGS="$ARGS -L"
 
 COMMAND="(cd $LOCAL/sandbox && tar -xf $TMP_DIR/sandbox.tar.gz)"
 
+# Extract directly first: running tar under proot costs a ptrace stop on every
+# syscall and is the slowest part of first launch. The archm tarball has no
+# hardlinks, device nodes or xattrs, so Android's tar can unpack it as-is.
+# proot remains a fallback for devices that reject the direct path.
 set +e
-# Samsung devices doesn't like running system binaries under proot
-$PROOT $ARGS /system/bin/sh -c "$COMMAND"
+LD_PRELOAD="$(realpath "$NATIVE_LIB_DIR/liblink2symlink.so")"
+export LD_PRELOAD
+/system/bin/sh -c "$COMMAND"
 ret=$?
+unset LD_PRELOAD
 set -e
 
 if [ "$ret" -ne 0 ]; then
-    warn "PRoot extraction failed (exit code $ret), falling back to direct extraction..."
+    warn "Direct extraction failed (exit code $ret), retrying under proot..."
 
     set +e
-    LD_PRELOAD="$(realpath "$NATIVE_LIB_DIR/liblink2symlink.so")"
-    export LD_PRELOAD
-    /system/bin/sh -c "$COMMAND"
-    unset LD_PRELOAD
+    $PROOT $ARGS /system/bin/sh -c "$COMMAND"
     ret=$?
     set -e
 
