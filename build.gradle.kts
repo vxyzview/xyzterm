@@ -6,6 +6,7 @@ buildscript {
             force("com.google.guava:guava:33.7.2-jre")
             force("org.bouncycastle:bcprov-jdk18on:1.85")
             force("org.bouncycastle:bcpkix-jdk18on:1.85")
+            force("org.apache.commons:commons-lang3:3.18.0")
         }
     }
 }
