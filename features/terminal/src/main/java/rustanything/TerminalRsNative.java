@@ -27,6 +27,12 @@ public final class TerminalRsNative {
     public static native boolean n_matchesLogLevel(String line, int levelValue, String[] slot);
     public static native boolean n_shouldCaptureLog(String line, String[] slot);
     public static native boolean n_isNewer(String latest, String installed, String[] slot);
+    public static native String n_formatFileSize(long bytes, String[] slot);
+    public static native String n_formatNumberCompact(int number, String[] slot);
+    public static native int n_roundedSliderMin(int min, String[] slot);
+    public static native String n_parseHexArgb(String input, String[] slot);
+    public static native String n_hslLabel(float rf, float gf, float bf, String[] slot);
+    public static native String n_fromUrlName(String url, String[] slot);
 
     public static String call_detectBackupLayoutName(String entriesJoined) {
         try {
@@ -109,6 +115,72 @@ public final class TerminalRsNative {
         try {
             String[] slot = RustAnythingError.slot();
             boolean out = n_isNewer(latest, installed, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static String call_formatFileSize(long bytes) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            String out = n_formatFileSize(bytes, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static String call_formatNumberCompact(int number) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            String out = n_formatNumberCompact(number, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static int call_roundedSliderMin(int min) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            int out = n_roundedSliderMin(min, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static String call_parseHexArgb(String input) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            String out = n_parseHexArgb(input, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static String call_hslLabel(float rf, float gf, float bf) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            String out = n_hslLabel(rf, gf, bf, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static String call_fromUrlName(String url) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            String out = n_fromUrlName(url, slot);
             RustAnythingError.check(slot);
             return out;
         } catch (RustAnythingError e) {

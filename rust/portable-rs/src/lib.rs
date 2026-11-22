@@ -94,6 +94,30 @@ fn dispatch(name: &str, args: &[Value]) -> Result<Value, String> {
             let out = port::is_newer(arg(args, 0)?, arg(args, 1)?)?;
             Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
         }
+        "formatFileSize" => {
+            let out = port::format_file_size(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "formatNumberCompact" => {
+            let out = port::format_number_compact(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "roundedSliderMin" => {
+            let out = port::rounded_slider_min(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "parseHexArgb" => {
+            let out = port::parse_hex_argb(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "hslLabel" => {
+            let out = port::hsl_label(num(args, 0)?, num(args, 1)?, num(args, 2)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "fromUrlName" => {
+            let out = port::from_url_name(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
         _ => Err(format!("no function `{name}`")),
     }
 }
@@ -437,6 +461,122 @@ pub extern "system" fn Java_rustanything_TerminalRsNative_n_1isNewer<'local>(
         Err(message) => {
             report(&mut env, &slot, &message);
             0
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.formatFileSize(Long bytes)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_formatFileSize`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1formatFileSize<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    bytes: jni::sys::jlong,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jstring {
+    match run(|| port::format_file_size(bytes)) {
+        Ok(out) => java_string(&mut env, &out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.formatNumberCompact(Int number)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_formatNumberCompact`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1formatNumberCompact<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    number: jni::sys::jint,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jstring {
+    match run(|| port::format_number_compact(i64::from(number))) {
+        Ok(out) => java_string(&mut env, &out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.roundedSliderMin(Int min)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_roundedSliderMin`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1roundedSliderMin<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    min: jni::sys::jint,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jint {
+    match run(|| port::rounded_slider_min(i64::from(min))) {
+        Ok(out) => out as jni::sys::jint,
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            0
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.parseHexArgb(String input)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_parseHexArgb`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1parseHexArgb<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    input: jni::objects::JString<'local>,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jstring {
+    let Some(input) = string_arg(&mut env, &input) else {
+        return std::ptr::null_mut();
+    };
+    match run(|| port::parse_hex_argb(input)) {
+        Ok(out) => java_string(&mut env, &out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.hslLabel(Float rf, Float gf, Float bf)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_hslLabel`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1hslLabel<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    rf: jni::sys::jfloat,
+    gf: jni::sys::jfloat,
+    bf: jni::sys::jfloat,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jstring {
+    match run(|| port::hsl_label(f64::from(rf), f64::from(gf), f64::from(bf))) {
+        Ok(out) => java_string(&mut env, &out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.fromUrlName(String url)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_fromUrlName`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1fromUrlName<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    url: jni::objects::JString<'local>,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jstring {
+    let Some(url) = string_arg(&mut env, &url) else {
+        return std::ptr::null_mut();
+    };
+    match run(|| port::from_url_name(url)) {
+        Ok(out) => java_string(&mut env, &out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            std::ptr::null_mut()
         }
     }
 }

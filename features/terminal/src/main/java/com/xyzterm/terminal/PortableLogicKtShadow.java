@@ -181,4 +181,112 @@ public final class PortableLogicKtShadow {
         }
         return expected;
     }
+
+    @SuppressWarnings("unchecked")
+    public static String formatFileSize(long bytes) {
+        if (MODE.equals("new")) {
+            return (String) rustanything.TerminalRsNative.call_formatFileSize(bytes);
+        }
+        String expected = PortableLogicKt.formatFileSize(bytes);
+        if (!MODE.equals("old")) {
+            Object actual;
+            try {
+                actual = rustanything.TerminalRsNative.call_formatFileSize(bytes);
+            } catch (RuntimeException e) {
+                actual = e;
+            }
+            compare("formatFileSize", expected, actual);
+        }
+        return expected;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String formatNumberCompact(int number) {
+        if (MODE.equals("new")) {
+            return (String) rustanything.TerminalRsNative.call_formatNumberCompact(number);
+        }
+        String expected = PortableLogicKt.formatNumberCompact(number);
+        if (!MODE.equals("old")) {
+            Object actual;
+            try {
+                actual = rustanything.TerminalRsNative.call_formatNumberCompact(number);
+            } catch (RuntimeException e) {
+                actual = e;
+            }
+            compare("formatNumberCompact", expected, actual);
+        }
+        return expected;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static int roundedSliderMin(int min) {
+        if (MODE.equals("new")) {
+            return (Integer) rustanything.TerminalRsNative.call_roundedSliderMin(min);
+        }
+        int expected = PortableLogicKt.roundedSliderMin(min);
+        if (!MODE.equals("old")) {
+            Object actual;
+            try {
+                actual = rustanything.TerminalRsNative.call_roundedSliderMin(min);
+            } catch (RuntimeException e) {
+                actual = e;
+            }
+            compare("roundedSliderMin", expected, actual);
+        }
+        return expected;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String parseHexArgb(String input) {
+        if (MODE.equals("new")) {
+            return (String) rustanything.TerminalRsNative.call_parseHexArgb(input);
+        }
+        String expected = PortableLogicKt.parseHexArgb(input);
+        if (!MODE.equals("old")) {
+            Object actual;
+            try {
+                actual = rustanything.TerminalRsNative.call_parseHexArgb(input);
+            } catch (RuntimeException e) {
+                actual = e;
+            }
+            compare("parseHexArgb", expected, actual);
+        }
+        return expected;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String hslLabel(float rf, float gf, float bf) {
+        if (MODE.equals("new")) {
+            return (String) rustanything.TerminalRsNative.call_hslLabel(rf, gf, bf);
+        }
+        String expected = PortableLogicKt.hslLabel(rf, gf, bf);
+        if (!MODE.equals("old")) {
+            Object actual;
+            try {
+                actual = rustanything.TerminalRsNative.call_hslLabel(rf, gf, bf);
+            } catch (RuntimeException e) {
+                actual = e;
+            }
+            compare("hslLabel", expected, actual);
+        }
+        return expected;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String fromUrlName(String url) {
+        if (MODE.equals("new")) {
+            return (String) rustanything.TerminalRsNative.call_fromUrlName(url);
+        }
+        String expected = PortableLogicKt.fromUrlName(url);
+        if (!MODE.equals("old")) {
+            Object actual;
+            try {
+                actual = rustanything.TerminalRsNative.call_fromUrlName(url);
+            } catch (RuntimeException e) {
+                actual = e;
+            }
+            compare("fromUrlName", expected, actual);
+        }
+        return expected;
+    }
 }

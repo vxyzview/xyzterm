@@ -1,6 +1,7 @@
 package com.xyzterm.terminal
 
 import com.xyzterm.exec.UserBindings
+import kotlin.math.roundToInt
 
 /**
  * Adapters between the real app's pure logic and the generated rust-anything JNI shadow.
@@ -112,3 +113,70 @@ fun detectBackupLayoutViaRust(entries: List<String>): BackupLayout =
 fun nameSafeViaRust(id: String): String = PortableLogicKtShadow.nameSafe(id)
 
 fun isNewerViaRust(latest: String, installed: String): Boolean = PortableLogicKtShadow.isNewer(latest, installed)
+
+// Wave 2 adapters. Bodies are verbatim from core/main where the original is private or
+// returns an Android/Compose type; keep them in sync with Utils.kt, ValueSlider.kt,
+// ColorUtils.kt and SourceCodeProvider.kt.
+
+fun formatFileSize(bytes: Long): String = com.xyzterm.utils.formatFileSize(bytes)
+
+fun formatNumberCompact(number: Int): String = com.xyzterm.utils.formatNumberCompact(number)
+
+fun roundedSliderMin(min: Int): Int {
+    if (min <= 0) return 0
+    var magnitude = 1
+    while (magnitude <= min / 10) {
+        magnitude *= 10
+    }
+    return (min / magnitude) * magnitude
+}
+
+fun parseHexArgb(input: String): String {
+    val hex = input.trim().removePrefix("#")
+    if (hex.isEmpty()) return "null"
+    val argb =
+        when (hex.length) {
+            3 -> {
+                val r = hex[0].toString().repeat(2).toInt(16)
+                val g = hex[1].toString().repeat(2).toInt(16)
+                val b = hex[2].toString().repeat(2).toInt(16)
+                (0xFF000000.toInt() or (r shl 16) or (g shl 8) or b)
+            }
+            6 -> (0xFF000000.toInt() or hex.toInt(16))
+            8 -> hex.toLong(16).toInt()
+            else -> return "null"
+        }
+    return argb.toString()
+}
+
+fun hslLabel(rf: Float, gf: Float, bf: Float): String {
+    val max = maxOf(rf, gf, bf)
+    val min = minOf(rf, gf, bf)
+    val delta = max - min
+    var h = 0f
+    val l = (max + min) / 2f
+    val s = if (delta == 0f) 0f else delta / (1f - kotlin.math.abs(2f * l - 1f))
+    if (delta != 0f) {
+        h =
+            when (max) {
+                rf -> ((gf - bf) / delta) % 6f
+                gf -> ((bf - rf) / delta) + 2f
+                else -> ((rf - gf) / delta) + 4f
+            }
+        h /= 6f
+        if (h < 0f) h += 1f
+    }
+    return "${(h * 360f).roundToInt()}|${(s * 100f).roundToInt()}|${(l * 100f).roundToInt()}"
+}
+
+fun fromUrlName(url: String): String =
+    try {
+        when (java.net.URL(url).host) {
+            "github.com" -> "GitHub"
+            "gitlab.com" -> "GitLab"
+            "bitbucket.org" -> "BitBucket"
+            else -> "Other"
+        }
+    } catch (e: java.net.MalformedURLException) {
+        throw RuntimeException(e.message ?: "")
+    }

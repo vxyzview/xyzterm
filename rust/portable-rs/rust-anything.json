@@ -9,7 +9,7 @@
     {
       "name": "detectBackupLayoutName",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 35,
+      "line": 37,
       "params": [
         {
           "name": "entriesJoined",
@@ -30,7 +30,7 @@
     {
       "name": "nameSafe",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 47,
+      "line": 49,
       "params": [
         {
           "name": "id",
@@ -51,7 +51,7 @@
     {
       "name": "hasBinaryChars",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 58,
+      "line": 60,
       "params": [
         {
           "name": "text",
@@ -72,7 +72,7 @@
     {
       "name": "parseExtensions",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 75,
+      "line": 77,
       "params": [
         {
           "name": "input",
@@ -93,7 +93,7 @@
     {
       "name": "parseExtensionsJoined",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 80,
+      "line": 82,
       "params": [
         {
           "name": "input",
@@ -114,7 +114,7 @@
     {
       "name": "isSafeFileName",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 83,
+      "line": 85,
       "params": [
         {
           "name": "fileName",
@@ -135,7 +135,7 @@
     {
       "name": "matchesLogLevel",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 91,
+      "line": 93,
       "params": [
         {
           "name": "line",
@@ -163,7 +163,7 @@
     {
       "name": "shouldCaptureLog",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 112,
+      "line": 114,
       "params": [
         {
           "name": "line",
@@ -184,7 +184,7 @@
     {
       "name": "isNewer",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 168,
+      "line": 170,
       "params": [
         {
           "name": "latest",
@@ -208,6 +208,146 @@
       "uses_instanceof": false,
       "native_return": "boolean",
       "prototype": "com.xyzterm.terminal.PortableLogicKt.isNewer(String latest, String installed)"
+    },
+    {
+      "name": "formatFileSize",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 180,
+      "params": [
+        {
+          "name": "bytes",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long"
+        }
+      ],
+      "returns": "string",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "String",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.formatFileSize(Long bytes)"
+    },
+    {
+      "name": "formatNumberCompact",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 191,
+      "params": [
+        {
+          "name": "number",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "string",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "String",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.formatNumberCompact(Int number)"
+    },
+    {
+      "name": "roundedSliderMin",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 207,
+      "params": [
+        {
+          "name": "min",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.roundedSliderMin(Int min)"
+    },
+    {
+      "name": "parseHexArgb",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 220,
+      "params": [
+        {
+          "name": "input",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "string",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "String",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.parseHexArgb(String input)"
+    },
+    {
+      "name": "hslLabel",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 239,
+      "params": [
+        {
+          "name": "rf",
+          "ts_type": "number",
+          "optional": false,
+          "rest": false,
+          "native_type": "float"
+        },
+        {
+          "name": "gf",
+          "ts_type": "number",
+          "optional": false,
+          "rest": false,
+          "native_type": "float"
+        },
+        {
+          "name": "bf",
+          "ts_type": "number",
+          "optional": false,
+          "rest": false,
+          "native_type": "float"
+        }
+      ],
+      "returns": "string",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "String",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.hslLabel(Float rf, Float gf, Float bf)"
+    },
+    {
+      "name": "fromUrlName",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 266,
+      "params": [
+        {
+          "name": "url",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "string",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "String",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.fromUrlName(String url)"
     }
   ],
   "classes": [],
@@ -215,13 +355,13 @@
     {
       "name": "isWellFormedHost",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 41,
+      "line": 43,
       "reason": "kept on request"
     },
     {
       "name": "isValidGuestPath",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
-      "line": 44,
+      "line": 46,
       "reason": "kept on request"
     }
   ]

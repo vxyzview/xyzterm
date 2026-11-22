@@ -6,57 +6,93 @@ import java.util.List;
 public final class PortableLogicKt {
     private PortableLogicKt() {}
 
-    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.detectBackupLayoutName(String entriesJoined)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:35`). */
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.detectBackupLayoutName(String entriesJoined)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:37`). */
     @SuppressWarnings("unchecked")
     public static String detectBackupLayoutName(String entriesJoined) {
         return rustanything.TerminalRsNative.call_detectBackupLayoutName(entriesJoined);
     }
 
-    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.nameSafe(String id)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:47`). */
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.nameSafe(String id)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:49`). */
     @SuppressWarnings("unchecked")
     public static String nameSafe(String id) {
         return rustanything.TerminalRsNative.call_nameSafe(id);
     }
 
-    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.hasBinaryChars(String text)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:58`). */
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.hasBinaryChars(String text)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:60`). */
     @SuppressWarnings("unchecked")
     public static boolean hasBinaryChars(String text) {
         return rustanything.TerminalRsNative.call_hasBinaryChars(text);
     }
 
-    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.parseExtensions(String input)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:75`). */
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.parseExtensions(String input)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:77`). */
     @SuppressWarnings("unchecked")
     public static List<String> parseExtensions(String input) {
         return rustanything.TerminalRsNative.call_parseExtensions(input);
     }
 
-    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.parseExtensionsJoined(String input)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:80`). */
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.parseExtensionsJoined(String input)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:82`). */
     @SuppressWarnings("unchecked")
     public static String parseExtensionsJoined(String input) {
         return rustanything.TerminalRsNative.call_parseExtensionsJoined(input);
     }
 
-    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.isSafeFileName(String fileName)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:83`). */
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.isSafeFileName(String fileName)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:85`). */
     @SuppressWarnings("unchecked")
     public static boolean isSafeFileName(String fileName) {
         return rustanything.TerminalRsNative.call_isSafeFileName(fileName);
     }
 
-    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.matchesLogLevel(String line, Int levelValue)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:91`). */
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.matchesLogLevel(String line, Int levelValue)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:93`). */
     @SuppressWarnings("unchecked")
     public static boolean matchesLogLevel(String line, int levelValue) {
         return rustanything.TerminalRsNative.call_matchesLogLevel(line, levelValue);
     }
 
-    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.shouldCaptureLog(String line)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:112`). */
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.shouldCaptureLog(String line)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:114`). */
     @SuppressWarnings("unchecked")
     public static boolean shouldCaptureLog(String line) {
         return rustanything.TerminalRsNative.call_shouldCaptureLog(line);
     }
 
-    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.isNewer(String latest, String installed)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:168`). */
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.isNewer(String latest, String installed)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:170`). */
     @SuppressWarnings("unchecked")
     public static boolean isNewer(String latest, String installed) {
         return rustanything.TerminalRsNative.call_isNewer(latest, installed);
+    }
+
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.formatFileSize(Long bytes)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:180`). */
+    @SuppressWarnings("unchecked")
+    public static String formatFileSize(long bytes) {
+        return rustanything.TerminalRsNative.call_formatFileSize(bytes);
+    }
+
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.formatNumberCompact(Int number)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:191`). */
+    @SuppressWarnings("unchecked")
+    public static String formatNumberCompact(int number) {
+        return rustanything.TerminalRsNative.call_formatNumberCompact(number);
+    }
+
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.roundedSliderMin(Int min)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:207`). */
+    @SuppressWarnings("unchecked")
+    public static int roundedSliderMin(int min) {
+        return rustanything.TerminalRsNative.call_roundedSliderMin(min);
+    }
+
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.parseHexArgb(String input)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:220`). */
+    @SuppressWarnings("unchecked")
+    public static String parseHexArgb(String input) {
+        return rustanything.TerminalRsNative.call_parseHexArgb(input);
+    }
+
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.hslLabel(Float rf, Float gf, Float bf)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:239`). */
+    @SuppressWarnings("unchecked")
+    public static String hslLabel(float rf, float gf, float bf) {
+        return rustanything.TerminalRsNative.call_hslLabel(rf, gf, bf);
+    }
+
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.fromUrlName(String url)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:266`). */
+    @SuppressWarnings("unchecked")
+    public static String fromUrlName(String url) {
+        return rustanything.TerminalRsNative.call_fromUrlName(url);
     }
 }

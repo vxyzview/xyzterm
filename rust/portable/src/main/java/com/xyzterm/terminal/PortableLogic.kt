@@ -263,12 +263,15 @@ fun hslLabel(rf: Float, gf: Float, bf: Float): String {
 }
 
 /** Source host detection (verbatim from SourceCodeProvider.fromUrl). */
-fun fromUrlName(url: String): String {
-    val hostName = java.net.URL(url).host
-    return when (hostName) {
-        "github.com" -> "GitHub"
-        "gitlab.com" -> "GitLab"
-        "bitbucket.org" -> "BitBucket"
-        else -> "Other"
+fun fromUrlName(url: String): String =
+    try {
+        val hostName = java.net.URL(url).host
+        when (hostName) {
+            "github.com" -> "GitHub"
+            "gitlab.com" -> "GitLab"
+            "bitbucket.org" -> "BitBucket"
+            else -> "Other"
+        }
+    } catch (e: java.net.MalformedURLException) {
+        throw RuntimeException(e.message ?: "")
     }
-}

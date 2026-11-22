@@ -33,7 +33,13 @@
         "isSafeFileName",
         "matchesLogLevel",
         "shouldCaptureLog",
-        "isNewer"
+        "isNewer",
+        "formatFileSize",
+        "formatNumberCompact",
+        "roundedSliderMin",
+        "parseHexArgb",
+        "hslLabel",
+        "fromUrlName"
       ]
     }
   ]
