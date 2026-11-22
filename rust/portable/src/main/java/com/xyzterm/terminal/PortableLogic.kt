@@ -1,5 +1,7 @@
 package com.xyzterm.terminal
 
+import kotlin.math.roundToInt
+
 /**
  * Faithful extractions of the pure, platform-independent logic of xyzterm.
  *
@@ -172,4 +174,101 @@ fun isNewer(latest: String, installed: String): Boolean {
     val a = parse(latest) ?: return false
     val b = parse(installed) ?: return true
     return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
+}
+
+/** File size formatting (verbatim from Utils.kt:formatFileSize). */
+fun formatFileSize(bytes: Long): String {
+    if (bytes < 1024) return "$bytes B"
+    val kb = bytes / 1024.0
+    if (kb < 1024) return String.format(java.util.Locale.getDefault(), "%.1f KB", kb)
+    val mb = kb / 1024.0
+    if (mb < 1024) return String.format(java.util.Locale.getDefault(), "%.1f MB", mb)
+    val gb = mb / 1024.0
+    return String.format(java.util.Locale.getDefault(), "%.1f GB", gb)
+}
+
+/** Compact number formatting (verbatim from Utils.kt:formatNumberCompact). */
+fun formatNumberCompact(number: Int): String {
+    if (number < 1000) return number.toString()
+
+    val suffix = arrayOf("k", "m", "b")
+    var value = number.toDouble()
+    var index = -1
+
+    while (value >= 1000 && index < suffix.lastIndex) {
+        value /= 1000
+        index++
+    }
+
+    return String.format("%.1f%s", value, suffix[index]).replace(".0", "")
+}
+
+/** Slider rounding (verbatim from ValueSlider.kt:roundedSliderMin). */
+fun roundedSliderMin(min: Int): Int {
+    if (min <= 0) return 0
+
+    var magnitude = 1
+    while (magnitude <= min / 10) {
+        magnitude *= 10
+    }
+
+    val rounded = (min / magnitude) * magnitude
+    return rounded
+}
+
+/** Hex colour parsing (verbatim from ColorUtils.kt:parseHex; ARGB int as decimal string). */
+fun parseHexArgb(input: String): String {
+    val hex = input.trim().removePrefix("#")
+    if (hex.isEmpty()) return "null"
+    val argb =
+        when (hex.length) {
+            3 -> {
+                val r = hex[0].toString().repeat(2).toInt(16)
+                val g = hex[1].toString().repeat(2).toInt(16)
+                val b = hex[2].toString().repeat(2).toInt(16)
+                (0xFF000000.toInt() or (r shl 16) or (g shl 8) or b)
+            }
+            6 -> (0xFF000000.toInt() or hex.toInt(16))
+            8 -> hex.toLong(16).toInt()
+            else -> return "null"
+        }
+    return argb.toString()
+}
+
+/** RGB to HSL label (verbatim from ColorUtils.kt:rgbToHsl + toHsl). */
+fun hslLabel(rf: Float, gf: Float, bf: Float): String {
+    val max = maxOf(rf, gf, bf)
+    val min = minOf(rf, gf, bf)
+    val delta = max - min
+
+    var h = 0f
+    val l = (max + min) / 2f
+    val s = if (delta == 0f) 0f else delta / (1f - kotlin.math.abs(2f * l - 1f))
+
+    if (delta != 0f) {
+        h =
+            when (max) {
+                rf -> ((gf - bf) / delta) % 6f
+                gf -> ((bf - rf) / delta) + 2f
+                else -> ((rf - gf) / delta) + 4f
+            }
+        h /= 6f
+        if (h < 0f) h += 1f
+    }
+
+    val hh = (h * 360f).roundToInt()
+    val ss = (s * 100f).roundToInt()
+    val ll = (l * 100f).roundToInt()
+    return "$hh|$ss|$ll"
+}
+
+/** Source host detection (verbatim from SourceCodeProvider.fromUrl). */
+fun fromUrlName(url: String): String {
+    val hostName = java.net.URL(url).host
+    return when (hostName) {
+        "github.com" -> "GitHub"
+        "gitlab.com" -> "GitLab"
+        "bitbucket.org" -> "BitBucket"
+        else -> "Other"
+    }
 }
