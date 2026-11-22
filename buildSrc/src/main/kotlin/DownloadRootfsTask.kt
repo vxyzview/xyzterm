@@ -115,7 +115,7 @@ abstract class DownloadRootfsTask : DefaultTask() {
                     }
                 }
             }
-            val body = manifest.substringAfter('\n')
+            val body = manifest.toString().substringAfter('\n')
             File(assets, "rootfs-$abi.tsv").writeText("B\t$totalBytes\n$body")
             logger.lifecycle("archm $abi: $entryCount entries, $totalBytes bytes")
             File(assets, "archm-$abi.bin").delete()
