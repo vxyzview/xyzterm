@@ -1,13 +1,28 @@
 package com.xyzterm.terminal
 
-private const val ROOTFS_BASE = "https://github.com/Xed-Editor/Karbon-PackagesX/releases/download/ubuntu"
+private const val ARCHM_TAG = "2026.11.21"
+private const val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
 
-const val ROOTFS_ARM = "$ROOTFS_BASE/ubuntu-base-24.04.3-base-armhf.tar.gz"
-const val ROOTFS_ARM64 = "$ROOTFS_BASE/ubuntu-base-24.04.3-base-arm64.tar.gz"
-const val ROOTFS_X64 = "$ROOTFS_BASE/ubuntu-base-24.04.3-base-amd64.tar.gz"
+data class ArchmAsset(val name: String, val url: String, val sha256: String)
 
-// SHA-256 of each release asset (from the GitHub release API). When the URL
-// constants are bumped to a new rootfs release, update these alongside them.
-const val ROOTFS_ARM_SHA256 = "747909a2f81d816fc6252f076757fcf6bd75a55f848a1c049ee79c0e88c0b9a0"
-const val ROOTFS_ARM64_SHA256 = "7b2dced6dd56ad5e4a813fa25c8de307b655fdabc6ea9213175a92c48dabb048"
-const val ROOTFS_X64_SHA256 = "6bc2cde3930ad088b3bb46fa45279e96d25bc3810f209850ecbe4722711874f9"
+val ARCHM_ARM64 =
+    ArchmAsset(
+        name = "archm-arm64.tar.gz",
+        url = "$ARCHM_BASE/archm-arm64.tar.gz",
+        sha256 = "f1a7c3c710592d1d9484662c9474b92c17bf27f3c517c596ee5c094011369d0f",
+    )
+
+val ARCHM_ARM =
+    ArchmAsset(
+        name = "archm-arm.tar.gz",
+        url = "$ARCHM_BASE/archm-arm.tar.gz",
+        sha256 = "5bcaa84710df04bbd38c682a32b3247bcae8f9738fc1851e33b1535a693e6347",
+    )
+
+/** archm ships only arm64 and armv7; x86 devices have no rootfs available. */
+fun archmAssetForAbi(abis: Array<String>): ArchmAsset? =
+    when {
+        abis.any { it.contains("arm64-v8a") } -> ARCHM_ARM64
+        abis.any { it.contains("armeabi-v7a") } -> ARCHM_ARM
+        else -> null
+    }

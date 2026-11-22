@@ -49,3 +49,7 @@ graphify-out/
 *.jks
 signing.properties
 *signing*.properties
+
+# Rootfs tarballs are downloaded by the build, never committed
+features/terminal/src/main/assets/terminal/archm-*.tar.gz
+features/terminal/src/main/assets/terminal/archm-*.tar.gz.part

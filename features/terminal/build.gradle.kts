@@ -1,3 +1,8 @@
+import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
+import java.security.MessageDigest
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
@@ -25,6 +30,52 @@ android {
     }
     kotlin { jvmToolchain(21) }
 }
+
+// Bundle the pinned archm rootfs into the APK so first launch never downloads
+// it. Assets are fetched at build time and verified against the release's
+// .sha256; git never stores the ~200 MB binaries.
+private const val ARCHM_TAG = "2026.11.21"
+private const val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
+
+private fun sha256(file: File): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    file.inputStream().use { input ->
+        val buffer = ByteArray(64 * 1024)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) break
+            digest.update(buffer, 0, read)
+        }
+    }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
+val downloadRootfs by
+    tasks.registering {
+        group = "build"
+        description = "Downloads and verifies the archm rootfs tarballs into the app assets."
+        val abis = listOf("arm64", "arm")
+        val assetsDir = layout.projectDirectory.dir("src/main/assets/terminal").asFile
+        inputs.property("archmTag", ARCHM_TAG)
+        doLast {
+            for (abi in abis) {
+                val name = "archm-$abi.tar.gz"
+                val expected = URL("$ARCHM_BASE/$name.sha256").readText().trim().split(Regex("\\s+")).first()
+                val target = File(assetsDir, name)
+                if (target.exists() && sha256(target) == expected) continue
+                target.parentFile.mkdirs()
+                val partial = File(target.parentFile, "$name.part")
+                URL("$ARCHM_BASE/$name").openStream().use { input ->
+                    FileOutputStream(partial).use { output -> input.copyTo(output) }
+                }
+                val actual = sha256(partial)
+                check(actual == expected) { "SHA-256 mismatch for $name: expected $expected, got $actual" }
+                check(partial.renameTo(target)) { "Failed to move $name into assets" }
+            }
+        }
+    }
+
+tasks.named("preBuild") { dependsOn(downloadRootfs) }
 
 dependencies {
     implementation(project(":core:main"))
