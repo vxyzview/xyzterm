@@ -116,8 +116,8 @@ jobs:
         run: |
           echo "Bundled terminal assets:"
           unzip -l app/xyzterm-release.apk | grep "assets/terminal/" || true
-          unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm64.tar.gz"
-          unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm.tar.gz"
+          unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm64.bin"
+          unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm.bin"
 
       - name: Extract version
         id: version

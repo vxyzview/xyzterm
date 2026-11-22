@@ -34,7 +34,7 @@ android {
 private val ARCHM_TAG = "2026.11.21"
 private val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
 private val ARCHM_SHA256: Map<String, String> =
-    Regex("name = \"archm-(arm64|arm)\\.tar\\.gz\",[\\s\\S]*?sha256 = \"([0-9a-f]{64})\"")
+    Regex("urlName = \"archm-(arm64|arm)\\.tar\\.gz\",[\\s\\S]*?sha256 = \"([0-9a-f]{64})\"")
         .findAll(File(rootDir, "features/terminal/src/main/java/com/xyzterm/terminal/Constants.kt").readText())
         .associate { it.groupValues[1] to it.groupValues[2] }
 

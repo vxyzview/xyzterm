@@ -3,18 +3,25 @@ package com.xyzterm.terminal
 private const val ARCHM_TAG = "2026.11.21"
 private const val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
 
-data class ArchmAsset(val name: String, val url: String, val sha256: String)
+/**
+ * [name] is the APK asset name. It deliberately avoids a .gz suffix: aapt
+ * decompresses .gz assets and strips the extension, which breaks both the
+ * asset lookup and the pinned SHA-256. [urlName] is the upstream release name.
+ */
+data class ArchmAsset(val name: String, val urlName: String, val url: String, val sha256: String)
 
 val ARCHM_ARM64 =
     ArchmAsset(
-        name = "archm-arm64.tar.gz",
+        name = "archm-arm64.bin",
+        urlName = "archm-arm64.tar.gz",
         url = "$ARCHM_BASE/archm-arm64.tar.gz",
         sha256 = "f1a7c3c710592d1d9484662c9474b92c17bf27f3c517c596ee5c094011369d0f",
     )
 
 val ARCHM_ARM =
     ArchmAsset(
-        name = "archm-arm.tar.gz",
+        name = "archm-arm.bin",
+        urlName = "archm-arm.tar.gz",
         url = "$ARCHM_BASE/archm-arm.tar.gz",
         sha256 = "5bcaa84710df04bbd38c682a32b3247bcae8f9738fc1851e33b1535a693e6347",
     )

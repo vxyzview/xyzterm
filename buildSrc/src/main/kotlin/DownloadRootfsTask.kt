@@ -27,18 +27,21 @@ abstract class DownloadRootfsTask : DefaultTask() {
         val base = baseUrl.get()
         val expectedDigests = digests.get()
         for (abi in listOf("arm64", "arm")) {
-            val name = "archm-$abi.tar.gz"
-            val expected = expectedDigests[abi] ?: error("No pinned SHA-256 for $name in Constants.kt")
-            val target = File(assets, name)
+            val remoteName = "archm-$abi.tar.gz"
+            // .gz assets are transparently decompressed by aapt; store the same
+            // gzip bytes under a neutral name so the pinned digest still matches.
+            val assetName = "archm-$abi.bin"
+            val expected = expectedDigests[abi] ?: error("No pinned SHA-256 for $remoteName in Constants.kt")
+            val target = File(assets, assetName)
             if (target.exists() && sha256(target) == expected) continue
             assets.mkdirs()
-            val partial = File(assets, "$name.part")
-            URL("$base/$name").openStream().use { input ->
+            val partial = File(assets, "$assetName.part")
+            URL("$base/$remoteName").openStream().use { input ->
                 FileOutputStream(partial).use { output -> input.copyTo(output) }
             }
             val actual = sha256(partial)
-            check(actual == expected) { "SHA-256 mismatch for $name: expected $expected, got $actual" }
-            check(partial.renameTo(target)) { "Failed to move $name into assets" }
+            check(actual == expected) { "SHA-256 mismatch for $remoteName: expected $expected, got $actual" }
+            check(partial.renameTo(target)) { "Failed to move $assetName into assets" }
         }
     }
 }
