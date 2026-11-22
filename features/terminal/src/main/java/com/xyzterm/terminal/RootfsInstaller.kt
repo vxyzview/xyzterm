@@ -31,7 +31,7 @@ internal fun parseRootfsManifest(text: String): RootfsManifest {
             "L",
             "F" -> {
                 val path = parts.getOrNull(1) ?: return@forEach
-                val type = parts[0]
+                val type = parts[0].lowercase()
                 val mode = parts.getOrNull(2)?.toIntOrNull() ?: 0
                 val size = if (type == "F") parts.getOrNull(3)?.toLongOrNull() ?: 0L else 0L
                 val target = if (type == "L") parts.getOrNull(3) else null
