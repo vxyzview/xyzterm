@@ -15,6 +15,12 @@ subprojects {
     configurations.configureEach {
         resolutionStrategy {
             force("org.apache.commons:commons-lang3:3.18.0")
+            // Transitive build-time deps pinned below patched versions:
+            // GHSA-xxph-c9ww-hj94, GHSA-qp49-qgx5-5m26, GHSA-9pwp-9qqc-pr26,
+            // GHSA-9rm7-3qhh-h2mc.
+            force("com.google.guava:guava:33.7.2-jre")
+            force("org.bouncycastle:bcprov-jdk18on:1.85")
+            force("com.squareup.wire:wire-runtime:6.4.5")
         }
     }
 
