@@ -44,7 +44,8 @@ val downloadRootfs by
         description = "Downloads and verifies the archm rootfs tarballs into the app assets."
         baseUrl.set(ARCHM_BASE)
         digests.set(ARCHM_SHA256)
-        rootAssetsDir.set(rootProject.layout.projectDirectory.dir("app/src"))
+        armAssetsDir.set(rootProject.layout.projectDirectory.dir("app/src/arm/assets/terminal"))
+        arm64AssetsDir.set(rootProject.layout.projectDirectory.dir("app/src/arm64/assets/terminal"))
     }
 
 tasks.named("preBuild") { dependsOn(downloadRootfs) }

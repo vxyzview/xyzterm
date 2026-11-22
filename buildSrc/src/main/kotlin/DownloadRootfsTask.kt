@@ -19,11 +19,12 @@ abstract class DownloadRootfsTask : DefaultTask() {
 
     @get:Input abstract val digests: MapProperty<String, String>
 
-    @get:OutputDirectory abstract val rootAssetsDir: DirectoryProperty
+    @get:OutputDirectory abstract val armAssetsDir: DirectoryProperty
+    @get:OutputDirectory abstract val arm64AssetsDir: DirectoryProperty
 
     @TaskAction
     fun download() {
-        val root = rootAssetsDir.get().asFile
+        val dirs = mapOf("arm" to armAssetsDir.get().asFile, "arm64" to arm64AssetsDir.get().asFile)
         val base = baseUrl.get()
         val expectedDigests = digests.get()
         for (abi in listOf("arm64", "arm")) {
@@ -33,7 +34,7 @@ abstract class DownloadRootfsTask : DefaultTask() {
             val assetName = "archm-$abi.bin"
             val expected = expectedDigests[abi] ?: error("No pinned SHA-256 for $remoteName in Constants.kt")
             // Each flavor gets its own asset tree so only one rootfs is packaged.
-            val assets = File(root, "$abi/assets/terminal")
+            val assets = dirs.getValue(abi)
             val target = File(assets, assetName)
             if (target.exists() && sha256(target) == expected) continue
             assets.mkdirs()
