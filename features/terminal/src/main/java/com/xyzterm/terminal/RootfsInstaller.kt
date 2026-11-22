@@ -34,7 +34,7 @@ object RootfsInstaller {
         context: Context,
         asset: ArchmAsset,
         root: File,
-        onProgress: (copied: Long, total: Long) -> Unit,
+        onProgress: suspend (copied: Long, total: Long) -> Unit,
     ) =
         withContext(Dispatchers.IO) {
             val manifestName = "terminal/rootfs-${asset.abi}.json"
