@@ -1,7 +1,4 @@
 import java.io.File
-import java.io.FileOutputStream
-import java.net.URL
-import java.security.MessageDigest
 
 plugins {
     alias(libs.plugins.android.library)
@@ -34,8 +31,8 @@ android {
 }
 
 // Bundle the pinned archm rootfs into the APK so first launch never downloads
-// it. Assets are fetched at build time and verified; git never stores the
-// ~200 MB binaries. Constants.kt is the single source of truth for the digests.
+// it. The task lives in buildSrc so it stays compatible with the configuration
+// cache; Constants.kt remains the single source of truth for the digests.
 private val ARCHM_TAG = "2026.11.21"
 private val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
 private val ARCHM_SHA256: Map<String, String> =
@@ -43,42 +40,14 @@ private val ARCHM_SHA256: Map<String, String> =
         .findAll(File(rootDir, "features/terminal/src/main/java/com/xyzterm/terminal/Constants.kt").readText())
         .associate { it.groupValues[1] to it.groupValues[2] }
 
-private fun sha256(file: File): String {
-    val digest = MessageDigest.getInstance("SHA-256")
-    file.inputStream().use { input ->
-        val buffer = ByteArray(64 * 1024)
-        while (true) {
-            val read = input.read(buffer)
-            if (read < 0) break
-            digest.update(buffer, 0, read)
-        }
+val downloadRootfs by
+    tasks.registering(DownloadRootfsTask::class) {
+        group = "build"
+        description = "Downloads and verifies the archm rootfs tarballs into the app assets."
+        baseUrl.set(ARCHM_BASE)
+        digests.set(ARCHM_SHA256)
+        assetsDir.set(layout.projectDirectory.dir("src/main/assets/terminal"))
     }
-    return digest.digest().joinToString("") { "%02x".format(it) }
-}
-
-val downloadRootfs by tasks.registering {
-    group = "build"
-    description = "Downloads and verifies the archm rootfs tarballs into the app assets."
-    val abis = listOf("arm64", "arm")
-    val assetsDir = layout.projectDirectory.dir("src/main/assets/terminal").asFile
-    inputs.property("archmTag", ARCHM_TAG)
-    doLast {
-        for (abi in abis) {
-            val name = "archm-$abi.tar.gz"
-            val expected = ARCHM_SHA256[abi] ?: error("No pinned SHA-256 for $name in Constants.kt")
-            val target = File(assetsDir, name)
-            if (target.exists() && sha256(target) == expected) continue
-            target.parentFile.mkdirs()
-            val partial = File(target.parentFile, "$name.part")
-            URL("$ARCHM_BASE/$name").openStream().use { input ->
-                FileOutputStream(partial).use { output -> input.copyTo(output) }
-            }
-            val actual = sha256(partial)
-            check(actual == expected) { "SHA-256 mismatch for $name: expected $expected, got $actual" }
-            check(partial.renameTo(target)) { "Failed to move $name into assets" }
-        }
-    }
-}
 
 tasks.named("preBuild") { dependsOn(downloadRootfs) }
 

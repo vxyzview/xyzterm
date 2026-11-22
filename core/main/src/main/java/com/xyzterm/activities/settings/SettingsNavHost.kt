@@ -1,7 +1,8 @@
 package com.xyzterm.activities.settings
 
-import androidx.compose.animation.core.isReduceMotionEnabled
+import android.provider.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,7 +20,11 @@ import com.xyzterm.settings.theme.ThemeScreen
 
 @Composable
 fun SettingsNavHost(navController: NavHostController, activity: SettingsActivity) {
-    val reduceMotion = isReduceMotionEnabled()
+    // System "Remove animations" setting; avoid tying this to an unstable
+    // Compose animation API.
+    val context = LocalContext.current
+    val reduceMotion =
+        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SECONDS, 1f) == 0f
     NavHost(
         navController = navController,
         startDestination = SettingsRoutes.Settings.route,
