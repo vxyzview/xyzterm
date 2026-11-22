@@ -178,8 +178,9 @@ jobs:
           ### Requirements and install
           - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`
           - **x86_64 is not supported** — archm publishes no x86_64 rootfs
-          - Download the APK for your device: `xyzterm-1.0.0-arm64.apk` (arm64) or `xyzterm-1.0.0-arm.apk` (armv7), install it, then open the app. The bundled rootfs extracts automatically on first launch.
-          - The APK is large (~400 MB) because it contains both rootfs images. This may exceed F-Droid's size limits; F-Droid build metadata is included in the repo.
+          - Download the APK for your device: `xyzterm-1.0.0-arm64.apk` (arm64) or `xyzterm-1.0.0-arm.apk` (armv7), install it, then open the app.
+          - The rootfs is unpacked during the build from the latest verified archm release; the app copies it in place on first launch without running tar or proot.
+          - Each APK is around 200 MB (one rootfs). This may still exceed F-Droid's size limits; F-Droid build metadata is included in the repo.
 
           ### Verification
           - The rootfs images are pinned to SHA-256 `f1a7c3c710592d1d9484662c9474b92c17bf27f3c517c596ee5c094011369d0f` (arm64) and `5bcaa84710df04bbd38c682a32b3247bcae8f9738fc1851e33b1535a693e6347` (arm).
@@ -187,7 +188,7 @@ jobs:
           - Releases are signed with the repository's persistent signing key; see `docs/CONTRIBUTING.md` for reproducible-build steps.
 
           ### Known limitations
-          - First launch takes time while ~200 MB of rootfs is staged and extracted.
+          - First launch copies the prepared rootfs into app storage once; this is a short, progress-tracked step.
           - Existing installs that already contain an Ubuntu sandbox keep that userspace until the app data is removed and reinstalled.
           - Some localized strings still fall back to English.
 

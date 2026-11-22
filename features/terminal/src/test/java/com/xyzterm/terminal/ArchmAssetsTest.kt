@@ -22,12 +22,12 @@ class ArchmAssetsTest {
 
     @Test
     fun abi_specific_apk_uses_its_bundled_asset() {
-        assertEquals(ARCHM_ARM, pickRootfsAsset(ARCHM_ARM, setOf(ARCHM_ARM.name)))
+        assertEquals(ARCHM_ARM, pickRootfsAsset(ARCHM_ARM, setOf("rootfs-arm.zip", "rootfs-arm.json")))
     }
 
     @Test
     fun wrong_abi_apk_falls_back_to_the_bundled_asset() {
-        assertEquals(ARCHM_ARM64, pickRootfsAsset(ARCHM_ARM, setOf(ARCHM_ARM64.name)))
+        assertEquals(ARCHM_ARM64, pickRootfsAsset(ARCHM_ARM, setOf("rootfs-arm64.zip")))
     }
 
     @Test

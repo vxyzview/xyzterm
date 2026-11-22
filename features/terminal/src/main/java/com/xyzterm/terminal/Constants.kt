@@ -1,29 +1,13 @@
 package com.xyzterm.terminal
 
-private const val ARCHM_TAG = "2026.11.21"
-private const val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
-
 /**
- * [name] is the APK asset name. It deliberately avoids a .gz suffix: aapt decompresses .gz assets and strips the
- * extension, which breaks both the asset lookup and the pinned SHA-256. [urlName] is the upstream release name.
+ * [name] is the legacy tarball asset name. New builds ship a pre-extracted
+ * tree as rootfs-<abi>.zip / .json instead; [abi] selects those assets.
  */
-data class ArchmAsset(val name: String, val urlName: String, val url: String, val sha256: String)
+data class ArchmAsset(val abi: String, val name: String)
 
-val ARCHM_ARM64 =
-    ArchmAsset(
-        name = "archm-arm64.bin",
-        urlName = "archm-arm64.tar.gz",
-        url = "$ARCHM_BASE/archm-arm64.tar.gz",
-        sha256 = "f1a7c3c710592d1d9484662c9474b92c17bf27f3c517c596ee5c094011369d0f",
-    )
-
-val ARCHM_ARM =
-    ArchmAsset(
-        name = "archm-arm.bin",
-        urlName = "archm-arm.tar.gz",
-        url = "$ARCHM_BASE/archm-arm.tar.gz",
-        sha256 = "5bcaa84710df04bbd38c682a32b3247bcae8f9738fc1851e33b1535a693e6347",
-    )
+val ARCHM_ARM64 = ArchmAsset(abi = "arm64", name = "archm-arm64.bin")
+val ARCHM_ARM = ArchmAsset(abi = "arm", name = "archm-arm.bin")
 
 /** archm ships only arm64 and armv7; x86 devices have no rootfs available. */
 fun archmAssetForAbi(abis: Array<String>): ArchmAsset? =
@@ -34,9 +18,12 @@ fun archmAssetForAbi(abis: Array<String>): ArchmAsset? =
     }
 
 /** Pick an asset that is actually bundled in this ABI-specific APK. */
-fun pickRootfsAsset(preferred: ArchmAsset?, available: Set<String>): ArchmAsset? =
-    when {
+fun pickRootfsAsset(preferred: ArchmAsset?, available: Set<String>): ArchmAsset? {
+    fun bundled(asset: ArchmAsset) =
+        "rootfs-${asset.abi}.zip" in available || asset.name in available
+    return when {
         preferred == null -> null
-        preferred.name in available -> preferred
-        else -> listOf(ARCHM_ARM64, ARCHM_ARM).firstOrNull { it.name in available }
+        bundled(preferred) -> preferred
+        else -> listOf(ARCHM_ARM64, ARCHM_ARM).firstOrNull(::bundled)
     }
+}

@@ -116,9 +116,10 @@ jobs:
             apk=$(find "app/build/outputs/apk/$abi/release" -name '*.apk' | head -1)
             echo "=== $apk ==="
             unzip -l "$apk" | grep "assets/terminal/" || true
-            unzip -l "$apk" | grep -q "assets/terminal/archm-$abi.bin"
+            unzip -l "$apk" | grep -q "assets/terminal/rootfs-$abi.zip"
+            unzip -l "$apk" | grep -q "assets/terminal/rootfs-$abi.json"
             other=$([ "$abi" = arm ] && echo arm64 || echo arm)
-            if unzip -l "$apk" | grep -q "assets/terminal/archm-$other.bin"; then
+            if unzip -l "$apk" | grep -q "assets/terminal/rootfs-$other.zip"; then
               echo "Wrong rootfs bundled in $apk" >&2
               exit 1
             fi

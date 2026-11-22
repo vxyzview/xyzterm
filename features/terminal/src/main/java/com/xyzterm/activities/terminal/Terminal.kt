@@ -60,6 +60,7 @@ import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.exec.isTerminalInstalled
 import com.xyzterm.file.FilePermission
 import com.xyzterm.file.child
+import com.xyzterm.file.sandboxDir
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
@@ -71,16 +72,13 @@ import com.xyzterm.terminal.TerminalScreen
 import com.xyzterm.terminal.archmAssetForAbi
 import com.xyzterm.terminal.changeSession
 import com.xyzterm.terminal.getNextStage
+import com.xyzterm.terminal.RootfsInstaller
 import com.xyzterm.terminal.pickRootfsAsset
 import com.xyzterm.terminal.terminalView
 import com.xyzterm.theme.XyzTheme
 import com.xyzterm.utils.AppDialogHost
-import com.xyzterm.utils.getTempDir
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 import java.lang.ref.WeakReference
-import java.security.MessageDigest
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -368,53 +366,28 @@ class Terminal : AppCompatActivity() {
             }
 
             try {
+                if (!RootfsInstaller.isAvailable(context, asset)) {
+                    throw IllegalStateException("Bundled rootfs is missing from this APK")
+                }
                 withContext(Dispatchers.IO) {
-                    val output = getTempDir().child("sandbox.tar.gz")
-                    // Stored or deflated assets both stream to the same staged
-                    // gzip file; openFd just gives a known length when available.
-                    val descriptor = runCatching { context.assets.openFd("terminal/${asset.name}") }.getOrNull()
-                    val input: InputStream =
-                        descriptor?.createInputStream() ?: context.assets.open("terminal/${asset.name}")
-                    val localTotal = descriptor?.length ?: -1L
-                    withContext(Dispatchers.Main) { totalBytes = localTotal }
-                    var copied = 0L
-                    var lastCopyEmit = 0L
-                    input.use { stream ->
-                        FileOutputStream(output).use { fileOut ->
-                            val buffer = ByteArray(64 * 1024)
-                            while (true) {
-                                val read = stream.read(buffer)
-                                if (read < 0) break
-                                fileOut.write(buffer, 0, read)
-                                copied += read
-                                val now = System.currentTimeMillis()
-                                if (now - lastCopyEmit >= 250L) {
-                                    lastCopyEmit = now
-                                    withContext(Dispatchers.Main) {
-                                        downloadedBytes = copied
-                                        progressText =
-                                            if (localTotal > 0) {
-                                                "${strings.installing.getString()} ${copied * 100 / localTotal}%"
-                                            } else {
-                                                strings.installing.getString()
-                                            }
-                                    }
+                    RootfsInstaller.install(context, asset, sandboxDir()) { copied, total ->
+                        withContext(Dispatchers.Main) {
+                            downloadedBytes = copied
+                            totalBytes = total
+                            progressText =
+                                if (total > 0) {
+                                    "${strings.installing.getString()} ${copied * 100 / total}%"
+                                } else {
+                                    strings.installing.getString()
                                 }
-                            }
                         }
                     }
-                    withContext(Dispatchers.Main) { downloadedBytes = copied }
-                    descriptor?.close()
-
-                    if (!sha256Matches(output, asset.sha256)) {
-                        output.delete()
-                        throw IllegalStateException("Bundled rootfs checksum mismatch: ${asset.name}")
-                    }
-                    val next = getNextStage(this@Terminal)
-                    installNextStage = next
-                    extractionDone = next == NEXT_STAGE.NONE
-                    copyDone = true
                 }
+                // The extracted tree and marker are already in place; no
+                // extraction session, no setup.sh tar step on first launch.
+                installNextStage = NEXT_STAGE.NONE
+                extractionDone = true
+                copyDone = true
             } catch (e: Exception) {
                 e.printStackTrace()
                 failed = true
@@ -546,22 +519,4 @@ class Terminal : AppCompatActivity() {
         }
     }
 
-    private fun sha256Matches(file: File, expectedSha256: String?): Boolean {
-        if (expectedSha256.isNullOrEmpty()) return true
-        return runCatching {
-            val digest = MessageDigest.getInstance("SHA-256")
-            file.inputStream().use { input ->
-                val buffer = ByteArray(8 * 1024)
-                var bytesRead: Int
-                while (input.read(buffer).also { bytesRead = it } != -1) {
-                    digest.update(buffer, 0, bytesRead)
-                }
-            }
-            digest.digest().joinToString("") { "%02x".format(it) }.equals(expectedSha256, ignoreCase = true)
-        }
-            .getOrElse {
-                it.printStackTrace()
-                false
-            }
-    }
 }

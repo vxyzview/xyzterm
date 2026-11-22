@@ -28,22 +28,16 @@ android {
     kotlin { jvmToolchain(21) }
 }
 
-// Bundle the pinned archm rootfs into the APK so first launch never downloads
-// it. The task lives in buildSrc so it stays compatible with the configuration
-// cache; Constants.kt remains the single source of truth for the digests.
-private val ARCHM_TAG = "2026.11.21"
-private val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
-private val ARCHM_SHA256: Map<String, String> =
-    Regex("urlName = \"archm-(arm64|arm)\\.tar\\.gz\",[\\s\\S]*?sha256 = \"([0-9a-f]{64})\"")
-        .findAll(File(rootDir, "features/terminal/src/main/java/com/xyzterm/terminal/Constants.kt").readText())
-        .associate { it.groupValues[1] to it.groupValues[2] }
+// Always use the newest verified archm release; the app ships an extracted
+// copy so first launch never runs tar or proot.
+private val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/latest/download"
 
 val downloadRootfs by
     tasks.registering(DownloadRootfsTask::class) {
         group = "build"
         description = "Downloads and verifies the archm rootfs tarballs into the app assets."
         baseUrl.set(ARCHM_BASE)
-        digests.set(ARCHM_SHA256)
+        stagingDir.set(layout.buildDirectory.dir("rootfs"))
         armAssetsDir.set(rootProject.layout.projectDirectory.dir("app/src/arm/assets/terminal"))
         arm64AssetsDir.set(rootProject.layout.projectDirectory.dir("app/src/arm64/assets/terminal"))
     }
