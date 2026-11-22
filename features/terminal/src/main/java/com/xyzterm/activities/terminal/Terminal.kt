@@ -27,6 +27,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -46,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -53,19 +57,20 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.xyzterm.UpdateManager
-import com.xyzterm.activities.settings.DisclaimerScreen
 import com.xyzterm.commands.ActionContext
 import com.xyzterm.commands.KeyCombination
 import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.exec.isTerminalInstalled
-import com.xyzterm.file.FilePermission
 import com.xyzterm.file.sandboxDir
+import com.xyzterm.components.BrandHeader
+import com.xyzterm.components.SetupStepRail
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
+import com.xyzterm.terminal.SetupFlow
 import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
@@ -224,10 +229,15 @@ class Terminal : AppCompatActivity() {
         }
     }
 
-    private fun needsNotificationPermission(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+    fun notificationPermissionNeeded(): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
                 PackageManager.PERMISSION_GRANTED
+
+    fun requestNotificationPermission() {
+        if (notificationPermissionNeeded()) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     companion object {
@@ -251,39 +261,28 @@ class Terminal : AppCompatActivity() {
         enableEdgeToEdge()
         instance = this
 
-        if (needsNotificationPermission()) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-
         setContent {
             XyzTheme {
                 AppDialogHost()
 
                 Surface {
-                    var disclaimerAccepted by remember { mutableStateOf(Settings.shown_disclaimer) }
-
-                    if (!disclaimerAccepted) {
-                        DisclaimerScreen(
-                            onAccept = { disclaimerAccepted = true },
-                            onDecline = { finishAffinity() },
-                        )
-                    } else if (sessionBinder != null) {
-                        LaunchedEffect(Unit) { FilePermission.verifyStoragePermission(this@Terminal) }
-                        TerminalScreenHost(this)
-                    } else {
+                    if (sessionBinder == null) {
                         Column(
                             modifier = Modifier.fillMaxSize().padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
+                            verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
                         ) {
+                            BrandHeader()
+                            CircularProgressIndicator()
                             Text(
                                 text = stringResource(strings.service_connection_error),
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center,
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { recreate() }) { Text(text = stringResource(strings.retry)) }
                         }
+                    } else {
+                        SetupFlow(this@Terminal) { TerminalScreenHost(this@Terminal) }
                     }
                 }
             }
@@ -477,40 +476,71 @@ class Terminal : AppCompatActivity() {
 
                 InstallStage.Copying,
                 InstallStage.Extracting -> {
-                    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    Box(modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp)) {
                         Column(
-                            modifier = Modifier.align(Alignment.Center),
+                            modifier = Modifier.fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(20.dp),
                         ) {
-                            Text(text = progressText, style = MaterialTheme.typography.bodyLarge)
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            if (totalBytes > 0) {
-                                LinearProgressIndicator(
-                                    progress = { downloadedBytes.toFloat() / totalBytes },
-                                    modifier = Modifier.fillMaxWidth(0.8f),
-                                )
-                                val percent = (downloadedBytes.toFloat() / totalBytes * 100).toInt()
-                                Text(
-                                    text = "$percent%",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier =
-                                        Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
-                                )
-                            } else {
-                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(0.8f))
+                            Spacer(modifier = Modifier.height(24.dp))
+                            SetupStepRail(step = 3)
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = MaterialTheme.shapes.large,
+                                colors =
+                                    CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                                    ),
+                            ) {
+                                Column(modifier = Modifier.padding(24.dp)) {
+                                    Text(
+                                        text = stringResource(strings.install_heading),
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = stringResource(strings.install_desc),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    Spacer(modifier = Modifier.height(24.dp))
+                                    if (totalBytes > 0) {
+                                        LinearProgressIndicator(
+                                            progress = { downloadedBytes.toFloat() / totalBytes },
+                                            modifier = Modifier.fillMaxWidth(),
+                                        )
+                                        val percent = (downloadedBytes.toFloat() / totalBytes * 100).toInt()
+                                        Text(
+                                            text = "$percent%  ·  $progressText",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            modifier =
+                                                Modifier.padding(top = 8.dp).semantics {
+                                                    liveRegion = LiveRegionMode.Polite
+                                                },
+                                        )
+                                    } else {
+                                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                                        Text(
+                                            text = progressText,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            modifier =
+                                                Modifier.padding(top = 8.dp).semantics {
+                                                    liveRegion = LiveRegionMode.Polite
+                                                },
+                                        )
+                                    }
+                                }
                             }
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text(
+                                text = stringResource(strings.warn_dont_leave_setup),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                            )
                         }
-
-                        Text(
-                            text = stringResource(strings.warn_dont_leave_setup),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier =
-                                Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp).safeDrawingPadding(),
-                            textAlign = TextAlign.Center,
-                        )
                     }
                 }
             }

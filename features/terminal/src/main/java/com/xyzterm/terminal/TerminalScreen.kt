@@ -796,17 +796,19 @@ private data class TerminalColorSignature(
 )
 
 private fun TerminalView.applyTerminalColors(onSurfaceColor: Int, surfaceColor: Int, terminalColors: Properties) {
-    if (mEmulator == null) return
     val last = tag as? TerminalColorSignature
     if (last?.colors == terminalColors && last.surface == surfaceColor && last.onSurface == onSurfaceColor) {
         return
     }
+    // Seed the per-view signature and the process-wide palette BEFORE an
+    // emulator exists. The first session attaches asynchronously, so returning
+    // early here would leave it with termux default ANSI colors (green prompt).
     tag = TerminalColorSignature(terminalColors, surfaceColor, onSurfaceColor)
+    TerminalColors.COLOR_SCHEME.updateWith(terminalColors)
+    if (mEmulator == null) return
 
     this.onScreenUpdated()
-
     mEmulator?.mColors?.reset()
-    TerminalColors.COLOR_SCHEME.updateWith(terminalColors)
 
     val cursorColor =
         terminalColors.getProperty("cursor")?.let { runCatching { android.graphics.Color.parseColor(it) }.getOrNull() }

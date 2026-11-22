@@ -318,4 +318,18 @@
     <string name="show_extra_keys">Show extra keys</string>
     <string name="show_extra_keys_desc">Show the extra keys row below the terminal</string>
     <string name="font_preview">AaBbCc 0123 ~$ ls -la | grep xyz</string>
+    <string name="setup_step">Step %1$d of 3</string>
+    <string name="setup_terms">Terms</string>
+    <string name="setup_permissions">Permissions</string>
+    <string name="setup_install">Install</string>
+    <string name="permission_heading">Set up your shell</string>
+    <string name="permission_desc">A few quick choices before your Linux environment is ready. You can change all of these later in Settings.</string>
+    <string name="permission_storage">File access (optional)</string>
+    <string name="permission_storage_desc">Let the shell see /sdcard and other files. The terminal works without it.</string>
+    <string name="permission_notifications">Notifications (optional)</string>
+    <string name="permission_notifications_desc">Alerts when a background command finishes.</string>
+    <string name="permission_continue">Continue</string>
+    <string name="permission_skip">Not now</string>
+    <string name="install_heading">Preparing your Linux shell</string>
+    <string name="install_desc">Copying the bundled Arch Linux environment into place. This happens only once.</string>
 </resources>

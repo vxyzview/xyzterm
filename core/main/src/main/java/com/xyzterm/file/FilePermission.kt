@@ -45,6 +45,19 @@ object FilePermission {
 
     private var dialogRef = WeakReference<AlertDialog?>(null)
 
+    /** True when the optional file-access prompt still applies. */
+    fun needsStoragePermission(activity: Activity): Boolean {
+        if (Settings.ignore_storage_permission) return false
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            !Environment.isExternalStorageManager()
+        } else {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) !=
+                PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                    PackageManager.PERMISSION_GRANTED
+        }
+    }
+
     suspend fun verifyStoragePermission(activity: Activity) =
         withContext(Dispatchers.Main) {
             if (isRequesting && activeActivity.get() == activity) {
