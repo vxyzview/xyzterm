@@ -36,9 +36,9 @@ import com.xyzterm.events.Events
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import com.xyzterm.theme.DYNAMIC_THEME_ID
-import com.xyzterm.theme.lime
 import com.xyzterm.theme.builtInThemes
 import com.xyzterm.theme.currentTheme
+import com.xyzterm.theme.lime
 import kotlinx.coroutines.launch
 
 @Composable
