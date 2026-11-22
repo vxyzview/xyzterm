@@ -5,14 +5,13 @@ import com.xyzterm.exec.UserBindings
 /**
  * Adapters between the real app's pure logic and the generated rust-anything JNI shadow.
  *
- * These carry the exact names/signatures the generated `PortableLogicKtShadow` calls. They
- * delegate to the original Kotlin functions, so the shadow's default mode returns the original
- * result while comparing it with the Rust port. `rust-anything.mode=new` switches to Rust.
+ * These carry the exact names/signatures the generated `PortableLogicKtShadow` calls. They delegate to the original
+ * Kotlin functions, so the shadow's default mode returns the original result while comparing it with the Rust port.
+ * `rust-anything.mode=new` switches to Rust.
  *
- * `matchesLogLevel` and `shouldCaptureLog` are verbatim extracts of private functions in
- * core/main; keep them in sync with AppLogs.kt and LogcatService.kt.
+ * `matchesLogLevel` and `shouldCaptureLog` are verbatim extracts of private functions in core/main; keep them in sync
+ * with AppLogs.kt and LogcatService.kt.
  */
-
 fun detectBackupLayoutName(entriesJoined: String): String {
     val entries = if (entriesJoined.isEmpty()) emptyList() else entriesJoined.split('\n')
     return detectBackupLayout(entries).name
@@ -73,7 +72,7 @@ fun shouldCaptureLog(line: String): Boolean {
             "GestureDetector",
             "WindowManager",
             "ImeFocusController",
-            "Insets"
+            "Insets",
         )
     if (noisyKeywords.any { line.contains(it, ignoreCase = true) }) {
         return false
@@ -112,5 +111,4 @@ fun detectBackupLayoutViaRust(entries: List<String>): BackupLayout =
 
 fun nameSafeViaRust(id: String): String = PortableLogicKtShadow.nameSafe(id)
 
-fun isNewerViaRust(latest: String, installed: String): Boolean =
-    PortableLogicKtShadow.isNewer(latest, installed)
+fun isNewerViaRust(latest: String, installed: String): Boolean = PortableLogicKtShadow.isNewer(latest, installed)

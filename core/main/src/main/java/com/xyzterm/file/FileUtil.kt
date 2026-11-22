@@ -22,16 +22,10 @@ fun File.child(fileName: String): File {
  * untrusted names (e.g. session ids from a BROWSABLE deep link). Throws IllegalArgumentException on a bad segment.
  */
 fun isSafeFileName(fileName: String): Boolean =
-    fileName.isNotEmpty() &&
-        fileName != "." &&
-        fileName != ".." &&
-        !fileName.contains('/') &&
-        !fileName.contains('\\')
+    fileName.isNotEmpty() && fileName != "." && fileName != ".." && !fileName.contains('/') && !fileName.contains('\\')
 
 fun File.childSafe(fileName: String): File {
-    require(isSafeFileName(fileName)) {
-        "invalid path segment: $fileName"
-    }
+    require(isSafeFileName(fileName)) { "invalid path segment: $fileName" }
     return File(this, fileName)
 }
 
