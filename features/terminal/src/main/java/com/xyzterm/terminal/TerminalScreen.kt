@@ -255,7 +255,10 @@ private fun ColumnScope.TerminalView(
                     // Legacy behavior
                     val fontFile = sandboxDir().child("etc/font.ttf")
                     if (fontFile.exists()) {
-                        setTypeface(Typeface.createFromFile(fontFile))
+                        setTypeface(
+                            FontCache.getTypeface(context, fontFile.absolutePath, false)
+                                ?: Typeface.createFromFile(fontFile),
+                        )
                     } else {
                         val fontPath = Settings.terminal_font_path
                         val font =

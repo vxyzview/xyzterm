@@ -144,7 +144,8 @@ object UpdateManager {
                 return@launch
             }
 
-            if (!signatureMatches(file.absolutePath)) {
+            // Parses the APK signature block — keep it off the UI thread.
+            if (!withContext(Dispatchers.IO) { signatureMatches(file.absolutePath) }) {
                 toast(strings.update_signature_mismatch.getString())
                 return@launch
             }

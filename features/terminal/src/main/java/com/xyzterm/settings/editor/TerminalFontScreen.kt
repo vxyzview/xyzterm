@@ -94,6 +94,8 @@ fun TerminalFontScreen() {
 
                             Settings.terminal_font_path = destinationFile.absolutePath
                             Settings.is_terminal_font_asset = false
+                            // Parse the TTF here; the preview's remember() runs on Main.
+                            FontCache.loadFont(context, destinationFile.absolutePath, false)
                             withContext(Dispatchers.Main) { fontPath = destinationFile.absolutePath }
                         }
                             .onFailure {

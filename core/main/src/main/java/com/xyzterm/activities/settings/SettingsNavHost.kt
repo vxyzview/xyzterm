@@ -2,6 +2,7 @@ package com.xyzterm.activities.settings
 
 import android.provider.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -24,7 +25,9 @@ fun SettingsNavHost(navController: NavHostController, activity: SettingsActivity
     // Compose animation API.
     val context = LocalContext.current
     val reduceMotion =
-        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+        remember(context) {
+            Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+        }
     NavHost(
         navController = navController,
         startDestination = SettingsRoutes.Settings.route,

@@ -1,5 +1,6 @@
 package com.xyzterm.settings.terminal
 
+import android.os.SystemClock
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,7 +36,8 @@ import com.xyzterm.resources.strings
 import com.xyzterm.theme.greenStatus
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 enum class CheckStatus {
     PENDING,
@@ -58,32 +60,44 @@ fun TerminalCheckScreen() {
     val checks = terminalChecks()
 
     LaunchedEffect(Unit) {
-        for (i in checks.indices) {
-            val check = checks[i]
-            // Update to LOADING and clear logs
-            checks[i] = check.copy(status = CheckStatus.LOADING, logs = emptyList())
+        // Checks have independent timeouts and spawn their own processes: run
+        // them together instead of making the user wait ~90 s serially.
+        coroutineScope {
+            checks.forEachIndexed { index, check ->
+                launch(Dispatchers.IO) {
+                    checks[index] = check.copy(status = CheckStatus.LOADING, logs = emptyList())
+                    val pendingLogs = mutableListOf<String>()
+                    var lastEmit = 0L
 
-            val success =
-                try {
-                    // Health checks spawn processes / hit the network: never block main.
-                    val result =
-                        withContext(Dispatchers.IO) {
+                    fun publish() {
+                        checks[index] = checks[index].copy(logs = pendingLogs.toList())
+                    }
+
+                    val success =
+                        try {
                             check.run { log ->
-                                // Append log to the current check's logs
-                                checks[i] = checks[i].copy(logs = checks[i].logs + log)
+                                pendingLogs += log
+                                val now = SystemClock.elapsedRealtime()
+                                if (now - lastEmit >= 200L) {
+                                    lastEmit = now
+                                    publish()
+                                }
                             }
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            pendingLogs += "Crash: ${e.localizedMessage}"
+                            false
                         }
 
-                    result
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    checks[i] = checks[i].copy(logs = checks[i].logs + "Crash: ${e.localizedMessage}")
-                    false
+                    checks[index] =
+                        checks[index].copy(
+                            status = if (success) CheckStatus.SUCCESS else CheckStatus.FAILED,
+                            logs = pendingLogs.toList(),
+                            isExpanded = !success,
+                        )
                 }
-
-            checks[i] =
-                checks[i].copy(status = if (success) CheckStatus.SUCCESS else CheckStatus.FAILED, isExpanded = !success)
+            }
         }
     }
 

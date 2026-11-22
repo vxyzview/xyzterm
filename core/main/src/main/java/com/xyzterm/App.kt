@@ -10,6 +10,8 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.xyzterm.commands.CommandProvider
 import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.crashhandler.CrashHandler
+import com.xyzterm.file.child
+import com.xyzterm.file.sandboxDir
 import com.xyzterm.resources.Res
 import com.xyzterm.settings.Settings
 import com.xyzterm.settings.debugOptions.LogcatService
@@ -70,6 +72,10 @@ open class App : Application() {
 
                 FontCache.loadFont(this@App, appFontPath, isAppAsset)
                 FontCache.loadFont(this@App, terminalFontPath, isTerminalAsset)
+                // Legacy in-container font is parsed during the first terminal
+                // frame unless it is preloaded here.
+                val legacyFont = sandboxDir().child("etc/font.ttf")
+                if (legacyFont.exists()) FontCache.loadFont(this@App, legacyFont.absolutePath, false)
             }
 
             launch(Dispatchers.IO) { DocumentProvider.setDocumentProviderEnabled(this@App, Settings.expose_home_dir) }

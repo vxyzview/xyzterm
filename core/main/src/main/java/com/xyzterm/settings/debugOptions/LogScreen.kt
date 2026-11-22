@@ -1,5 +1,6 @@
 package com.xyzterm.settings.debugOptions
 
+import android.os.SystemClock
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,7 +51,20 @@ fun LogScreen(
     // the screen keeping the stale initial text forever.
     var logs by remember(logText) { mutableStateOf(logText) }
 
-    LaunchedEffect(flow) { flow?.collect { newLine -> logs += "\n" + newLine } }
+    // Logcat can emit hundreds of lines per second. Appending to the whole
+    // String on every line causes O(n^2) copies and re-layout; batch publishes.
+    LaunchedEffect(flow, logText) {
+        val buffer = StringBuilder(logText)
+        var lastEmit = 0L
+        flow?.collect { newLine ->
+            buffer.append(newLine).append('\n')
+            val now = SystemClock.elapsedRealtime()
+            if (now - lastEmit >= 100L) {
+                lastEmit = now
+                logs = buffer.toString()
+            }
+        }
+    }
 
     PreferenceScaffold(
         label = stringResource(strings.logs),

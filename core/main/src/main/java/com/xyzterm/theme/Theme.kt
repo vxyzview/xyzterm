@@ -66,18 +66,24 @@ fun XyzTheme(
             scheme to holder
         }
 
+    // Stable instance: a fresh Shapes on every recomposition invalidates every
+    // shape-reading composable in the tree.
+    val shapes =
+        remember {
+            MaterialTheme.shapes.copy(
+                extraSmall = RoundedCornerShape(12.dp),
+                small = RoundedCornerShape(16.dp),
+                medium = RoundedCornerShape(20.dp),
+                large = RoundedCornerShape(28.dp),
+                extraLarge = RoundedCornerShape(40.dp),
+            )
+        }
+
     CompositionLocalProvider(LocalThemeHolder provides themeHolder) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = rememberAppTypography(LocalContext.current),
-            shapes =
-                MaterialTheme.shapes.copy(
-                    extraSmall = RoundedCornerShape(12.dp),
-                    small = RoundedCornerShape(16.dp),
-                    medium = RoundedCornerShape(20.dp),
-                    large = RoundedCornerShape(28.dp),
-                    extraLarge = RoundedCornerShape(40.dp),
-                ),
+            shapes = shapes,
         ) {
             Surface(color = MaterialTheme.colorScheme.background) { content() }
         }

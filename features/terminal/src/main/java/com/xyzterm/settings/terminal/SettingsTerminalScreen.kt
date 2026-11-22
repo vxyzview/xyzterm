@@ -205,7 +205,7 @@ fun TerminalDataSettings(navController: NavController) {
         val context = LocalContext.current
         val activity = LocalActivity.current as? AppCompatActivity
         // State-backed so uninstall/restore updates the card immediately.
-        var terminalInstalled by remember { mutableStateOf(isTerminalInstalled()) }
+        var terminalInstalled by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) { terminalInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() } }
 
         PreferenceGroup(heading = stringResource(strings.user_data)) {

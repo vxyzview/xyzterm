@@ -152,7 +152,7 @@ fun DayNightDialog(showBottomSheet: MutableState<Boolean>, context: Context) {
                 },
             ) {
                 LazyColumn {
-                    itemsIndexed(modes) { index, mode ->
+                    itemsIndexed(modes, key = { _, mode -> mode }) { index, mode ->
                         PreferenceTemplate(
                             title = { Text(text = modeLabels[index]) },
                             modifier =
