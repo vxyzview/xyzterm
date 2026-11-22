@@ -4,9 +4,8 @@ private const val ARCHM_TAG = "2026.11.21"
 private const val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
 
 /**
- * [name] is the APK asset name. It deliberately avoids a .gz suffix: aapt
- * decompresses .gz assets and strips the extension, which breaks both the
- * asset lookup and the pinned SHA-256. [urlName] is the upstream release name.
+ * [name] is the APK asset name. It deliberately avoids a .gz suffix: aapt decompresses .gz assets and strips the
+ * extension, which breaks both the asset lookup and the pinned SHA-256. [urlName] is the upstream release name.
  */
 data class ArchmAsset(val name: String, val urlName: String, val url: String, val sha256: String)
 
