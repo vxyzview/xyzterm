@@ -35,8 +35,11 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().safeContentPadding().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
+        Column(
+            modifier = Modifier.fillMaxSize().widthIn(max = 560.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
         BrandHeader()
         SetupStepRail(step = 1)
 
@@ -115,6 +118,7 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
             ) {
                 Text(text = stringResource(strings.i_accept), maxLines = 1)
             }
+        }
         }
     }
 }

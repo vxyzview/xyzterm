@@ -498,7 +498,8 @@ class Terminal : AppCompatActivity() {
                 InstallStage.Extracting -> {
                     Box(modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp)) {
                         Column(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier =
+                                Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState()),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(20.dp),
                         ) {
@@ -552,7 +553,7 @@ class Terminal : AppCompatActivity() {
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.weight(1f))
+                            Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = stringResource(strings.warn_dont_leave_setup),
                                 style = MaterialTheme.typography.bodyMedium,
