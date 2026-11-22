@@ -5,29 +5,17 @@ shopt -s checkwinsize
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/games:/usr/local/bin:/usr/local/sbin:$LOCAL/bin:$PATH
 export SHELL="bash"
 
-# Ubuntu-only helpers (utils.sh refuses to run inside the Android shell).
-export TERMINAL_MODE=ubuntu
+# archm helpers (utils.sh refuses to run inside the Android shell).
+export TERMINAL_MODE=archm
 source "$LOCAL/bin/utils"
 
 if [ -f "$LOCAL/.sandbox_degraded" ]; then
     warn "Running in degraded mode. Some features may not work. Please reinstall the terminal"
 fi
 
-# Set timezone
-# Follow the device timezone (the app exports TZ); fall back to UTC.
-CONTAINER_TIMEZONE="${TZ:-UTC}"
-
-# Symlink /etc/localtime to the desired timezone
-# Only reconfigure when the timezone actually changed — dpkg-reconfigure on
-# every shell start wastes a second each time.
-if [ "$(cat /etc/timezone 2>/dev/null)" != "$CONTAINER_TIMEZONE" ]; then
-    ln -snf "/usr/share/zoneinfo/$CONTAINER_TIMEZONE" /etc/localtime
-
-    # Write the timezone string to /etc/timezone
-    echo "$CONTAINER_TIMEZONE" > /etc/timezone
-
-    # Reconfigure tzdata to apply without prompts
-    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure -f noninteractive tzdata >/dev/null 2>&1
+# Follow the device timezone when the app exports one (archm defaults to UTC).
+if [ -n "${TZ:-}" ] && [ -e "/usr/share/zoneinfo/$TZ" ]; then
+    ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime
 fi
 
 
@@ -36,12 +24,11 @@ if [[ -f ~/.bashrc ]]; then
     source ~/.bashrc
 fi
 
-# Prompt set AFTER ~/.bashrc so the stock Ubuntu colored prompt cannot
-# override it. Plain (non-bold) 32/34 map straight to the theme palette's
-# green/blue slots, so the prompt always matches the selected color scheme.
-# User@host is hardcoded per brand ("roo@xyz"); see TerminalScreen wiring.
-# A stale ~/.bashrc (pre-branding, or stock Ubuntu) may re-inject root@localhost
-# via PROMPT_COMMAND; override it so the brand survives, and guard PS1 itself.
+# Prompt set AFTER ~/.bashrc so a stock prompt cannot override it. Plain
+# (non-bold) 32/34 map straight to the theme palette's green/blue slots, so
+# the prompt always matches the selected color scheme. User@host is hardcoded
+# per brand ("roo@xyz"); see TerminalScreen wiring. Guard PS1 so a stale
+# dotfile cannot re-inject another host name via PROMPT_COMMAND.
 export PS1="\[\e[32m\]roo@xyz\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \$ "
 case "$PROMPT_COMMAND" in
   *roo@xyz*) ;;
@@ -49,38 +36,11 @@ case "$PROMPT_COMMAND" in
 esac
 
 
-# One-time base setup now runs inside setup.sh, which writes the marker files,
-# so this is normally a no-op. It only blocks when an older install never
-# finished (e.g. an app update that kept the sandbox) — after that first
-# start the prompt appears instantly.
-if [ ! -f "/.cache/.packages_ensured" ]; then
-    if ensure_packages_once && ensure_nodejs_once; then
-        clear
-    fi
-fi
-
-if [ -x /usr/lib/command-not-found -o -x /usr/share/command-not-found/command-not-found ]; then
-	function command_not_found_handle {
-	        # check because c-n-f could've been removed in the meantime
-                if [ -x /usr/lib/command-not-found ]; then
-		   /usr/lib/command-not-found -- "$1"
-                   return $?
-                elif [ -x /usr/share/command-not-found/command-not-found ]; then
-		   /usr/share/command-not-found/command-not-found -- "$1"
-                   return $?
-		else
-		   printf "%s: command not found\n" "$1" >&2
-		   return 127
-		fi
-	}
-fi
-
-
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
-alias pkg='apt'
+alias pkg='pacman'
 
 if [[ -f /initrc ]]; then
     # shellcheck disable=SC1090
