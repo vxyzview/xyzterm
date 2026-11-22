@@ -1,9 +1,7 @@
 package com.xyzterm.terminal
 
 import android.content.Context
-import com.xyzterm.file.child
-import com.xyzterm.file.sandboxDir
-import com.xyzterm.file.sandboxHomeDir
+import com.xyzterm.file.localDir
 import com.xyzterm.utils.getTempDir
 import com.xyzterm.utils.isMainThread
 import java.io.File
@@ -16,22 +14,22 @@ enum class NEXT_STAGE {
     EXTRACTION,
 }
 
+internal const val INSTALL_MARKER = ".terminal_setup_ok_DO_NOT_REMOVE"
+
+/**
+ * The marker, not the directory contents, decides whether extraction finished.
+ * A kill mid-`tar` leaves partial files behind; they must not block a retry.
+ */
+internal fun nextStageFor(tarballExists: Boolean, markerExists: Boolean): NEXT_STAGE =
+    if (tarballExists && !markerExists) NEXT_STAGE.EXTRACTION else NEXT_STAGE.NONE
+
 suspend fun CoroutineScope.getNextStage(context: Context): NEXT_STAGE =
     withContext(Dispatchers.IO) {
         if (isMainThread()) {
             throw RuntimeException("IO operation on the main thread")
         }
 
-        val sandboxFile = File(getTempDir(), "sandbox.tar.gz")
-        val rootfsFiles =
-            sandboxDir().listFiles()?.filter {
-                it.absolutePath != sandboxHomeDir().absolutePath &&
-                    it.absolutePath != sandboxDir().child("tmp").absolutePath
-            } ?: emptyList()
-
-        return@withContext if (sandboxFile.exists().not() || rootfsFiles.isEmpty().not()) {
-            NEXT_STAGE.NONE
-        } else {
-            NEXT_STAGE.EXTRACTION
-        }
+        val tarball = File(getTempDir(), "sandbox.tar.gz")
+        val marker = File(localDir(context), INSTALL_MARKER)
+        return@withContext nextStageFor(tarball.exists(), marker.exists())
     }

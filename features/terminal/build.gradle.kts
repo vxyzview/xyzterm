@@ -24,6 +24,8 @@ android {
         compose = true
     }
 
+    androidResources { noCompress += "tar.gz" }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -32,10 +34,14 @@ android {
 }
 
 // Bundle the pinned archm rootfs into the APK so first launch never downloads
-// it. Assets are fetched at build time and verified against the release's
-// .sha256; git never stores the ~200 MB binaries.
-private const val ARCHM_TAG = "2026.11.21"
-private const val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
+// it. Assets are fetched at build time and verified; git never stores the
+// ~200 MB binaries. Constants.kt is the single source of truth for the digests.
+private val ARCHM_TAG = "2026.11.21"
+private val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/$ARCHM_TAG"
+private val ARCHM_SHA256: Map<String, String> =
+    Regex("name = \"archm-(arm64|arm)\\.tar\\.gz\",[\\s\\S]*?sha256 = \"([0-9a-f]{64})\"")
+        .findAll(File(rootDir, "features/terminal/src/main/java/com/xyzterm/terminal/Constants.kt").readText())
+        .associate { it.groupValues[1] to it.groupValues[2] }
 
 private fun sha256(file: File): String {
     val digest = MessageDigest.getInstance("SHA-256")
@@ -60,7 +66,7 @@ val downloadRootfs by
         doLast {
             for (abi in abis) {
                 val name = "archm-$abi.tar.gz"
-                val expected = URL("$ARCHM_BASE/$name.sha256").readText().trim().split(Regex("\\s+")).first()
+                val expected = ARCHM_SHA256[abi] ?: error("No pinned SHA-256 for $name in Constants.kt")
                 val target = File(assetsDir, name)
                 if (target.exists() && sha256(target) == expected) continue
                 target.parentFile.mkdirs()
