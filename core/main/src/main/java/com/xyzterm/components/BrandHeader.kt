@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.xyzterm.resources.drawables
 import com.xyzterm.resources.strings
 
-/** Single brand block used by the session deck and the settings hub. */
+/** Single brand block used by the session drawer and the settings hub. */
 @Composable
 fun BrandHeader(modifier: Modifier = Modifier) {
     Surface(
