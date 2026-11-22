@@ -106,7 +106,6 @@ private fun PermissionStep(activity: Terminal, onContinue: () -> Unit) {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-
     Column(
         modifier = Modifier.fillMaxSize().safeContentPadding().padding(24.dp).verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,

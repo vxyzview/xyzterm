@@ -6,13 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.FileProvider
 import androidx.core.content.pm.PackageInfoCompat
-import com.xyzterm.commands.KeybindingsManager
-import com.xyzterm.file.child
 import com.xyzterm.file.localBinDir
-import com.xyzterm.file.localDir
-import com.xyzterm.file.sandboxDir
-import com.xyzterm.file.sandboxHomeDir
-import com.xyzterm.file.toFileWrapper
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
