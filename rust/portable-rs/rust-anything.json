@@ -1,0 +1,124 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "/home/xyzterm/rust/portable",
+  "unit": "src/main/java/com/xyzterm/terminal/",
+  "language": "kotlin",
+  "kind": "ffi",
+  "crate_name": "terminal-rs",
+  "exports": [
+    {
+      "name": "detectBackupLayoutName",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 35,
+      "params": [
+        {
+          "name": "entriesJoined",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "string",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "String",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.detectBackupLayoutName(String entriesJoined)"
+    },
+    {
+      "name": "isWellFormedHost",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 41,
+      "params": [
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.isWellFormedHost(String path)"
+    },
+    {
+      "name": "isValidGuestPath",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 44,
+      "params": [
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.isValidGuestPath(String path)"
+    },
+    {
+      "name": "nameSafe",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 47,
+      "params": [
+        {
+          "name": "id",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "string",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "String",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.nameSafe(String id)"
+    },
+    {
+      "name": "isNewer",
+      "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
+      "line": 58,
+      "params": [
+        {
+          "name": "latest",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        },
+        {
+          "name": "installed",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.isNewer(String latest, String installed)"
+    }
+  ],
+  "classes": [],
+  "js_only": []
+}
