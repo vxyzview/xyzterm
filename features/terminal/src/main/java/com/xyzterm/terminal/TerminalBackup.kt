@@ -62,7 +62,7 @@ object TerminalBackup {
         withContext(Dispatchers.IO) {
             sandboxHomeDir().mkdirs()
             val process =
-                ProcessBuilder("tar", "-czf", targetFile.absolutePath, "sandbox", "home", *EXCLUDES)
+                ProcessBuilder("tar", "-czf", targetFile.absolutePath, *EXCLUDES, "sandbox", "home")
                     .directory(localDir())
                     .redirectErrorStream(true)
                     .start()
