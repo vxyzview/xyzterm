@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Notifications
@@ -26,13 +26,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.lifecycleScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.xyzterm.activities.settings.DisclaimerScreen
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.components.BrandHeader
@@ -42,7 +42,11 @@ import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import kotlinx.coroutines.launch
 
-private enum class SetupStep { Terms, Permissions, Install }
+private enum class SetupStep {
+    Terms,
+    Permissions,
+    Install,
+}
 
 /** Three calm steps before the first shell: terms, permissions, then install. */
 @Composable
@@ -54,7 +58,7 @@ fun SetupFlow(activity: Terminal, installContent: @Composable () -> Unit) {
                 FilePermission.needsStoragePermission(activity) || activity.notificationPermissionNeeded() ->
                     SetupStep.Permissions
                 else -> SetupStep.Install
-            }
+            },
         )
     }
 

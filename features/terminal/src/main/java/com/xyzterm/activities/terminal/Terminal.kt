@@ -60,18 +60,18 @@ import com.xyzterm.UpdateManager
 import com.xyzterm.commands.ActionContext
 import com.xyzterm.commands.KeyCombination
 import com.xyzterm.commands.KeybindingsManager
-import com.xyzterm.exec.isTerminalInstalled
-import com.xyzterm.file.sandboxDir
 import com.xyzterm.components.BrandHeader
 import com.xyzterm.components.SetupStepRail
+import com.xyzterm.exec.isTerminalInstalled
+import com.xyzterm.file.sandboxDir
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
-import com.xyzterm.terminal.SetupFlow
 import com.xyzterm.terminal.SessionService
+import com.xyzterm.terminal.SetupFlow
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
 import com.xyzterm.terminal.archmAssetForAbi
@@ -489,7 +489,7 @@ class Terminal : AppCompatActivity() {
                                 shape = MaterialTheme.shapes.large,
                                 colors =
                                     CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                                     ),
                             ) {
                                 Column(modifier = Modifier.padding(24.dp)) {
