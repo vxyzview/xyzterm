@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "com.xyzterm.terminal"
     compileSdk = 37
+    ndkVersion = "30.0.16248370"
 
     defaultConfig {
         minSdk = 26
