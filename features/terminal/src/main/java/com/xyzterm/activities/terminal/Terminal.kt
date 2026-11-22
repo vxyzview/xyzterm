@@ -69,6 +69,7 @@ import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
 import com.xyzterm.terminal.archmAssetForAbi
+import com.xyzterm.terminal.pickRootfsAsset
 import com.xyzterm.terminal.changeSession
 import com.xyzterm.terminal.getNextStage
 import com.xyzterm.terminal.terminalView
@@ -351,17 +352,26 @@ class Terminal : AppCompatActivity() {
                 return@LaunchedEffect
             }
 
-            val asset = archmAssetForAbi(Build.SUPPORTED_ABIS)
-            if (asset == null) {
+            val preferred = archmAssetForAbi(Build.SUPPORTED_ABIS)
+            if (preferred == null) {
                 supported = false
+                return@LaunchedEffect
+            }
+            // ABI-specific APKs ship only one rootfs; fall back to the bundled
+            // one if the user sideloads the other ABI's APK.
+            val available = context.assets.list("terminal")?.toSet().orEmpty()
+            val asset = pickRootfsAsset(preferred, available)
+            if (asset == null) {
+                failed = true
+                errorMessage = "Bundled rootfs is missing from this APK"
                 return@LaunchedEffect
             }
 
             try {
                 withContext(Dispatchers.IO) {
                     val output = getTempDir().child("sandbox.tar.gz")
-                    // aapt may leave .tar.gz uncompressed (openFd works) or store
-                    // it deflated; both paths must produce the same staged file.
+                    // Stored or deflated assets both stream to the same staged
+                    // gzip file; openFd just gives a known length when available.
                     val descriptor = runCatching { context.assets.openFd("terminal/${asset.name}") }.getOrNull()
                     val input: InputStream =
                         descriptor?.createInputStream() ?: context.assets.open("terminal/${asset.name}")

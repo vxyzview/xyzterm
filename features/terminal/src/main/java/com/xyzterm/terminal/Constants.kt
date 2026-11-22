@@ -32,3 +32,11 @@ fun archmAssetForAbi(abis: Array<String>): ArchmAsset? =
         abis.any { it.contains("armeabi-v7a") } -> ARCHM_ARM
         else -> null
     }
+
+/** Pick an asset that is actually bundled in this ABI-specific APK. */
+fun pickRootfsAsset(preferred: ArchmAsset?, available: Set<String>): ArchmAsset? =
+    when {
+        preferred == null -> null
+        preferred.name in available -> preferred
+        else -> listOf(ARCHM_ARM64, ARCHM_ARM).firstOrNull { it.name in available }
+    }

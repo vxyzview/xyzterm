@@ -10,12 +10,22 @@ AutoName: xyzterm
 
 RepoType: git
 Repo: https://github.com/vxyzview/xyzterm
-Binaries: https://github.com/vxyzview/xyzterm/releases/download/v%v/xyzterm-%v.apk
 
 Builds:
   - versionName: 1.0.0
     versionCode: 1
     commit: v1.0.0
+    Architecture: armeabi-v7a
+    subdir: app
+    gradle:
+      - yes
+    prebuild:
+      - sed -ri '/foojay-resolver-convention/d' -i ../settings.gradle.kts
+      - sed -r '/signingConfigs.getByName/d' -i build.gradle.kts
+  - versionName: 1.0.0
+    versionCode: 2
+    commit: v1.0.0
+    Architecture: arm64-v8a
     subdir: app
     gradle:
       - yes
@@ -28,4 +38,4 @@ AllowedAPKSigningKeys: f665fa36963b20cec9954399d2213331be522aca035ebf56cfa5a6abd
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 CurrentVersion: 1.0.0
-CurrentVersionCode: 1
+CurrentVersionCode: 2

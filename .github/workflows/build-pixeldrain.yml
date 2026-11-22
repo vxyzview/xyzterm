@@ -104,20 +104,25 @@ jobs:
             --jni-libs features/terminal/src/main/jniLibs
 
       - name: Build with Gradle
-        run: ./gradlew assembleRelease --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-release.apk
+        run: ./gradlew assembleRelease --no-daemon
         env:
           KEYSTORE_FILE: /tmp/xyzterm.keystore
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
         continue-on-error: false
 
-      # aapt renames and decompresses gz assets listed in noCompress; the app
-      # opens the .tar.gz name, so fail the build if that ever changes again.
-      - name: Verify bundled rootfs assets
+      - name: Verify per-ABI rootfs assets
         run: |
-          echo "Bundled terminal assets:"
-          unzip -l app/xyzterm-release.apk | grep "assets/terminal/" || true
-          unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm64.bin"
-          unzip -l app/xyzterm-release.apk | grep -q "assets/terminal/archm-arm.bin"
+          for abi in arm arm64; do
+            apk=$(find "app/build/outputs/apk/$abi/release" -name '*.apk' | head -1)
+            echo "=== $apk ==="
+            unzip -l "$apk" | grep "assets/terminal/" || true
+            unzip -l "$apk" | grep -q "assets/terminal/archm-$abi.bin"
+            other=$([ "$abi" = arm ] && echo arm64 || echo arm)
+            if unzip -l "$apk" | grep -q "assets/terminal/archm-$other.bin"; then
+              echo "Wrong rootfs bundled in $apk" >&2
+              exit 1
+            fi
+          done
 
       - name: Extract version
         id: version
@@ -127,8 +132,12 @@ jobs:
           echo "Got version: $VERSION"
 
       # Per-commit upload target: <version>-<commit>.apk so each build is distinct.
-      - name: Rename APK with version + commit
-        run: mv app/xyzterm-release.apk "app/xyzterm-${{ env.VERSION }}-${{ env.COMMIT_HASH }}.apk"
+      - name: Rename APKs with version + commit
+        run: |
+          for abi in arm arm64; do
+            apk=$(find "app/build/outputs/apk/$abi/release" -name '*.apk' | head -1)
+            mv "$apk" "app/xyzterm-${{ env.VERSION }}-${{ env.COMMIT_HASH }}-$abi.apk"
+          done
 
       - name: Upload APK to PixelDrain
         if: ${{ success() }}
@@ -139,17 +148,19 @@ jobs:
           VERSION: ${{ env.VERSION }}
           COMMIT_HASH: ${{ env.COMMIT_HASH }}
         run: |
-          RESP=$(curl -s -T "app/xyzterm-$VERSION-$COMMIT_HASH.apk" \
-            -u ":$PIXELDRAIN_API_KEY" \
-            "https://pixeldrain.com/api/file/")
-          echo "PixelDrain response: $RESP"
-          ID=$(echo "$RESP" | jq -r '.id // empty')
-          if [ -n "$ID" ]; then
-            echo "APK uploaded: https://pixeldrain.com/u/$ID"
-            echo "Version: $VERSION"
-            echo "Commit: $COMMIT_MSG"
-          else
-            # A revoked/expired key must not fail the whole build; the APK is
-            # still produced and the GitHub release path is unaffected.
-            echo "::warning::PixelDrain upload failed: $RESP"
-          fi
+          for abi in arm arm64; do
+            FILE="app/xyzterm-$VERSION-$COMMIT_HASH-$abi.apk"
+            RESP=$(curl -s -T "$FILE" \
+              -u ":$PIXELDRAIN_API_KEY" \
+              "https://pixeldrain.com/api/file/")
+            echo "$abi PixelDrain response: $RESP"
+            ID=$(echo "$RESP" | jq -r '.id // empty')
+            if [ -n "$ID" ]; then
+              echo "$abi APK uploaded: https://pixeldrain.com/u/$ID"
+            else
+              # A revoked/expired key must not fail the whole build.
+              echo "::warning::PixelDrain upload failed for $abi: $RESP"
+            fi
+          done
+          echo "Version: $VERSION"
+          echo "Commit: $COMMIT_MSG"

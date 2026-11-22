@@ -104,7 +104,7 @@ jobs:
         run: ./gradlew :features:terminal:testDebugUnitTest --no-daemon
 
       - name: Build with Gradle
-        run: ./gradlew assembleRelease --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-release.apk
+        run: ./gradlew assembleRelease --no-daemon
         env:
           KEYSTORE_FILE: /tmp/xyzterm.keystore
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
@@ -117,8 +117,12 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "Got version: $VERSION"
 
-      - name: Rename APK with version
-        run: mv app/xyzterm-release.apk "app/xyzterm-${{ env.VERSION }}.apk"
+      - name: Rename APKs with version
+        run: |
+          for abi in arm arm64; do
+            apk=$(find "app/build/outputs/apk/$abi/release" -name '*.apk' | head -1)
+            mv "$apk" "app/xyzterm-${{ env.VERSION }}-$abi.apk"
+          done
 
       - name: Create GitHub Release
         id: release
@@ -174,7 +178,7 @@ jobs:
           ### Requirements and install
           - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`
           - **x86_64 is not supported** — archm publishes no x86_64 rootfs
-          - Download `xyzterm-1.0.0.apk`, install it, then open the app. The bundled rootfs extracts automatically on first launch.
+          - Download the APK for your device: `xyzterm-1.0.0-arm64.apk` (arm64) or `xyzterm-1.0.0-arm.apk` (armv7), install it, then open the app. The bundled rootfs extracts automatically on first launch.
           - The APK is large (~400 MB) because it contains both rootfs images. This may exceed F-Droid's size limits; F-Droid build metadata is included in the repo.
 
           ### Verification
@@ -189,11 +193,12 @@ jobs:
 
           Licensed under GPL-3.0-or-later. Built from source on GitHub Actions.
           RELEASE_NOTES
-          printf '\nBuilt from commit `%s`. APK: `xyzterm-%s.apk`. F-Droid metadata: [fdroid/metadata/com.xyzterm.app.yml](fdroid/metadata/com.xyzterm.app.yml).\n' \
-            "${{ env.COMMIT_HASH }}" "${{ env.VERSION }}" >> "$NOTES_FILE"
+          printf '\nBuilt from commit `%s`. APKs: `xyzterm-%s-arm.apk` (armv7) and `xyzterm-%s-arm64.apk` (arm64). F-Droid metadata: [fdroid/metadata/com.xyzterm.app.yml](fdroid/metadata/com.xyzterm.app.yml).\n' \
+            "${{ env.COMMIT_HASH }}" "${{ env.VERSION }}" "${{ env.VERSION }}" >> "$NOTES_FILE"
           # shellcheck disable=SC2086
           gh release create "$TAG" \
-            "app/xyzterm-${{ env.VERSION }}.apk" \
+            "app/xyzterm-${{ env.VERSION }}-arm.apk" \
+            "app/xyzterm-${{ env.VERSION }}-arm64.apk" \
             --title "xyzterm ${{ env.VERSION }}" \
             $PRERELEASE_FLAG \
             --notes-file "$NOTES_FILE" \

@@ -14,6 +14,7 @@ android {
     }
 
     targetProjectPath = ":app"
+    targetVariant = "arm64Release"
 
     experimentalProperties["android.experimental.self-instrumenting"] = true
 }

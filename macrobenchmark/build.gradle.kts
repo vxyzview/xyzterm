@@ -17,6 +17,7 @@ android {
     }
 
     targetProjectPath = ":app"
+    targetVariant = "arm64Release"
 
     // Plain com.android.test modules only create a debug test variant;
     // create release so connectedReleaseAndroidTest measures the shipped

@@ -19,4 +19,19 @@ class ArchmAssetsTest {
     fun x86_device_is_unsupported() {
         assertNull(archmAssetForAbi(arrayOf("x86_64", "x86")))
     }
+
+    @Test
+    fun abi_specific_apk_uses_its_bundled_asset() {
+        assertEquals(ARCHM_ARM, pickRootfsAsset(ARCHM_ARM, setOf(ARCHM_ARM.name)))
+    }
+
+    @Test
+    fun wrong_abi_apk_falls_back_to_the_bundled_asset() {
+        assertEquals(ARCHM_ARM64, pickRootfsAsset(ARCHM_ARM, setOf(ARCHM_ARM64.name)))
+    }
+
+    @Test
+    fun missing_bundled_asset_fails_closed() {
+        assertNull(pickRootfsAsset(ARCHM_ARM64, setOf("init.sh")))
+    }
 }

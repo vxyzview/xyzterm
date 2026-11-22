@@ -30,6 +30,26 @@ android {
         resValues = true
     }
 
+    // One APK per ABI: each ships only its own rootfs instead of both (~430 MB total).
+    flavorDimensions += "abi"
+    productFlavors {
+        create("arm") {
+            dimension = "abi"
+            versionCode = 1
+            ndk { abiFilters += "armeabi-v7a" }
+        }
+        create("arm64") {
+            dimension = "abi"
+            versionCode = 2
+            ndk { abiFilters += "arm64-v8a" }
+        }
+    }
+    sourceSets {
+        getByName("arm") { assets.srcDirs("src/arm/assets") }
+        getByName("arm64") { assets.srcDirs("src/arm64/assets") }
+    }
+
+
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
