@@ -174,6 +174,8 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                         bellPulse = false
                     }
                 }
+                val sessionStateLabel =
+                    stringResource(if (bellPulse) strings.session_attention else strings.session_running)
                 Box(
                     modifier =
                         Modifier.size(8.dp)
@@ -185,12 +187,7 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                                 },
                                 CircleShape,
                             )
-                            .semantics {
-                                contentDescription =
-                                    stringResource(
-                                        if (bellPulse) strings.session_attention else strings.session_running,
-                                    )
-                            },
+                            .semantics { contentDescription = sessionStateLabel },
                 )
                 SessionTitle(terminalActivity)
             }

@@ -342,6 +342,10 @@ class Terminal : AppCompatActivity() {
             copyDone = false
             errorMessage = ""
             downloadedBytes = 0L
+            totalBytes = 0L
+            extractionDone = false
+            installNextStage = null
+            progressText = strings.installing.getString()
             if (withContext(Dispatchers.IO) { isTerminalInstalled() }) {
                 extractionDone = true
                 return@LaunchedEffect
@@ -361,7 +365,9 @@ class Terminal : AppCompatActivity() {
                     val descriptor = runCatching { context.assets.openFd("terminal/${asset.name}") }.getOrNull()
                     val input: InputStream =
                         descriptor?.createInputStream() ?: context.assets.open("terminal/${asset.name}")
-                    totalBytes = descriptor?.length ?: -1L
+                    val localTotal = descriptor?.length ?: -1L
+                    withContext(Dispatchers.Main) { totalBytes = localTotal }
+                    var copied = 0L
                     var lastCopyEmit = 0L
                     input.use { stream ->
                         FileOutputStream(output).use { fileOut ->
@@ -370,14 +376,15 @@ class Terminal : AppCompatActivity() {
                                 val read = stream.read(buffer)
                                 if (read < 0) break
                                 fileOut.write(buffer, 0, read)
-                                downloadedBytes += read
+                                copied += read
                                 val now = System.currentTimeMillis()
                                 if (now - lastCopyEmit >= 250L) {
                                     lastCopyEmit = now
                                     withContext(Dispatchers.Main) {
+                                        downloadedBytes = copied
                                         progressText =
-                                            if (totalBytes > 0) {
-                                                "${strings.installing.getString()} ${downloadedBytes * 100 / totalBytes}%"
+                                            if (localTotal > 0) {
+                                                "${strings.installing.getString()} ${copied * 100 / localTotal}%"
                                             } else {
                                                 strings.installing.getString()
                                             }
@@ -386,6 +393,7 @@ class Terminal : AppCompatActivity() {
                             }
                         }
                     }
+                    withContext(Dispatchers.Main) { downloadedBytes = copied }
                     descriptor?.close()
 
                     if (!sha256Matches(output, asset.sha256)) {
@@ -467,7 +475,7 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
-                InstallStage.Ready -> TerminalScreen(terminalActivity = this@Terminal)
+                InstallStage.Ready, InstallStage.Extracting -> TerminalScreen(terminalActivity = this@Terminal)
 
                 InstallStage.Failed -> {
                     Column(

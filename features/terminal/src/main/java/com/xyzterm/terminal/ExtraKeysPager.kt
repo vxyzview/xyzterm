@@ -194,6 +194,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
             horizontalArrangement = Arrangement.Center,
         ) {
             repeat(2) { i ->
+                val pageLabel = stringResource(strings.pager_page).format(i + 1, 2)
                 Box(
                     Modifier.padding(horizontal = 3.dp)
                         .size(4.dp)
@@ -205,7 +206,7 @@ fun ExtraKeysPager(onSurfaceColor: Int) {
                             },
                             MaterialTheme.shapes.small,
                         )
-                        .semantics { contentDescription = stringResource(strings.pager_page).format(i + 1, 2) },
+                        .semantics { contentDescription = pageLabel },
                 )
             }
         }

@@ -24,7 +24,7 @@ fun SettingsNavHost(navController: NavHostController, activity: SettingsActivity
     // Compose animation API.
     val context = LocalContext.current
     val reduceMotion =
-        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SECONDS, 1f) == 0f
+        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
     NavHost(
         navController = navController,
         startDestination = SettingsRoutes.Settings.route,
