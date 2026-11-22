@@ -27,7 +27,9 @@ internal fun parseRootfsManifest(text: String): RootfsManifest {
         val parts = line.split('\t')
         when (parts.firstOrNull()) {
             "B" -> bytes = parts.getOrNull(1)?.toLongOrNull() ?: 0L
-            "D", "L", "F" -> {
+            "D",
+            "L",
+            "F" -> {
                 val path = parts.getOrNull(1) ?: return@forEach
                 val type = parts[0]
                 val mode = parts.getOrNull(2)?.toIntOrNull() ?: 0

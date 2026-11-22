@@ -10,11 +10,12 @@ class RootfsManifestTest {
         val manifest =
             parseRootfsManifest(
                 listOf(
-                    "B\t1234",
-                    "D\tetc\t493",
-                    "L\tbin\t493\tusr/bin",
-                    "F\tetc/hosts\t420\t512",
-                ).joinToString("\n"),
+                        "B\t1234",
+                        "D\tetc\t493",
+                        "L\tbin\t493\tusr/bin",
+                        "F\tetc/hosts\t420\t512",
+                    )
+                    .joinToString("\n"),
             )
 
         assertEquals(1234L, manifest.bytes)
