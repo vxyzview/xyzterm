@@ -2,6 +2,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
 import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.FileVisitResult
 import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermission
 import java.security.MessageDigest
@@ -50,6 +53,22 @@ abstract class DownloadRootfsTask : DefaultTask() {
                     .redirectErrorStream(true)
                     .start()
             check(process.waitFor() == 0) { "Failed to extract $remote" }
+            // Some archm helpers ship with restrictive modes; give the build
+            // user access so they can be packaged. Runtime modes come from the manifest.
+            Files.walkFileTree(
+                tree.toPath(),
+                object : SimpleFileVisitor<Path>() {
+                    override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
+                        grantBuildUser(dir)
+                        return FileVisitResult.CONTINUE
+                    }
+
+                    override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                        grantBuildUser(file)
+                        return FileVisitResult.CONTINUE
+                    }
+                },
+            )
 
             val assets = dirs.getValue(abi)
             assets.mkdirs()
@@ -98,6 +117,16 @@ abstract class DownloadRootfsTask : DefaultTask() {
             File(assets, "archm-$abi.bin").delete()
             File(assets, "archm-$abi.bin.part").delete()
         }
+    }
+}
+
+private fun grantBuildUser(path: Path) {
+    runCatching {
+        val permissions = Files.getPosixFilePermissions(path).toMutableSet()
+        permissions += PosixFilePermission.OWNER_READ
+        permissions += PosixFilePermission.OWNER_WRITE
+        permissions += PosixFilePermission.OWNER_EXECUTE
+        Files.setPosixFilePermissions(path, permissions)
     }
 }
 
