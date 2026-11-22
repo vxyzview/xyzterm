@@ -31,6 +31,12 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
+/** Matches the per-ABI names produced by android.yml and build-pixeldrain.yml. */
+internal fun updateApkName(version: String, supportedAbis: Array<String>): String {
+    val abi = if (supportedAbis.any { it.contains("arm64-v8a") }) "arm64" else "arm"
+    return "xyzterm-$version-$abi.apk"
+}
+
 object UpdateManager {
     private const val UPDATE_OWNER = "vxyzview"
     private const val UPDATE_REPO = "xyzterm"
@@ -122,12 +128,13 @@ object UpdateManager {
         scope.launch(Dispatchers.Main) {
             val file = runCatching {
                 withContext(Dispatchers.IO) {
-                    val target = File(application!!.filesDir, "update/xyzterm-$version.apk")
+                    val apkName = updateApkName(version, Build.SUPPORTED_ABIS)
+                    val target = File(application!!.filesDir, "update/$apkName")
                     target.parentFile?.mkdirs()
                     val request =
                         Request.Builder()
                             .url(
-                                "https://github.com/$UPDATE_OWNER/$UPDATE_REPO/releases/latest/download/xyzterm-$version.apk",
+                                "https://github.com/$UPDATE_OWNER/$UPDATE_REPO/releases/latest/download/$apkName",
                             )
                             .build()
                     OkHttpClient().newCall(request).execute().use { response ->
@@ -203,121 +210,10 @@ object UpdateManager {
             val lastVersionCode = Settings.last_version_code
             val currentVersionCode = PackageInfoCompat.getLongVersionCode(packageManager.getPackageInfo(packageName, 0))
 
+            // 1.0 ships a fresh per-ABI versioning scheme (1 = arm, 2 = arm64).
+            // The old pre-1.0 migration ladder is intentionally removed: running
+            // it here would wipe all preferences on every ABI switch or update.
             if (lastVersionCode != currentVersionCode) {
-                // App is updated -> Migrate existing files
-                if (lastVersionCode <= 40L) {
-                    Preference.clearData()
-                }
-
-                if (lastVersionCode <= 68L) {
-                    val rootfs =
-                        sandboxDir().listFiles()?.filter {
-                            it.absolutePath != sandboxHomeDir().absolutePath &&
-                                it.absolutePath != sandboxDir().child("tmp").absolutePath
-                        } ?: emptyList()
-
-                    if (rootfs.isNotEmpty()) {
-                        localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createNewFile()
-                    }
-                }
-
-                if (lastVersionCode <= 69L) {
-                    sandboxDir().child(".cache/.packages_ensured").apply {
-                        if (exists()) {
-                            delete()
-                        }
-                    }
-                }
-
-                if (lastVersionCode <= 73) {
-                    runCatching {
-                        val filesToCopy = application!!.cacheDir.listFiles { it.isFile && it.extension.isEmpty() }
-                        filesToCopy?.forEach {
-                            it.copyTo(
-                                application!!.filesDir.child(it.name),
-                                overwrite = true,
-                            )
-                        }
-                    }
-                }
-
-                if (lastVersionCode <= 76) {
-                    runCatching {
-                        val filesToCopy = application!!.filesDir.listFiles { it.isFile && it.extension.isEmpty() }
-                        filesToCopy?.forEach { it.delete() }
-                    }
-                }
-
-                if (lastVersionCode <= 80) {
-                    val oldShownDisclaimer = Preference.getBoolean("shownDisclaimer", false)
-                    Preference.removeKey("shownDisclaimer")
-                    if (oldShownDisclaimer) {
-                        Preference.setBoolean("shown_disclaimer", true)
-                    }
-
-                    val oldOled = Preference.getBoolean("oled", false)
-                    Preference.removeKey("oled")
-                    if (oldOled) {
-                        Preference.setBoolean("amoled", true)
-                    }
-
-                    val oldStrictMode = Preference.getBoolean("strictMode", BuildConfig.DEBUG)
-                    Preference.removeKey("strictMode")
-                    if (oldStrictMode != BuildConfig.DEBUG) {
-                        Preference.setBoolean("strict_mode", oldStrictMode)
-                    }
-
-                    val oldDesktopMode = Preference.getBoolean("desktopMode", false)
-                    Preference.removeKey("desktopMode")
-                    if (oldDesktopMode) {
-                        Preference.setBoolean("desktop_mode", true)
-                    }
-
-                    val defaultLang = application!!.resources.configuration.locales[0].language
-                    val oldCurrentLang = Preference.getString("currentLang", defaultLang)
-                    Preference.removeKey("currentLang")
-                    if (oldCurrentLang != defaultLang) {
-                        Preference.setString("current_lang", oldCurrentLang)
-                    }
-                }
-
-                if (lastVersionCode <= 81) {
-                    scope.launch {
-                        runCatching {
-                            application!!.filesDir.child("projects").toFileWrapper().renameTo("drawerTabs")
-                            application!!.filesDir.child("currentTab").toFileWrapper().renameTo("currentDrawerTab")
-                            application!!
-                                .filesDir
-                                .child("expanded_filetree_nodes")
-                                .toFileWrapper()
-                                .renameTo("expandedFileTree")
-                        }
-                    }
-                }
-
-                if (lastVersionCode <= 94L) {
-                    runCatching {
-                        val legacySeccomp = Preference.getBoolean("seccomp", false)
-
-                        val newValue =
-                            if (legacySeccomp) {
-                                "yes"
-                            } else {
-                                "unspecified"
-                            }
-
-                        Preference.setString("seccomp_mode", newValue)
-                        Preference.removeKey("seccomp")
-                    }
-                }
-
-                if (lastVersionCode <= 99) {
-                    runCatching {
-                        KeybindingsManager.migrate()
-                        KeybindingsManager.loadKeybindings()
-                    }
-                }
-
                 deleteCommonFiles()
             }
 

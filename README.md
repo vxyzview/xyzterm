@@ -75,7 +75,7 @@ $ pfetch
 ### Trust
 
 - **Zero telemetry** — no analytics, no third-party crash reporting, no network calls you didn't make yourself.
-- **SHA-256–verified rootfs** — the build fetches and verifies the pinned archm tarballs; first launch re-verifies the bundled copy before extracting it. No rootfs is downloaded at runtime.
+- **Verified rootfs** — CI downloads the latest archm release, checks its published SHA-256, unpacks it and bundles one per ABI. No rootfs is downloaded at runtime.
 - **Stable release signing** — every GitHub release is signed with the same key, so updates install in place.
 - **GitHub Releases first** — the bundled rootfs makes the APK large (~428 MB with both ABIs), which may exceed F-Droid's size limits. Releases are published on [GitHub Releases](https://github.com/vxyzview/xyzterm/releases).
 - **Reproducible builds** — verify our APKs match the source with [apksigcopier + diffoscope](docs/CONTRIBUTING.md).

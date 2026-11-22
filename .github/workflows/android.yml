@@ -159,7 +159,7 @@ jobs:
           This is the first packaged 1.0.0 release. It ships a proot-based **Arch Linux ARM (archm)** userspace inside the APK — no root, no telemetry, no tracking, and no runtime rootfs download.
 
           ### Highlights
-          - **Arch Linux instead of Ubuntu.** Rootfs images come from [vxyzview/archm](https://github.com/vxyzview/archm) release `2026.11.21`, pinned and SHA-256 verified at build time.
+          - **Arch Linux instead of Ubuntu.** Rootfs images come from the latest [vxyzview/archm](https://github.com/vxyzview/archm) release, verified against its published SHA-256 at build time.
           - **Bundled, not downloaded.** Both `arm64` and `arm` rootfs images ship inside one APK. First launch stages the right one locally and unpacks it directly; there is no separate download step.
           - **Session-first UI.** A session-first terminal header and drawer, a searchable settings hub, and terminal settings grouped into Appearance / Input / Data / Advanced.
           - **Guided setup.** Terms, optional permissions, then a single install progress card — no raw logs and no unthemed first shell.
@@ -184,7 +184,7 @@ jobs:
           - Each APK is around 200 MB (one rootfs). This may still exceed F-Droid's size limits; F-Droid build metadata is included in the repo.
 
           ### Verification
-          - The rootfs images are pinned to SHA-256 `f1a7c3c710592d1d9484662c9474b92c17bf27f3c517c596ee5c094011369d0f` (arm64) and `5bcaa84710df04bbd38c682a32b3247bcae8f9738fc1851e33b1535a693e6347` (arm).
+          - CI verifies the downloaded archive against the checksum published with the archm release, then unpacks it before packaging.
           - CI verifies both bundled APK asset names and bytes before publishing.
           - Releases are signed with the repository's persistent signing key; see `docs/CONTRIBUTING.md` for reproducible-build steps.
 

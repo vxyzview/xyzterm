@@ -7,10 +7,8 @@
     <cloud-backup>
 
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <!-- Never copy the bundled rootfs or shell data to another device. -->
+        <exclude domain="file" path="local/" />
     </device-transfer>
-    -->
 </data-extraction-rules>

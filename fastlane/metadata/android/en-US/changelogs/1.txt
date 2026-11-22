@@ -1,8 +1,8 @@
-First stable release of xyzterm as a standalone app.
+xyzterm 1.0.0
 
-- Real Ubuntu 24.04 via proot - no root required, per-ABI rootfs
-- Full terminal emulator with custom fonts, colors, and extra-keys row
-- Multiple named sessions, persisted across restarts
-- AMOLED black theme and Material You dynamic color
-- Backup and restore of the terminal environment
-- Rootfs downloads verified with SHA-256 integrity checks
+- Real Arch Linux (archm) in a proot container, no root required
+- Per-ABI APK: each download contains only your device's rootfs
+- Rootfs is unpacked at build time; first launch only copies files locally
+- Guided setup: terms, optional permissions, then install progress
+- Session-first terminal with searchable settings and themed first shell
+- Backup/restore, extra keys, snippets, custom binds and Material You themes

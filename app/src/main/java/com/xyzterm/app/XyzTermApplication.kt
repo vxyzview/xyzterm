@@ -8,12 +8,13 @@ class XyzTermApplication : App() {
     override fun onCreate() {
         super.onCreate()
 
-        // rust-anything JNI shadow: when the Rust library is bundled, run it beside the
-        // original Kotlin logic and log any mismatch; otherwise keep the original path.
-        // Set the system property `rust-anything.mode=new` to switch fully to Rust.
+        // Release builds use the proven Kotlin path. The Rust shadow harness is
+        // opt-in for development via `rust-anything.mode=shadow|new`, so production
+        // startup does not load JNI or run a comparison on every session.
+        val requestedMode = System.getProperty("rust-anything.mode")
         System.setProperty(
             "rust-anything.mode",
-            if (runCatching { System.loadLibrary("terminal_rs") }.isSuccess) "shadow" else "old",
+            if (requestedMode == "shadow" || requestedMode == "new") requestedMode else "old",
         )
 
         // Register pluggable features. This build only ships the terminal.

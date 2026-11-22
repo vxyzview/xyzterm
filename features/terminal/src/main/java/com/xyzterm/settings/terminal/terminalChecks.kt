@@ -12,9 +12,7 @@ import com.xyzterm.file.sandboxDir
 import com.xyzterm.file.sandboxHomeDir
 import com.xyzterm.resources.strings
 import com.xyzterm.utils.application
-import com.xyzterm.utils.getTempDir
 import java.io.File
-import java.util.concurrent.TimeUnit
 
 /** Upper bound for every spawned probe; a hung proot must not wedge the screen. */
 const val CHECK_TIMEOUT_SECONDS = 15L
@@ -41,48 +39,22 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
 
                     printLog("PRoot exists: ${libproot.exists()}")
                     printLog("PRoot readable: ${libproot.canRead()}")
-                    printLog("PRoot executable: ${libproot.canExecute()}")
                     printLog("PRoot Loader exists: ${prootloader.exists()}")
                     printLog("32bit PRoot Loader exists: ${prootloader32.exists()}")
 
-                    var exitCode = 999
-
-                    try {
-                        printLog("Creating a temporary sandbox environment...")
-
-                        val process =
-                            ProcessBuilder(libproot.absolutePath, "-0", "-r", "/", "true")
-                                .apply {
-                                    environment()["PROOT_TMP_DIR"] = getTempDir().absolutePath
-                                    environment()["PROOT_LOADER"] = prootloader.absolutePath
-                                    environment()["PROOT_LOADER_32"] = prootloader32.absolutePath
-                                }
-                                .start()
-
-                        exitCode =
-                            if (process.waitFor(CHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                                process.exitValue()
-                            } else {
-                                process.destroyForcibly()
-                                printLog("PRoot timed out after ${CHECK_TIMEOUT_SECONDS}s")
-                                124
-                            }
-
-                        printLog("Exit code: $exitCode")
-
-                        if (exitCode != 0) {
-                            val stderr = process.errorStream.bufferedReader().use { it.readText() }
-
-                            if (stderr.isNotBlank()) {
-                                printLog("stderr:")
-                                printLog(stderr)
-                            }
+                    // Use the same linker-based launch path as real sessions.
+                    val result =
+                        try {
+                            ShellUtils.runUbuntu("true", timeoutSeconds = CHECK_TIMEOUT_SECONDS)
+                        } catch (e: Exception) {
+                            printLog("Error while running PRoot: ${e.message}")
+                            null
                         }
-                    } catch (e: Exception) {
-                        printLog("Error while running PRoot: ${e.message}")
+                    if (result != null) {
+                        printLog("Exit code: ${result.exitCode}")
+                        if (result.error.isNotBlank()) printLog("stderr: ${result.error}")
                     }
-
-                    libproot.exists() && exitCode == 0
+                    libproot.exists() && result?.exitCode == 0 && result.timedOut.not()
                 },
             ),
             Check(

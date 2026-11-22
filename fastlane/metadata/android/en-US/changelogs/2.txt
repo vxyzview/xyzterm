@@ -1,9 +1,8 @@
-xyzterm 1.1.0
+xyzterm 1.0.0
 
-- Security: removed the exported share-text handler that could inject commands
-- Backups now include your home directory; a corrupt archive can no longer wipe the sandbox
-- Session restore, rename and rootfs extraction fixes
-- Custom bind paths with spaces now work
-- Faster cold start and fewer startup network calls
-- Removed the unused theme/icon-pack store code
-- Full package rebrand from com.rk to com.xyzterm
+- Real Arch Linux (archm) in a proot container, no root required
+- Per-ABI APK: each download contains only your device's rootfs
+- Rootfs is unpacked at build time; first launch only copies files locally
+- Guided setup: terms, optional permissions, then install progress
+- Session-first terminal with searchable settings and themed first shell
+- Backup/restore, extra keys, snippets, custom binds and Material You themes

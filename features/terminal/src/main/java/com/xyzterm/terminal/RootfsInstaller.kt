@@ -64,6 +64,15 @@ object RootfsInstaller {
             val zipName = "terminal/rootfs-${asset.abi}.zip"
             val manifest = context.assets.open(manifestName).use { parseRootfsManifest(it.reader().readText()) }
 
+            // A lost marker must not destroy a working userspace: recreate it
+            // instead. Only a clearly incomplete tree is replaced.
+            val marker = File(root.parentFile, ".terminal_setup_ok_DO_NOT_REMOVE")
+            if (File(root, "bin/bash").exists()) {
+                marker.createNewFile()
+                writeContainerConfig(root)
+                onProgress(manifest.bytes, manifest.bytes)
+                return@withContext
+            }
             if (root.exists()) root.deleteRecursively()
             root.mkdirs()
 
@@ -107,7 +116,7 @@ object RootfsInstaller {
 
             onProgress(manifest.bytes, manifest.bytes)
             writeContainerConfig(root)
-            File(root.parentFile, ".terminal_setup_ok_DO_NOT_REMOVE").createNewFile()
+            marker.createNewFile()
         }
 
     private fun writeContainerConfig(root: File) {

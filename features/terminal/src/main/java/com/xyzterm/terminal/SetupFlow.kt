@@ -27,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -86,7 +85,7 @@ fun SetupFlow(activity: Terminal, installContent: @Composable () -> Unit) {
 @Composable
 private fun PermissionStep(activity: Terminal, onContinue: () -> Unit) {
     val lifecycleOwner = LocalContext.current as LifecycleOwner
-    var refresh by remember { mutableIntStateOf(0) }
+    var storageGranted by remember { mutableStateOf(!FilePermission.needsStoragePermission(activity)) }
     var notificationsGranted by remember { mutableStateOf(!activity.notificationPermissionNeeded()) }
 
     val notificationLauncher =
@@ -94,13 +93,12 @@ private fun PermissionStep(activity: Terminal, onContinue: () -> Unit) {
             androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
         ) { granted ->
             notificationsGranted = granted
-            refresh++
         }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                refresh++
+                storageGranted = !FilePermission.needsStoragePermission(activity)
                 notificationsGranted = !activity.notificationPermissionNeeded()
             }
         }
@@ -108,7 +106,6 @@ private fun PermissionStep(activity: Terminal, onContinue: () -> Unit) {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    val storageGranted = !FilePermission.needsStoragePermission(activity)
 
     Column(
         modifier = Modifier.fillMaxSize().safeContentPadding().padding(24.dp).verticalScroll(rememberScrollState()),
@@ -135,7 +132,12 @@ private fun PermissionStep(activity: Terminal, onContinue: () -> Unit) {
                 label = stringResource(strings.permission_storage),
                 description = stringResource(strings.permission_storage_desc),
                 granted = storageGranted,
-                onClick = { activity.lifecycleScope.launch { FilePermission.verifyStoragePermission(activity) } },
+                onClick = {
+                    activity.lifecycleScope.launch {
+                        FilePermission.verifyStoragePermission(activity)
+                        storageGranted = !FilePermission.needsStoragePermission(activity)
+                    }
+                },
             )
             PermissionRow(
                 icon = Icons.Outlined.Settings,
