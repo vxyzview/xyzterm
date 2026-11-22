@@ -107,7 +107,7 @@ fun isNewer(latest: String, installed: String): Boolean {
     return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
 }
 
-fun detectBackupLayoutViaRust(entries: List<String>): BackupLayout =
+internal fun detectBackupLayoutViaRust(entries: List<String>): BackupLayout =
     BackupLayout.valueOf(PortableLogicKtShadow.detectBackupLayoutName(entries.joinToString("\n")))
 
 fun nameSafeViaRust(id: String): String = PortableLogicKtShadow.nameSafe(id)

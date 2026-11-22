@@ -90,8 +90,10 @@ jobs:
           NDK_VERSION=$(grep -rhoE '"[0-9]+\.[0-9]+\.[0-9]+"' features/terminal/link2symlink/build.gradle.kts | tr -d '"' | sed -n '1p')
           [ -n "$NDK_VERSION" ] || NDK_VERSION=30.0.16248370
           SDK_ROOT=${ANDROID_HOME:-/usr/local/lib/android/sdk}
+          SDKMANAGER=$(ls "$SDK_ROOT"/cmdline-tools/*/bin/sdkmanager "$SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager 2>/dev/null | sed -n '1p')
+          [ -n "$SDKMANAGER" ] || { echo "sdkmanager not found under $SDK_ROOT" >&2; exit 1; }
           if [ ! -d "$SDK_ROOT/ndk/$NDK_VERSION" ]; then
-            yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" "ndk;$NDK_VERSION"
+            yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" "ndk;$NDK_VERSION"
           fi
           rust-anything build rust/portable-rs --profile android \
             --ndk "$SDK_ROOT/ndk/$NDK_VERSION" --api 26 \
