@@ -63,6 +63,7 @@ import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.components.BrandHeader
 import com.xyzterm.components.SetupStepRail
 import com.xyzterm.exec.isTerminalInstalled
+import com.xyzterm.file.FilePermission
 import com.xyzterm.file.sandboxDir
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString

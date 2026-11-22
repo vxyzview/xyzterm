@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -117,13 +117,13 @@ private fun PermissionStep(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 PermissionRow(
-                    icon = Icons.Outlined.Folder,
+                    icon = Icons.Outlined.Info,
                     label = stringResource(strings.permission_storage),
                     description = stringResource(strings.permission_storage_desc),
                 )
                 if (needsNotifications) {
                     PermissionRow(
-                        icon = Icons.Outlined.Notifications,
+                        icon = Icons.Outlined.Settings,
                         label = stringResource(strings.permission_notifications),
                         description = stringResource(strings.permission_notifications_desc),
                     )
