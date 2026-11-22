@@ -59,20 +59,18 @@ import com.xyzterm.commands.KeyCombination
 import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.exec.isTerminalInstalled
 import com.xyzterm.file.FilePermission
-import com.xyzterm.file.child
 import com.xyzterm.file.sandboxDir
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import com.xyzterm.terminal.NEXT_STAGE
+import com.xyzterm.terminal.RootfsInstaller
 import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
 import com.xyzterm.terminal.archmAssetForAbi
 import com.xyzterm.terminal.changeSession
-import com.xyzterm.terminal.getNextStage
-import com.xyzterm.terminal.RootfsInstaller
 import com.xyzterm.terminal.pickRootfsAsset
 import com.xyzterm.terminal.terminalView
 import com.xyzterm.theme.XyzTheme
@@ -518,5 +516,4 @@ class Terminal : AppCompatActivity() {
             }
         }
     }
-
 }

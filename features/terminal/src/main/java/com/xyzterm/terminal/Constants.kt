@@ -1,8 +1,8 @@
 package com.xyzterm.terminal
 
 /**
- * [name] is the legacy tarball asset name. New builds ship a pre-extracted
- * tree as rootfs-<abi>.zip / .json instead; [abi] selects those assets.
+ * [name] is the legacy tarball asset name. New builds ship a pre-extracted tree as rootfs-<abi>.zip / .json instead;
+ * [abi] selects those assets.
  */
 data class ArchmAsset(val abi: String, val name: String)
 
@@ -19,8 +19,7 @@ fun archmAssetForAbi(abis: Array<String>): ArchmAsset? =
 
 /** Pick an asset that is actually bundled in this ABI-specific APK. */
 fun pickRootfsAsset(preferred: ArchmAsset?, available: Set<String>): ArchmAsset? {
-    fun bundled(asset: ArchmAsset) =
-        "rootfs-${asset.abi}.zip" in available || asset.name in available
+    fun bundled(asset: ArchmAsset) = "rootfs-${asset.abi}.zip" in available || asset.name in available
     return when {
         preferred == null -> null
         bundled(preferred) -> preferred
