@@ -1,7 +1,7 @@
 package com.xyzterm.settings.debugOptions
 
-import android.os.SystemClock
 import android.content.Intent
+import android.os.SystemClock
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
