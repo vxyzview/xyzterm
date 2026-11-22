@@ -85,7 +85,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-enum class InstallStage { Copying, Extracting, Ready, UnsupportedCpu, Failed }
+enum class InstallStage {
+    Copying,
+    Extracting,
+    Ready,
+    UnsupportedCpu,
+    Failed,
+}
 
 /** Pure transition used by the first-run host; Retry clears failed/copyDone. */
 internal fun nextInstallStage(
@@ -400,9 +406,7 @@ class Terminal : AppCompatActivity() {
 
         // SessionService clears the one-shot stage after setup.sh consumes the
         // tarball; follow it so the UI leaves the extraction screen.
-        LaunchedEffect(installNextStage) {
-            if (copyDone && installNextStage == NEXT_STAGE.NONE) extractionDone = true
-        }
+        LaunchedEffect(installNextStage) { if (copyDone && installNextStage == NEXT_STAGE.NONE) extractionDone = true }
 
         val stage =
             nextInstallStage(
@@ -481,7 +485,8 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
-                InstallStage.Copying, InstallStage.Extracting -> {
+                InstallStage.Copying,
+                InstallStage.Extracting -> {
                     Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                         Column(
                             modifier = Modifier.align(Alignment.Center),
@@ -501,9 +506,7 @@ class Terminal : AppCompatActivity() {
                                     text = "$percent%",
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier =
-                                        Modifier.padding(top = 8.dp).semantics {
-                                            liveRegion = LiveRegionMode.Polite
-                                        },
+                                        Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
                                 )
                             } else {
                                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth(0.8f))

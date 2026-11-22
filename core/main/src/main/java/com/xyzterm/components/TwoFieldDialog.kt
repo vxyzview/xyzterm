@@ -1,9 +1,9 @@
 package com.xyzterm.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 /** One validated two-field dialog shared by snippets and custom binds. */

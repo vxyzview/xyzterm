@@ -33,8 +33,7 @@ fun BrandHeader(modifier: Modifier = Modifier) {
         Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier =
-                    Modifier.size(52.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
+                modifier = Modifier.size(52.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
             ) {
                 Icon(
                     painter = painterResource(drawables.terminal),

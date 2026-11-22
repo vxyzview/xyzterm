@@ -67,20 +67,20 @@ class TerminalFeature : Feature {
         routes.add(
             DynamicRoute(SettingsRoutes.TerminalAppearance.route) { navController, _ ->
                 TerminalAppearanceSettings(navController)
-            }
+            },
         )
         routes.add(
             DynamicRoute(SettingsRoutes.TerminalInput.route) { navController, _ ->
                 TerminalInputSettings(navController)
-            }
+            },
         )
         routes.add(
-            DynamicRoute(SettingsRoutes.TerminalData.route) { navController, _ -> TerminalDataSettings(navController) }
+            DynamicRoute(SettingsRoutes.TerminalData.route) { navController, _ -> TerminalDataSettings(navController) },
         )
         routes.add(
             DynamicRoute(SettingsRoutes.TerminalAdvanced.route) { navController, _ ->
                 TerminalAdvancedSettings(navController)
-            }
+            },
         )
         routes.add(DynamicRoute(SettingsRoutes.TerminalExtraKeys.route) { _, _ -> TerminalExtraKeys() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalSnippets.route) { _, _ -> SnippetsScreen() })

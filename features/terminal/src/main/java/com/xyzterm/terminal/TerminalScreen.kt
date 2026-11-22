@@ -188,7 +188,7 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                             .semantics {
                                 contentDescription =
                                     stringResource(
-                                        if (bellPulse) strings.session_attention else strings.session_running
+                                        if (bellPulse) strings.session_attention else strings.session_running,
                                     )
                             },
                 )

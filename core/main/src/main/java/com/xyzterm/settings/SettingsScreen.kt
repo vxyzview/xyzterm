@@ -2,7 +2,6 @@ package com.xyzterm.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,7 +16,6 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -80,9 +78,8 @@ fun SettingsScreen(navController: NavController) {
                     results.forEach { entry ->
                         PreferenceTemplate(
                             modifier =
-                                Modifier.semantics { role = Role.Button }.clickable {
-                                    navController.navigate(entry.route) { launchSingleTop = true }
-                                },
+                                Modifier.semantics { role = Role.Button }
+                                    .clickable { navController.navigate(entry.route) { launchSingleTop = true } },
                             verticalPadding = 14.dp,
                             title = { Text(entry.label) },
                             description = { Text(entry.description) },
