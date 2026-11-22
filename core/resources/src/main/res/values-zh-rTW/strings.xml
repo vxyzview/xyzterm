@@ -28,7 +28,7 @@
     <string name="ok">確認</string>
 <string name="error">錯誤</string>
     <string name="unsupported_cpu">不支援的CPU</string>
-    <string name="unsupported_cpu_desc">此架構沒有Ubuntu。應用程式無法在此裝置上執行。</string>
+    <string name="unsupported_cpu_desc">此架構沒有archm。應用程式無法在此裝置上執行。</string>
 <string name="app">應用程式</string>
     <string name="oled_desc">套用純黑主題</string>
     <string name="themes">主題</string>
@@ -86,7 +86,7 @@
 <string name="acquire_wakelock">保持螢幕常亮</string>
     <string name="release_wakelock">停用螢幕常亮</string>
 <string name="install">安裝</string>
-<string name="uninstall_terminal_warning">要永久解除安裝 Ubuntu 嗎？此操作將無法復原。</string>
+<string name="uninstall_terminal_warning">要永久解除安裝 archm 嗎？此操作將無法復原。</string>
     <string name="uninstall">解除安裝</string>
     <string name="uninstall_terminal">解除安裝終端機</string>
 <string name="seccomp_desc">修正部分裝置上功能未實作的錯誤</string>

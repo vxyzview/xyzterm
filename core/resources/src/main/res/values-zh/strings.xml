@@ -33,7 +33,7 @@
 <string name="file_open_denied">无法通过其他应用打开此文件</string>
 <string name="error">错误</string>
     <string name="unsupported_cpu">不支持的CPU</string>
-    <string name="unsupported_cpu_desc">此架构没有Ubuntu。应用无法在此设备上运行。</string>
+    <string name="unsupported_cpu_desc">此架构没有archm。应用无法在此设备上运行。</string>
     <string name="manage_storage_reason">xyzterm 需要存储空间权限以访问和读写文件。请稍后在系统设置中允许访问此权限。</string>
 <string name="text_size">字体大小</string>
     <string name="unknown_error">未知错误</string>
@@ -86,7 +86,7 @@
 <string name="acquire_wakelock">保持屏幕常亮</string>
     <string name="release_wakelock">关闭屏幕常亮</string>
 <string name="install">安装</string>
-<string name="uninstall_terminal_warning">确定要卸载 Ubuntu 吗？此操作不可恢复。</string>
+<string name="uninstall_terminal_warning">确定要卸载 archm 吗？此操作不可恢复。</string>
     <string name="uninstall">卸载</string>
     <string name="uninstall_terminal">卸载终端</string>
 <string name="seccomp_desc">修复部分设备上方法未实现的错误</string>
@@ -235,7 +235,7 @@
     <string name="check_proot">检查 PRoot</string>
     <string name="check_system_shell">检查系统 shell</string>
     <string name="check_storage_permissions">检查存储和权限</string>
-    <string name="check_ubuntu">检查 Ubuntu®</string>
+    <string name="check_ubuntu">检查 archm®</string>
     <string name="check_network_access">检查网络</string>
     <string name="check_abnormalities">检查异常</string>
 <string name="seccomp_unspecified">未指定</string>
@@ -266,15 +266,15 @@
     <string name="bind_warning">绑定可写。访客进程以伪 root 运行，可以修改这些文件。</string>
     <string name="collapse">折叠</string>
     <string name="custom_binds">自定义绑定</string>
-    <string name="custom_binds_desc">在 Ubuntu 环境中暴露额外的宿主文件夹</string>
-    <string name="custom_binds_empty">暂无自定义绑定。添加的文件夹会出现在 Ubuntu 文件系统中。</string>
+    <string name="custom_binds_desc">在 archm 环境中暴露额外的宿主文件夹</string>
+    <string name="custom_binds_empty">暂无自定义绑定。添加的文件夹会出现在 archm 文件系统中。</string>
     <string name="default_session_name">main</string>
     <string name="default_session_numbered">main #%1$d</string>
     <string name="delete_session_confirm">终止此会话？其进程将被结束。</string>
     <string name="expand">展开</string>
     <string name="font_preview">AaBbCc 0123 ~$ ls -la | grep xyz</string>
-    <string name="install_ubuntu_optional">Ubuntu 未安装</string>
-    <string name="install_ubuntu_optional_desc">安装 Ubuntu 以获得完整的 Linux 环境。你现在就可以安装，或稍后在终端设置中进行。</string>
+    <string name="install_ubuntu_optional">archm 未安装</string>
+    <string name="install_ubuntu_optional_desc">安装 archm 以获得完整的 Linux 环境。你现在就可以安装，或稍后在终端设置中进行。</string>
     <string name="keep_screen_on">保持屏幕常亮</string>
     <string name="keep_screen_on_desc">终端打开时防止屏幕休眠</string>
     <string name="manage_backups">管理备份</string>

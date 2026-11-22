@@ -2,7 +2,7 @@
 <resources>
     <string name="error">Tuccḍa</string>
     <string name="unsupported_cpu">Unsupported CPU</string>
-    <string name="unsupported_cpu_desc">No Ubuntu is available for this architecture. The app cannot run on this device.</string>
+    <string name="unsupported_cpu_desc">No archm is available for this architecture. The app cannot run on this device.</string>
 <string name="copy">Nɣel</string>
     <string name="close">Mdel</string>
     <string name="path">Abrid</string>

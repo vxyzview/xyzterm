@@ -33,5 +33,5 @@
     <string name="developer_name">vxyzview</string>
     <string name="upstream_source">Upstream source</string>
     <string name="unsupported_cpu">Tuettu CPU</string>
-    <string name="unsupported_cpu_desc">Ei Ubuntu-tä tälle arkkitehtuurille. Sovellus ei voi toimia tässä laitteessa.</string>
+    <string name="unsupported_cpu_desc">Ei archm-tä tälle arkkitehtuurille. Sovellus ei voi toimia tässä laitteessa.</string>
 </resources>

@@ -28,7 +28,7 @@
     <string name="ok">OK</string>
 <string name="error">Fel</string>
     <string name="unsupported_cpu">Ej stödd CPU</string>
-    <string name="unsupported_cpu_desc">Ingen Ubuntu för denna arkitektur. Appen kan inte köras på den här enheten.</string>
+    <string name="unsupported_cpu_desc">Ingen archm för denna arkitektur. Appen kan inte köras på den här enheten.</string>
 <string name="app">Applikation</string>
     <string name="oled_desc">Applicerar helsvart tema</string>
     <string name="themes">Teman</string>

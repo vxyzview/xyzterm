@@ -76,7 +76,7 @@
     <string name="copied">Skopiowano</string>
     <string name="error">Błąd</string>
     <string name="unsupported_cpu">Nieobsługiwane CPU</string>
-    <string name="unsupported_cpu_desc">Brak Ubuntu dla tej architektury. Aplikacja nie może działać na tym urządzeniu.</string>
+    <string name="unsupported_cpu_desc">Brak archm dla tej architektury. Aplikacja nie może działać na tym urządzeniu.</string>
 <string name="install">Zainstaluj</string>
 <string name="theme_settings">Ustawienia motywu</string>
 <string name="info">Informacje</string>
@@ -100,7 +100,7 @@
     <string name="expose_saf_desc">Udostępnij katalog główny aplikacjom zewnętrznym używając systemowego menedżera plików (SAF)</string>
     <string name="saf_expose_warning">Udostępniając katalog główny możesz odkryć wrażliwe informacje złośliwym aplikacjom, włączając tokeny Git, hasła, nazwy użytkownika oraz inne pliki przechowywane w twoim głównym katalogu terminalu. Czy chcesz kontynuować?</string>
 <string name="timeout">Pobieranie przerwane ze względu na przekroczenie limitu czasu. Proszę, upewnij się że połączenie z internetem jest stabilne</string>
-<string name="uninstall_terminal_warning">Odinstalować Ubuntu? Czynności nie da się odwrócić.</string>
+<string name="uninstall_terminal_warning">Odinstalować archm? Czynności nie da się odwrócić.</string>
     <string name="uninstall">Odinstaluj</string>
     <string name="uninstall_terminal">Odinstaluj terminal</string>
 <string name="seccomp_desc">Napraw błąd \"funkcja nieobsługiwana\", na niektórych urządzeniach</string>
@@ -245,7 +245,7 @@
     <string name="check_proot">Sprawdź PRoot</string>
     <string name="check_system_shell">Sprawdź powłokę systemu</string>
     <string name="check_storage_permissions">Sprawdź pamięć i uprawnienia</string>
-    <string name="check_ubuntu">Sprawdź Ubuntu</string>
+    <string name="check_ubuntu">Sprawdź archm</string>
     <string name="check_network_access">Sprawdź dostęp do sieci</string>
     <string name="check_abnormalities">Sprawdź, czy nie ma nieprawidłowości</string>
 <string name="seccomp_unspecified">Nieokreślony</string>

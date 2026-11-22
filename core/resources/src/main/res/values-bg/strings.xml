@@ -28,7 +28,7 @@
     <string name="ok">Добре</string>
 <string name="error">Грешка</string>
     <string name="unsupported_cpu">Неподдържан процесор</string>
-    <string name="unsupported_cpu_desc">Няма Ubuntu за тази архитектура. Приложението не може да работи на това устройство.</string>
+    <string name="unsupported_cpu_desc">Няма archm за тази архитектура. Приложението не може да работи на това устройство.</string>
 <string name="app">Приложение</string>
     <string name="oled_desc">Прилага чисто черна тема</string>
     <string name="themes">Теми</string>
@@ -86,7 +86,7 @@
 <string name="acquire_wakelock">Придобиване на заключване след събуждане</string>
     <string name="release_wakelock">Освободете заключването след събуждане</string>
 <string name="install">Инсталиране</string>
-<string name="uninstall_terminal_warning">Да деинсталирате Ubuntu за постоянно? Това действие не може да бъде отменено.</string>
+<string name="uninstall_terminal_warning">Да деинсталирате archm за постоянно? Това действие не може да бъде отменено.</string>
     <string name="uninstall">Деинсталиране</string>
     <string name="uninstall_terminal">Деинсталиране на терминал</string>
 <string name="seccomp_desc">Поправка на грешката \"функция не е внедрена\" на някои устройства</string>

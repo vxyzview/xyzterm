@@ -28,7 +28,7 @@
     <string name="ok">OK</string>
 <string name="error">Lỗi</string>
     <string name="unsupported_cpu">CPU không được hỗ trợ</string>
-    <string name="unsupported_cpu_desc">Không có Ubuntu cho kiến trúc này. Ứng dụng không thể chạy trên thiết bị này.</string>
+    <string name="unsupported_cpu_desc">Không có archm cho kiến trúc này. Ứng dụng không thể chạy trên thiết bị này.</string>
 <string name="app">Ứng dụng</string>
     <string name="oled_desc">Sử dụng chủ đề Pure Black</string>
     <string name="themes">Chủ đề</string>
@@ -130,7 +130,7 @@
     <string name="i_accept">Đồng ý</string>
 <string name="permissions">Quyền</string>
 <string name="check_for_updates_desc">Thường xuyên kiểm tra cập nhật</string>
-<string name="uninstall_terminal_warning">Gỡ cài đặt Ubuntu vĩnh viễn? Hành động này không thể hoàn tác.</string>
+<string name="uninstall_terminal_warning">Gỡ cài đặt archm vĩnh viễn? Hành động này không thể hoàn tác.</string>
     <string name="uninstall_terminal">Gỡ cài đặt terminal</string>
     <string name="restore_terminal">Khôi phục bản sao lưu terminal</string>
     <string name="terminal_backup">Sao lưu terminal</string>

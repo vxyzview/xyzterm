@@ -34,7 +34,7 @@
     <string name="ok">OK</string>
 <string name="error">Error</string>
     <string name="unsupported_cpu">Unsupported CPU</string>
-    <string name="unsupported_cpu_desc">No Ubuntu is available for this architecture. The app cannot run on this device.</string>
+    <string name="unsupported_cpu_desc">No archm build is available for this architecture. The app cannot run on this device.</string>
 <string name="app">Application</string>
     <string name="oled_desc">Applies a pure black theme</string>
     <string name="themes">Themes</string>
@@ -46,9 +46,9 @@
     <string name="snippet_label">Label</string>
     <string name="snippet_command">Command</string>
     <string name="custom_binds">Custom binds</string>
-    <string name="custom_binds_desc">Expose extra host folders inside the Ubuntu environment</string>
+    <string name="custom_binds_desc">Expose extra host folders inside the archm environment</string>
     <string name="bind_add">Add bind</string>
-    <string name="custom_binds_empty">No custom binds. Added folders appear inside the Ubuntu filesystem.</string>
+    <string name="custom_binds_empty">No custom binds. Added folders appear inside the archm filesystem.</string>
     <string name="bind_host_path">Host path (e.g. /storage/emulated/0/Download)</string>
     <string name="bind_guest_path">Guest path — optional, defaults to the host path</string>
     <string name="bind_invalid_host">Host path must be absolute and must exist on the device</string>
@@ -124,10 +124,10 @@
 <string name="acquire_wakelock">Acquire wakelock</string>
     <string name="release_wakelock">Release wakelock</string>
 <string name="install">Install</string>
-    <string name="install_ubuntu_optional">Ubuntu is not installed</string>
-    <string name="install_ubuntu_optional_desc">Install Ubuntu to get a full Linux environment. You can do this now or later from Terminal settings.</string>
+    <string name="install_ubuntu_optional">archm is not installed</string>
+    <string name="install_ubuntu_optional_desc">archm installs automatically on first launch — there is nothing to download.</string>
     <string name="not_now">Not now</string>
-<string name="uninstall_terminal_warning">Permanently uninstall Ubuntu? This action cannot be undone.</string>
+<string name="uninstall_terminal_warning">Permanently uninstall archm? This action cannot be undone.</string>
     <string name="uninstall">Uninstall</string>
     <string name="uninstall_terminal">Uninstall terminal</string>
     <string name="restore_terminal">Restore terminal backup</string>
@@ -291,7 +291,7 @@
     <string name="check_proot">Check PRoot</string>
     <string name="check_system_shell">Check system shell</string>
     <string name="check_storage_permissions">Check storage and permissions</string>
-    <string name="check_ubuntu">Check Ubuntu</string>
+    <string name="check_ubuntu">Check archm</string>
     <string name="check_network_access">Check network access</string>
     <string name="check_abnormalities">Check abnormalities</string>
 <string name="session_name_exists">Session name already exists</string>

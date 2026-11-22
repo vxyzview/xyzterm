@@ -28,7 +28,7 @@
     <string name="ok">OK</string>
 <string name="error">Σφάλμα</string>
     <string name="unsupported_cpu">Μη υποστηριζόμενος επεξεργαστής</string>
-    <string name="unsupported_cpu_desc">Δεν υπάρχει Ubuntu για αυτή την αρχιτεκτονική. Η εφαρμογή δεν μπορεί να τρέξει σε αυτή τη συσκευή.</string>
+    <string name="unsupported_cpu_desc">Δεν υπάρχει archm για αυτή την αρχιτεκτονική. Η εφαρμογή δεν μπορεί να τρέξει σε αυτή τη συσκευή.</string>
 <string name="app">Εφαρμογή</string>
     <string name="oled_desc">Εφαρμόζει ένα καθαρό μαύρο θέμα</string>
     <string name="themes">Θέματα</string>
@@ -88,7 +88,7 @@
 <string name="timeout">Η λήψη ακυρώθηκε λόγω χρονικού ορίου λήξης. Βεβαιωθείτε ότι η σύνδεσή σας στο διαδίκτυο είναι σταθερή</string>
 <string name="theme_settings">Ρυθμίσεις θέματος</string>
     <string name="install">Εγκατάσταση</string>
-<string name="uninstall_terminal_warning">Να απεγκατασταθεί οριστικά το Ubuntu; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+<string name="uninstall_terminal_warning">Να απεγκατασταθεί οριστικά το archm; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
     <string name="uninstall">Απεγκατάσταση</string>
     <string name="uninstall_terminal">Απεγκατάσταση τερματικού</string>
     <string name="restore_terminal">Επαναφορά αντιγράφου ασφαλείας τερματικού</string>

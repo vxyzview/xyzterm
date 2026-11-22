@@ -129,7 +129,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                     printLog("Sandbox Home Writable: ${sandboxHome.canWrite()}")
 
                     if (freeSpace < 500) {
-                        printLog("Warning: Low storage space (< 500 MB). Ubuntu might fail to install or update.")
+                        printLog("Warning: Low storage space (< 500 MB). archm might fail to install or update.")
                     }
 
                     freeSpace > 100 && filesDir.canWrite() && sandboxHome.canWrite()
@@ -139,7 +139,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                 label = checkUbuntu,
                 run = { printLog ->
                     if (!isTerminalInstalled()) {
-                        printLog("Ubuntu not installed, skipping")
+                        printLog("archm not installed, skipping")
                         return@Check true
                     }
 
@@ -152,8 +152,8 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                         printLog("Bash executable: ${bash.canExecute()}")
                     }
 
-                    val apt = rootfs.child("usr/bin/apt")
-                    printLog("Apt exists: ${apt.exists()}")
+                    val pacman = rootfs.child("usr/bin/pacman")
+                    printLog("Pacman exists: ${pacman.exists()}")
 
                     val osRelease = rootfs.child("etc/os-release")
                     if (osRelease.exists()) {
@@ -161,7 +161,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                         osRelease.readLines().take(5).forEach { printLog("  $it") }
                     }
 
-                    printLog("Testing Ubuntu execution...")
+                    printLog("Testing archm execution...")
                     var working = false
                     try {
                         // Route through ShellUtils.runUbuntu so stdout/stderr drain
@@ -183,7 +183,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                 label = checkNetworkAccess,
                 run = { printLog ->
                     if (!isTerminalInstalled()) {
-                        printLog("Ubuntu not installed, skipping network check.")
+                        printLog("archm not installed, skipping network check.")
                         return@Check true
                     }
 
@@ -209,7 +209,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                             } else {
                                 printLog("/etc/resolv.conf is MISSING!")
                             }
-                            printLog("Abnormality: Ubuntu will not have internet access without DNS.")
+                            printLog("Abnormality: archm will not have internet access without DNS.")
                         }
                         dns.exitCode == 0 && !dns.timedOut
                     } catch (e: Exception) {
@@ -222,7 +222,7 @@ inline fun terminalChecks(): SnapshotStateList<Check> {
                 label = checkAbnormalities,
                 run = { printLog ->
                     if (!isTerminalInstalled()) {
-                        printLog("Ubuntu not installed, skipping")
+                        printLog("archm not installed, skipping")
                         return@Check true
                     }
                     var abnormalities = 0

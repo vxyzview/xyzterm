@@ -28,7 +28,7 @@
     <string name="ok">ОК</string>
 <string name="error">Ошибка</string>
     <string name="unsupported_cpu">Неподдерживаемый процессор</string>
-    <string name="unsupported_cpu_desc">Нет Ubuntu для этой архитектуры. Приложение не может работать на этом устройстве.</string>
+    <string name="unsupported_cpu_desc">Нет archm для этой архитектуры. Приложение не может работать на этом устройстве.</string>
 <string name="app">Приложение</string>
     <string name="oled_desc">Применяет чисто чёрную тему</string>
     <string name="themes">Темы</string>
@@ -86,7 +86,7 @@
 <string name="acquire_wakelock">Заблокировать спящий режим</string>
     <string name="release_wakelock">Разблокировать спящий режим</string>
 <string name="install">Установить</string>
-    <string name="uninstall_terminal_warning">Полностью удалить Ubuntu? Это действие невозможно отменить.</string>
+    <string name="uninstall_terminal_warning">Полностью удалить archm? Это действие невозможно отменить.</string>
     <string name="uninstall">Удалить</string>
     <string name="uninstall_terminal">Удалить терминал</string>
 <string name="seccomp_desc">Исправит ошибку «функция не реализована» на некоторых устройствах</string>
@@ -246,7 +246,7 @@
     <string name="check_proot">Проверьте PRoot</string>
     <string name="check_system_shell">Проверка системного shell</string>
     <string name="check_storage_permissions">Проверка хранилища и разрешений</string>
-    <string name="check_ubuntu">Проверка Ubuntu</string>
+    <string name="check_ubuntu">Проверка archm</string>
     <string name="check_network_access">Проверка доступности сети</string>
     <string name="check_abnormalities">Проверьте наличие отклонений от нормы</string>
 <string name="seccomp_no_seccomp">Seccomp не доступен</string>
