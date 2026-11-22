@@ -104,7 +104,7 @@ jobs:
             --jni-libs features/terminal/src/main/jniLibs
 
       - name: Build with Gradle
-        run: ./gradlew assembleRelease --no-daemon && mv app/build/outputs/apk/release/*.apk app/xyzterm-release.apk
+        run: ./gradlew assembleRelease --no-daemon --info && mv app/build/outputs/apk/release/*.apk app/xyzterm-release.apk
         env:
           KEYSTORE_FILE: /tmp/xyzterm.keystore
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
