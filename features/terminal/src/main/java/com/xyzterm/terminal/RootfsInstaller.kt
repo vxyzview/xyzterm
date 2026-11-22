@@ -1,6 +1,7 @@
 package com.xyzterm.terminal
 
 import android.content.Context
+import android.os.SystemClock
 import android.system.Os
 import com.xyzterm.file.child
 import java.io.File
@@ -33,8 +34,8 @@ internal fun parseRootfsManifest(text: String): RootfsManifest {
                 val path = parts.getOrNull(1) ?: return@forEach
                 val type = parts[0].lowercase()
                 val mode = parts.getOrNull(2)?.toIntOrNull() ?: 0
-                val size = if (type == "F") parts.getOrNull(3)?.toLongOrNull() ?: 0L else 0L
-                val target = if (type == "L") parts.getOrNull(3) else null
+                val size = if (type == "f") parts.getOrNull(3)?.toLongOrNull() ?: 0L else 0L
+                val target = if (type == "l") parts.getOrNull(3) else null
                 entries += RootfsEntry(path, type, mode, size, target)
             }
         }
@@ -73,6 +74,7 @@ object RootfsInstaller {
                 .forEach { entry -> runCatching { Os.symlink(entry.target, File(root, entry.path).absolutePath) } }
 
             var copied = 0L
+            var lastEmit = 0L
             context.assets.open(zipName).use { raw ->
                 ZipInputStream(raw.buffered()).use { zip ->
                     var entry = zip.nextEntry
@@ -83,13 +85,18 @@ object RootfsInstaller {
                         FileOutputStream(target).use { out -> zip.copyTo(out, 64 * 1024) }
                         modes[name]?.let { mode -> if (mode != 0) runCatching { Os.chmod(target.absolutePath, mode) } }
                         copied += target.length()
-                        onProgress(copied, manifest.bytes)
+                        val now = SystemClock.elapsedRealtime()
+                        if (now - lastEmit >= 250L) {
+                            lastEmit = now
+                            onProgress(copied, manifest.bytes)
+                        }
                         zip.closeEntry()
                         entry = zip.nextEntry
                     }
                 }
             }
 
+            onProgress(manifest.bytes, manifest.bytes)
             writeContainerConfig(root)
             File(root.parentFile, ".terminal_setup_ok_DO_NOT_REMOVE").createNewFile()
         }
