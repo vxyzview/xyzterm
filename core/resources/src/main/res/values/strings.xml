@@ -230,6 +230,8 @@
 <string name="session_running">Session running</string>
 <string name="session_attention">Session needs attention</string>
 <string name="pager_page">Page %1$d of %2$d</string>
+<string name="no_results">No settings match that search.</string>
+<string name="clear_search">Clear search</string>
 <string name="last_modified">Last modified</string>
     <string name="content_property">%1$s items, totaling %2$s</string>
     <string name="manifest_missing_fields">The manifest.json file has missing or invalid properties:\n%s\n\nPlease check the file and try again.</string>

@@ -11,23 +11,31 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.xyzterm.activities.settings.SettingsRoutes
+import com.xyzterm.components.BrandHeader
+import com.xyzterm.components.EmptyState
 import com.xyzterm.components.compose.preferences.base.PreferenceGroup
 import com.xyzterm.components.compose.preferences.base.PreferenceLayout
 import com.xyzterm.components.compose.preferences.base.PreferenceTemplate
@@ -40,34 +48,49 @@ import com.xyzterm.resources.strings
 
 @Composable
 fun SettingsScreen(navController: NavController) {
-    PreferenceLayout(label = stringResource(id = strings.settings), backArrowVisible = true) {
-        BrandCard()
-        Categories(navController)
-    }
-}
+    var query by remember { mutableStateOf("") }
+    val entries = remember { settingsEntries() }
 
-@Composable
-private fun BrandCard() {
-    Surface(
-        modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
-        ) {
-            Text(
-                text = stringResource(strings.app_name),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = stringResource(strings.developed_by),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+    PreferenceLayout(label = stringResource(id = strings.settings), backArrowVisible = true) {
+        BrandHeader()
+        Spacer(modifier = Modifier.height(12.dp))
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            label = { Text(stringResource(strings.search)) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            singleLine = true,
+            modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (query.isBlank()) {
+            Categories(navController)
+        } else {
+            val results = filterSettings(entries, query)
+            if (results.isEmpty()) {
+                EmptyState(
+                    painter = rememberVectorPainter(Icons.Filled.Search),
+                    text = stringResource(strings.no_results),
+                    actionLabel = stringResource(strings.clear_search),
+                    onAction = { query = "" },
+                )
+            } else {
+                PreferenceGroup {
+                    results.forEach { entry ->
+                        PreferenceTemplate(
+                            modifier =
+                                Modifier.semantics { role = Role.Button }.clickable {
+                                    navController.navigate(entry.route) { launchSingleTop = true }
+                                },
+                            verticalPadding = 14.dp,
+                            title = { Text(entry.label) },
+                            description = { Text(entry.description) },
+                            endWidget = { Chevron() },
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -148,7 +171,7 @@ private fun Categories(navController: NavController) {
                 Modifier.semantics { role = Role.Button }
                     .clickable { navController.navigate(SettingsRoutes.Support.route) { launchSingleTop = true } },
             verticalPadding = 14.dp,
-            title = { Text(stringResource(strings.support)) },
+            title = { Text(text = stringResource(strings.support)) },
             description = { Text(stringResource(id = strings.support_desc)) },
             startWidget = { SupportIcon() },
             endWidget = { Chevron() },
@@ -170,12 +193,7 @@ private fun Chevron() {
 fun SupportIcon() {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(32.dp)) {
         Icon(
-            imageVector =
-                if (Settings.donated) {
-                    Icons.Filled.Favorite
-                } else {
-                    Icons.Outlined.FavoriteBorder
-                },
+            imageVector = if (Settings.donated) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.primary,

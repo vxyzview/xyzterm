@@ -19,9 +19,13 @@ import com.xyzterm.settings.SettingsRegistry
 import com.xyzterm.settings.editor.TerminalFontScreen
 import com.xyzterm.settings.terminal.SettingsTerminalScreen
 import com.xyzterm.settings.terminal.SnippetsScreen
+import com.xyzterm.settings.terminal.TerminalAdvancedSettings
+import com.xyzterm.settings.terminal.TerminalAppearanceSettings
 import com.xyzterm.settings.terminal.TerminalBackupsScreen
 import com.xyzterm.settings.terminal.TerminalCheckScreen
+import com.xyzterm.settings.terminal.TerminalDataSettings
 import com.xyzterm.settings.terminal.TerminalExtraKeys
+import com.xyzterm.settings.terminal.TerminalInputSettings
 import com.xyzterm.settings.terminal.UserBindingsScreen
 import com.xyzterm.utils.toast
 
@@ -59,6 +63,24 @@ class TerminalFeature : Feature {
             DynamicRoute(SettingsRoutes.TerminalSettings.route) { navController, _ ->
                 SettingsTerminalScreen(navController)
             },
+        )
+        routes.add(
+            DynamicRoute(SettingsRoutes.TerminalAppearance.route) { navController, _ ->
+                TerminalAppearanceSettings(navController)
+            }
+        )
+        routes.add(
+            DynamicRoute(SettingsRoutes.TerminalInput.route) { navController, _ ->
+                TerminalInputSettings(navController)
+            }
+        )
+        routes.add(
+            DynamicRoute(SettingsRoutes.TerminalData.route) { navController, _ -> TerminalDataSettings(navController) }
+        )
+        routes.add(
+            DynamicRoute(SettingsRoutes.TerminalAdvanced.route) { navController, _ ->
+                TerminalAdvancedSettings(navController)
+            }
         )
         routes.add(DynamicRoute(SettingsRoutes.TerminalExtraKeys.route) { _, _ -> TerminalExtraKeys() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalSnippets.route) { _, _ -> SnippetsScreen() })

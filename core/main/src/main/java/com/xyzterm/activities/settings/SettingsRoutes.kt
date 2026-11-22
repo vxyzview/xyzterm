@@ -9,6 +9,14 @@ sealed class SettingsRoutes(val route: String) {
 
     data object TerminalSettings : SettingsRoutes("terminal_settings")
 
+    data object TerminalAppearance : SettingsRoutes("terminal_appearance")
+
+    data object TerminalInput : SettingsRoutes("terminal_input")
+
+    data object TerminalData : SettingsRoutes("terminal_data")
+
+    data object TerminalAdvanced : SettingsRoutes("terminal_advanced")
+
     data object TerminalExtraKeys : SettingsRoutes("terminal_extra_keys")
 
     data object TerminalSnippets : SettingsRoutes("terminal_snippets")

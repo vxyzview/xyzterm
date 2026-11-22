@@ -153,6 +153,8 @@ dependencies {
     // Modules
     implementation(project(":core:resources"))
     implementation(project(":core:components"))
+
+    testImplementation(libs.junit)
 }
 
 abstract class GenerateSupportedLocales : DefaultTask() {

@@ -67,18 +67,50 @@ enum class TerminalCursorStyle(val value: String, val stringRes: Int) {
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun SettingsTerminalScreen(navController: NavController) {
     PreferenceLayout(label = stringResource(id = strings.terminal), backArrowVisible = true) {
+        PreferenceGroup(heading = stringResource(strings.appearance)) {
+            NextScreenCard(
+                label = stringResource(strings.appearance),
+                description = stringResource(strings.terminal_desc),
+                navController = navController,
+                route = SettingsRoutes.TerminalAppearance,
+            )
+        }
+        PreferenceGroup(heading = stringResource(strings.input)) {
+            NextScreenCard(
+                label = stringResource(strings.input),
+                description = stringResource(strings.terminal_desc),
+                navController = navController,
+                route = SettingsRoutes.TerminalInput,
+            )
+        }
+        PreferenceGroup(heading = stringResource(strings.user_data)) {
+            NextScreenCard(
+                label = stringResource(strings.user_data),
+                description = stringResource(strings.terminal_desc),
+                navController = navController,
+                route = SettingsRoutes.TerminalData,
+            )
+        }
+        PreferenceGroup(heading = stringResource(strings.advanced)) {
+            NextScreenCard(
+                label = stringResource(strings.advanced),
+                description = stringResource(strings.terminal_desc),
+                navController = navController,
+                route = SettingsRoutes.TerminalAdvanced,
+            )
+        }
+    }
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+@Composable
+fun TerminalAdvancedSettings(navController: NavController) {
+    PreferenceLayout(label = stringResource(strings.advanced), backArrowVisible = true) {
         val context = LocalContext.current
         val activity = LocalActivity.current as? AppCompatActivity
-        // State-backed so uninstall/restore updates the card immediately.
-        // ponytail: isTerminalInstalled() scans sandboxDir on disk — compute off the
-        // main thread, not inside remember() during composition.
-        var terminalInstalled by remember { mutableStateOf(isTerminalInstalled()) }
-        LaunchedEffect(Unit) { terminalInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() } }
-
         PreferenceGroup(heading = stringResource(strings.advanced)) {
             if (FeatureRegistry.isEnabled("debug_mode")) {
                 SettingsItem(
@@ -109,7 +141,15 @@ fun SettingsTerminalScreen(navController: NavController) {
                 route = SettingsRoutes.TerminalCheck,
             )
         }
+    }
+}
 
+@OptIn(DelicateCoroutinesApi::class)
+@Composable
+fun TerminalAppearanceSettings(navController: NavController) {
+    PreferenceLayout(label = stringResource(strings.appearance), backArrowVisible = true) {
+        val context = LocalContext.current
+        val activity = LocalActivity.current as? AppCompatActivity
         PreferenceGroup(heading = stringResource(strings.appearance)) {
             SteppedValueSlider(
                 label = stringResource(strings.text_size),
@@ -155,6 +195,18 @@ fun SettingsTerminalScreen(navController: NavController) {
                 },
             )
         }
+    }
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+@Composable
+fun TerminalDataSettings(navController: NavController) {
+    PreferenceLayout(label = stringResource(strings.user_data), backArrowVisible = true) {
+        val context = LocalContext.current
+        val activity = LocalActivity.current as? AppCompatActivity
+        // State-backed so uninstall/restore updates the card immediately.
+        var terminalInstalled by remember { mutableStateOf(isTerminalInstalled()) }
+        LaunchedEffect(Unit) { terminalInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() } }
 
         PreferenceGroup(heading = stringResource(strings.user_data)) {
             val restore =
@@ -327,7 +379,15 @@ fun SettingsTerminalScreen(navController: NavController) {
                 },
             )
         }
+    }
+}
 
+@OptIn(DelicateCoroutinesApi::class)
+@Composable
+fun TerminalInputSettings(navController: NavController) {
+    PreferenceLayout(label = stringResource(strings.input), backArrowVisible = true) {
+        val context = LocalContext.current
+        val activity = LocalActivity.current as? AppCompatActivity
         PreferenceGroup(heading = stringResource(strings.input)) {
             SettingsItem(
                 label = stringResource(strings.show_extra_keys),
