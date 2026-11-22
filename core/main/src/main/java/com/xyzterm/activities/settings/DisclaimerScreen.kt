@@ -40,85 +40,91 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
             modifier = Modifier.fillMaxSize().widthIn(max = 560.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-        BrandHeader()
-        SetupStepRail(step = 1)
+            BrandHeader()
+            SetupStepRail(step = 1)
 
-        val scrollState = rememberScrollState()
-        Card(
-            modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
-            shape = MaterialTheme.shapes.large,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+            val scrollState = rememberScrollState()
+            Card(
+                modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
             ) {
-                Text(
-                    text = stringResource(strings.disclaimer_heading),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = stringResource(strings.disclaimer_read_carefully),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = stringResource(strings.disclaimer_heading),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = stringResource(strings.disclaimer_read_carefully),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                    )
 
-                Text(
-                    text = stringResource(strings.data_loss_risk),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.error,
-                )
-                Text(text = stringResource(strings.data_loss_risk_content), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = stringResource(strings.data_loss_risk),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    Text(
+                        text = stringResource(strings.data_loss_risk_content),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
 
-                Text(
-                    text = stringResource(strings.terminal_risks),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.error,
-                )
-                Text(text = stringResource(strings.terminal_risks_content), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = stringResource(strings.terminal_risks),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    Text(
+                        text = stringResource(strings.terminal_risks_content),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
 
-                Text(
-                    text = stringResource(strings.no_warranty),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(text = stringResource(strings.no_warranty_content), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = stringResource(strings.no_warranty),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(text = stringResource(strings.no_warranty_content), style = MaterialTheme.typography.bodySmall)
 
-                Text(
-                    text = stringResource(strings.not_liable),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(text = stringResource(strings.not_liable_content), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = stringResource(strings.not_liable),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(text = stringResource(strings.not_liable_content), style = MaterialTheme.typography.bodySmall)
 
-                Text(
-                    text = stringResource(strings.consent_statement),
-                    style = MaterialTheme.typography.bodySmall,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                    Text(
+                        text = stringResource(strings.consent_statement),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
-        }
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(modifier = Modifier.weight(1f), onClick = onDecline) {
-                Text(text = stringResource(strings.decline), maxLines = 1)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(modifier = Modifier.weight(1f), onClick = onDecline) {
+                    Text(text = stringResource(strings.decline), maxLines = 1)
+                }
+                val canAccept by remember { derivedStateOf { !scrollState.canScrollForward } }
+                Button(
+                    enabled = canAccept,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        Settings.shown_disclaimer = true
+                        onAccept()
+                    },
+                ) {
+                    Text(text = stringResource(strings.i_accept), maxLines = 1)
+                }
             }
-            val canAccept by remember { derivedStateOf { !scrollState.canScrollForward } }
-            Button(
-                enabled = canAccept,
-                modifier = Modifier.weight(1f),
-                onClick = {
-                    Settings.shown_disclaimer = true
-                    onAccept()
-                },
-            ) {
-                Text(text = stringResource(strings.i_accept), maxLines = 1)
-            }
-        }
         }
     }
 }

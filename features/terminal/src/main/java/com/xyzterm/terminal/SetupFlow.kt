@@ -23,7 +23,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -34,12 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.xyzterm.activities.settings.DisclaimerScreen
@@ -51,7 +50,11 @@ import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import kotlinx.coroutines.launch
 
-private enum class SetupStep { Terms, Permissions, Install }
+private enum class SetupStep {
+    Terms,
+    Permissions,
+    Install,
+}
 
 /** Three calm steps before the first shell: terms, permissions, then install. */
 @Composable
@@ -63,7 +66,7 @@ fun SetupFlow(activity: Terminal, installContent: @Composable () -> Unit) {
                 FilePermission.needsStoragePermission(activity) || activity.notificationPermissionNeeded() ->
                     SetupStep.Permissions
                 else -> SetupStep.Install
-            }
+            },
         )
     }
 
@@ -88,20 +91,19 @@ private fun PermissionStep(activity: Terminal, onContinue: () -> Unit) {
 
     val notificationLauncher =
         androidx.activity.compose.rememberLauncherForActivityResult(
-            androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+            androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
         ) { granted ->
             notificationsGranted = granted
             refresh++
         }
 
     DisposableEffect(lifecycleOwner) {
-        val observer =
-            LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    refresh++
-                    notificationsGranted = !activity.notificationPermissionNeeded()
-                }
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                refresh++
+                notificationsGranted = !activity.notificationPermissionNeeded()
             }
+        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
@@ -109,8 +111,7 @@ private fun PermissionStep(activity: Terminal, onContinue: () -> Unit) {
     val storageGranted = !FilePermission.needsStoragePermission(activity)
 
     Column(
-        modifier =
-            Modifier.fillMaxSize().safeContentPadding().padding(24.dp).verticalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxSize().safeContentPadding().padding(24.dp).verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
@@ -134,9 +135,7 @@ private fun PermissionStep(activity: Terminal, onContinue: () -> Unit) {
                 label = stringResource(strings.permission_storage),
                 description = stringResource(strings.permission_storage_desc),
                 granted = storageGranted,
-                onClick = {
-                    activity.lifecycleScope.launch { FilePermission.verifyStoragePermission(activity) }
-                },
+                onClick = { activity.lifecycleScope.launch { FilePermission.verifyStoragePermission(activity) } },
             )
             PermissionRow(
                 icon = Icons.Outlined.Settings,
@@ -195,7 +194,8 @@ private fun PermissionRow(
             }
             Icon(
                 imageVector = Icons.Outlined.CheckCircle,
-                contentDescription = stringResource(if (granted) strings.permission_continue else strings.permission_skip),
+                contentDescription =
+                    stringResource(if (granted) strings.permission_continue else strings.permission_skip),
                 tint =
                     if (granted) {
                         MaterialTheme.colorScheme.primary
