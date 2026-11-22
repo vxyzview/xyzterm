@@ -475,7 +475,8 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
-                InstallStage.Ready, InstallStage.Extracting -> TerminalScreen(terminalActivity = this@Terminal)
+                InstallStage.Ready,
+                InstallStage.Extracting -> TerminalScreen(terminalActivity = this@Terminal)
 
                 InstallStage.Failed -> {
                     Column(
