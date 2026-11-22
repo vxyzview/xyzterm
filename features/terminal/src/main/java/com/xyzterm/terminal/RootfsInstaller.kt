@@ -68,7 +68,14 @@ object RootfsInstaller {
             root.mkdirs()
 
             val modes = manifest.entries.associate { it.path to it.mode }
-            manifest.entries.filter { it.type == "d" }.forEach { File(root, it.path).mkdirs() }
+            // Android creates dirs with 0700; pacman compares them to the
+            // package's 0755, so apply the archived modes to every directory.
+            manifest.entries.filter { it.type == "d" }.forEach { entry ->
+                val dir = File(root, entry.path)
+                dir.mkdirs()
+                if (entry.mode != 0) runCatching { Os.chmod(dir.absolutePath, entry.mode) }
+            }
+            runCatching { Os.chmod(root.absolutePath, 493) }
             manifest.entries
                 .filter { it.type == "l" }
                 .forEach { entry -> runCatching { Os.symlink(entry.target, File(root, entry.path).absolutePath) } }
@@ -104,7 +111,7 @@ object RootfsInstaller {
     private fun writeContainerConfig(root: File) {
         root.child("etc").mkdirs()
         root.child("tmp").mkdirs()
-        runCatching { Os.chmod(root.child("tmp").absolutePath, 0b111111111) }
+        runCatching { Os.chmod(root.child("tmp").absolutePath, 0b1000000000 or 0b111111111) }
         root.child("etc/hostname").writeText("xyz\n")
         root.child("etc/resolv.conf").writeText("nameserver 8.8.8.8\nnameserver 8.8.4.4\n")
         root
