@@ -292,9 +292,10 @@ class Terminal : AppCompatActivity() {
     }
 
     private fun writeToShell(text: String) {
-        val service = sessionBinder?.get()?.getService() ?: return
+        val binder = sessionBinder?.get() ?: return
+        val service = binder.getService()
         val id = service.currentSession.value ?: return
-        service.getSession(id)?.write(text)
+        binder.getSession(id)?.write(text)
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
