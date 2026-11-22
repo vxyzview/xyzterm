@@ -8,16 +8,19 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 
-// NavHost's transition lambdas are non-composable scopes, so these cannot depend
-// on CompositionLocals. Compose's animation framework already honors the system
-// "Remove animations" accessibility setting (animator duration scale = 0) on its
-// own, so no explicit reduced-motion branch is needed here.
+// NavHost's transition lambdas are not composable scopes, so callers pass the
+// reduce-motion flag read from CompositionLocals. A reduced-motion user gets a
+// plain crossfade instead of a slide.
 object NavigationAnimationTransitions {
-    fun popEnterTransition(): EnterTransition = fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
+    fun popEnterTransition(reduceMotion: Boolean): EnterTransition =
+        if (reduceMotion) fadeIn(tween(0)) else fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
 
-    fun popExitTransition(): ExitTransition = fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
+    fun popExitTransition(reduceMotion: Boolean): ExitTransition =
+        if (reduceMotion) fadeOut(tween(0)) else fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
 
-    fun enterTransition(): EnterTransition = fadeIn(tween(250)) + slideInHorizontally { it / 2 }
+    fun enterTransition(reduceMotion: Boolean): EnterTransition =
+        if (reduceMotion) fadeIn(tween(0)) else fadeIn(tween(250)) + slideInHorizontally { it / 2 }
 
-    fun exitTransition(): ExitTransition = fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
+    fun exitTransition(reduceMotion: Boolean): ExitTransition =
+        if (reduceMotion) fadeOut(tween(0)) else fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
 }

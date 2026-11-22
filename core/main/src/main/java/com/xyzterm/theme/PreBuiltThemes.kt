@@ -12,7 +12,7 @@ import java.util.Properties
 val blueberry =
     ThemeHolder(
         id = "blueberry-default",
-        name = "BlueBerry (${strings.default_option.getString()})",
+        name = "BlueBerry",
         inheritBase = true,
         lightScheme =
             lightColorScheme(
@@ -147,6 +147,100 @@ val blueberry =
                 // white
                 it["color7"] = "#e0def4"
                 it["color15"] = "#e0def4"
+            },
+    )
+
+// Deck: a dark-first, cyan-accented shell language. Navigation and controls stay
+// stock Material 3; the palette and terminal ANSI colors carry the identity.
+val deck =
+    blueberry.copy(
+        id = "deck",
+        name = "Deck (${strings.default_option.getString()})",
+        lightScheme =
+            lightColorScheme(
+                primary = Color(0xFF006B76),
+                onPrimary = Color(0xFFFFFFFF),
+                primaryContainer = Color(0xFFB8F4FA),
+                onPrimaryContainer = Color(0xFF00282E),
+                secondary = Color(0xFF3F626C),
+                onSecondary = Color(0xFFFFFFFF),
+                secondaryContainer = Color(0xFFCBE6EC),
+                onSecondaryContainer = Color(0xFF0E2A30),
+                tertiary = Color(0xFF5A4B92),
+                onTertiary = Color(0xFFFFFFFF),
+                tertiaryContainer = Color(0xFFE6DEFF),
+                onTertiaryContainer = Color(0xFF1D1740),
+                error = Color(0xFFBA1A1A),
+                errorContainer = Color(0xFFFFDAD6),
+                onError = Color(0xFFFFFFFF),
+                onErrorContainer = Color(0xFF410002),
+                background = Color(0xFFF4F8F9),
+                onBackground = Color(0xFF111B1F),
+                surface = Color(0xFFF4F8F9),
+                onSurface = Color(0xFF111B1F),
+                surfaceVariant = Color(0xFFDCE6E9),
+                onSurfaceVariant = Color(0xFF3F525A),
+                outline = Color(0xFF6F868E),
+                inverseOnSurface = Color(0xFFEDF3F5),
+                inverseSurface = Color(0xFF26343A),
+                inversePrimary = Color(0xFF4DD8E6),
+                surfaceTint = Color(0xFF006B76),
+                outlineVariant = Color(0xFFBCCBD0),
+                scrim = Color(0xFF000000),
+            ),
+        darkScheme =
+            darkColorScheme(
+                primary = Color(0xFF4DD8E6),
+                onPrimary = Color(0xFF00282E),
+                primaryContainer = Color(0xFF0A4A54),
+                onPrimaryContainer = Color(0xFFB8F4FA),
+                secondary = Color(0xFF8BB4C0),
+                onSecondary = Color(0xFF0E2A30),
+                secondaryContainer = Color(0xFF1B3B43),
+                onSecondaryContainer = Color(0xFFCBE6EC),
+                tertiary = Color(0xFFB3A4E6),
+                onTertiary = Color(0xFF1D1740),
+                tertiaryContainer = Color(0xFF392F66),
+                onTertiaryContainer = Color(0xFFE6DEFF),
+                error = Color(0xFFFFB4AB),
+                errorContainer = Color(0xFF93000A),
+                onError = Color(0xFF690005),
+                onErrorContainer = Color(0xFFFFDAD6),
+                background = Color(0xFF0B1114),
+                onBackground = Color(0xFFDCE6E9),
+                surface = Color(0xFF0E161A),
+                onSurface = Color(0xFFDCE6E9),
+                surfaceVariant = Color(0xFF26343A),
+                onSurfaceVariant = Color(0xFFA8BCC3),
+                outline = Color(0xFF6F868E),
+                inverseOnSurface = Color(0xFF0E161A),
+                inverseSurface = Color(0xFFDCE6E9),
+                inversePrimary = Color(0xFF00707D),
+                surfaceTint = Color(0xFF4DD8E6),
+                outlineVariant = Color(0xFF34464D),
+                scrim = Color(0xFF000000),
+            ),
+        darkTerminalColors =
+            Properties().also {
+                it["background"] = Color(0xFF0E161A).toHex()
+                it["foreground"] = Color(0xFFDCE6E9).toHex()
+                it["cursor"] = "#4DD8E6"
+                it["color0"] = "#0B1114"
+                it["color1"] = "#FF6B6B"
+                it["color2"] = "#5FD3A0"
+                it["color3"] = "#F6C177"
+                it["color4"] = "#4DD8E6"
+                it["color5"] = "#B3A4E6"
+                it["color6"] = "#4DD8E6"
+                it["color7"] = "#DCE6E9"
+                it["color8"] = "#6F868E"
+                it["color9"] = "#FF6B6B"
+                it["color10"] = "#5FD3A0"
+                it["color11"] = "#F6C177"
+                it["color12"] = "#4DD8E6"
+                it["color13"] = "#B3A4E6"
+                it["color14"] = "#4DD8E6"
+                it["color15"] = "#FFFFFF"
             },
     )
 
@@ -798,4 +892,4 @@ val ayu =
             },
     )
 
-val builtInThemes = listOf(blueberry, lime, tokyonight, gruvbox, ayu)
+val builtInThemes = listOf(deck, blueberry, lime, tokyonight, gruvbox, ayu)

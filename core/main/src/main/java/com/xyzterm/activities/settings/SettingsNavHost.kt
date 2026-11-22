@@ -1,5 +1,6 @@
 package com.xyzterm.activities.settings
 
+import androidx.compose.animation.core.isReduceMotionEnabled
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -18,13 +19,14 @@ import com.xyzterm.settings.theme.ThemeScreen
 
 @Composable
 fun SettingsNavHost(navController: NavHostController, activity: SettingsActivity) {
+    val reduceMotion = isReduceMotionEnabled()
     NavHost(
         navController = navController,
         startDestination = SettingsRoutes.Settings.route,
-        enterTransition = { NavigationAnimationTransitions.enterTransition() },
-        exitTransition = { NavigationAnimationTransitions.exitTransition() },
-        popEnterTransition = { NavigationAnimationTransitions.popEnterTransition() },
-        popExitTransition = { NavigationAnimationTransitions.popExitTransition() },
+        enterTransition = { NavigationAnimationTransitions.enterTransition(reduceMotion) },
+        exitTransition = { NavigationAnimationTransitions.exitTransition(reduceMotion) },
+        popEnterTransition = { NavigationAnimationTransitions.popEnterTransition(reduceMotion) },
+        popExitTransition = { NavigationAnimationTransitions.popExitTransition(reduceMotion) },
     ) {
         composable(SettingsRoutes.Settings.route) { SettingsScreen(navController) }
         composable(SettingsRoutes.AppSettings.route) { SettingsAppScreen(activity, navController) }

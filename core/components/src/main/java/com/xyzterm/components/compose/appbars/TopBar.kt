@@ -27,8 +27,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.xyzterm.components.compose.icons.ClickableIcon
+import com.xyzterm.resources.strings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +43,7 @@ fun TopBar(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    val navigateUp = stringResource(strings.navigate_up)
 
     if (isExpandedScreen) {
         TopAppBar(
@@ -52,6 +55,7 @@ fun TopBar(
                     ClickableIcon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                         onClick = { backDispatcher?.onBackPressed() },
+                        contentDescription = navigateUp,
                     )
                 }
             },
@@ -67,6 +71,7 @@ fun TopBar(
                     ClickableIcon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                         onClick = { backDispatcher?.onBackPressed() },
+                        contentDescription = navigateUp,
                     )
                 }
             },
