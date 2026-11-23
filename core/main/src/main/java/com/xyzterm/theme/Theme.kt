@@ -67,16 +67,17 @@ fun XyzTheme(
         }
 
     // Stable instance: a fresh Shapes on every recomposition invalidates every
-    // shape-reading composable in the tree.
+    // shape-reading composable in the tree. Expressive scale: soft squircles for
+    // containers, near-pill for sheets and the live session chip.
     val baseShapes = MaterialTheme.shapes
     val shapes =
         remember(baseShapes) {
             baseShapes.copy(
-                extraSmall = RoundedCornerShape(12.dp),
-                small = RoundedCornerShape(16.dp),
-                medium = RoundedCornerShape(20.dp),
-                large = RoundedCornerShape(28.dp),
-                extraLarge = RoundedCornerShape(40.dp),
+                extraSmall = RoundedCornerShape(14.dp),
+                small = RoundedCornerShape(20.dp),
+                medium = RoundedCornerShape(28.dp),
+                large = RoundedCornerShape(32.dp),
+                extraLarge = RoundedCornerShape(48.dp),
             )
         }
 

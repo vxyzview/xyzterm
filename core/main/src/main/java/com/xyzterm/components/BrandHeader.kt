@@ -1,13 +1,11 @@
 package com.xyzterm.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,19 +28,22 @@ fun BrandHeader(modifier: Modifier = Modifier) {
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(52.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
+        Row(modifier = Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                modifier = Modifier.size(56.dp),
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.primaryContainer,
             ) {
-                Icon(
-                    painter = painterResource(drawables.terminal),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(26.dp),
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        painter = painterResource(drawables.terminal),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(28.dp),
+                    )
+                }
             }
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(14.dp))
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(16.dp))
             Column {
                 Text(
                     text = stringResource(strings.app_name),

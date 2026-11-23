@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
@@ -503,7 +504,8 @@ class Terminal : AppCompatActivity() {
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                                 Button(
-                                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                                    shape = CircleShape,
                                     onClick = { finishAffinity() },
                                 ) {
                                     Text(text = stringResource(strings.ok))
@@ -547,7 +549,8 @@ class Terminal : AppCompatActivity() {
                                     color = MaterialTheme.colorScheme.onErrorContainer,
                                 )
                                 Button(
-                                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                                    shape = CircleShape,
                                     onClick = { retryKey++ },
                                 ) {
                                     Text(text = stringResource(strings.retry))
@@ -569,9 +572,9 @@ class Terminal : AppCompatActivity() {
                                 ),
                         ) {
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                                modifier = Modifier.fillMaxWidth().padding(28.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(14.dp),
                             ) {
                                 val progress =
                                     if (totalBytes > 0) {
@@ -579,23 +582,23 @@ class Terminal : AppCompatActivity() {
                                     } else {
                                         null
                                     }
-                                Box(modifier = Modifier.size(120.dp), contentAlignment = Alignment.Center) {
+                                Box(modifier = Modifier.size(140.dp), contentAlignment = Alignment.Center) {
                                     if (progress == null) {
                                         CircularProgressIndicator(
                                             modifier = Modifier.fillMaxSize(),
-                                            strokeWidth = 8.dp,
+                                            strokeWidth = 10.dp,
                                             trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                                         )
                                     } else {
                                         CircularProgressIndicator(
                                             progress = { progress },
                                             modifier = Modifier.fillMaxSize(),
-                                            strokeWidth = 8.dp,
+                                            strokeWidth = 10.dp,
                                             trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                                         )
                                         Text(
                                             text = "${(progress * 100).toInt()}%",
-                                            style = MaterialTheme.typography.headlineSmall,
+                                            style = MaterialTheme.typography.headlineLarge,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary,
                                         )
@@ -603,7 +606,7 @@ class Terminal : AppCompatActivity() {
                                 }
                                 Text(
                                     text = stringResource(strings.install_heading),
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
                                 )
@@ -613,21 +616,25 @@ class Terminal : AppCompatActivity() {
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center,
                                 )
-                                Text(
-                                    text = progressText,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                                )
+                                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer) {
+                                    Text(
+                                        text = progressText,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier =
+                                            Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                                .semantics { liveRegion = LiveRegionMode.Polite },
+                                    )
+                                }
                             }
                         }
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.medium,
+                            shape = MaterialTheme.shapes.large,
                             color = MaterialTheme.colorScheme.warningSurface,
                         ) {
                             Row(
-                                modifier = Modifier.padding(14.dp),
+                                modifier = Modifier.padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Icon(

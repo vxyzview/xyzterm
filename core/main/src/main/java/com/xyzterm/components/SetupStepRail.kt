@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,9 +43,9 @@ fun SetupStepRail(
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(strings.setup_step, step),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 12.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 16.dp),
         )
         if (vertical) {
             labels.forEachIndexed { index, label ->
@@ -55,7 +55,7 @@ fun SetupStepRail(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = if (index == step - 1) FontWeight.SemiBold else FontWeight.Normal,
+                        fontWeight = if (index == step - 1) FontWeight.Bold else FontWeight.Medium,
                         color =
                             if (index < step) {
                                 MaterialTheme.colorScheme.onSurface
@@ -67,8 +67,8 @@ fun SetupStepRail(
                 if (index < labels.lastIndex) {
                     Box(
                         modifier =
-                            Modifier.padding(start = 14.dp)
-                                .size(width = 2.dp, height = 20.dp)
+                            Modifier.padding(start = 15.dp)
+                                .size(width = 3.dp, height = 20.dp)
                                 .background(
                                     if (index < step - 1) {
                                         MaterialTheme.colorScheme.primary
@@ -85,7 +85,7 @@ fun SetupStepRail(
                     if (index > 0) {
                         Box(
                             modifier =
-                                Modifier.height(2.dp)
+                                Modifier.height(3.dp)
                                     .weight(1f)
                                     .background(
                                         if (index < step) {
@@ -104,8 +104,8 @@ fun SetupStepRail(
                 labels.forEachIndexed { index, label ->
                     Text(
                         text = label,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (index == step - 1) FontWeight.SemiBold else FontWeight.Normal,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (index == step - 1) FontWeight.Bold else FontWeight.Medium,
                         color =
                             if (index < step) {
                                 MaterialTheme.colorScheme.primary
@@ -127,17 +127,25 @@ private fun StepNode(
     val done = index < step - 1
     val current = index == step - 1
     if (done) {
-        Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = null,
-            modifier = Modifier.size(30.dp),
-            tint = MaterialTheme.colorScheme.primary,
-        )
+        Box(
+            modifier =
+                Modifier.size(34.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onPrimary,
+            )
+        }
         return
     }
     Box(
         modifier =
-            Modifier.size(30.dp)
+            Modifier.size(34.dp)
                 .clip(CircleShape)
                 .background(
                     if (current) {

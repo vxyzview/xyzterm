@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,22 +36,22 @@ import com.xyzterm.resources.strings
 fun SetupBrand(modifier: Modifier = Modifier) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Surface(
-            modifier = Modifier.size(44.dp),
-            shape = CircleShape,
+            modifier = Modifier.size(48.dp),
+            shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.primaryContainer,
         ) {
             Icon(
                 painter = painterResource(drawables.terminal),
                 contentDescription = null,
-                modifier = Modifier.padding(11.dp),
+                modifier = Modifier.padding(12.dp),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
-        Column(modifier = Modifier.padding(start = 12.dp)) {
+        Column(modifier = Modifier.padding(start = 14.dp)) {
             Text(
                 text = stringResource(strings.app_name),
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
             )
             Text(
                 text = stringResource(strings.setup_tagline),
@@ -63,20 +61,6 @@ fun SetupBrand(modifier: Modifier = Modifier) {
         }
     }
 }
-
-/** Quiet tonal wash that gives the setup steps their own ground without fighting the terminal theme. */
-@Composable
-private fun Modifier.setupBackdrop(): Modifier =
-    background(
-        Brush.verticalGradient(
-            colors =
-                listOf(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
-                    MaterialTheme.colorScheme.background,
-                    MaterialTheme.colorScheme.background,
-                ),
-        ),
-    )
 
 /**
  * Centered frame shared by setup steps. Phone: one column. Wide window: a progress sidebar beside the step content, so
@@ -88,11 +72,11 @@ fun SetupShell(
     scrollState: ScrollState = rememberScrollState(),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize().setupBackdrop()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val expanded = maxWidth >= 840.dp
         if (expanded) {
             Row(
-                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 40.dp, vertical = 32.dp),
+                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 48.dp, vertical = 40.dp),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Column(
@@ -110,7 +94,7 @@ fun SetupShell(
                 }
                 Column(
                     modifier = Modifier.widthIn(max = 560.dp).verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     content()
                 }
@@ -120,13 +104,13 @@ fun SetupShell(
                 modifier =
                     Modifier.fillMaxSize()
                         .safeContentPadding()
-                        .padding(horizontal = 20.dp, vertical = 20.dp)
+                        .padding(horizontal = 24.dp, vertical = 24.dp)
                         .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     SetupBrand()
                     SetupStepRail(step = step)

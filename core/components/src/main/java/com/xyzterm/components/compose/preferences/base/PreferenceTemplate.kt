@@ -48,7 +48,7 @@ fun PreferenceTemplate(
     enabled: Boolean = true,
     applyPaddings: Boolean = true,
     horizontalPadding: Dp = 16.dp,
-    verticalPadding: Dp = 16.dp,
+    verticalPadding: Dp = 18.dp,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     carded: Boolean = true,
     description: @Composable () -> Unit = {},
@@ -78,7 +78,7 @@ fun PreferenceTemplate(
                 Column(Modifier.weight(1f)) {
                     CompositionLocalProvider(
                         LocalContentColor provides MaterialTheme.colorScheme.onBackground,
-                        LocalTextStyle provides MaterialTheme.typography.bodyLarge,
+                        LocalTextStyle provides MaterialTheme.typography.titleSmall,
                     ) {
                         title()
                     }

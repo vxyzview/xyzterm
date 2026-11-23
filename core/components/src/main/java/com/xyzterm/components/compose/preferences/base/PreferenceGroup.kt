@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -50,11 +51,12 @@ fun PreferenceGroupHeading(heading: String?, modifier: Modifier = Modifier) {
     if (heading != null) {
         Column(
             verticalArrangement = Arrangement.Center,
-            modifier = modifier.height(48.dp).padding(horizontal = 32.dp).fillMaxWidth(),
+            modifier = modifier.height(56.dp).padding(horizontal = 32.dp).fillMaxWidth(),
         ) {
             Text(
                 text = heading,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.semantics { this.heading() },
             )

@@ -50,55 +50,68 @@ fun generateTypography(fontFamily: FontFamily): Typography =
         displayLarge =
             TextStyle(
                 fontFamily = fontFamily,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 fontSize = 57.sp,
                 lineHeight = 64.sp,
-                letterSpacing = (-0.02).sp,
+                letterSpacing = (-0.03).sp,
             ),
         displayMedium =
             TextStyle(
                 fontFamily = fontFamily,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 fontSize = 45.sp,
                 lineHeight = 52.sp,
-                letterSpacing = (-0.02).sp,
+                letterSpacing = (-0.03).sp,
             ),
         displaySmall =
             TextStyle(
                 fontFamily = fontFamily,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 fontSize = 36.sp,
                 lineHeight = 44.sp,
-                letterSpacing = (-0.01).sp,
+                letterSpacing = (-0.02).sp,
             ),
         headlineLarge =
             TextStyle(
                 fontFamily = fontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 34.sp,
                 lineHeight = 40.sp,
-                letterSpacing = (-0.01).sp,
+                letterSpacing = (-0.02).sp,
             ),
         headlineMedium =
             TextStyle(
                 fontFamily = fontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp,
                 lineHeight = 36.sp,
+                letterSpacing = (-0.015).sp,
             ),
         headlineSmall =
             TextStyle(
                 fontFamily = fontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 26.sp,
                 lineHeight = 32.sp,
+                letterSpacing = (-0.01).sp,
             ),
         titleLarge =
-            TextStyle(fontFamily = fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 28.sp),
+            TextStyle(
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                lineHeight = 30.sp,
+                letterSpacing = (-0.01).sp,
+            ),
         titleMedium =
-            TextStyle(fontFamily = fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 24.sp),
+            TextStyle(
+                fontFamily = fontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                lineHeight = 24.sp,
+            ),
         titleSmall =
-            TextStyle(fontFamily = fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, lineHeight = 20.sp),
+            TextStyle(fontFamily = fontFamily, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 20.sp),
         bodyLarge =
             TextStyle(fontFamily = fontFamily, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp),
         bodyMedium =
@@ -108,8 +121,8 @@ fun generateTypography(fontFamily: FontFamily): Typography =
         labelLarge =
             TextStyle(
                 fontFamily = fontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp,
                 lineHeight = 20.sp,
                 letterSpacing = 0.01.sp,
             ),

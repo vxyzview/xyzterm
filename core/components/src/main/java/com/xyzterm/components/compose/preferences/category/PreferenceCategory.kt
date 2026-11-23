@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -60,17 +61,23 @@ fun PreferenceCategory(
             }
         },
         startWidget = {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(32.dp)) {
-                if (iconResource != null) {
-                    Icon(
-                        painter = painterResource(id = iconResource),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
-                if (startWidget != null) {
-                    startWidget()
+            Surface(
+                modifier = Modifier.size(44.dp),
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (iconResource != null) {
+                        Icon(
+                            painter = painterResource(id = iconResource),
+                            contentDescription = null,
+                            modifier = Modifier.size(22.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                    }
+                    if (startWidget != null) {
+                        startWidget()
+                    }
                 }
             }
         },

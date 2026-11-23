@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
@@ -37,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -127,7 +130,7 @@ private fun PermissionStep(
     SetupShell(step = 2) {
         Text(
             text = stringResource(strings.permission_heading),
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
         )
         Text(
@@ -136,11 +139,18 @@ private fun PermissionStep(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        Text(
-            text = stringResource(strings.permission_allowed_count, allowed, required),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = stringResource(strings.permission_allowed_count, allowed, required),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 10.dp),
+            )
+        }
 
         PermissionCard(
             icon = Icons.Outlined.Info,
@@ -165,7 +175,8 @@ private fun PermissionStep(
         }
 
         Button(
-            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            shape = CircleShape,
             enabled = canContinue,
             onClick = onContinue,
         ) {
@@ -176,9 +187,11 @@ private fun PermissionStep(
                 text = stringResource(strings.permission_later),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth(),
             )
             OutlinedButton(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                shape = CircleShape,
                 onClick = {
                     skipped = true
                     onContinue()
@@ -201,15 +214,16 @@ private fun PermissionCard(
     Card(
         modifier =
             Modifier.fillMaxWidth()
-                .heightIn(min = 88.dp)
-                .semantics { role = Role.Button }
+                .heightIn(min = 104.dp)
+                // A granted row is a status, not an action: don't announce it as a button.
+                .semantics { if (!granted) role = Role.Button }
                 .clickable(
                     enabled = !granted,
                     onClickLabel =
                         stringResource(if (granted) strings.permission_granted else strings.permission_not_granted),
                     onClick = onClick,
                 ),
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.large,
         colors =
             CardDefaults.cardColors(
                 containerColor =
@@ -221,12 +235,12 @@ private fun PermissionCard(
             ),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(18.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
-                modifier = Modifier.size(46.dp),
-                shape = CircleShape,
+                modifier = Modifier.size(48.dp),
+                shape = MaterialTheme.shapes.medium,
                 color =
                     if (granted) {
                         MaterialTheme.colorScheme.primary
@@ -237,7 +251,7 @@ private fun PermissionCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(13.dp),
                     tint =
                         if (granted) {
                             MaterialTheme.colorScheme.onPrimary
@@ -248,7 +262,7 @@ private fun PermissionCard(
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Text(text = label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
@@ -266,23 +280,31 @@ private fun PermissionCard(
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
-            if (granted) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = stringResource(strings.permission_granted),
-                    modifier = Modifier.size(28.dp),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            } else {
-                Box(
-                    modifier =
-                        Modifier.size(28.dp)
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = CircleShape,
-                            ),
-                )
+            Box(
+                modifier =
+                    Modifier.size(28.dp)
+                        .clip(CircleShape)
+                        .background(if (granted) MaterialTheme.colorScheme.primary else Color.Transparent)
+                        .border(
+                            width = 3.dp,
+                            color =
+                                if (granted) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.outline
+                                },
+                            shape = CircleShape,
+                        ),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (granted) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                    )
+                }
             }
         }
     }
