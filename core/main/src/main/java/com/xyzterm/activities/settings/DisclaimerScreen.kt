@@ -47,6 +47,8 @@ fun DisclaimerScreen(
     onDecline: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
+    val termsTitle = stringResource(strings.terms_title)
+    val termsIntro = stringResource(strings.disclaimer_read_carefully)
     var consentChecked by remember { mutableStateOf(false) }
     // Consent gate: terms read to the end AND the checkbox acknowledged.
     val canAccept by remember { derivedStateOf { !scrollState.canScrollForward && consentChecked } }
@@ -56,16 +58,11 @@ fun DisclaimerScreen(
         scrollState = scrollState,
         brandTrailing = {
             IconButton(
-                onClick = {
-                    dialogRes(
-                        title = stringResource(strings.terms_title),
-                        msg = stringResource(strings.disclaimer_read_carefully),
-                    )
-                },
+                onClick = { dialogRes(title = termsTitle, msg = termsIntro) },
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Info,
-                    contentDescription = stringResource(strings.terms_title),
+                    contentDescription = termsTitle,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -74,12 +71,12 @@ fun DisclaimerScreen(
         // Small top offset so the terms don't sit flush against the step rail.
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = stringResource(strings.terms_title),
+            text = termsTitle,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = stringResource(strings.disclaimer_read_carefully),
+            text = termsIntro,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
