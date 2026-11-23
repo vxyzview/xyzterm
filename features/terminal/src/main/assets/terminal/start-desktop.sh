@@ -82,9 +82,41 @@ fi
 
 DISPLAY="${X11_DISPLAY:-:0}"
 export DISPLAY
+# Termux:X11 puts its socket at $TMPDIR/.X11-unix/X<n>. Inside proot that must
+# be the guest /tmp, otherwise clients see a stale lock but cannot connect.
+export TMPDIR=/tmp
 export XKB_CONFIG_ROOT="${XKB_CONFIG_ROOT:-/usr/share/X11/xkb}"
+mkdir -p /tmp/.X11-unix
+chmod 1777 /tmp/.X11-unix
 
-termux-x11 "$DISPLAY" >/dev/null 2>&1 &
-sleep 2
+num=${DISPLAY##*:}
+num=${num%%.*}
+SOCKET="/tmp/.X11-unix/X$num"
 
+if [ ! -S "$SOCKET" ]; then
+    # Only a lock with no socket is stale; never remove a live server's lock.
+    rm -f "/tmp/.X$num-lock"
+    XLOG=/tmp/termux-x11.log
+    termux-x11 "$DISPLAY" >"$XLOG" 2>&1 &
+    tries=0
+    while [ ! -S "$SOCKET" ] && [ "$tries" -lt 20 ]; do
+        sleep 1
+        tries=$((tries + 1))
+    done
+    if [ ! -S "$SOCKET" ]; then
+        echo "Termux:X11 did not start on $DISPLAY:" >&2
+        cat "$XLOG" >&2 2>/dev/null || true
+        exit 1
+    fi
+fi
+
+# Desktop sessions need a D-Bus session bus and an XDG runtime dir.
+uid=$(id -u 2>/dev/null || echo 0)
+export XDG_RUNTIME_DIR="/tmp/runtime-$uid"
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
+
+if command -v dbus-launch >/dev/null 2>&1; then
+    exec dbus-launch --exit-with-session sh -c "$CMD"
+fi
 exec sh -c "$CMD"
