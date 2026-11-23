@@ -154,44 +154,23 @@ jobs:
           esac
           NOTES_FILE="$RUNNER_TEMP/xyzterm-release-notes.md"
           cat > "$NOTES_FILE" <<'RELEASE_NOTES'
-          ## xyzterm 1.0.0 — a real Arch Linux shell in your pocket
+          ## xyzterm 1.0.1 — calmer, leaner, more consistent
 
-          This is the first packaged 1.0.0 release. It ships a proot-based **Arch Linux ARM (archm)** userspace inside the APK — no root, no telemetry, no tracking, and no runtime rootfs download.
+          A maintenance release on top of 1.0.0. The shell, bundled Arch Linux rootfs, sessions, custom binds and backups are unchanged; this release is about a cleaner app and a consistent interface.
 
-          ### Highlights
-          - **Arch Linux instead of Ubuntu.** Rootfs images come from the latest [vxyzview/archm](https://github.com/vxyzview/archm) release, verified against its published SHA-256 at build time.
-          - **Bundled, not downloaded.** Both `arm64` and `arm` rootfs images ship inside one APK. First launch stages the right one locally and unpacks it directly; there is no separate download step.
-          - **Session-first UI.** A session-first terminal header and drawer, a searchable settings hub, and terminal settings grouped into Appearance / Input / Data / Advanced.
-          - **Guided setup.** Terms, optional permissions, then a single install progress card — no raw logs and no unthemed first shell.
-          - **No proot extraction.** First launch unpacks the rootfs directly on the device instead of paying a ptrace stop per syscall.
-          - **Honest setup states.** Live copy progress plus a working Retry path if staging fails.
-          - **Smoother UI.** Parallel terminal health checks, batched log rendering, off-main font parsing, memoized theme shapes and stable list keys.
-          - **Faster startup.** Off-main font preload, no duplicate directory scan on composition, and signature checks off the UI thread.
+          ### Changed
+          - Removed about 2,280 lines of dead and unused code left over from the editor-era fork: orphaned file-type icons, dialogs, components and helpers.
+          - Carried the Material You "Session Deck" look across every screen: expressive type scale, rounded tonal surfaces, critically damped navigation, and teaching empty states for sessions, snippets, binds and backups.
+          - Accessibility: radio selection is announced, decorative icons stay silent, first-run buttons meet the 48dp target, and permission cards are announced as buttons.
+          - The extra-keys editor now follows the resolved app typography (line height and tracking) instead of a static fallback.
 
-          ### Features
-          - Full terminal emulator with named, persistent sessions
-          - 4 built-in themes; Material You dynamic color is the default, AMOLED black available
-          - Remappable keybindings, extra-keys row, snippets and custom binds
-          - Backup / restore of the whole sandbox as `.tar.gz`
-          - Optional SAF document provider, quick-settings tile and `xyzterm://session/...` deep links
-          - No analytics, no crash reporting to third parties
+          ### Fixed
+          - A build-breaking composable call inside a non-composable semantics lambda in the terminal drawer header.
 
           ### Requirements and install
-          - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`
-          - **x86_64 is not supported** — archm publishes no x86_64 rootfs
-          - Download the APK for your device: `xyzterm-1.0.0-arm64.apk` (arm64) or `xyzterm-1.0.0-arm.apk` (armv7), install it, then open the app.
-          - The rootfs is unpacked during the build from the latest verified archm release; the app copies it in place on first launch without running tar or proot.
-          - Each APK is around 200 MB (one rootfs). This may still exceed F-Droid's size limits; F-Droid build metadata is included in the repo.
-
-          ### Verification
-          - CI verifies the downloaded archive against the checksum published with the archm release, then unpacks it before packaging.
-          - CI verifies both bundled APK asset names and bytes before publishing.
-          - Releases are signed with the repository's persistent signing key; see `docs/CONTRIBUTING.md` for reproducible-build steps.
-
-          ### Known limitations
-          - First launch copies the prepared rootfs into app storage once; this is a short, progress-tracked step.
-          - Existing installs that already contain an Ubuntu sandbox keep that userspace until the app data is removed and reinstalled.
-          - Some localized strings still fall back to English.
+          - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`. x86_64 is not supported.
+          - Install `xyzterm-1.0.1-arm64.apk` (arm64) or `xyzterm-1.0.1-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
+          - Signed with the repository's persistent key, so it installs over 1.0.0.
 
           Licensed under GPL-3.0-or-later. Built from source on GitHub Actions.
           RELEASE_NOTES
