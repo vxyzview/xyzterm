@@ -20,15 +20,10 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -87,114 +82,6 @@ fun PreferenceLayout(
             scrollState = scrollState,
             content = content,
         )
-    }
-}
-
-@Composable
-fun RefreshablePreferenceLayout(
-    label: String,
-    isRefreshing: Boolean,
-    onRefresh: () -> Unit,
-    modifier: Modifier = Modifier,
-    backArrowVisible: Boolean = true,
-    isExpandedScreen: Boolean = LocalIsExpandedScreen.current,
-    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
-    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
-    scrollState: ScrollState? = rememberScrollState(),
-    fab: (@Composable () -> Unit) = {},
-    actions: @Composable RowScope.() -> Unit = {},
-    bottomBar: @Composable () -> Unit = { BottomSpacer() },
-    snackbarHost: @Composable () -> Unit = {},
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    val state = rememberPullToRefreshState()
-    val stretchEnabled = !isRefreshing && state.distanceFraction == 0f
-
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = onRefresh,
-        state = state,
-        indicator = {
-            PullToRefreshDefaults.Indicator(
-                state = state,
-                isRefreshing = isRefreshing,
-                modifier =
-                    Modifier.align(Alignment.TopCenter).padding(top = TopAppBarDefaults.MediumAppBarExpandedHeight),
-            )
-        },
-    ) {
-        PreferenceScaffold(
-            modifier = modifier,
-            backArrowVisible = backArrowVisible,
-            label = label,
-            isExpandedScreen = isExpandedScreen,
-            actions = actions,
-            bottomBar = bottomBar,
-            fab = fab,
-            snackbarHost = snackbarHost,
-        ) {
-            PreferenceColumn(
-                contentPadding = it,
-                verticalArrangement = verticalArrangement,
-                horizontalAlignment = horizontalAlignment,
-                scrollState = scrollState,
-                stretchEnabled = stretchEnabled,
-                content = content,
-            )
-        }
-    }
-}
-
-@Composable
-fun RefreshablePreferenceLayoutLazyColumn(
-    label: String,
-    isRefreshing: Boolean,
-    onRefresh: () -> Unit,
-    modifier: Modifier = Modifier,
-    backArrowVisible: Boolean = true,
-    isExpandedScreen: Boolean = LocalIsExpandedScreen.current,
-    enabled: Boolean = true,
-    lazyListState: LazyListState = rememberLazyListState(),
-    fab: (@Composable () -> Unit) = {},
-    actions: @Composable RowScope.() -> Unit = {},
-    bottomBar: @Composable () -> Unit = { BottomSpacer() },
-    snackbarHost: @Composable () -> Unit = {},
-    content: LazyListScope.() -> Unit,
-) {
-    val state = rememberPullToRefreshState()
-    val stretchEnabled = !isRefreshing && state.distanceFraction == 0f
-
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = onRefresh,
-        state = state,
-        indicator = {
-            PullToRefreshDefaults.Indicator(
-                state = state,
-                isRefreshing = isRefreshing,
-                modifier =
-                    Modifier.align(Alignment.TopCenter).padding(top = TopAppBarDefaults.MediumAppBarExpandedHeight),
-            )
-        },
-    ) {
-        PreferenceScaffold(
-            backArrowVisible = backArrowVisible,
-            label = label,
-            isExpandedScreen = isExpandedScreen,
-            actions = actions,
-            bottomBar = bottomBar,
-            fab = fab,
-            snackbarHost = snackbarHost,
-        ) {
-            PreferenceLazyColumn(
-                contentPadding = it,
-                modifier = modifier,
-                enabled = enabled,
-                state = lazyListState,
-                stretchEnabled = stretchEnabled,
-                content = content,
-            )
-        }
     }
 }
 

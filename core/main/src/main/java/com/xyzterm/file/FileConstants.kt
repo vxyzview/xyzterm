@@ -8,10 +8,6 @@ fun getPrivateDir(context: Context = application!!): File {
     return context.filesDir.createDirIfNot().parentFile!!.createDirIfNot()
 }
 
-fun getCacheDir(context: Context = application!!): File {
-    return context.cacheDir.createDirIfNot()
-}
-
 fun localDir(context: Context = application!!): File {
     return getPrivateDir(context).child("local").also { it.createDirIfNot() }
 }
@@ -30,12 +26,4 @@ fun sandboxDir(context: Context = application!!): File {
 
 fun sandboxHomeDir(context: Context = application!!): File {
     return localDir(context).child("home").createDirIfNot()
-}
-
-fun themeDir(context: Context = application!!): File {
-    return localDir(context).child("themes").createDirIfNot()
-}
-
-fun persistentTempDir(context: Context = application!!): File {
-    return getCacheDir(context).child("tempFiles").createDirIfNot()
 }

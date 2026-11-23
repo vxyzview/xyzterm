@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,16 +27,5 @@ fun ResetButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
             Icon(painter = painterResource(drawables.refresh), contentDescription = stringResource(strings.reset_all))
             Text(text = stringResource(id = strings.reset_all))
         }
-    }
-}
-
-@Composable
-fun ResetButtonSmall(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    IconButton(
-        modifier = modifier,
-        colors = IconButtonDefaults.iconButtonColors().copy(contentColor = MaterialTheme.colorScheme.error),
-        onClick = onClick,
-    ) {
-        Icon(painter = painterResource(drawables.refresh), contentDescription = null)
     }
 }

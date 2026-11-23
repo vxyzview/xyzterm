@@ -48,7 +48,3 @@ fun EmptyState(
         }
     }
 }
-
-@Composable
-fun StateScreen(painter: Painter, text: String, color: Color = LocalContentColor.current) =
-    EmptyState(painter = painter, text = text, color = color)

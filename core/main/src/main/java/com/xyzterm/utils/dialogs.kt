@@ -1,7 +1,6 @@
 package com.xyzterm.utils
 
 import android.app.Activity
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +34,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.xyzterm.extension.ActivityProvider
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
-import com.xyzterm.settings.Settings
 import com.xyzterm.theme.XyzTheme
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.delay
@@ -52,7 +50,7 @@ class DialogRequest(
 )
 
 /**
- * Process-singleton store for state-hoisted dialogs. [dialog], [composableDialog] and [LoadingPopup] push requests
+ * Process-singleton store for state-hoisted dialogs. [dialog] and [LoadingPopup] push requests
  * here; every activity root must compose [AppDialogHost] once so the requests render.
  */
 object DialogHost {
@@ -65,7 +63,6 @@ object DialogHost {
 
     fun push(request: DialogRequest) {
         dialogs.add(request)
-        isDialogShowing = true
     }
 
     fun pushLoading(request: DialogRequest) {
@@ -73,10 +70,8 @@ object DialogHost {
     }
 
     fun remove(id: Long) {
-        val removed = dialogs.removeAll { it.id == id } or loadings.removeAll { it.id == id }
-        if (removed && dialogs.isEmpty() && loadings.isEmpty()) {
-            isDialogShowing = false
-        }
+        dialogs.removeAll { it.id == id }
+        loadings.removeAll { it.id == id }
     }
 }
 
@@ -134,72 +129,6 @@ private fun HostEntry(request: DialogRequest) {
         XyzTheme { request.content() }
     }
 }
-
-fun errorDialog(
-    activity: Activity? = ActivityProvider.currentActivity,
-    title: String = strings.error.getString(),
-    msg: String,
-) {
-    Log.e("ERROR_DIALOG", msg)
-
-    runOnUiThread {
-        if (msg.isBlank()) {
-            Log.w("ERROR_DIALOG", "Message is blank")
-            return@runOnUiThread
-        }
-        if (msg.contains("Job was cancelled")) {
-            Log.w("ERROR_DIALOG", msg)
-            return@runOnUiThread
-        }
-
-        dialogRes(activity = activity, title = title, msg = msg, onOk = {})
-    }
-}
-
-fun errorDialog(@StringRes msgRes: Int) {
-    runOnUiThread { errorDialog(msg = msgRes.getString()) }
-}
-
-fun errorDialog(
-    activity: Activity? = ActivityProvider.currentActivity,
-    throwable: Throwable,
-    title: String = strings.error.getString(),
-) {
-    runOnUiThread {
-        if (throwable.message.toString().contains("Job was cancelled")) {
-            Log.w("ERROR_DIALOG", throwable.message.toString())
-            return@runOnUiThread
-        }
-        val message = StringBuilder()
-        throwable.let {
-            message.append(it.message).append("\n")
-            if (Settings.verbose_error) {
-                message.append(it.stackTraceToString()).append("\n")
-            }
-        }
-
-        errorDialog(activity = activity, title = title, msg = message.toString())
-    }
-}
-
-fun errorDialog(exception: Exception) {
-    val message = StringBuilder()
-    exception.let {
-        var msg = it.message
-        if (msg.isNullOrBlank()) {
-            msg = it.javaClass.simpleName.replace("Exception", "")
-        }
-        message.append(msg).append("\n")
-        if (Settings.verbose_error) {
-            message.append(it.stackTraceToString()).append("\n")
-        }
-    }
-
-    errorDialog(msg = message.toString())
-}
-
-var isDialogShowing = false
-    private set
 
 fun dialogRes(
     activity: Activity? = ActivityProvider.currentActivity,
@@ -312,27 +241,4 @@ private fun DialogContent(
             TextButton(onClick = { onOk() }) { Text(okString) }
         }
     }
-}
-
-/**
- * Shows a custom composable dialog that survives configuration changes.
- *
- * The composable receives `null` instead of an [AlertDialog]; there is no AppCompat handle anymore. Callers must treat
- * the parameter as nullable-and-always-null.
- */
-fun composableDialog(
-    activity: Activity? = ActivityProvider.currentActivity,
-    cancelable: Boolean = true,
-    composable: @Composable (AlertDialog?) -> Unit,
-) {
-    if (activity == null) {
-        toast(strings.unknown_error)
-        return
-    }
-    val id = DialogHost.nextId()
-    DialogHost.push(
-        DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = cancelable) {
-            Surface(shape = MaterialTheme.shapes.large, tonalElevation = 1.dp) { composable(null) }
-        },
-    )
 }

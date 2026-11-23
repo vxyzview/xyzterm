@@ -6,47 +6,25 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.PictureDrawable
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
-import android.text.style.StrikethroughSpan
-import android.text.style.StyleSpan
-import android.text.style.UnderlineSpan
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.core.net.toUri
 import com.caverock.androidsvg.SVG
 import com.xyzterm.extension.ActivityProvider
-import com.xyzterm.file.BuiltinFileType
-import com.xyzterm.resources.getQuantityString
 import com.xyzterm.resources.getString
-import com.xyzterm.resources.plurals
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import java.io.File
 import java.io.InputStream
-import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 fun runOnUiThread(runnable: Runnable) {
     // No coroutine needed: post directly to the main looper.
@@ -121,11 +99,6 @@ fun Context.openUrl(url: String) {
     }
 }
 
-fun hasHardwareKeyboard(context: Context): Boolean {
-    val configuration = context.resources.configuration
-    return configuration.keyboard != Configuration.KEYBOARD_NOKEYS
-}
-
 @Suppress("DEPRECATION")
 fun origin(): String {
     return application!!.run {
@@ -135,13 +108,6 @@ fun origin(): String {
             return@run packageManager.getInstallerPackageName(packageName).toString()
         }
     }
-}
-
-// lazy: origin() touches application!! which is only set in App.onCreate;
-// class-init order must never depend on that.
-val isV by lazy {
-    byteArrayOf(99, 111, 109, 46, 97, 110, 100, 114, 111, 105, 100, 46, 118, 101, 110, 100, 105, 110, 103)
-        .toString(Charsets.UTF_8) == origin()
 }
 
 fun copyToClipboard(label: String, text: String, showToast: Boolean = true) {
@@ -155,19 +121,6 @@ fun copyToClipboard(label: String, text: String, showToast: Boolean = true) {
 
 fun copyToClipboard(text: String, showToast: Boolean = true) {
     copyToClipboard(label = "xyzterm", text, showToast = showToast)
-}
-
-fun expectOOM(requiredMemBytes: Long): Boolean {
-    val runtime = Runtime.getRuntime()
-    val maxMemory = runtime.maxMemory()
-    val allocatedMemory = runtime.totalMemory()
-    val freeMemory = runtime.freeMemory()
-    val usedMemory = allocatedMemory - freeMemory
-    val availableMemory = maxMemory - usedMemory
-    val safetyBuffer = 8L * 1024 * 1024 // 8MB
-    val requiredMemory = requiredMemBytes + safetyBuffer
-
-    return requiredMemory > availableMemory
 }
 
 fun getSourceDirOfPackage(context: Context, packageName: String): String? {
@@ -187,58 +140,6 @@ fun getTempDir(): File {
     return tmp
 }
 
-/** Converts a [Spanned] text object to an [AnnotatedString]. */
-fun Spanned.toAnnotatedString(): AnnotatedString {
-    val builder = AnnotatedString.Builder(this.toString())
-    val spans = getSpans(0, length, Any::class.java)
-    spans.forEach { span ->
-        val start = getSpanStart(span)
-        val end = getSpanEnd(span)
-        val style =
-            when (span) {
-                is ForegroundColorSpan -> SpanStyle(color = Color(span.foregroundColor))
-                is StyleSpan ->
-                    when (span.style) {
-                        Typeface.BOLD -> SpanStyle(fontWeight = FontWeight.Bold)
-                        Typeface.ITALIC -> SpanStyle(fontStyle = FontStyle.Italic)
-                        Typeface.BOLD_ITALIC -> SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
-                        else -> null
-                    }
-                is UnderlineSpan -> SpanStyle(textDecoration = TextDecoration.Underline)
-                is StrikethroughSpan -> SpanStyle(textDecoration = TextDecoration.LineThrough)
-                else -> null
-            }
-        if (style != null) {
-            builder.addStyle(style, start, end)
-        }
-    }
-    return builder.toAnnotatedString()
-}
-
-// Helper function copied from
-// https://github.com/MohamedRejeb/compose-dnd/blob/65d48ed0f0bd83a0b01263b7e046864bdd4a9048/sample/common/src/commonMain/kotlin/utils/ScrollUtils.kt
-suspend fun handleLazyListScroll(lazyListState: LazyListState, dropIndex: Int): Unit = coroutineScope {
-    val firstVisibleItemIndex = lazyListState.firstVisibleItemIndex
-    val firstVisibleItemScrollOffset = lazyListState.firstVisibleItemScrollOffset
-
-    // Workaround to fix scroll issue when dragging the first item
-    if (dropIndex == 0 || dropIndex == 1) {
-        launch { lazyListState.scrollToItem(firstVisibleItemIndex, firstVisibleItemScrollOffset) }
-    }
-
-    // Animate scroll when entering the first or last item
-    val lastVisibleItemIndex = lazyListState.firstVisibleItemIndex + lazyListState.layoutInfo.visibleItemsInfo.lastIndex
-
-    val firstVisibleItem = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull() ?: return@coroutineScope
-    val scrollAmount = firstVisibleItem.size * 2f
-
-    if (dropIndex <= firstVisibleItemIndex + 1) {
-        launch { lazyListState.animateScrollBy(-scrollAmount) }
-    } else if (dropIndex == lastVisibleItemIndex) {
-        launch { lazyListState.animateScrollBy(scrollAmount) }
-    }
-}
-
 fun hasBinaryChars(text: String): Boolean {
     val threshold = 0.3
     val checkedCharacters = 1024
@@ -256,20 +157,6 @@ fun hasBinaryChars(text: String): Boolean {
 
     // If the amount of unusual control chars in the file content is over 30%
     return unusualCharCount.toDouble() / checkText.length > threshold
-}
-
-private val binaryExtensions: Set<String> =
-    (BuiltinFileType.IMAGE.extensions +
-            BuiltinFileType.AUDIO.extensions +
-            BuiltinFileType.VIDEO.extensions +
-            BuiltinFileType.ARCHIVE.extensions +
-            BuiltinFileType.APK.extensions +
-            BuiltinFileType.EXECUTABLE.extensions)
-        .map { it.lowercase() }
-        .toSet()
-
-fun isBinaryExtension(fileExt: String): Boolean {
-    return fileExt.lowercase() in binaryExtensions
 }
 
 fun formatFileSize(bytes: Long): String {
@@ -297,35 +184,9 @@ fun formatNumberCompact(number: Int): String {
     return String.format("%.1f%s", value, suffix[index]).replace(".0", "")
 }
 
-@Composable
-fun rememberNumberFormatter(): NumberFormat {
-    return remember { NumberFormat.getNumberInstance() }
-}
-
 /** Parses a string of comma or space-separated file extensions into a uniform list of extensions (without the dot). */
 fun parseExtensions(input: String): List<String> {
     return input.split(",", " ").map { it.trim().trimStart('.') }.filter { it.isNotEmpty() }
-}
-
-fun timeAgo(currentTimeMillis: Long, startTimeMillis: Long): String? {
-    if (startTimeMillis == -1L) return null
-
-    val diff = (currentTimeMillis - startTimeMillis)
-    if (diff < 0) return null
-
-    val seconds = (diff / 1000).toInt()
-    val minutes = seconds / 60
-    val hours = minutes / 60
-    val days = hours / 24
-
-    if (seconds < 1) return strings.time_just_now.getString()
-
-    return when {
-        seconds < 60 -> plurals.time_seconds_ago.getQuantityString(seconds, seconds)
-        minutes < 60 -> plurals.time_minutes_ago.getQuantityString(minutes, minutes)
-        hours < 24 -> plurals.time_hours_ago.getQuantityString(hours, hours)
-        else -> plurals.time_days_ago.getQuantityString(days, days)
-    }
 }
 
 fun loadSvg(inputStream: InputStream): Drawable? {

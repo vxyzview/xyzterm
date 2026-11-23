@@ -17,8 +17,6 @@ import com.xyzterm.utils.AppDialogHost
 import com.xyzterm.utils.toast
 import java.lang.ref.WeakReference
 
-var snackbarHostStateRef: WeakReference<SnackbarHostState?> = WeakReference(null)
-
 class SettingsActivity : AppCompatActivity() {
     val fileManager = FileManager(this)
 
@@ -45,7 +43,6 @@ class SettingsActivity : AppCompatActivity() {
                         SettingsNavHost(activity = this@SettingsActivity, navController = navController)
 
                         val snackbarHostState = remember { SnackbarHostState() }
-                        LaunchedEffect(snackbarHostState) { snackbarHostStateRef = WeakReference(snackbarHostState) }
 
                         LaunchedEffect(intent) {
                             if (intent.hasExtra("route")) {

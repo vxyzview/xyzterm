@@ -1,6 +1,5 @@
 package com.xyzterm.events
 
-import com.xyzterm.file.FileObject
 import com.xyzterm.settings.debugOptions.LogEntry
 import com.xyzterm.theme.ThemeHolder
 import com.xyzterm.utils.logError
@@ -9,34 +8,6 @@ import kotlin.reflect.KClass
 
 /** Base interface for all events in the application. */
 interface Event
-
-/** Events related to file system operations. */
-sealed interface FileEvent : Event {
-
-    /** Event triggered when a new file or directory is created. */
-    data class Created(val file: FileObject) : FileEvent
-
-    /** Event triggered when a file or directory is deleted. */
-    data class Deleted(val path: String) : FileEvent
-
-    /** Event triggered when a file or directory is renamed. */
-    data class Renamed(
-        val file: FileObject,
-        val oldPath: String,
-    ) : FileEvent
-
-    /** Event triggered when a file or directory is moved. */
-    data class Moved(
-        val file: FileObject,
-        val oldPath: String,
-    ) : FileEvent
-
-    /** Event triggered when a file or directory is copied. */
-    data class Copied(
-        val file: FileObject,
-        val sourcePath: String,
-    ) : FileEvent
-}
 
 /** General application-level events. */
 sealed interface AppEvent : Event {

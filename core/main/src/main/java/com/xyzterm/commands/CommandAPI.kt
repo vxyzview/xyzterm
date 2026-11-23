@@ -95,8 +95,4 @@ abstract class Command {
     override fun hashCode(): Int = id.hashCode()
 }
 
-interface ToggleableCommand {
-    fun isOn(): Boolean
-}
-
 abstract class GlobalCommand : Command()

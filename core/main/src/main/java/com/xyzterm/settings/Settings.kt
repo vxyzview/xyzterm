@@ -358,12 +358,6 @@ object Preference {
     }
 }
 
-class CachedExtensionPreference<T>(
-    id: String,
-    key: String,
-    defaultValue: T,
-) : CachedPreference<T>("$id.$key", defaultValue)
-
 @Suppress("UNCHECKED_CAST")
 open class CachedPreference<T>(val key: String, val defaultValue: T) : ReadWriteProperty<Any?, T> {
     private var state by mutableStateOf(loadInitialValue())

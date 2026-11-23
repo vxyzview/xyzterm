@@ -9,22 +9,15 @@ import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.StringRes
 import androidx.lifecycle.lifecycleScope
 import com.xyzterm.DefaultScope
-import com.xyzterm.resources.getString
 import com.xyzterm.utils.application
-import com.xyzterm.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.net.io.Util.copyStream
 
-var to_save_file: FileObject? = null
-
 class FileManager(private val activity: ComponentActivity) {
-
-    private fun getString(@StringRes id: Int): String = id.getString()
 
     // Generic activity result handler
     private val activityResultLauncher =
@@ -63,19 +56,6 @@ class FileManager(private val activity: ComponentActivity) {
                     callback(null)
                 }
             }
-        }
-    }
-
-    fun requestOpenDirectory(callback: (Uri?) -> Unit) {
-        launchDirectoryPicker { uri ->
-            uri?.let {
-                runCatching {
-                    val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    activity.contentResolver.takePersistableUriPermission(it, takeFlags)
-                }
-                    .onFailure { e -> e.printStackTrace() }
-            }
-            callback(uri)
         }
     }
 
@@ -142,36 +122,7 @@ class FileManager(private val activity: ComponentActivity) {
         }
     }
 
-    fun selectDirForNewFileLaunch(fileName: String, callback: (FileObject?) -> Unit = {}) {
-        launchDirectoryPicker { uri ->
-            if (uri == null) {
-                callback(null)
-                return@launchDirectoryPicker
-            }
-
-            // ponytail: the try/catch must live inside the launched coroutine —
-            // createChild -> childSafe throws IllegalArgumentException for a name with
-            // '/'/'\\'/'.'/'..', which the surrounding scope-level catch cannot see.
-            this.activity.lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    val fileObject = uri.toFileObject(expectedIsFile = true)
-                    if (fileObject.hasChild(fileName)) {
-                        toast("File with name $fileName already exists")
-                        callback(null)
-                    } else {
-                        val newFile = fileObject.createChild(true, fileName)
-                        callback(newFile)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    callback(null)
-                }
-            }
-        }
-    }
-
     fun requestOpenDirectoryToSaveFile(file: FileObject, callback: (Boolean) -> Unit = {}) {
-        to_save_file = file
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         val activities = application!!.packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL)
 
