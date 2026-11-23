@@ -1,6 +1,6 @@
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URL
+import java.net.URI
 import java.nio.file.Files
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.SimpleFileVisitor
@@ -36,12 +36,12 @@ abstract class DownloadRootfsTask : DefaultTask() {
 
         for (abi in listOf("arm", "arm64")) {
             val remote = "archm-$abi.tar.gz"
-            val expected = URL("$base/$remote.sha256").readText().trim().split(Regex("\\s+")).first()
+            val expected = URI("$base/$remote.sha256").toURL().readText().trim().split(Regex("\\s+")).first()
             val staging = File(stagingDir.get().asFile, abi)
             staging.deleteRecursively()
             staging.mkdirs()
             val tarball = File(staging, remote)
-            URL("$base/$remote").openStream().use { input ->
+            URI("$base/$remote").toURL().openStream().use { input ->
                 FileOutputStream(tarball).use { output -> input.copyTo(output) }
             }
             check(sha256(tarball) == expected) { "SHA-256 mismatch for $remote" }
