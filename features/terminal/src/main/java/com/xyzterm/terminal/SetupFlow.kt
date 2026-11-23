@@ -46,7 +46,11 @@ import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import kotlinx.coroutines.launch
 
-private enum class SetupStep { Terms, Permissions, Install }
+private enum class SetupStep {
+    Terms,
+    Permissions,
+    Install,
+}
 
 /** Three calm steps before the first shell: terms, permissions, then install. */
 @Composable
@@ -87,13 +91,12 @@ private fun PermissionStep(activity: Terminal, onContinue: () -> Unit) {
         }
 
     DisposableEffect(lifecycleOwner) {
-        val observer =
-            LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    storageGranted = !FilePermission.needsStoragePermission(activity)
-                    notificationsGranted = !activity.notificationPermissionNeeded()
-                }
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                storageGranted = !FilePermission.needsStoragePermission(activity)
+                notificationsGranted = !activity.notificationPermissionNeeded()
             }
+        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
@@ -166,7 +169,7 @@ private fun PermissionCard(
                         MaterialTheme.colorScheme.primaryContainer
                     } else {
                         MaterialTheme.colorScheme.surfaceContainerLow
-                    }
+                    },
             ),
     ) {
         Row(

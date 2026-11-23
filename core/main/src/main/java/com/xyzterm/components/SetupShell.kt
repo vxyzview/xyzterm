@@ -56,7 +56,9 @@ fun SetupBrand(modifier: Modifier = Modifier) {
 fun SetupShell(step: Int, content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier =
-            Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 24.dp, vertical = 16.dp)
+            Modifier.fillMaxSize()
+                .safeContentPadding()
+                .padding(horizontal = 24.dp, vertical = 16.dp)
                 .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
