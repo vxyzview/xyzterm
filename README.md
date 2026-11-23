@@ -1,12 +1,14 @@
 <div align="center">
 
-<img src="core/main/src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="112" alt="xyzterm icon — a cyan terminal prompt on a deep dark plate" />
+<img src="core/main/src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="124" alt="xyzterm icon — a cyan terminal prompt on a deep dark plate" />
 
 # xyzterm
 
 ### a real Arch Linux shell in your pocket
 
 `terminal-only` · `no root` · `no telemetry` · `no tracking`
+
+[![Latest release](https://img.shields.io/badge/release-v1.0.7-1976D2?style=for-the-badge)](https://github.com/vxyzview/xyzterm/releases/latest)
 
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 [![F-Droid](https://img.shields.io/badge/available%20on-F--Droid-1976D2?style=flat-square)](https://f-droid.org/)
@@ -22,6 +24,23 @@
 
 > **Tap the icon. You're in a shell.**
 > Nothing sits between you and the prompt.
+
+<div align="center">
+
+```
+┌─ roo@xyz ─ /home ──────────────────────────────┐
+│ $ pfetch                                       │
+│         root@localhost                         │
+│     _  -----()   os      Arch Linux (archm)    │
+│    / ` ---(_)     host    arm64                 │
+│   |  |   ()       kernel  5.4.210-qgki-perf     │
+│    \  ---(_)_     uptime  0m                    │
+│     ` -----(_)    pkgs    371                   │
+│                   memory  5682M / 7264M         │
+└────────────────────────────────────────────────┘
+```
+
+</div>
 
 | | |
 |:---|:---|
@@ -43,17 +62,6 @@
 **xyzterm** is a minimal, terminal-only Android app that runs a **real [proot](https://github.com/termux/proot)-based Arch Linux environment** ([archm](https://github.com/vxyzview/archm)) with a full terminal emulator.
 
 Tap the icon and you are in a shell. That's it. No code editor, no file manager, no git UI, no extension marketplace — nothing between you and the command line. If you've ever wanted a pocket Linux box that respects your attention as much as your privacy, this is it.
-
-```console
-$ pfetch
-        root@localhost
-    _  -----()   os      Arch Linux (archm)
-   / ` ---(_)     host    arm64
-  |  |   ()       kernel  5.4.210-qgki-perf
-   \  ---(_)_     uptime  0m
-    ` -----(_)    pkgs    371
-                   memory  5682M / 7264M
-```
 
 > **The shell is the product.** Everything else stays out of the way.
 
