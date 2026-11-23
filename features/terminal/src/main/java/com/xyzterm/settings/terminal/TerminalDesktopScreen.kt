@@ -14,6 +14,7 @@ import com.xyzterm.components.compose.preferences.base.PreferenceLayout
 import com.xyzterm.file.child
 import com.xyzterm.file.localBinDir
 import com.xyzterm.resources.strings
+import com.xyzterm.terminal.DesktopSessions
 import com.xyzterm.settings.Settings
 
 @Composable
@@ -28,13 +29,22 @@ fun TerminalDesktopScreen(navController: NavController) {
                 description = null,
                 items =
                     listOf(
-                        "xfce4" to "XFCE",
-                        "kde" to "KDE Plasma",
-                        "openbox" to "Openbox",
-                    ),
+                        DesktopSessions.AUTO to "Auto-detect",
+                        DesktopSessions.CUSTOM to "Custom command",
+                    ) + DesktopSessions.all.map { it.key to it.label },
                 selectedItem = Settings.desktop_session,
                 onItemSelected = { Settings.desktop_session = it },
             )
+
+            if (Settings.desktop_session == DesktopSessions.CUSTOM) {
+                PreferenceSingleInput(
+                    label = "Session command",
+                    description = Settings.desktop_custom.ifEmpty { "e.g. startxfce4 or labwc" },
+                    value = Settings.desktop_custom,
+                    validate = { if (it.isBlank()) "Enter a command" else null },
+                    onConfirm = { Settings.desktop_custom = it },
+                )
+            }
 
             PreferenceSingleInput(
                 label = stringResource(strings.desktop_display),
@@ -60,6 +70,7 @@ fun TerminalDesktopScreen(navController: NavController) {
                             arrayOf(
                                 "X11_DISPLAY=${Settings.x11_display}",
                                 "X11_SESSION=${Settings.desktop_session}",
+                                "X11_CUSTOM=${Settings.desktop_custom}",
                             ),
                     )
                 },

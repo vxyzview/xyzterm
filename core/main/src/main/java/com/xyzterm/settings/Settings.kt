@@ -87,7 +87,8 @@ object Settings {
 
     // Int settings
     var x11_display by CachedPreference("x11_display", ":0")
-    var desktop_session by CachedPreference("desktop_session", "xfce4")
+    var desktop_session by CachedPreference("desktop_session", "auto")
+    var desktop_custom by CachedPreference("desktop_custom", "")
     var gamepad_input by CachedPreference("gamepad_input", true)
 
     var theme_mode by
