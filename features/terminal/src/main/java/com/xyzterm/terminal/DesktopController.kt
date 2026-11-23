@@ -55,10 +55,10 @@ object DesktopController {
                 openX11WhenReady(activity)
                 return@withContext
             }
-            val started =
-                runCatching {
-                    service.createBackgroundSession(SESSION_ID, TerminalBackEnd(), activity.applicationContext, command)
-                }.isSuccess
+            val started = runCatching {
+                service.createBackgroundSession(SESSION_ID, TerminalBackEnd(), activity.applicationContext, command)
+            }
+                .isSuccess
             if (!started) {
                 toast(strings.x11_start_failed.getString())
                 return@withContext
