@@ -76,7 +76,7 @@ fun SetupShell(
         val expanded = maxWidth >= 840.dp
         if (expanded) {
             Row(
-                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 48.dp, vertical = 40.dp),
+                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 32.dp, vertical = 40.dp),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Column(
@@ -104,7 +104,7 @@ fun SetupShell(
                 modifier =
                     Modifier.fillMaxSize()
                         .safeContentPadding()
-                        .padding(horizontal = 24.dp, vertical = 24.dp)
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
                         .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

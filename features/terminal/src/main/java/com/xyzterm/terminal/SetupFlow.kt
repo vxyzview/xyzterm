@@ -148,7 +148,7 @@ private fun PermissionStep(
                 text = stringResource(strings.permission_allowed_count, allowed, required),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
             )
         }
 
@@ -235,7 +235,7 @@ private fun PermissionCard(
             ),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(

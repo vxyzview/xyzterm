@@ -130,7 +130,7 @@ private fun TermsSection(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(18.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Surface(
                 modifier = Modifier.size(44.dp),
                 shape = MaterialTheme.shapes.medium,
