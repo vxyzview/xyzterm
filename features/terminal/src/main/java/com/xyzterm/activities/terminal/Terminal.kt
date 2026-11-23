@@ -74,9 +74,9 @@ import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
+import com.xyzterm.terminal.DesktopController
 import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
-import com.xyzterm.terminal.DesktopController
 import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.SetupCompleteScreen
 import com.xyzterm.terminal.SetupFlow

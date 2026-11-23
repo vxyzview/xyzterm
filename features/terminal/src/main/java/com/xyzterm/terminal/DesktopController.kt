@@ -52,8 +52,7 @@ object DesktopController {
 
     private fun openX11(activity: Activity) {
         runCatching {
-            val intent =
-                Intent(Intent.ACTION_VIEW).setClassName("com.termux.x11", "com.termux.x11.MainActivity")
+            val intent = Intent(Intent.ACTION_VIEW).setClassName("com.termux.x11", "com.termux.x11.MainActivity")
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)
         }
@@ -64,8 +63,6 @@ object DesktopController {
         withContext(Dispatchers.Main) {
             binder?.terminateSession(SESSION_ID)
             running = false
-            runCatching {
-                activity.sendBroadcast(Intent("com.termux.x11.ACTION_STOP").setPackage("com.termux.x11"))
-            }
+            runCatching { activity.sendBroadcast(Intent("com.termux.x11.ACTION_STOP").setPackage("com.termux.x11")) }
         }
 }

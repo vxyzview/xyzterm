@@ -7,7 +7,6 @@ import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.commands.CommandProvider
 import com.xyzterm.commands.ToolbarConfiguration
 import com.xyzterm.commands.global.TerminalCommand
-import com.xyzterm.terminal.DesktopController
 import com.xyzterm.exec.pendingCommand
 import com.xyzterm.exec.ubuntuProcess
 import com.xyzterm.extension.api.DynamicRoute
@@ -29,6 +28,7 @@ import com.xyzterm.settings.terminal.TerminalDesktopScreen
 import com.xyzterm.settings.terminal.TerminalExtraKeys
 import com.xyzterm.settings.terminal.TerminalInputSettings
 import com.xyzterm.settings.terminal.UserBindingsScreen
+import com.xyzterm.terminal.DesktopController
 import com.xyzterm.utils.toast
 import kotlinx.coroutines.launch
 
