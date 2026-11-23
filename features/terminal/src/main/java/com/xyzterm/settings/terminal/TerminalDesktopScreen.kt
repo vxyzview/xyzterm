@@ -1,6 +1,7 @@
 package com.xyzterm.settings.terminal
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -15,12 +16,15 @@ import com.xyzterm.file.child
 import com.xyzterm.file.localBinDir
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
+import com.xyzterm.terminal.DesktopController
 import com.xyzterm.terminal.DesktopSessions
 import com.xyzterm.terminal.X11Installer
+import kotlinx.coroutines.launch
 
 @Composable
 fun TerminalDesktopScreen(navController: NavController) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     PreferenceLayout(label = stringResource(strings.desktop), backArrowVisible = true) {
         PreferenceGroup(heading = stringResource(strings.desktop)) {
             InfoBlock(text = stringResource(strings.desktop_requires_x11))
@@ -87,6 +91,19 @@ fun TerminalDesktopScreen(navController: NavController) {
                     )
                 },
             )
+
+            if (DesktopController.running) {
+                SettingsItem(
+                    label = stringResource(strings.stop_desktop),
+                    description = stringResource(strings.stop_desktop_desc),
+                    showSwitch = false,
+                    default = false,
+                    sideEffect = {
+                        val activity = context as? android.app.Activity ?: return@SettingsItem
+                        scope.launch { DesktopController.stop(activity) }
+                    },
+                )
+            }
 
             SettingsItem(
                 label = stringResource(strings.gamepad_input),

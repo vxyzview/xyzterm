@@ -373,4 +373,8 @@
     <string name="setup_complete_info">Start using xyzterm now and explore the power of terminal on your device.</string>
     <string name="setup_complete_open">Open xyzterm</string>
     <string name="back_to_home">Back to Home</string>
+    <string name="stop_desktop">Stop desktop</string>
+    <string name="stop_desktop_desc">End the running desktop session and close Termux:X11</string>
+    <string name="x11_not_installed">Termux:X11 is not installed</string>
+    <string name="x11_start_failed">Termux:X11 did not start. Check the desktop logs.</string>
 </resources>

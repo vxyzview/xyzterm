@@ -7,6 +7,7 @@ import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.commands.CommandProvider
 import com.xyzterm.commands.ToolbarConfiguration
 import com.xyzterm.commands.global.TerminalCommand
+import com.xyzterm.terminal.DesktopController
 import com.xyzterm.exec.pendingCommand
 import com.xyzterm.exec.ubuntuProcess
 import com.xyzterm.extension.api.DynamicRoute
@@ -29,6 +30,7 @@ import com.xyzterm.settings.terminal.TerminalExtraKeys
 import com.xyzterm.settings.terminal.TerminalInputSettings
 import com.xyzterm.settings.terminal.UserBindingsScreen
 import com.xyzterm.utils.toast
+import kotlinx.coroutines.launch
 
 /**
  * This build only ships the terminal feature. The file-manager/drawer and code-runner integrations that used to live
@@ -112,6 +114,10 @@ class TerminalFeature : Feature {
             try {
                 val intent = Intent(activity, Terminal::class.java)
                 activity.startActivity(intent)
+                if (id == "desktop") {
+                    DesktopController.markStarting()
+                    DefaultScope.launch { DesktopController.openX11WhenReady(activity) }
+                }
             } catch (_: Exception) {
                 toast("Terminal feature is not available in this build")
             }
