@@ -35,10 +35,10 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,10 +80,10 @@ import com.termux.view.TerminalView
 import com.xyzterm.activities.settings.SettingsActivity
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.components.BrandHeader
-import com.xyzterm.components.XyzDropdownMenuItem
-import com.xyzterm.components.ResponsiveDrawer
 import com.xyzterm.components.EmptyState
+import com.xyzterm.components.ResponsiveDrawer
 import com.xyzterm.components.SingleInputDialog
+import com.xyzterm.components.XyzDropdownMenuItem
 import com.xyzterm.components.compose.preferences.base.ProvideIsExpandedScreen
 import com.xyzterm.exec.pendingCommand
 import com.xyzterm.file.child
@@ -649,7 +649,8 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                                     Text(
                                         text =
                                             stringResource(
-                                                if (isSelected) strings.session_active else strings.session_running_short
+                                                if (isSelected) strings.session_active
+                                                else strings.session_running_short,
                                             ),
                                         style = MaterialTheme.typography.labelSmall,
                                         color =
@@ -680,7 +681,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                             }
                         }
                     }
-            }
+                }
             }
         }
 
