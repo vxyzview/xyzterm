@@ -29,6 +29,7 @@ object X11Installer {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val client = OkHttpClient()
+
     private data class Release(val url: String, val digest: String)
 
     fun installLatest(activity: Activity) {
@@ -76,41 +77,38 @@ object X11Installer {
         }
     }
 
-    private fun fetchLatest(): Release? =
-        runCatching {
-            val request =
-                Request.Builder().url("https://api.github.com/repos/$OWNER/$REPO/releases/latest").build()
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return null
-                val json = JSONObject(response.body.string())
-                val assets = json.optJSONArray("assets") ?: return null
-                for (i in 0 until assets.length()) {
-                    val asset = assets.getJSONObject(i)
-                    if (asset.optString("name") == ASSET) {
-                        return Release(
-                            url = asset.optString("browser_download_url"),
-                            digest = asset.optString("digest"),
-                        )
-                    }
+    private fun fetchLatest(): Release? = runCatching {
+        val request = Request.Builder().url("https://api.github.com/repos/$OWNER/$REPO/releases/latest").build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) return null
+            val json = JSONObject(response.body.string())
+            val assets = json.optJSONArray("assets") ?: return null
+            for (i in 0 until assets.length()) {
+                val asset = assets.getJSONObject(i)
+                if (asset.optString("name") == ASSET) {
+                    return Release(
+                        url = asset.optString("browser_download_url"),
+                        digest = asset.optString("digest"),
+                    )
                 }
-                null
             }
+            null
         }
-            .getOrNull()
+    }
+        .getOrNull()
 
-    private fun download(url: String): File? =
-        runCatching {
-            if (url.isBlank()) return null
-            val target = File(application!!.filesDir, "x11/$ASSET")
-            target.parentFile?.mkdirs()
-            val request = Request.Builder().url(url).build()
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return null
-                target.outputStream().use { response.body.byteStream().copyTo(it) }
-            }
-            target
+    private fun download(url: String): File? = runCatching {
+        if (url.isBlank()) return null
+        val target = File(application!!.filesDir, "x11/$ASSET")
+        target.parentFile?.mkdirs()
+        val request = Request.Builder().url(url).build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) return null
+            target.outputStream().use { response.body.byteStream().copyTo(it) }
         }
-            .getOrNull()
+        target
+    }
+        .getOrNull()
 
     private fun verify(file: File, digest: String): Boolean {
         val expected = digest.substringAfter(':', "").ifEmpty { digest }.trim()
