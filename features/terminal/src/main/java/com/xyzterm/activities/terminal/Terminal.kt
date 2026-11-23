@@ -622,8 +622,9 @@ class Terminal : AppCompatActivity() {
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                         modifier =
-                                            Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                                                .semantics { liveRegion = LiveRegionMode.Polite },
+                                            Modifier.padding(horizontal = 16.dp, vertical = 8.dp).semantics {
+                                                liveRegion = LiveRegionMode.Polite
+                                            },
                                     )
                                 }
                             }

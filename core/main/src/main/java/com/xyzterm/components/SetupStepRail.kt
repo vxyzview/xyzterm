@@ -128,10 +128,7 @@ private fun StepNode(
     val current = index == step - 1
     if (done) {
         Box(
-            modifier =
-                Modifier.size(34.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
+            modifier = Modifier.size(34.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
