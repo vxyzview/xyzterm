@@ -366,6 +366,8 @@ private suspend fun TerminalView.attachOrCreateSession(
         // as changeSession. Posted to dodge the extra-keys-factory race.
         wireExtraKeysClient()
         reapplyTerminalColors(this)
+        // Activity start isn't "usable": the prompt lands here, after session I/O.
+        post { terminalActivity.reportFullyDrawn() }
     }
 }
 
