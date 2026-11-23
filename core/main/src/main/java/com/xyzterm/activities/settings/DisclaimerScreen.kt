@@ -97,7 +97,7 @@ fun DisclaimerScreen(
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(
-                modifier = Modifier.weight(1f).heightIn(min = 56.dp),
+                modifier = Modifier.weight(1f).heightIn(min = 52.dp),
                 shape = CircleShape,
                 onClick = onDecline,
             ) {
@@ -105,7 +105,7 @@ fun DisclaimerScreen(
             }
             Button(
                 enabled = canAccept,
-                modifier = Modifier.weight(1f).heightIn(min = 56.dp),
+                modifier = Modifier.weight(1f).heightIn(min = 52.dp),
                 shape = CircleShape,
                 onClick = {
                     Settings.shown_disclaimer = true
@@ -130,9 +130,9 @@ private fun TermsSection(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
             Surface(
-                modifier = Modifier.size(44.dp),
+                modifier = Modifier.size(40.dp),
                 shape = MaterialTheme.shapes.medium,
                 color =
                     if (important) {
@@ -144,7 +144,7 @@ private fun TermsSection(
                 Icon(
                     imageVector = if (important) Icons.Outlined.Warning else Icons.Outlined.Info,
                     contentDescription = null,
-                    modifier = Modifier.padding(11.dp),
+                    modifier = Modifier.padding(10.dp),
                     tint =
                         if (important) {
                             MaterialTheme.colorScheme.onErrorContainer

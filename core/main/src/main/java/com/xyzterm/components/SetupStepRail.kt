@@ -45,7 +45,7 @@ fun SetupStepRail(
             text = stringResource(strings.setup_step, step),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = 12.dp),
         )
         if (vertical) {
             labels.forEachIndexed { index, label ->
@@ -68,7 +68,7 @@ fun SetupStepRail(
                     Box(
                         modifier =
                             Modifier.padding(start = 15.dp)
-                                .size(width = 3.dp, height = 20.dp)
+                                .size(width = 3.dp, height = 16.dp)
                                 .background(
                                     if (index < step - 1) {
                                         MaterialTheme.colorScheme.primary
@@ -128,13 +128,13 @@ private fun StepNode(
     val current = index == step - 1
     if (done) {
         Box(
-            modifier = Modifier.size(34.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+            modifier = Modifier.size(32.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(18.dp),
                 tint = MaterialTheme.colorScheme.onPrimary,
             )
         }
@@ -142,7 +142,7 @@ private fun StepNode(
     }
     Box(
         modifier =
-            Modifier.size(34.dp)
+            Modifier.size(32.dp)
                 .clip(CircleShape)
                 .background(
                     if (current) {

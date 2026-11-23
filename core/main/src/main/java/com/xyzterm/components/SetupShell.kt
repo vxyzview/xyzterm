@@ -36,18 +36,18 @@ import com.xyzterm.resources.strings
 fun SetupBrand(modifier: Modifier = Modifier) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Surface(
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(44.dp),
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.primaryContainer,
         ) {
             Icon(
                 painter = painterResource(drawables.terminal),
                 contentDescription = null,
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(10.dp),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
-        Column(modifier = Modifier.padding(start = 14.dp)) {
+        Column(modifier = Modifier.padding(start = 12.dp)) {
             Text(
                 text = stringResource(strings.app_name),
                 style = MaterialTheme.typography.titleLarge,
@@ -76,12 +76,12 @@ fun SetupShell(
         val expanded = maxWidth >= 840.dp
         if (expanded) {
             Row(
-                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 32.dp, vertical = 40.dp),
+                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 36.dp, vertical = 32.dp),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Column(
                     modifier = Modifier.width(260.dp).padding(end = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     SetupBrand()
                     SetupStepRail(step = step, vertical = true)
@@ -94,7 +94,7 @@ fun SetupShell(
                 }
                 Column(
                     modifier = Modifier.widthIn(max = 560.dp).verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     content()
                 }
@@ -104,13 +104,13 @@ fun SetupShell(
                 modifier =
                     Modifier.fillMaxSize()
                         .safeContentPadding()
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                        .padding(horizontal = 20.dp, vertical = 20.dp)
                         .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     SetupBrand()
                     SetupStepRail(step = step)

@@ -148,7 +148,7 @@ private fun PermissionStep(
                 text = stringResource(strings.permission_allowed_count, allowed, required),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp),
             )
         }
 
@@ -175,7 +175,7 @@ private fun PermissionStep(
         }
 
         Button(
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
             shape = CircleShape,
             enabled = canContinue,
             onClick = onContinue,
@@ -190,7 +190,7 @@ private fun PermissionStep(
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedButton(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 shape = CircleShape,
                 onClick = {
                     skipped = true
@@ -214,7 +214,7 @@ private fun PermissionCard(
     Card(
         modifier =
             Modifier.fillMaxWidth()
-                .heightIn(min = 104.dp)
+                .heightIn(min = 88.dp)
                 // A granted row is a status, not an action: don't announce it as a button.
                 .semantics { if (!granted) role = Role.Button }
                 .clickable(
@@ -235,11 +235,11 @@ private fun PermissionCard(
             ),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(44.dp),
                 shape = MaterialTheme.shapes.medium,
                 color =
                     if (granted) {
@@ -251,7 +251,7 @@ private fun PermissionCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.padding(13.dp),
+                    modifier = Modifier.padding(10.dp),
                     tint =
                         if (granted) {
                             MaterialTheme.colorScheme.onPrimary
@@ -260,7 +260,7 @@ private fun PermissionCard(
                         },
                 )
             }
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(text = label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
@@ -279,7 +279,7 @@ private fun PermissionCard(
                         },
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Box(
                 modifier =
                     Modifier.size(28.dp)

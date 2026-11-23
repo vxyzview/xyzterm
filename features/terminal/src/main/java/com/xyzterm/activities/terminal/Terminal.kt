@@ -572,9 +572,9 @@ class Terminal : AppCompatActivity() {
                                 ),
                         ) {
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(28.dp),
+                                modifier = Modifier.fillMaxWidth().padding(20.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
                                 val progress =
                                     if (totalBytes > 0) {
@@ -582,18 +582,18 @@ class Terminal : AppCompatActivity() {
                                     } else {
                                         null
                                     }
-                                Box(modifier = Modifier.size(140.dp), contentAlignment = Alignment.Center) {
+                                Box(modifier = Modifier.size(112.dp), contentAlignment = Alignment.Center) {
                                     if (progress == null) {
                                         CircularProgressIndicator(
                                             modifier = Modifier.fillMaxSize(),
-                                            strokeWidth = 10.dp,
+                                            strokeWidth = 8.dp,
                                             trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                                         )
                                     } else {
                                         CircularProgressIndicator(
                                             progress = { progress },
                                             modifier = Modifier.fillMaxSize(),
-                                            strokeWidth = 10.dp,
+                                            strokeWidth = 8.dp,
                                             trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                                         )
                                         Text(
@@ -622,7 +622,7 @@ class Terminal : AppCompatActivity() {
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                         modifier =
-                                            Modifier.padding(horizontal = 16.dp, vertical = 8.dp).semantics {
+                                            Modifier.padding(horizontal = 14.dp, vertical = 6.dp).semantics {
                                                 liveRegion = LiveRegionMode.Polite
                                             },
                                     )
@@ -635,16 +635,16 @@ class Terminal : AppCompatActivity() {
                             color = MaterialTheme.colorScheme.warningSurface,
                         ) {
                             Row(
-                                modifier = Modifier.padding(16.dp),
+                                modifier = Modifier.padding(14.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Warning,
                                     contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
+                                    modifier = Modifier.size(18.dp),
                                     tint = MaterialTheme.colorScheme.onWarningSurface,
                                 )
-                                Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(10.dp))
                                 Text(
                                     text = stringResource(strings.warn_dont_leave_setup),
                                     style = MaterialTheme.typography.bodySmall,
