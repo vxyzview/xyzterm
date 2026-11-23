@@ -50,8 +50,8 @@ class DialogRequest(
 )
 
 /**
- * Process-singleton store for state-hoisted dialogs. [dialog] and [LoadingPopup] push requests
- * here; every activity root must compose [AppDialogHost] once so the requests render.
+ * Process-singleton store for state-hoisted dialogs. [dialog] and [LoadingPopup] push requests here; every activity
+ * root must compose [AppDialogHost] once so the requests render.
  */
 object DialogHost {
     val dialogs = mutableStateListOf<DialogRequest>()
