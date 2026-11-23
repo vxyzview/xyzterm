@@ -5,13 +5,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import com.xyzterm.TerminalLauncher
 import com.xyzterm.components.InfoBlock
 import com.xyzterm.components.PreferenceList
 import com.xyzterm.components.PreferenceSingleInput
 import com.xyzterm.components.SettingsItem
 import com.xyzterm.components.compose.preferences.base.PreferenceGroup
 import com.xyzterm.components.compose.preferences.base.PreferenceLayout
+import com.xyzterm.exec.TerminalCommand
 import com.xyzterm.file.child
 import com.xyzterm.file.localBinDir
 import com.xyzterm.resources.strings
@@ -77,18 +77,23 @@ fun TerminalDesktopScreen(navController: NavController) {
                 default = false,
                 sideEffect = {
                     val activity = context as? android.app.Activity ?: return@SettingsItem
-                    TerminalLauncher.launch(
-                        activity = activity,
-                        sandbox = true,
-                        exe = localBinDir().child("start-desktop").absolutePath,
-                        id = "desktop",
-                        env =
-                            arrayOf(
-                                "X11_DISPLAY=${Settings.x11_display}",
-                                "X11_SESSION=${Settings.desktop_session}",
-                                "X11_CUSTOM=${Settings.desktop_custom}",
-                            ),
-                    )
+                    scope.launch {
+                        DesktopController.start(
+                            activity = activity,
+                            command =
+                                TerminalCommand(
+                                    sandbox = true,
+                                    exe = localBinDir().child("start-desktop").absolutePath,
+                                    id = "desktop",
+                                    env =
+                                        arrayOf(
+                                            "X11_DISPLAY=${Settings.x11_display}",
+                                            "X11_SESSION=${Settings.desktop_session}",
+                                            "X11_CUSTOM=${Settings.desktop_custom}",
+                                        ),
+                                ),
+                        )
+                    }
                 },
             )
 

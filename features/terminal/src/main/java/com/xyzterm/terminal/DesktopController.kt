@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.xyzterm.TerminalLauncher
+import com.xyzterm.exec.TerminalCommand
 import com.xyzterm.file.localDir
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
@@ -30,6 +32,40 @@ object DesktopController {
     fun markStarting() {
         running = true
     }
+
+    /** Starts the desktop in the background service, then brings Termux:X11 forward. */
+    suspend fun start(
+        activity: Activity,
+        command: TerminalCommand,
+    ) =
+        withContext(Dispatchers.Main) {
+            val service = binder
+            if (service == null) {
+                TerminalLauncher.launch(
+                    activity = activity,
+                    sandbox = command.sandbox,
+                    exe = command.exe,
+                    args = command.args,
+                    id = command.id,
+                    terminatePreviousSession = command.terminatePreviousSession,
+                    workingDir = command.workingDir,
+                    env = command.env,
+                )
+                markStarting()
+                openX11WhenReady(activity)
+                return@withContext
+            }
+            val started =
+                runCatching {
+                    service.createBackgroundSession(SESSION_ID, TerminalBackEnd(), activity.applicationContext, command)
+                }.isSuccess
+            if (!started) {
+                toast(strings.x11_start_failed.getString())
+                return@withContext
+            }
+            markStarting()
+            openX11(activity)
+        }
 
     /** Opens the X11 surface once the guest X socket exists, so it does not show "not connected". */
     suspend fun openX11WhenReady(activity: Activity) =
