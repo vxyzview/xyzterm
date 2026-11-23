@@ -35,10 +35,10 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -79,7 +80,9 @@ import com.termux.view.TerminalView
 import com.xyzterm.activities.settings.SettingsActivity
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.components.BrandHeader
+import com.xyzterm.components.XyzDropdownMenuItem
 import com.xyzterm.components.ResponsiveDrawer
+import com.xyzterm.components.EmptyState
 import com.xyzterm.components.SingleInputDialog
 import com.xyzterm.components.compose.preferences.base.ProvideIsExpandedScreen
 import com.xyzterm.exec.pendingCommand
@@ -216,7 +219,7 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                 Icon(Icons.Default.MoreVert, stringResource(strings.more_options))
             }
             DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                DropdownMenuItem(
+                XyzDropdownMenuItem(
                     text = { Text(stringResource(strings.add_session)) },
                     leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
                     onClick = {
@@ -224,7 +227,7 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
                         newSession(terminalActivity, scope)
                     },
                 )
-                DropdownMenuItem(
+                XyzDropdownMenuItem(
                     text = { Text(stringResource(strings.settings)) },
                     leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                     onClick = {
@@ -554,113 +557,130 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
             }
         }
 
-        service?.sessionList?.let { sessions ->
-            val listState = rememberLazyListState()
-
-            // Keep the active session visible when the drawer opens or the
-            // selection changes — with many sessions it can sit off-screen.
-            LaunchedEffect(service.currentSession.value, sessions.size) {
-                val index = sessions.indexOf(service.currentSession.value)
-                if (index >= 0) {
-                    listState.scrollToItem(index)
-                }
+        if (service == null) {
+            Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
+        } else {
+            val sessions = service.sessionList.orEmpty()
+            if (sessions.isEmpty()) {
+                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                    EmptyState(
+                        painter = rememberVectorPainter(Icons.Default.Add),
+                        text = stringResource(strings.session_empty),
+                        actionLabel = stringResource(strings.add_session),
+                        onAction = { newSession(terminalActivity, scope) },
+                    )
+                }
+            } else {
+                val listState = rememberLazyListState()
 
-            LazyColumn(
-                state = listState,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.weight(1f),
-            ) {
-                items(sessions, key = { it }) { sessionId ->
-                    val isSelected = sessionId == service.currentSession.value
-                    val foreground =
-                        if (isSelected) {
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        }
+                // Keep the active session visible when the drawer opens or the
+                // selection changes — with many sessions it can sit off-screen.
+                LaunchedEffect(service.currentSession.value, sessions.size) {
+                    val index = sessions.indexOf(service.currentSession.value)
+                    if (index >= 0) {
+                        listState.scrollToItem(index)
+                    }
+                }
 
-                    // Live session strip: an accent bar plus a state label that
-                    // changes in place, so the active shell is legible at a glance.
-                    Surface(
-                        onClick = { scope.launch { terminalActivity.changeSession(sessionId) } },
-                        shape = MaterialTheme.shapes.large,
-                        color =
+                LazyColumn(
+                    state = listState,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    items(sessions, key = { it }) { sessionId ->
+                        val isSelected = sessionId == service.currentSession.value
+                        val foreground =
                             if (isSelected) {
-                                MaterialTheme.colorScheme.primaryContainer
+                                MaterialTheme.colorScheme.onPrimaryContainer
                             } else {
-                                MaterialTheme.colorScheme.surfaceContainerLow
-                            },
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier =
-                                    Modifier.size(width = 4.dp, height = 48.dp)
-                                        .clip(MaterialTheme.shapes.extraSmall)
-                                        .background(
-                                            when {
-                                                isSelected && bellPulse -> MaterialTheme.colorScheme.yellowStatus
-                                                isSelected -> MaterialTheme.colorScheme.primary
-                                                else -> MaterialTheme.colorScheme.outlineVariant
-                                            },
-                                        ),
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Box(
-                                modifier =
-                                    Modifier.size(8.dp)
-                                        .background(
-                                            if (isSelected) {
-                                                MaterialTheme.colorScheme.primary
-                                            } else {
-                                                MaterialTheme.colorScheme.outline
-                                            },
-                                            CircleShape,
-                                        ),
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column(modifier = Modifier.weight(1f).padding(vertical = 10.dp)) {
-                                Text(
-                                    text = sessionId,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = foreground,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                Text(
-                                    text =
-                                        stringResource(
-                                            if (isSelected) strings.session_active else strings.session_running_short,
-                                        ),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color =
-                                        if (isSelected) {
-                                            foreground.copy(alpha = 0.75f)
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                        },
-                                )
+                                MaterialTheme.colorScheme.onSurface
                             }
-                            IconButton(
-                                onClick = {
-                                    sessionToRename = sessionId
-                                    renameValue = sessionId
-                                    renameError = null
-                                    showRenameDialog = true
+
+                        // Live session strip: an accent bar plus a state label that
+                        // changes in place, so the active shell is legible at a glance.
+                        Surface(
+                            onClick = { scope.launch { terminalActivity.changeSession(sessionId) } },
+                            shape = MaterialTheme.shapes.large,
+                            color =
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerLow
                                 },
-                                modifier = Modifier.size(48.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Edit,
-                                    contentDescription = stringResource(strings.rename),
-                                    tint = if (isSelected) foreground else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        ) {
+                            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier =
+                                        Modifier.size(width = 4.dp, height = 48.dp)
+                                            .clip(MaterialTheme.shapes.extraSmall)
+                                            .background(
+                                                when {
+                                                    isSelected && bellPulse -> MaterialTheme.colorScheme.yellowStatus
+                                                    isSelected -> MaterialTheme.colorScheme.primary
+                                                    else -> MaterialTheme.colorScheme.outlineVariant
+                                                },
+                                            ),
                                 )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Box(
+                                    modifier =
+                                        Modifier.size(8.dp)
+                                            .background(
+                                                if (isSelected) {
+                                                    MaterialTheme.colorScheme.primary
+                                                } else {
+                                                    MaterialTheme.colorScheme.outlineVariant
+                                                },
+                                                CircleShape,
+                                            ),
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f).padding(vertical = 10.dp)) {
+                                    Text(
+                                        text = sessionId,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = foreground,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    Text(
+                                        text =
+                                            stringResource(
+                                                if (isSelected) strings.session_active else strings.session_running_short
+                                            ),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color =
+                                            if (isSelected) {
+                                                foreground.copy(alpha = 0.75f)
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            },
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        sessionToRename = sessionId
+                                        renameValue = sessionId
+                                        renameError = null
+                                        showRenameDialog = true
+                                    },
+                                    modifier = Modifier.size(48.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Edit,
+                                        contentDescription = stringResource(strings.rename),
+                                        tint =
+                                            if (isSelected) foreground else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                }
                             }
                         }
                     }
-                }
+            }
             }
         }
 

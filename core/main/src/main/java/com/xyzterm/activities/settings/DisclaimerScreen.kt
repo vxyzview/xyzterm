@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
@@ -96,12 +97,12 @@ fun DisclaimerScreen(
             modifier = Modifier.fillMaxWidth(),
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(modifier = Modifier.weight(1f), onClick = onDecline) {
+            OutlinedButton(modifier = Modifier.weight(1f).heightIn(min = 52.dp), onClick = onDecline) {
                 Text(text = stringResource(strings.decline), maxLines = 1)
             }
             Button(
                 enabled = canAccept,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).heightIn(min = 52.dp),
                 onClick = {
                     Settings.shown_disclaimer = true
                     onAccept()

@@ -39,6 +39,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -175,7 +178,7 @@ private fun PermissionStep(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             OutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 onClick = {
                     skipped = true
                     onContinue()
@@ -199,6 +202,7 @@ private fun PermissionCard(
         modifier =
             Modifier.fillMaxWidth()
                 .heightIn(min = 88.dp)
+                .semantics { role = Role.Button }
                 .clickable(
                     enabled = !granted,
                     onClickLabel =

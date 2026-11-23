@@ -14,6 +14,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.xyzterm.components.compose.preferences.base.PreferenceTemplate
 import com.xyzterm.resources.getString
@@ -52,7 +56,13 @@ fun <T> PreferenceList(
                 Column {
                     items.forEach { (item, string) ->
                         PreferenceTemplate(
-                            modifier = Modifier.clip(MaterialTheme.shapes.large).clickable { tempSelectedItem = item },
+                            modifier =
+                                Modifier.clip(MaterialTheme.shapes.large)
+                                    .clickable { tempSelectedItem = item }
+                                    .semantics {
+                                        role = Role.RadioButton
+                                        selected = tempSelectedItem == item
+                                    },
                             title = { Text(text = string) },
                             startWidget = { RadioButton(selected = tempSelectedItem == item, onClick = null) },
                             verticalPadding = 12.dp,

@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -24,9 +23,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.xyzterm.components.EmptyState
 import com.xyzterm.components.InfoBlock
 import com.xyzterm.components.compose.preferences.base.PreferenceLayoutLazyColumn
 import com.xyzterm.components.compose.preferences.base.PreferenceTemplate
@@ -91,11 +92,11 @@ fun SnippetsScreen() {
 
         if (snippets.isEmpty()) {
             item {
-                Text(
+                EmptyState(
+                    painter = rememberVectorPainter(Icons.Outlined.Add),
                     text = stringResource(strings.snippet_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    actionLabel = stringResource(strings.snippet_add),
+                    onAction = { showAddDialog = true },
                 )
             }
         }

@@ -90,7 +90,7 @@ fun NextScreenCard(
             Icon(
                 modifier = Modifier.padding(16.dp),
                 imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                contentDescription = label,
+                contentDescription = null,
             )
         },
         startWidget = {
@@ -99,12 +99,12 @@ fun NextScreenCard(
                     modifier = Modifier.size(24.dp),
                     imageVector = icon,
                     tint = startIconTint,
-                    contentDescription = label,
+                    contentDescription = null,
                 )
             } else if (iconRes != null) {
                 Icon(
                     painter = painterResource(id = iconRes),
-                    contentDescription = label,
+                    contentDescription = null,
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary,
                 )

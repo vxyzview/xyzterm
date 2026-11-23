@@ -3,7 +3,7 @@ package com.xyzterm.components
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemColors
@@ -27,7 +27,7 @@ fun XyzDropdownMenuItem(
     DropdownMenuItem(
         text = text,
         onClick = onClick,
-        modifier = modifier.padding(horizontal = 8.dp).clip(RoundedCornerShape(12.dp)),
+        modifier = modifier.padding(horizontal = 8.dp).clip(MaterialTheme.shapes.extraSmall),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         enabled = enabled,

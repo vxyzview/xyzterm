@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.xyzterm.components.ResetButton
@@ -36,7 +35,6 @@ import com.xyzterm.resources.strings
 import com.xyzterm.settings.DEFAULT_TERMINAL_EXTRA_KEYS
 import com.xyzterm.settings.Preference
 import com.xyzterm.settings.Settings
-import com.xyzterm.theme.Typography
 import com.xyzterm.utils.openUrl
 
 @Composable
@@ -73,7 +71,7 @@ fun TerminalExtraKeys() {
             ) {
                 Text(
                     stringResource(strings.see_termux_extra_keys),
-                    fontSize = Typography.bodyMedium.fontSize,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f),
                 )
@@ -109,11 +107,7 @@ fun TerminalExtraKeys() {
                         disabledContainerColor = Color.Transparent,
                     ),
                 modifier = Modifier.fillMaxWidth().weight(1f),
-                textStyle =
-                    TextStyle(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    ),
+                textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             )
         }
     }
