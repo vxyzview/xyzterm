@@ -60,8 +60,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
@@ -608,8 +606,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                                 MaterialTheme.colorScheme.onSurface
                             }
 
-                        // Live session strip: an accent bar plus a state label that
-                        // changes in place, so the active shell is legible at a glance.
+                        // State stays legible through the dot and label; no bar beside the name.
                         Surface(
                             onClick = { scope.launch { terminalActivity.changeSession(sessionId) } },
                             shape = MaterialTheme.shapes.large,
@@ -622,23 +619,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                             modifier = Modifier.padding(horizontal = 16.dp),
                         ) {
                             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier =
-                                        Modifier.size(width = 4.dp, height = 48.dp)
-                                            .clip(MaterialTheme.shapes.extraSmall)
-                                            .background(
-                                                if (isSelected) {
-                                                    if (bellPulse) {
-                                                        MaterialTheme.colorScheme.yellowStatus
-                                                    } else {
-                                                        MaterialTheme.colorScheme.primary
-                                                    }
-                                                } else {
-                                                    Color.Transparent
-                                                },
-                                            ),
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(16.dp))
                                 Box(
                                     modifier =
                                         Modifier.size(8.dp)
