@@ -304,7 +304,8 @@ class Terminal : AppCompatActivity() {
     private fun writeToShell(text: String) {
         val binder = sessionBinder?.get() ?: return
         val service = binder.getService()
-        val id = service.currentSession.value ?: return
+        val id = service.currentSession.value
+        if (id.isEmpty()) return
         binder.getSession(id)?.write(text)
     }
 
