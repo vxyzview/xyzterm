@@ -150,19 +150,19 @@ object TerminalBackup {
 
                 // User-supplied archives are a trust boundary: reject symlinks
                 // that point outside the staging tree before swapping directories.
-                val unsafeSymlink =
-                    runCatching {
-                        Files.walk(staging.toPath()).use { paths ->
-                            paths.iterator().asSequence().any { path ->
-                                if (!Files.isSymbolicLink(path)) {
-                                    false
-                                } else {
-                                    val target = Files.readSymbolicLink(path).toString()
-                                    target.split('/').contains("..")
-                                }
+                val unsafeSymlink = runCatching {
+                    Files.walk(staging.toPath()).use { paths ->
+                        paths.iterator().asSequence().any { path ->
+                            if (!Files.isSymbolicLink(path)) {
+                                false
+                            } else {
+                                val target = Files.readSymbolicLink(path).toString()
+                                target.split('/').contains("..")
                             }
                         }
-                    }.getOrDefault(true)
+                    }
+                }
+                    .getOrDefault(true)
                 if (unsafeSymlink) {
                     return@withContext "backup contains unsafe symlinks"
                 }
