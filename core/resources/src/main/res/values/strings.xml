@@ -350,4 +350,10 @@
     <string name="terms_ready">You\'ve reached the end</string>
     <string name="setup_tagline">terminal-only · no root · no telemetry</string>
     <string name="permission_allowed_count">%1$d of %2$d allowed</string>
+    <!-- Defaults for translations that predate the terminal-only build; aapt drops locale-only strings. -->
+    <string name="downloading">Downloading…</string>
+    <string name="network_err">Network error. Check your internet connection.</string>
+    <string name="install_ubuntu_optional">archm not installed</string>
+    <string name="install_ubuntu_optional_desc">Install archm for a full Linux environment, now or later in terminal settings.</string>
+    <string name="not_now">Not now</string>
 </resources>
