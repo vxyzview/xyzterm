@@ -115,7 +115,7 @@ $ pfetch
 
 ## Get started
 
-1. Install **v1.0.6** from [GitHub Releases](https://github.com/vxyzview/xyzterm/releases/tag/v1.0.6) (F-Droid metadata is included; submission is in progress), or [build it yourself](#build).
+1. Install **v1.0.7** from [GitHub Releases](https://github.com/vxyzview/xyzterm/releases/tag/v1.0.7) (F-Droid metadata is included; submission is in progress), or [build it yourself](#build).
 2. Open **xyzterm** — the bundled archm rootfs extracts automatically on first launch (a one-time local setup, no download).
 3. You're in a real Arch Linux shell. `pacman -Syu` if that's your thing.
 

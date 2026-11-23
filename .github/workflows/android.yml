@@ -154,19 +154,19 @@ jobs:
           esac
           NOTES_FILE="$RUNNER_TEMP/xyzterm-release-notes.md"
           cat > "$NOTES_FILE" <<'RELEASE_NOTES'
-          ## xyzterm 1.0.6 — complete setup, clearer terms, easier X11
+          ## xyzterm 1.0.7 — desktop control and reference-matched setup
 
-          A feature-and-polish release. The shell, bundled Arch Linux userspace, sessions, binds, backups and privacy posture are unchanged.
+          A feature and visual release. The bundled Arch Linux userspace, shell engine, binds and backups are unchanged.
 
           ### Changed
-          - Added a **Setup Complete** screen after installation finishes: a one-time confirmation with a direct action to open the shell or return home.
-          - Desktop settings can now **install the latest Termux:X11** from GitHub. The download is checked against its published SHA-256, and a signature mismatch warning is shown if another build is already installed.
-          - The first-run Terms screen is more compact and readable, with shorter wording that keeps every key point, wider cards and a small top offset.
-          - Setup screens share a tighter Material 3 rhythm: flatter tonal cards, smaller tiles and calmer spacing, with no gradients.
+          - Desktop: the desktop or window manager now runs as a background session with **Start / Stop** controls in Desktop settings, and starting it opens Termux:X11 automatically.
+          - Fixed X11 startup: the X socket now lives in the guest /tmp (matching Termux:X11's $TMPDIR), stale locks are cleared only when no server is listening, startup waits for the socket, and a D-Bus session is launched for desktop environments.
+          - First-run screens (Terms, Permissions, Loading) now follow the supplied reference visuals: full-width cards with even side gutters, chevrons, accent bars, consent checkbox, progress card and status rows.
+          - **M3Y OmColor** is now the default theme for new installs. Dynamic color and the other themes remain selectable.
 
           ### Requirements and install
           - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`. x86_64 is not supported.
-          - Install `xyzterm-1.0.6-arm64.apk` (arm64) or `xyzterm-1.0.6-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
+          - Install `xyzterm-1.0.7-arm64.apk` (arm64) or `xyzterm-1.0.7-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
           - Signed with the repository's persistent key, so it installs over earlier releases.
 
           Licensed under GPL-3.0-or-later. Built from source on GitHub Actions.

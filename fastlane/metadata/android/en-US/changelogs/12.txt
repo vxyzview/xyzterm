@@ -1,0 +1,6 @@
+xyzterm 1.0.7
+
+- Background desktop session with Start/Stop controls and auto-opening Termux:X11
+- Fixed the X11 socket path and D-Bus setup for desktop environments
+- First-run Terms, Permissions and Loading screens follow the new reference design
+- M3Y OmColor is now the default theme
