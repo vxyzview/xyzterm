@@ -6,6 +6,7 @@ import com.xyzterm.file.localDir
 import com.xyzterm.file.sandboxHomeDir
 import com.xyzterm.utils.getTempDir
 import java.io.File
+import java.nio.file.Files
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -145,6 +146,25 @@ object TerminalBackup {
                 if (code != 0) {
                     return@withContext (stderr.lineSequence().firstOrNull { it.isNotBlank() }
                         ?: "tar exited with $code")
+                }
+
+                // User-supplied archives are a trust boundary: reject symlinks
+                // that point outside the staging tree before swapping directories.
+                val unsafeSymlink =
+                    runCatching {
+                        Files.walk(staging.toPath()).use { paths ->
+                            paths.any { path ->
+                                if (!Files.isSymbolicLink(path)) {
+                                    false
+                                } else {
+                                    val target = Files.readSymbolicLink(path).toString()
+                                    target.split('/').contains("..")
+                                }
+                            }
+                        }
+                    }.getOrDefault(true)
+                if (unsafeSymlink) {
+                    return@withContext "backup contains unsafe symlinks"
                 }
 
                 val sandboxTarget = localDir().child("sandbox")

@@ -8,6 +8,19 @@ if [ -z "$TERMUX_X11_SOURCE_DIR" ]; then
     exit 1
 fi
 
+SESSION="${X11_SESSION:-xfce4}"
+case "$SESSION" in
+    xfce4) DESKTOP_CMD=startxfce4; PKG=xfce4 ;;
+    kde) DESKTOP_CMD=startplasma-x11; PKG=kde ;;
+    openbox) DESKTOP_CMD=openbox-session; PKG=openbox ;;
+    *) DESKTOP_CMD=""; PKG="$SESSION" ;;
+esac
+
+if [ -n "$DESKTOP_CMD" ] && ! command -v "$DESKTOP_CMD" >/dev/null 2>&1; then
+    echo "Desktop not installed. Run: pacman -S $PKG" >&2
+    exit 1
+fi
+
 DISPLAY="${X11_DISPLAY:-:0}"
 export DISPLAY
 export XKB_CONFIG_ROOT="${XKB_CONFIG_ROOT:-/usr/share/X11/xkb}"
@@ -15,9 +28,8 @@ export XKB_CONFIG_ROOT="${XKB_CONFIG_ROOT:-/usr/share/X11/xkb}"
 termux-x11 "$DISPLAY" >/dev/null 2>&1 &
 sleep 2
 
-case "${X11_SESSION:-xfce4}" in
-    xfce4) exec startxfce4 ;;
-    kde) exec startplasma-x11 ;;
-    openbox) exec openbox-session ;;
-    *) exec sh -c "$X11_SESSION" ;;
-esac
+if [ -n "$DESKTOP_CMD" ]; then
+    exec "$DESKTOP_CMD"
+else
+    exec sh -c "$SESSION"
+fi
