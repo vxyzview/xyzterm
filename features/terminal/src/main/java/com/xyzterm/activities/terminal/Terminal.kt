@@ -25,10 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -64,7 +60,7 @@ import com.xyzterm.commands.ActionContext
 import com.xyzterm.commands.KeyCombination
 import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.components.BrandHeader
-import com.xyzterm.components.SetupStepRail
+import com.xyzterm.components.SetupShell
 import com.xyzterm.exec.isTerminalInstalled
 import com.xyzterm.file.FilePermission
 import com.xyzterm.file.sandboxDir
@@ -470,112 +466,127 @@ class Terminal : AppCompatActivity() {
 
             when (stage) {
                 InstallStage.UnsupportedCpu -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(
-                            text = stringResource(strings.unsupported_cpu),
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(strings.unsupported_cpu_desc),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { finishAffinity() }) { Text(text = stringResource(strings.ok)) }
+                    SetupShell(step = 3) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.large,
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                ),
+                        ) {
+                            Column(modifier = Modifier.padding(24.dp)) {
+                                Text(
+                                    text = stringResource(strings.unsupported_cpu),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = stringResource(strings.unsupported_cpu_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Button(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { finishAffinity() },
+                                ) {
+                                    Text(text = stringResource(strings.ok))
+                                }
+                            }
+                        }
                     }
                 }
 
                 InstallStage.Ready -> TerminalScreen(terminalActivity = this@Terminal)
 
                 InstallStage.Failed -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(
-                            text = errorMessage.ifBlank { stringResource(strings.install_failed) },
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center,
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { retryKey++ }) { Text(text = stringResource(strings.retry)) }
+                    SetupShell(step = 3) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.large,
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                ),
+                        ) {
+                            Column(modifier = Modifier.padding(24.dp)) {
+                                Text(
+                                    text = errorMessage.ifBlank { stringResource(strings.install_failed) },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Button(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { retryKey++ },
+                                ) {
+                                    Text(text = stringResource(strings.retry))
+                                }
+                            }
+                        }
                     }
                 }
 
                 InstallStage.Copying,
                 InstallStage.Extracting -> {
-                    Box(modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp)) {
-                        Column(
-                            modifier =
-                                Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState()),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(20.dp),
+                    SetupShell(step = 3) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.large,
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                ),
                         ) {
-                            Spacer(modifier = Modifier.height(24.dp))
-                            SetupStepRail(step = 3)
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = MaterialTheme.shapes.large,
-                                colors =
-                                    CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                                    ),
-                            ) {
-                                Column(modifier = Modifier.padding(24.dp)) {
-                                    Text(
-                                        text = stringResource(strings.install_heading),
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.Bold,
+                            Column(modifier = Modifier.padding(24.dp)) {
+                                Text(
+                                    text = stringResource(strings.install_heading),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = stringResource(strings.install_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                if (totalBytes > 0) {
+                                    LinearProgressIndicator(
+                                        progress = { downloadedBytes.toFloat() / totalBytes },
+                                        modifier = Modifier.fillMaxWidth(),
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    val percent = (downloadedBytes.toFloat() / totalBytes * 100).toInt()
                                     Text(
-                                        text = stringResource(strings.install_desc),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        text = "$percent%  ·  $progressText",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier =
+                                            Modifier.padding(top = 8.dp).semantics {
+                                                liveRegion = LiveRegionMode.Polite
+                                            },
                                     )
-                                    Spacer(modifier = Modifier.height(24.dp))
-                                    if (totalBytes > 0) {
-                                        LinearProgressIndicator(
-                                            progress = { downloadedBytes.toFloat() / totalBytes },
-                                            modifier = Modifier.fillMaxWidth(),
-                                        )
-                                        val percent = (downloadedBytes.toFloat() / totalBytes * 100).toInt()
-                                        Text(
-                                            text = "$percent%  ·  $progressText",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            modifier =
-                                                Modifier.padding(top = 8.dp).semantics {
-                                                    liveRegion = LiveRegionMode.Polite
-                                                },
-                                        )
-                                    } else {
-                                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                                        Text(
-                                            text = progressText,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            modifier =
-                                                Modifier.padding(top = 8.dp).semantics {
-                                                    liveRegion = LiveRegionMode.Polite
-                                                },
-                                        )
-                                    }
+                                } else {
+                                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                                    Text(
+                                        text = progressText,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier =
+                                            Modifier.padding(top = 8.dp).semantics {
+                                                liveRegion = LiveRegionMode.Polite
+                                            },
+                                    )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = stringResource(strings.warn_dont_leave_setup),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                            )
                         }
+                        Text(
+                            text = stringResource(strings.warn_dont_leave_setup),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
             }

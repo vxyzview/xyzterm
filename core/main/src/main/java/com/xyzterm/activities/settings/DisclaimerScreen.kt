@@ -3,8 +3,10 @@ package com.xyzterm.activities.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.widthIn
@@ -13,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -26,7 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.xyzterm.components.BrandHeader
+import com.xyzterm.components.SetupBrand
 import com.xyzterm.components.SetupStepRail
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
@@ -34,14 +37,14 @@ import com.xyzterm.settings.Settings
 @Composable
 fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().safeContentPadding().padding(24.dp),
+        modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(
             modifier = Modifier.fillMaxSize().widthIn(max = 560.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            BrandHeader()
+            SetupBrand()
             SetupStepRail(step = 1)
 
             val scrollState = rememberScrollState()
@@ -52,55 +55,39 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     Text(
-                        text = stringResource(strings.disclaimer_heading),
+                        text = stringResource(strings.terms_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
                         text = stringResource(strings.disclaimer_read_carefully),
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
-                    Text(
-                        text = stringResource(strings.data_loss_risk),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.error,
+                    TermsSection(
+                        title = stringResource(strings.data_loss_risk),
+                        body = stringResource(strings.data_loss_risk_content),
+                        important = true,
                     )
-                    Text(
-                        text = stringResource(strings.data_loss_risk_content),
-                        style = MaterialTheme.typography.bodySmall,
+                    TermsSection(
+                        title = stringResource(strings.terminal_risks),
+                        body = stringResource(strings.terminal_risks_content),
+                        important = true,
                     )
-
-                    Text(
-                        text = stringResource(strings.terminal_risks),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.error,
+                    TermsSection(
+                        title = stringResource(strings.no_warranty),
+                        body = stringResource(strings.no_warranty_content),
                     )
-                    Text(
-                        text = stringResource(strings.terminal_risks_content),
-                        style = MaterialTheme.typography.bodySmall,
+                    TermsSection(
+                        title = stringResource(strings.not_liable),
+                        body = stringResource(strings.not_liable_content),
                     )
 
-                    Text(
-                        text = stringResource(strings.no_warranty),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(text = stringResource(strings.no_warranty_content), style = MaterialTheme.typography.bodySmall)
-
-                    Text(
-                        text = stringResource(strings.not_liable),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(text = stringResource(strings.not_liable_content), style = MaterialTheme.typography.bodySmall)
-
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Text(
                         text = stringResource(strings.consent_statement),
                         style = MaterialTheme.typography.bodySmall,
@@ -110,11 +97,19 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
                 }
             }
 
+            val canAccept by remember { derivedStateOf { !scrollState.canScrollForward } }
+            if (!canAccept) {
+                Text(
+                    text = stringResource(strings.terms_scroll_hint),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(modifier = Modifier.weight(1f), onClick = onDecline) {
                     Text(text = stringResource(strings.decline), maxLines = 1)
                 }
-                val canAccept by remember { derivedStateOf { !scrollState.canScrollForward } }
                 Button(
                     enabled = canAccept,
                     modifier = Modifier.weight(1f),
@@ -126,6 +121,21 @@ fun DisclaimerScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
                     Text(text = stringResource(strings.i_accept), maxLines = 1)
                 }
             }
+            Spacer(modifier = Modifier.height(4.dp))
         }
     }
+}
+
+@Composable
+private fun TermsSection(title: String, body: String, important: Boolean = false) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = if (important) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+        )
+        Text(text = body, style = MaterialTheme.typography.bodySmall)
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 }

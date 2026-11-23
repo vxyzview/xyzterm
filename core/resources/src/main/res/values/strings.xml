@@ -342,4 +342,9 @@
     <string name="gamepad_input">Gamepad input</string>
     <string name="gamepad_input_desc">Map controller buttons to Enter, Escape, Tab and page keys in the shell.</string>
     <string name="restore_sessions_active">Close all sessions before restoring a backup.</string>
+    <string name="permission_granted">Granted</string>
+    <string name="permission_not_granted">Tap to allow</string>
+    <string name="permission_later">You can change these later in Settings.</string>
+    <string name="terms_scroll_hint">Scroll to the end to continue</string>
+    <string name="terms_title">Before you begin</string>
 </resources>
