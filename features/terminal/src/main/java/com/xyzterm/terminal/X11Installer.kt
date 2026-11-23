@@ -119,7 +119,9 @@ object X11Installer {
         progress = 0f
         progressKnown = false
         val id = DialogHost.nextId()
-        DialogHost.push(DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = false) { ProgressContent() })
+        DialogHost.push(
+            DialogRequest(id = id, createdAt = System.currentTimeMillis(), cancelable = false) { ProgressContent() },
+        )
         return id
     }
 
@@ -179,65 +181,63 @@ object X11Installer {
         }
     }
 
-    private fun fetchLatest(): Release? =
-        runCatching {
-            val request = Request.Builder().url("https://api.github.com/repos/$OWNER/$REPO/releases/latest").build()
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return null
-                val json = JSONObject(response.body.string())
-                val assets = json.optJSONArray("assets") ?: return null
-                for (i in 0 until assets.length()) {
-                    val asset = assets.getJSONObject(i)
-                    if (asset.optString("name") == ASSET) {
-                        return Release(
-                            url = asset.optString("browser_download_url"),
-                            digest = asset.optString("digest"),
-                        )
-                    }
+    private fun fetchLatest(): Release? = runCatching {
+        val request = Request.Builder().url("https://api.github.com/repos/$OWNER/$REPO/releases/latest").build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) return null
+            val json = JSONObject(response.body.string())
+            val assets = json.optJSONArray("assets") ?: return null
+            for (i in 0 until assets.length()) {
+                val asset = assets.getJSONObject(i)
+                if (asset.optString("name") == ASSET) {
+                    return Release(
+                        url = asset.optString("browser_download_url"),
+                        digest = asset.optString("digest"),
+                    )
                 }
-                null
             }
+            null
         }
-            .getOrNull()
+    }
+        .getOrNull()
 
     private suspend fun download(
         url: String,
         onProgress: suspend (Float, Boolean) -> Unit,
-    ): File? =
-        runCatching {
-            if (url.isBlank()) return null
-            val target = File(application!!.filesDir, "x11/$ASSET")
-            target.parentFile?.mkdirs()
-            val request = Request.Builder().url(url).build()
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) return null
-                val body = response.body
-                val total = body.contentLength()
-                var bytes = 0L
-                var lastPercent = -1
-                body.byteStream().use { input ->
-                    target.outputStream().use { out ->
-                        val buffer = ByteArray(64 * 1024)
-                        while (true) {
-                            val read = input.read(buffer)
-                            if (read <= 0) break
-                            out.write(buffer, 0, read)
-                            bytes += read
-                            if (total > 0) {
-                                val percent = (bytes * 100 / total).toInt()
-                                if (percent != lastPercent) {
-                                    lastPercent = percent
-                                    onProgress(bytes.toFloat() / total, true)
-                                }
+    ): File? = runCatching {
+        if (url.isBlank()) return null
+        val target = File(application!!.filesDir, "x11/$ASSET")
+        target.parentFile?.mkdirs()
+        val request = Request.Builder().url(url).build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) return null
+            val body = response.body
+            val total = body.contentLength()
+            var bytes = 0L
+            var lastPercent = -1
+            body.byteStream().use { input ->
+                target.outputStream().use { out ->
+                    val buffer = ByteArray(64 * 1024)
+                    while (true) {
+                        val read = input.read(buffer)
+                        if (read <= 0) break
+                        out.write(buffer, 0, read)
+                        bytes += read
+                        if (total > 0) {
+                            val percent = (bytes * 100 / total).toInt()
+                            if (percent != lastPercent) {
+                                lastPercent = percent
+                                onProgress(bytes.toFloat() / total, true)
                             }
                         }
                     }
                 }
-                if (total <= 0) onProgress(0f, false)
             }
-            target
+            if (total <= 0) onProgress(0f, false)
         }
-            .getOrNull()
+        target
+    }
+        .getOrNull()
 
     private fun verify(file: File, digest: String): Boolean {
         val expected = digest.substringAfter(':', "").ifEmpty { digest }.trim()
