@@ -82,6 +82,14 @@ fn dispatch(name: &str, args: &[Value]) -> Result<Value, String> {
             let out = port::is_safe_file_name(arg(args, 0)?)?;
             Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
         }
+        "isWellFormedHost" => {
+            let out = port::is_well_formed_host(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
+        "isValidGuestPath" => {
+            let out = port::is_valid_guest_path(arg(args, 0)?)?;
+            Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
+        }
         "matchesLogLevel" => {
             let out = port::matches_log_level(arg(args, 0)?, arg(args, 1)?)?;
             Ok(serde_json::to_value(out).map_err(|e| e.to_string())?)
@@ -389,6 +397,48 @@ pub extern "system" fn Java_rustanything_TerminalRsNative_n_1isSafeFileName<'loc
         return 0;
     };
     match run(|| port::is_safe_file_name(file_name)) {
+        Ok(out) => jni::sys::jboolean::from(out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            0
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.isWellFormedHost(String path)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_isWellFormedHost`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1isWellFormedHost<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    path: jni::objects::JString<'local>,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jboolean {
+    let Some(path) = string_arg(&mut env, &path) else {
+        return 0;
+    };
+    match run(|| port::is_well_formed_host(path)) {
+        Ok(out) => jni::sys::jboolean::from(out),
+        Err(message) => {
+            report(&mut env, &slot, &message);
+            0
+        }
+    }
+}
+
+/// `com.xyzterm.terminal.PortableLogicKt.isValidGuestPath(String path)`: typed, no JSON.
+// SAFETY: the JNI symbol of `rustanything.TerminalRsNative.n_isValidGuestPath`; nothing else defines it.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_rustanything_TerminalRsNative_n_1isValidGuestPath<'local>(
+    mut env: jni::JNIEnv<'local>,
+    _class: jni::objects::JClass<'local>,
+    path: jni::objects::JString<'local>,
+    slot: jni::objects::JObjectArray<'local>,
+) -> jni::sys::jboolean {
+    let Some(path) = string_arg(&mut env, &path) else {
+        return 0;
+    };
+    match run(|| port::is_valid_guest_path(path)) {
         Ok(out) => jni::sys::jboolean::from(out),
         Err(message) => {
             report(&mut env, &slot, &message);

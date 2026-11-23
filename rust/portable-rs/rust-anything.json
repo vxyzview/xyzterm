@@ -348,21 +348,50 @@
       "uses_instanceof": false,
       "native_return": "String",
       "prototype": "com.xyzterm.terminal.PortableLogicKt.fromUrlName(String url)"
-    }
-  ],
-  "classes": [],
-  "js_only": [
+    },
     {
       "name": "isWellFormedHost",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
       "line": 43,
-      "reason": "kept on request"
+      "params": [
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.isWellFormedHost(String path)"
     },
     {
       "name": "isValidGuestPath",
       "file": "src/main/java/com/xyzterm/terminal/PortableLogic.kt",
       "line": 46,
-      "reason": "kept on request"
+      "params": [
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.terminal.PortableLogicKt.isValidGuestPath(String path)"
     }
-  ]
+  ],
+  "classes": [],
+  "js_only": []
 }

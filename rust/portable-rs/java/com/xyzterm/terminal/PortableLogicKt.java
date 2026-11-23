@@ -95,4 +95,16 @@ public final class PortableLogicKt {
     public static String fromUrlName(String url) {
         return rustanything.TerminalRsNative.call_fromUrlName(url);
     }
+
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.isWellFormedHost(String path)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:43`). */
+    @SuppressWarnings("unchecked")
+    public static boolean isWellFormedHost(String path) {
+        return rustanything.TerminalRsNative.call_isWellFormedHost(path);
+    }
+
+    /** The Rust port of `com.xyzterm.terminal.PortableLogicKt.isValidGuestPath(String path)` (`src/main/java/com/xyzterm/terminal/PortableLogic.kt:46`). */
+    @SuppressWarnings("unchecked")
+    public static boolean isValidGuestPath(String path) {
+        return rustanything.TerminalRsNative.call_isValidGuestPath(path);
+    }
 }

@@ -24,6 +24,8 @@ public final class TerminalRsNative {
     public static native boolean n_hasBinaryChars(String text, String[] slot);
     public static native String n_parseExtensionsJoined(String input, String[] slot);
     public static native boolean n_isSafeFileName(String fileName, String[] slot);
+    public static native boolean n_isWellFormedHost(String path, String[] slot);
+    public static native boolean n_isValidGuestPath(String path, String[] slot);
     public static native boolean n_matchesLogLevel(String line, int levelValue, String[] slot);
     public static native boolean n_shouldCaptureLog(String line, String[] slot);
     public static native boolean n_isNewer(String latest, String installed, String[] slot);
@@ -82,6 +84,28 @@ public final class TerminalRsNative {
         try {
             String[] slot = RustAnythingError.slot();
             boolean out = n_isSafeFileName(fileName, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static boolean call_isWellFormedHost(String path) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            boolean out = n_isWellFormedHost(path, slot);
+            RustAnythingError.check(slot);
+            return out;
+        } catch (RustAnythingError e) {
+            throw e.real();
+        }
+    }
+
+    public static boolean call_isValidGuestPath(String path) {
+        try {
+            String[] slot = RustAnythingError.slot();
+            boolean out = n_isValidGuestPath(path, slot);
             RustAnythingError.check(slot);
             return out;
         } catch (RustAnythingError e) {

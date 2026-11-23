@@ -10,11 +10,7 @@
       "commands": [],
       "switch": "RUST_ANYTHING_UNIT_TERMINAL",
       "unit": "src/main/java/com/xyzterm/terminal/",
-      "shadow": "/home/xyzterm/rust/portable-rs/java/com/xyzterm/terminal/PortableLogicKtShadow.java",
-      "kept": [
-        "isWellFormedHost",
-        "isValidGuestPath"
-      ]
+      "shadow": "/home/xyzterm/rust/portable-rs/java/com/xyzterm/terminal/PortableLogicKtShadow.java"
     }
   ],
   "kind": "library",

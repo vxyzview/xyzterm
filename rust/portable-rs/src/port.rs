@@ -141,6 +141,16 @@ pub fn is_safe_file_name(file_name: String) -> Result<bool, String> {
         && !file_name.contains('\\'))
 }
 
+/// Port of `UserBindings.isWellFormedHost`: Kotlin `length` counts UTF-16 units.
+pub fn is_well_formed_host(path: String) -> Result<bool, String> {
+    Ok(path.starts_with('/') && path.encode_utf16().count() > 1)
+}
+
+/// Port of `UserBindings.isValidGuestPath`: same shape check as the host path.
+pub fn is_valid_guest_path(path: String) -> Result<bool, String> {
+    Ok(path.starts_with('/') && path.encode_utf16().count() > 1)
+}
+
 /// Port of `matchesLogLevel` (level value replaces the Android-backed enum).
 pub fn matches_log_level(line: String, level_value: i64) -> Result<bool, String> {
     if line.is_empty() {
