@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.PictureDrawable
@@ -121,15 +120,6 @@ fun copyToClipboard(label: String, text: String, showToast: Boolean = true) {
 
 fun copyToClipboard(text: String, showToast: Boolean = true) {
     copyToClipboard(label = "xyzterm", text, showToast = showToast)
-}
-
-fun getSourceDirOfPackage(context: Context, packageName: String): String? {
-    return try {
-        val info = context.packageManager.getApplicationInfo(packageName, 0)
-        info.sourceDir
-    } catch (e: PackageManager.NameNotFoundException) {
-        null // App not found
-    }
 }
 
 fun getTempDir(): File {

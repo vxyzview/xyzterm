@@ -23,7 +23,7 @@ suspend fun setupTerminalFiles() {
         if (terminalFilesInstalled) return
         if (sandboxDir().exists().not() || localBinDir().exists().not()) return
 
-        val internalFiles = listOf("init", "sandbox", "setup", "utils", "termux-x11", "start-desktop")
+        val internalFiles = listOf("init", "sandbox", "setup", "utils")
         internalFiles.forEach { setupAssetFile(it) }
 
         terminalFilesInstalled = true

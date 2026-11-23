@@ -24,13 +24,10 @@ import com.xyzterm.settings.terminal.TerminalAppearanceSettings
 import com.xyzterm.settings.terminal.TerminalBackupsScreen
 import com.xyzterm.settings.terminal.TerminalCheckScreen
 import com.xyzterm.settings.terminal.TerminalDataSettings
-import com.xyzterm.settings.terminal.TerminalDesktopScreen
 import com.xyzterm.settings.terminal.TerminalExtraKeys
 import com.xyzterm.settings.terminal.TerminalInputSettings
 import com.xyzterm.settings.terminal.UserBindingsScreen
-import com.xyzterm.terminal.DesktopController
 import com.xyzterm.utils.toast
-import kotlinx.coroutines.launch
 
 /**
  * This build only ships the terminal feature. The file-manager/drawer and code-runner integrations that used to live
@@ -88,11 +85,6 @@ class TerminalFeature : Feature {
         routes.add(DynamicRoute(SettingsRoutes.TerminalExtraKeys.route) { _, _ -> TerminalExtraKeys() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalSnippets.route) { _, _ -> SnippetsScreen() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalCheck.route) { _, _ -> TerminalCheckScreen() })
-        routes.add(
-            DynamicRoute(SettingsRoutes.TerminalDesktop.route) { navController, _ ->
-                TerminalDesktopScreen(navController)
-            },
-        )
         routes.add(DynamicRoute(SettingsRoutes.TerminalFontScreen.route) { _, _ -> TerminalFontScreen() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalBackups.route) { _, _ -> TerminalBackupsScreen() })
         routes.add(DynamicRoute(SettingsRoutes.TerminalBinds.route) { _, _ -> UserBindingsScreen() })
@@ -114,10 +106,6 @@ class TerminalFeature : Feature {
             try {
                 val intent = Intent(activity, Terminal::class.java)
                 activity.startActivity(intent)
-                if (id == "desktop") {
-                    DesktopController.markStarting()
-                    DefaultScope.launch { DesktopController.openX11WhenReady(activity) }
-                }
             } catch (_: Exception) {
                 toast("Terminal feature is not available in this build")
             }

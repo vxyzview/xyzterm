@@ -76,7 +76,6 @@ Tap the icon and you are in a shell. That's it. No code editor, no file manager,
 - **Extra-keys row** — ESC / CTRL / ALT / arrows / TAB / HOME / END / PGUP / PGDN always one tap away. Fully customizable in [Termux extra-keys JSON format](https://wiki.termux.com/wiki/Touch_Keyboard#Extra_Keys_Row), with live validation while you edit.
 - **Hardware keyboard support** — a wide set of default shortcuts, searchable and remappable in-app. See [KEYBINDS.md](docs/KEYBINDS.md).
 - **Hardware keyboard, mouse and gamepad** — Ctrl/Alt/Shift pass through to the shell, mouse reporting works in TUI apps, and controller buttons map to Enter/Esc/Tab/Page keys (toggle in Terminal settings).
-- **Graphical desktop (bring your own X server)** — from Terminal settings, auto-detect and launch any installed X11 desktop or window manager (XFCE, KDE, GNOME, Cinnamon, MATE, LXQt, LXDE, i3, Openbox, Fluxbox, Awesome, dwm, bspwm, Qtile and more), or enter a custom command. Requires [Termux:X11](https://github.com/termux/termux-x11) as the display server; install the desktop itself with `pacman -S xfce4` (or your preferred session).
 - **Clipboard keybindings** — paste multi-line input safely, without auto-execution surprises.
 
 ### Sessions & data

@@ -78,7 +78,6 @@ import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
-import com.xyzterm.terminal.DesktopController
 import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
 import com.xyzterm.terminal.SessionService
@@ -135,8 +134,6 @@ class Terminal : AppCompatActivity() {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 val binder = service as SessionService.SessionBinder
                 sessionBinder = WeakReference(binder)
-                DesktopController.binder = binder
-                DesktopController.refresh()
                 isBound = true
                 // Restore saved sessions from previous runs before handling the
                 // intent, so the screen picks the last active session instead of
@@ -152,8 +149,6 @@ class Terminal : AppCompatActivity() {
             override fun onServiceDisconnected(name: ComponentName?) {
                 isBound = false
                 sessionBinder = null
-                DesktopController.binder = null
-                DesktopController.refresh()
             }
         }
 

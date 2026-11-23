@@ -101,12 +101,6 @@ fun SettingsTerminalScreen(navController: NavController) {
                 navController = navController,
                 route = SettingsRoutes.TerminalAdvanced,
             )
-            NextScreenCard(
-                label = stringResource(strings.desktop),
-                description = stringResource(strings.desktop_desc),
-                navController = navController,
-                route = SettingsRoutes.TerminalDesktop,
-            )
         }
     }
 }
@@ -427,6 +421,13 @@ fun TerminalInputSettings(navController: NavController) {
                 description = stringResource(strings.clipboard_keybindings_desc),
                 default = Settings.terminal_clipboard_keybindings,
                 sideEffect = { Settings.terminal_clipboard_keybindings = it },
+            )
+
+            SettingsItem(
+                label = stringResource(strings.gamepad_input),
+                description = stringResource(strings.gamepad_input_desc),
+                default = Settings.gamepad_input,
+                sideEffect = { Settings.gamepad_input = it },
             )
 
             RoundedValueSlider(

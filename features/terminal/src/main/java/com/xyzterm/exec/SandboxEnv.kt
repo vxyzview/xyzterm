@@ -6,8 +6,6 @@ import com.xyzterm.file.localDir
 import com.xyzterm.file.localLibDir
 import com.xyzterm.file.sandboxHomeDir
 import com.xyzterm.settings.Settings
-import com.xyzterm.utils.application
-import com.xyzterm.utils.getSourceDirOfPackage
 import com.xyzterm.utils.getTempDir
 import java.io.File
 import java.util.TimeZone
@@ -52,8 +50,6 @@ object SandboxEnv {
                 "TZ" to TimeZone.getDefault().id,
                 "DOTNET_GCHeapHardLimit" to "1C0000000",
                 "SOURCE_DIR" to context.applicationInfo.sourceDir,
-                "TERMUX_X11_SOURCE_DIR" to getSourceDirOfPackage(application!!, "com.termux.x11").orEmpty(),
-                "DISPLAY" to ":0",
             )
 
         listOf(
