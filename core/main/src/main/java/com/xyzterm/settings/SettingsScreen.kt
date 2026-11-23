@@ -15,8 +15,9 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -50,12 +52,21 @@ fun SettingsScreen(navController: NavController) {
     val entries = remember { settingsEntries() }
 
     PreferenceLayout(label = stringResource(id = strings.settings), backArrowVisible = true) {
-        OutlinedTextField(
+        // Tonal search field: no outline competing with the settings cards.
+        TextField(
             value = query,
             onValueChange = { query = it },
             label = { Text(stringResource(strings.search)) },
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
             singleLine = true,
+            shape = MaterialTheme.shapes.large,
+            colors =
+                TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
             modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(12.dp))

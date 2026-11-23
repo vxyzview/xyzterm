@@ -30,10 +30,13 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,11 +54,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -159,42 +164,74 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
     // TerminalScreenInternal, so a toggle only recomposes the header — not the
     // whole screen (which would re-run the terminal AndroidView update + drawer).
     if (Settings.smart_toolbar && WindowInsets.isImeVisible) return
+    val context = LocalContext.current
+    var showMenu by remember { mutableStateOf(false) }
     TopAppBar(
+        // Live session chip: the one thing in the first viewport that says
+        // which shell is attached, in a tonal pill that never grows a border.
         title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            Surface(
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
-                // Session indicator: solid while live, flashes
-                // amber for 2s when the shell rings the bell
-                // (e.g. a background job finished).
-                LaunchedEffect(bellPulse) {
-                    if (bellPulse) {
-                        delay(2000)
-                        bellPulse = false
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    // Solid while live, flashes amber for 2s when the shell
+                    // rings the bell (e.g. a background job finished).
+                    LaunchedEffect(bellPulse) {
+                        if (bellPulse) {
+                            delay(2000)
+                            bellPulse = false
+                        }
                     }
+                    val sessionStateLabel =
+                        stringResource(if (bellPulse) strings.session_attention else strings.session_running)
+                    Box(
+                        modifier =
+                            Modifier.size(8.dp)
+                                .background(
+                                    if (bellPulse) {
+                                        MaterialTheme.colorScheme.yellowStatus
+                                    } else {
+                                        MaterialTheme.colorScheme.primary
+                                    },
+                                    CircleShape,
+                                )
+                                .semantics { contentDescription = sessionStateLabel },
+                    )
+                    SessionTitle(terminalActivity)
                 }
-                val sessionStateLabel =
-                    stringResource(if (bellPulse) strings.session_attention else strings.session_running)
-                Box(
-                    modifier =
-                        Modifier.size(8.dp)
-                            .background(
-                                if (bellPulse) {
-                                    MaterialTheme.colorScheme.yellowStatus
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                },
-                                CircleShape,
-                            )
-                            .semantics { contentDescription = sessionStateLabel },
-                )
-                SessionTitle(terminalActivity)
             }
         },
         navigationIcon = {
             IconButton(onClick = { scope.launch { drawerState.open() } }) {
                 Icon(Icons.Default.Menu, stringResource(strings.drawer))
+            }
+        },
+        actions = {
+            IconButton(onClick = { showMenu = true }) {
+                Icon(Icons.Default.MoreVert, stringResource(strings.more_options))
+            }
+            DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(strings.add_session)) },
+                    leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
+                    onClick = {
+                        showMenu = false
+                        newSession(terminalActivity, scope)
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(strings.settings)) },
+                    leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
+                    onClick = {
+                        showMenu = false
+                        context.startActivity(Intent(context, SettingsActivity::class.java))
+                    },
+                )
             }
         },
     )
@@ -212,6 +249,25 @@ private fun SessionTitle(terminalActivity: Terminal) {
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
+}
+
+/** Creates a uniquely named session and switches to it immediately — shared by the drawer and the chip menu. */
+private fun newSession(
+    terminalActivity: Terminal,
+    scope: CoroutineScope,
+) {
+    val binder = terminalActivity.sessionBinder?.get() ?: return
+    if (terminalView.get() == null) return
+    val existing = binder.getService().sessionList
+    var index = 1
+    var name: String
+    do {
+        name = strings.default_session_numbered.getString().format(index++)
+    } while (name in existing)
+    scope.launch {
+        val info = binder.createSession(name, TerminalBackEnd(), terminalActivity)
+        terminalActivity.changeSession(info.id)
+    }
 }
 
 @Composable
@@ -438,7 +494,10 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 Modifier.fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .padding(top = 8.dp)
-                    .semantics { role = Role.Button }
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = stringResource(strings.settings)
+                    }
                     .clickable { context.startActivity(Intent(context, SettingsActivity::class.java)) },
             shape = MaterialTheme.shapes.large,
             color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -481,36 +540,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 fontWeight = FontWeight.SemiBold,
             )
 
-            TextButton(
-                onClick = {
-                    fun generateUniqueString(existingStrings: List<String>): String {
-                        var index = 1
-                        var newString: String
-
-                        do {
-                            newString = strings.default_session_numbered.getString().format(index)
-                            index++
-                        } while (newString in existingStrings)
-
-                        return newString
-                    }
-                    terminalView.get()?.let {
-                        val binder = terminalActivity.sessionBinder?.get() ?: return@let
-                        val client = TerminalBackEnd()
-                        scope.launch {
-                            val info =
-                                binder.createSession(
-                                    generateUniqueString(binder.getService().sessionList),
-                                    client,
-                                    terminalActivity,
-                                )
-                            // Switch to the new session immediately — creating it
-                            // silently in the background feels like a dead button.
-                            terminalActivity.changeSession(info.id)
-                        }
-                    }
-                },
-            ) {
+            TextButton(onClick = { newSession(terminalActivity, scope) }) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = stringResource(strings.add_session),
@@ -543,7 +573,15 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
             ) {
                 items(sessions, key = { it }) { sessionId ->
                     val isSelected = sessionId == service.currentSession.value
+                    val foreground =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
 
+                    // Live session strip: an accent bar plus a state label that
+                    // changes in place, so the active shell is legible at a glance.
                     Surface(
                         onClick = { scope.launch { terminalActivity.changeSession(sessionId) } },
                         shape = MaterialTheme.shapes.large,
@@ -555,10 +593,20 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                             },
                         modifier = Modifier.padding(horizontal = 16.dp),
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier =
+                                    Modifier.size(width = 4.dp, height = 48.dp)
+                                        .clip(MaterialTheme.shapes.extraSmall)
+                                        .background(
+                                            when {
+                                                isSelected && bellPulse -> MaterialTheme.colorScheme.yellowStatus
+                                                isSelected -> MaterialTheme.colorScheme.primary
+                                                else -> MaterialTheme.colorScheme.outlineVariant
+                                            },
+                                        ),
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
                             Box(
                                 modifier =
                                     Modifier.size(8.dp)
@@ -572,20 +620,28 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                                         ),
                             )
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = sessionId,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color =
-                                    if (isSelected) {
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    } else {
-                                        MaterialTheme.colorScheme.onBackground
-                                    },
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f).padding(vertical = 14.dp),
-                            )
+                            Column(modifier = Modifier.weight(1f).padding(vertical = 10.dp)) {
+                                Text(
+                                    text = sessionId,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = foreground,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                                Text(
+                                    text =
+                                        stringResource(
+                                            if (isSelected) strings.session_active else strings.session_running_short
+                                        ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color =
+                                        if (isSelected) {
+                                            foreground.copy(alpha = 0.75f)
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
+                                )
+                            }
                             IconButton(
                                 onClick = {
                                     sessionToRename = sessionId
@@ -598,7 +654,8 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                                 Icon(
                                     imageVector = Icons.Outlined.Edit,
                                     contentDescription = stringResource(strings.rename),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    tint =
+                                        if (isSelected) foreground else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(18.dp),
                                 )
                             }

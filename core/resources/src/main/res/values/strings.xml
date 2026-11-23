@@ -89,6 +89,9 @@
 <string name="ignore">Ignore</string>
 <string name="sessions">Sessions</string>
     <string name="add_session">Add session</string>
+    <string name="more_options">More options</string>
+    <string name="session_active">Active</string>
+    <string name="session_running_short">Running</string>
 <string name="name_empty_err">Name cannot be empty</string>
 <string name="installing">Installing…</string>
 <string name="loading">Loading…</string>

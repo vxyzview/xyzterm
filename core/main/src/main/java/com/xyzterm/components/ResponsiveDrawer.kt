@@ -15,7 +15,6 @@ import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
@@ -52,8 +51,8 @@ fun ResponsiveDrawer(
             drawerContent = {
                 PermanentDrawerSheet(
                     windowInsets = if (fullscreen) WindowInsets() else DrawerDefaults.windowInsets,
-                    drawerShape = RectangleShape,
-                    drawerContainerColor = MaterialTheme.colorScheme.background,
+                    drawerShape = MaterialTheme.shapes.extraLarge,
+                    drawerContainerColor = MaterialTheme.colorScheme.surface,
                     content = sheetContent,
                 )
             },
@@ -68,8 +67,8 @@ fun ResponsiveDrawer(
                 ModalDrawerSheet(
                     windowInsets = if (fullscreen) WindowInsets() else DrawerDefaults.windowInsets,
                     modifier = Modifier.width(getDrawerWidth()),
-                    drawerShape = RectangleShape,
-                    drawerContainerColor = MaterialTheme.colorScheme.background,
+                    drawerShape = MaterialTheme.shapes.extraLarge,
+                    drawerContainerColor = MaterialTheme.colorScheme.surface,
                     content = sheetContent,
                 )
             },
