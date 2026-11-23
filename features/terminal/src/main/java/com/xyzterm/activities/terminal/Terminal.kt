@@ -210,7 +210,14 @@ class Terminal : AppCompatActivity() {
                 val name = uri.lastPathSegment?.trim().orEmpty()
                 // ponytail: deep-link session name is attacker-controlled; reject traversal
                 // and special segments before they reach MkSession.childSafe / deleteRecursively.
-                if (name.isEmpty() || name == "." || name == ".." || name.contains("/") || name.contains("\\")) {
+                if (
+                    name.isEmpty() ||
+                        name == "." ||
+                        name == ".." ||
+                        name.contains("/") ||
+                        name.contains("\\") ||
+                        name.any { it.isISOControl() }
+                ) {
                     return
                 }
                 lifecycleScope.launch(Dispatchers.Main) {
@@ -302,10 +309,14 @@ class Terminal : AppCompatActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (Settings.gamepad_input && event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+        if (Settings.gamepad_input) {
             val bytes = gamepadBytes(event.keyCode)
-            if (bytes != null) {
-                writeToShell(bytes)
+            if (bytes != null && (event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP)) {
+                // Consume both halves so the terminal view never sees a partial
+                // gamepad press (auto-repeat included).
+                if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+                    writeToShell(bytes)
+                }
                 return true
             }
         }
@@ -478,8 +489,7 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
-                InstallStage.Ready,
-                InstallStage.Extracting -> TerminalScreen(terminalActivity = this@Terminal)
+                InstallStage.Ready -> TerminalScreen(terminalActivity = this@Terminal)
 
                 InstallStage.Failed -> {
                     Column(

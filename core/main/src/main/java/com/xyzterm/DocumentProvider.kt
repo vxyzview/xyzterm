@@ -288,7 +288,8 @@ class DocumentProvider : DocumentsProvider() {
                 if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                 else PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 
-            context.packageManager.setComponentEnabledSetting(componentName, newState, PackageManager.DONT_KILL_APP)
+            // No DONT_KILL_APP: let Android restart the process so the provider is registered.
+            context.packageManager.setComponentEnabledSetting(componentName, newState, 0)
         }
 
         private const val ALL_MIME_TYPES = "*/*"
