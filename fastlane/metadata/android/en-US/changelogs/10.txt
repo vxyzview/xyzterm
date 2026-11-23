@@ -1,0 +1,5 @@
+xyzterm 1.0.6
+
+- Setup Complete screen after installation, with open or home actions
+- Install the latest Termux:X11 from Desktop settings, with SHA-256 verification
+- Shorter, clearer Terms and a more compact first-run layout
