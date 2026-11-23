@@ -1,7 +1,6 @@
 package com.xyzterm.settings
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -154,35 +152,34 @@ private fun Categories(navController: NavController) {
     }
 
     PreferenceGroup {
-        PreferenceTemplate(
-            modifier =
-                Modifier.semantics { role = Role.Button }
-                    .clickable { navController.navigate(SettingsRoutes.About.route) { launchSingleTop = true } },
-            verticalPadding = 14.dp,
-            title = { Text(stringResource(id = strings.about)) },
-            description = { Text(stringResource(id = strings.about_desc)) },
+        PreferenceCategory(
+            label = stringResource(id = strings.about),
+            description = stringResource(id = strings.about_desc),
             startWidget = {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
             },
             endWidget = { Chevron() },
+            onNavigate = { navController.navigate(SettingsRoutes.About.route) { launchSingleTop = true } },
         )
 
-        PreferenceTemplate(
-            modifier =
-                Modifier.semantics { role = Role.Button }
-                    .clickable { navController.navigate(SettingsRoutes.Support.route) { launchSingleTop = true } },
-            verticalPadding = 14.dp,
-            title = { Text(text = stringResource(strings.support)) },
-            description = { Text(stringResource(id = strings.support_desc)) },
-            startWidget = { SupportIcon() },
+        PreferenceCategory(
+            label = stringResource(id = strings.support),
+            description = stringResource(id = strings.support_desc),
+            startWidget = {
+                Icon(
+                    imageVector = if (Settings.donated) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            },
             endWidget = { Chevron() },
+            onNavigate = { navController.navigate(SettingsRoutes.Support.route) { launchSingleTop = true } },
         )
     }
 }
@@ -195,16 +192,4 @@ private fun Chevron() {
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.size(24.dp),
     )
-}
-
-@Composable
-fun SupportIcon() {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(32.dp)) {
-        Icon(
-            imageVector = if (Settings.donated) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.primary,
-        )
-    }
 }

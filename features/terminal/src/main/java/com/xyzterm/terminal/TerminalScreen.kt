@@ -61,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
@@ -626,10 +627,14 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                                         Modifier.size(width = 4.dp, height = 48.dp)
                                             .clip(MaterialTheme.shapes.extraSmall)
                                             .background(
-                                                when {
-                                                    isSelected && bellPulse -> MaterialTheme.colorScheme.yellowStatus
-                                                    isSelected -> MaterialTheme.colorScheme.primary
-                                                    else -> MaterialTheme.colorScheme.outlineVariant
+                                                if (isSelected) {
+                                                    if (bellPulse) {
+                                                        MaterialTheme.colorScheme.yellowStatus
+                                                    } else {
+                                                        MaterialTheme.colorScheme.primary
+                                                    }
+                                                } else {
+                                                    Color.Transparent
                                                 },
                                             ),
                                 )
