@@ -14,8 +14,8 @@ import com.xyzterm.components.compose.preferences.base.PreferenceLayout
 import com.xyzterm.file.child
 import com.xyzterm.file.localBinDir
 import com.xyzterm.resources.strings
-import com.xyzterm.terminal.DesktopSessions
 import com.xyzterm.settings.Settings
+import com.xyzterm.terminal.DesktopSessions
 
 @Composable
 fun TerminalDesktopScreen(navController: NavController) {
