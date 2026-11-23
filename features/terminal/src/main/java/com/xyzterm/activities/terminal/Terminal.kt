@@ -37,8 +37,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -71,9 +71,9 @@ import com.xyzterm.components.SetupShell
 import com.xyzterm.exec.isTerminalInstalled
 import com.xyzterm.file.FilePermission
 import com.xyzterm.file.sandboxDir
+import com.xyzterm.resources.drawables
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
-import com.xyzterm.resources.drawables
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import com.xyzterm.terminal.DesktopController

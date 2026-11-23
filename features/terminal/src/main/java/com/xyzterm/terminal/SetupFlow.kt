@@ -244,9 +244,7 @@ private fun PermissionStep(
     SetupShell(step = 2) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier =
-                    Modifier.size(width = 4.dp, height = 32.dp)
-                        .background(MaterialTheme.colorScheme.primary),
+                modifier = Modifier.size(width = 4.dp, height = 32.dp).background(MaterialTheme.colorScheme.primary),
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
