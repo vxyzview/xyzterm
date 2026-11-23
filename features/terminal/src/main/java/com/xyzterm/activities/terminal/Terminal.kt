@@ -78,6 +78,7 @@ import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
 import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.SetupFlow
+import com.xyzterm.terminal.SetupCompleteScreen
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
 import com.xyzterm.terminal.archmAssetForAbi
@@ -515,7 +516,18 @@ class Terminal : AppCompatActivity() {
                     }
                 }
 
-                InstallStage.Ready -> TerminalScreen(terminalActivity = this@Terminal)
+                InstallStage.Ready ->
+                    if (Settings.shown_setup_complete) {
+                        TerminalScreen(terminalActivity = this@Terminal)
+                    } else {
+                        SetupCompleteScreen(
+                            onOpen = { Settings.shown_setup_complete = true },
+                            onHome = {
+                                Settings.shown_setup_complete = true
+                                finishAffinity()
+                            },
+                        )
+                    }
 
                 InstallStage.Failed -> {
                     SetupShell(step = 3) {

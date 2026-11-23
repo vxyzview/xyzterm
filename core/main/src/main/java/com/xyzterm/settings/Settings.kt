@@ -22,6 +22,7 @@ import kotlin.reflect.jvm.isAccessible
 // NOTE: USE snake_case FOR KEYS!
 object Settings {
     var shown_disclaimer by CachedPreference("shown_disclaimer", false)
+    var shown_setup_complete by CachedPreference("shown_setup_complete", false)
     var amoled by CachedPreference("amoled", false)
     var check_for_update by CachedPreference("check_update", false)
     var is_app_font_asset by CachedPreference("is_app_font_asset", false)

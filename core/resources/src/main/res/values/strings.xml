@@ -368,4 +368,9 @@
     <string name="x11_install_failed">Could not download Termux:X11</string>
     <string name="x11_install_digest_failed">Download failed verification. Nothing was installed.</string>
     <string name="x11_install_signature_conflict">Termux:X11 is installed from another source. Uninstall it first.</string>
+    <string name="setup_complete_title">Setup Complete!</string>
+    <string name="setup_complete_desc">Your xyzterm is now ready to use on your device.</string>
+    <string name="setup_complete_info">Start using xyzterm now and explore the power of terminal on your device.</string>
+    <string name="setup_complete_open">Open xyzterm</string>
+    <string name="back_to_home">Back to Home</string>
 </resources>
