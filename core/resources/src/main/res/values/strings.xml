@@ -377,4 +377,5 @@
     <string name="stop_desktop_desc">End the running desktop session and close Termux:X11</string>
     <string name="x11_not_installed">Termux:X11 is not installed</string>
     <string name="x11_start_failed">Termux:X11 did not start. Check the desktop logs.</string>
+    <string name="install_patience">This may take a few minutes…</string>
 </resources>

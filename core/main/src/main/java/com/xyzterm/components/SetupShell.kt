@@ -3,6 +3,7 @@ package com.xyzterm.components
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -33,8 +34,11 @@ import com.xyzterm.resources.strings
 
 /** Compact brand row used by the setup flow. */
 @Composable
-fun SetupBrand(modifier: Modifier = Modifier) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+fun SetupBrand(
+    modifier: Modifier = Modifier,
+    trailing: @Composable () -> Unit = {},
+) {
+    Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Surface(
             modifier = Modifier.size(44.dp),
             shape = MaterialTheme.shapes.medium,
@@ -59,6 +63,8 @@ fun SetupBrand(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        Spacer(modifier = Modifier.weight(1f))
+        trailing()
     }
 }
 
@@ -70,6 +76,8 @@ fun SetupBrand(modifier: Modifier = Modifier) {
 fun SetupShell(
     step: Int,
     scrollState: ScrollState = rememberScrollState(),
+    brandTrailing: @Composable () -> Unit = {},
+    railInCard: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -83,8 +91,18 @@ fun SetupShell(
                     modifier = Modifier.width(260.dp).padding(end = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    SetupBrand()
-                    SetupStepRail(step = step, vertical = true)
+                    SetupBrand(trailing = brandTrailing)
+                    if (railInCard) {
+                        Surface(
+                            shape = MaterialTheme.shapes.large,
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Box(Modifier.padding(16.dp)) { SetupStepRail(step = step, vertical = true) }
+                        }
+                    } else {
+                        SetupStepRail(step = step, vertical = true)
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = stringResource(strings.permission_later),
@@ -93,7 +111,7 @@ fun SetupShell(
                     )
                 }
                 Column(
-                    modifier = Modifier.widthIn(max = 560.dp).verticalScroll(scrollState),
+                    modifier = Modifier.widthIn(max = 640.dp).verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     content()
@@ -104,16 +122,25 @@ fun SetupShell(
                 modifier =
                     Modifier.fillMaxSize()
                         .safeContentPadding()
-                        .padding(horizontal = 20.dp, vertical = 20.dp)
+                        .padding(horizontal = 16.dp, vertical = 20.dp)
                         .verticalScroll(scrollState),
-                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    SetupBrand()
-                    SetupStepRail(step = step)
+                    SetupBrand(trailing = brandTrailing)
+                    if (railInCard) {
+                        Surface(
+                            shape = MaterialTheme.shapes.large,
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Box(Modifier.padding(16.dp)) { SetupStepRail(step = step) }
+                        }
+                    } else {
+                        SetupStepRail(step = step)
+                    }
                     content()
                 }
             }

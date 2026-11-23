@@ -13,12 +13,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -26,15 +29,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.xyzterm.components.SetupShell
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
+import com.xyzterm.utils.dialogRes
 
 @Composable
 fun DisclaimerScreen(
@@ -42,11 +47,30 @@ fun DisclaimerScreen(
     onDecline: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    // Consent gate stays: the accept action only unlocks after the terms are
-    // scrolled through, whatever the card styling does.
-    val canAccept by remember { derivedStateOf { !scrollState.canScrollForward } }
+    var consentChecked by remember { mutableStateOf(false) }
+    // Consent gate: terms read to the end AND the checkbox acknowledged.
+    val canAccept by remember { derivedStateOf { !scrollState.canScrollForward && consentChecked } }
 
-    SetupShell(step = 1, scrollState = scrollState) {
+    SetupShell(
+        step = 1,
+        scrollState = scrollState,
+        brandTrailing = {
+            IconButton(
+                onClick = {
+                    dialogRes(
+                        title = stringResource(strings.terms_title),
+                        msg = stringResource(strings.disclaimer_read_carefully),
+                    )
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = stringResource(strings.terms_title),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+    ) {
         // Small top offset so the terms don't sit flush against the step rail.
         Spacer(modifier = Modifier.height(12.dp))
         Text(
@@ -79,13 +103,14 @@ fun DisclaimerScreen(
             body = stringResource(strings.not_liable_content),
         )
 
-        Text(
-            text = stringResource(strings.consent_statement),
-            style = MaterialTheme.typography.bodySmall,
-            fontStyle = FontStyle.Italic,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Checkbox(checked = consentChecked, onCheckedChange = { consentChecked = it })
+            Text(
+                text = stringResource(strings.consent_statement),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         Text(
             text = stringResource(if (canAccept) strings.terms_ready else strings.terms_scroll_hint),
@@ -165,6 +190,13 @@ private fun TermsSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
