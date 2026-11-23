@@ -289,4 +289,40 @@ public final class PortableLogicKtShadow {
         }
         return expected;
     }
+
+    @SuppressWarnings("unchecked")
+    public static boolean isWellFormedHost(String path) {
+        if (MODE.equals("new")) {
+            return (Boolean) rustanything.TerminalRsNative.call_isWellFormedHost(path);
+        }
+        boolean expected = PortableLogicKt.isWellFormedHost(path);
+        if (!MODE.equals("old")) {
+            Object actual;
+            try {
+                actual = rustanything.TerminalRsNative.call_isWellFormedHost(path);
+            } catch (RuntimeException e) {
+                actual = e;
+            }
+            compare("isWellFormedHost", expected, actual);
+        }
+        return expected;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean isValidGuestPath(String path) {
+        if (MODE.equals("new")) {
+            return (Boolean) rustanything.TerminalRsNative.call_isValidGuestPath(path);
+        }
+        boolean expected = PortableLogicKt.isValidGuestPath(path);
+        if (!MODE.equals("old")) {
+            Object actual;
+            try {
+                actual = rustanything.TerminalRsNative.call_isValidGuestPath(path);
+            } catch (RuntimeException e) {
+                actual = e;
+            }
+            compare("isValidGuestPath", expected, actual);
+        }
+        return expected;
+    }
 }
