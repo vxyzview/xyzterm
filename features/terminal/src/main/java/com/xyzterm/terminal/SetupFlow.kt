@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
@@ -42,16 +44,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import com.xyzterm.resources.drawables
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -61,6 +60,7 @@ import com.xyzterm.activities.settings.DisclaimerScreen
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.components.SetupShell
 import com.xyzterm.file.FilePermission
+import com.xyzterm.resources.drawables
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import kotlinx.coroutines.launch
@@ -100,7 +100,6 @@ fun SetupFlow(
         SetupStep.Install -> installContent()
     }
 }
-
 
 /** Final step after the install finishes: flat Material 3 tonal surfaces, no gradients. */
 @Composable
