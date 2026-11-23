@@ -16,6 +16,7 @@ import com.xyzterm.file.localBinDir
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
 import com.xyzterm.terminal.DesktopSessions
+import com.xyzterm.terminal.X11Installer
 
 @Composable
 fun TerminalDesktopScreen(navController: NavController) {
@@ -23,6 +24,17 @@ fun TerminalDesktopScreen(navController: NavController) {
     PreferenceLayout(label = stringResource(strings.desktop), backArrowVisible = true) {
         PreferenceGroup(heading = stringResource(strings.desktop)) {
             InfoBlock(text = stringResource(strings.desktop_requires_x11))
+
+            SettingsItem(
+                label = stringResource(strings.x11_install),
+                description = stringResource(strings.x11_install_desc),
+                showSwitch = false,
+                default = false,
+                sideEffect = {
+                    val activity = context as? android.app.Activity ?: return@SettingsItem
+                    X11Installer.installLatest(activity)
+                },
+            )
 
             PreferenceList(
                 label = stringResource(strings.desktop_session),

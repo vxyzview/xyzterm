@@ -360,4 +360,12 @@
     <string name="install_ubuntu_optional">archm not installed</string>
     <string name="install_ubuntu_optional_desc">Install archm for a full Linux environment, now or later in terminal settings.</string>
     <string name="not_now">Not now</string>
+    <string name="x11_install">Install Termux:X11</string>
+    <string name="x11_install_desc">Download and install the latest release from GitHub</string>
+    <string name="x11_install_confirm">Download the latest Termux:X11 release from GitHub? The file is checked against its published SHA-256 before installation.</string>
+    <string name="x11_install_fetching">Checking for the latest Termux:X11 release…</string>
+    <string name="x11_install_downloading">Downloading Termux:X11…</string>
+    <string name="x11_install_failed">Could not download Termux:X11</string>
+    <string name="x11_install_digest_failed">Download failed verification. Nothing was installed.</string>
+    <string name="x11_install_signature_conflict">Termux:X11 is installed from another source. Uninstall it first.</string>
 </resources>
