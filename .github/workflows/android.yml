@@ -154,19 +154,18 @@ jobs:
           esac
           NOTES_FILE="$RUNNER_TEMP/xyzterm-release-notes.md"
           cat > "$NOTES_FILE" <<'RELEASE_NOTES'
-          ## xyzterm 1.0.4 — cleaner first run, small fixes
+          ## xyzterm 1.0.5 — a tighter first-run flow
 
-          A polish release on top of 1.0.3. The shell, bundled Arch Linux userspace, sessions, binds, backups and privacy posture are unchanged.
+          A compact polish release on top of 1.0.4. The shell, bundled Arch Linux userspace, sessions, binds, backups and privacy posture are unchanged.
 
           ### Changed
-          - First-run setup screens have wider cards and better side spacing, so text wraps less on phones.
-          - About and Support now use the same tonal icon tiles as every other settings category.
-          - The pale idle strip beside inactive session names in the terminal drawer is gone; the active session keeps its accent.
-          - README and repository metadata now describe the current Arch Linux build.
+          - Session rows in the terminal drawer no longer show the pale strip beside the session name; the state dot and label still show which shell is active.
+          - First-run setup screens are more compact: smaller cards, icon tiles and progress ring, with slightly more side inset and calmer top/bottom spacing.
+          - Buttons remain at least 52dp tall, above the 48dp touch-target guideline.
 
           ### Requirements and install
           - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`. x86_64 is not supported.
-          - Install `xyzterm-1.0.4-arm64.apk` (arm64) or `xyzterm-1.0.4-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
+          - Install `xyzterm-1.0.5-arm64.apk` (arm64) or `xyzterm-1.0.5-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
           - Signed with the repository's persistent key, so it installs over earlier releases.
 
           Licensed under GPL-3.0-or-later. Built from source on GitHub Actions.

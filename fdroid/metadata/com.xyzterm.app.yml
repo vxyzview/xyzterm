@@ -54,9 +54,30 @@ Builds:
       - sed -ri '/foojay-resolver-convention/d' -i ../settings.gradle.kts
       - sed -r '/signingConfigs.getByName/d' -i build.gradle.kts
 
+  - versionName: 1.0.5
+    versionCode: 7
+    commit: v1.0.5
+    Architecture: armeabi-v7a
+    subdir: app
+    gradle:
+      - yes
+    prebuild:
+      - sed -ri '/foojay-resolver-convention/d' -i ../settings.gradle.kts
+      - sed -r '/signingConfigs.getByName/d' -i build.gradle.kts
+  - versionName: 1.0.5
+    versionCode: 8
+    commit: v1.0.5
+    Architecture: arm64-v8a
+    subdir: app
+    gradle:
+      - yes
+    prebuild:
+      - sed -ri '/foojay-resolver-convention/d' -i ../settings.gradle.kts
+      - sed -r '/signingConfigs.getByName/d' -i build.gradle.kts
+
 AllowedAPKSigningKeys: f665fa36963b20cec9954399d2213331be522aca035ebf56cfa5a6abdf3e3de2
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
-CurrentVersion: 1.0.4
-CurrentVersionCode: 6
+CurrentVersion: 1.0.5
+CurrentVersionCode: 8

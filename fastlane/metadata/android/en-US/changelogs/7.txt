@@ -1,0 +1,5 @@
+xyzterm 1.0.5
+
+- Removed the pale strip beside session names in the terminal drawer
+- More compact first-run cards, icon tiles and progress ring
+- Balanced side, top and bottom spacing across setup screens
