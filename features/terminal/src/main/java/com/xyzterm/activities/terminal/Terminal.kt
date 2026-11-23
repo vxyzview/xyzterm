@@ -53,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -614,10 +615,10 @@ class Terminal : AppCompatActivity() {
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        painter = painterResource(drawables.terminal),
+                                        painter = painterResource(drawables.arch_linux),
                                         contentDescription = null,
                                         modifier = Modifier.size(56.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        tint = Color.Unspecified,
                                     )
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Box(
