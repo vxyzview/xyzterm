@@ -30,7 +30,8 @@ android {
 // copy so first launch never runs tar or proot.
 private val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/latest/download"
 
-val downloadRootfs = tasks.register<DownloadRootfsTask>("downloadRootfs") {
+val downloadRootfs =
+    tasks.register<DownloadRootfsTask>("downloadRootfs") {
         group = "build"
         description = "Downloads and verifies the archm rootfs tarballs into the app assets."
         baseUrl.set(ARCHM_BASE)
