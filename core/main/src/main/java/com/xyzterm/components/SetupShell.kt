@@ -78,8 +78,8 @@ private fun Modifier.setupBackdrop(): Modifier =
     )
 
 /**
- * Centered frame shared by setup steps. Phone: one column. Wide window: a progress sidebar beside the step content,
- * so a tablet shows structure instead of a stretched phone layout.
+ * Centered frame shared by setup steps. Phone: one column. Wide window: a progress sidebar beside the step content, so
+ * a tablet shows structure instead of a stretched phone layout.
  */
 @Composable
 fun SetupShell(
@@ -91,8 +91,7 @@ fun SetupShell(
         val expanded = maxWidth >= 840.dp
         if (expanded) {
             Row(
-                modifier =
-                    Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 40.dp, vertical = 32.dp),
+                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 40.dp, vertical = 32.dp),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Column(

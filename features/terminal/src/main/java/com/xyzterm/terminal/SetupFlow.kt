@@ -107,13 +107,12 @@ private fun PermissionStep(
         }
 
     DisposableEffect(lifecycleOwner) {
-        val observer =
-            LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    storageGranted = FilePermission.hasStorageAccess(activity)
-                    notificationsGranted = !activity.notificationPermissionNeeded()
-                }
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                storageGranted = FilePermission.hasStorageAccess(activity)
+                notificationsGranted = !activity.notificationPermissionNeeded()
             }
+        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
@@ -198,11 +197,14 @@ private fun PermissionCard(
 ) {
     Card(
         modifier =
-            Modifier.fillMaxWidth().heightIn(min = 88.dp).clickable(
-                enabled = !granted,
-                onClickLabel = stringResource(if (granted) strings.permission_granted else strings.permission_not_granted),
-                onClick = onClick,
-            ),
+            Modifier.fillMaxWidth()
+                .heightIn(min = 88.dp)
+                .clickable(
+                    enabled = !granted,
+                    onClickLabel =
+                        stringResource(if (granted) strings.permission_granted else strings.permission_not_granted),
+                    onClick = onClick,
+                ),
         shape = MaterialTheme.shapes.medium,
         colors =
             CardDefaults.cardColors(
@@ -270,11 +272,12 @@ private fun PermissionCard(
             } else {
                 Box(
                     modifier =
-                        Modifier.size(28.dp).border(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = CircleShape,
-                        ),
+                        Modifier.size(28.dp)
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = CircleShape,
+                            ),
                 )
             }
         }

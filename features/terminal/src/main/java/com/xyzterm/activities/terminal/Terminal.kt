@@ -617,10 +617,7 @@ class Terminal : AppCompatActivity() {
                                     text = progressText,
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.primary,
-                                    modifier =
-                                        Modifier.semantics {
-                                            liveRegion = LiveRegionMode.Polite
-                                        },
+                                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                                 )
                             }
                         }
