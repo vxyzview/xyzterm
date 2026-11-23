@@ -1,0 +1,6 @@
+xyzterm 1.0.4
+
+- Wider first-run setup cards with better side spacing
+- About and Support icons now match the rest of settings
+- Removed the idle session strip from the terminal drawer
+- Documentation and repo metadata updated for the Arch Linux build

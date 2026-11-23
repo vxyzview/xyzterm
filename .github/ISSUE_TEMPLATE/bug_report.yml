@@ -41,9 +41,9 @@ body:
       placeholder: |
         - Device: [e.g. Pixel 7]
         - Android version: [e.g. 15]
-        - App Version : [e.g. 1.0.0]
+        - App Version : [e.g. 1.0.4]
         - Install source: F-Droid / GitHub APK
-        - Ubuntu rootfs installed: yes / no
+        - Arch Linux rootfs installed: yes / no
     validations:
       required: true
 

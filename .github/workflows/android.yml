@@ -154,20 +154,20 @@ jobs:
           esac
           NOTES_FILE="$RUNNER_TEMP/xyzterm-release-notes.md"
           cat > "$NOTES_FILE" <<'RELEASE_NOTES'
-          ## xyzterm 1.0.3 — Expressive UI and M3Y OmColor
+          ## xyzterm 1.0.4 — cleaner first run, small fixes
 
-          A visual release. The bundled Arch Linux userspace, sessions, binds, backups and privacy posture are unchanged; the whole interface has been rebuilt in a single Material 3 Expressive language, and a new community palette is built in.
+          A polish release on top of 1.0.3. The shell, bundled Arch Linux userspace, sessions, binds, backups and privacy posture are unchanged.
 
           ### Changed
-          - One Material 3 Expressive system across setup, settings, the terminal drawer and install states: softer squircles, bolder labels, tonal cards and roomier rhythm.
-          - Setup is now four tonal terms cards, large permission cards with drawn selectors, a live count chip and clearer progress states.
-          - Settings categories use consistent tonal icon tiles; the drawer uses the same language with a live session count and a single primary action.
-          - New built-in theme **M3Y OmColor**, ported from the Xed-Editor plugin by BONAxze: warm porcelain light scheme and deep-orange AMOLED dark scheme, with a matching terminal palette.
+          - First-run setup screens have wider cards and better side spacing, so text wraps less on phones.
+          - About and Support now use the same tonal icon tiles as every other settings category.
+          - The pale idle strip beside inactive session names in the terminal drawer is gone; the active session keeps its accent.
+          - README and repository metadata now describe the current Arch Linux build.
 
           ### Requirements and install
           - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`. x86_64 is not supported.
-          - Install `xyzterm-1.0.3-arm64.apk` (arm64) or `xyzterm-1.0.3-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
-          - Signed with the repository's persistent key, so it installs over 1.0.0 and 1.0.1.
+          - Install `xyzterm-1.0.4-arm64.apk` (arm64) or `xyzterm-1.0.4-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
+          - Signed with the repository's persistent key, so it installs over earlier releases.
 
           Licensed under GPL-3.0-or-later. Built from source on GitHub Actions.
           RELEASE_NOTES
