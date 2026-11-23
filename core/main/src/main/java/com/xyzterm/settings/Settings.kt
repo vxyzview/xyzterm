@@ -101,7 +101,7 @@ object Settings {
     var terminal_scrollback_buffer by CachedPreference("terminal_scrollback_buffer", 5000)
 
     // String settings
-    var theme by CachedPreference("theme", "dynamic")
+    var theme by CachedPreference("theme", "omcolor")
     var app_font_path by CachedPreference("app_font_path", "")
     var terminal_font_path by CachedPreference("terminal_font_path", "")
     var terminal_cursor_style by CachedPreference("terminal_cursor_style", "block")
