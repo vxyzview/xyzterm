@@ -470,6 +470,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
 
     val service = terminalActivity.sessionBinder?.get()?.getService()
     val context = LocalContext.current
+    val settingsLabel = stringResource(strings.settings)
 
     fun deleteSession(id: String) {
         val binder = terminalActivity.sessionBinder?.get() ?: return
@@ -499,7 +500,7 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                     .padding(top = 8.dp)
                     .semantics {
                         role = Role.Button
-                        contentDescription = stringResource(strings.settings)
+                        contentDescription = settingsLabel
                     }
                     .clickable { context.startActivity(Intent(context, SettingsActivity::class.java)) },
             shape = MaterialTheme.shapes.large,
