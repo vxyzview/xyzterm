@@ -33,7 +33,7 @@ subprojects {
             // GHSA-9rm7-3qhh-h2mc.
             force("com.google.guava:guava:33.7.2-jre")
             force("org.bouncycastle:bcprov-jdk18on:1.85")
-            force("com.squareup.wire:wire-runtime:6.4.5")
+            force("com.squareup.wire:wire-runtime:6.4.7")
         }
     }
 
