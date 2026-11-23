@@ -154,23 +154,20 @@ jobs:
           esac
           NOTES_FILE="$RUNNER_TEMP/xyzterm-release-notes.md"
           cat > "$NOTES_FILE" <<'RELEASE_NOTES'
-          ## xyzterm 1.0.1 — calmer, leaner, more consistent
+          ## xyzterm 1.0.3 — Expressive UI and M3Y OmColor
 
-          A maintenance release on top of 1.0.0. The shell, bundled Arch Linux rootfs, sessions, custom binds and backups are unchanged; this release is about a cleaner app and a consistent interface.
+          A visual release. The bundled Arch Linux userspace, sessions, binds, backups and privacy posture are unchanged; the whole interface has been rebuilt in a single Material 3 Expressive language, and a new community palette is built in.
 
           ### Changed
-          - Removed about 2,280 lines of dead and unused code left over from the editor-era fork: orphaned file-type icons, dialogs, components and helpers.
-          - Carried the Material You "Session Deck" look across every screen: expressive type scale, rounded tonal surfaces, critically damped navigation, and teaching empty states for sessions, snippets, binds and backups.
-          - Accessibility: radio selection is announced, decorative icons stay silent, first-run buttons meet the 48dp target, and permission cards are announced as buttons.
-          - The extra-keys editor now follows the resolved app typography (line height and tracking) instead of a static fallback.
-
-          ### Fixed
-          - A build-breaking composable call inside a non-composable semantics lambda in the terminal drawer header.
+          - One Material 3 Expressive system across setup, settings, the terminal drawer and install states: softer squircles, bolder labels, tonal cards and roomier rhythm.
+          - Setup is now four tonal terms cards, large permission cards with drawn selectors, a live count chip and clearer progress states.
+          - Settings categories use consistent tonal icon tiles; the drawer uses the same language with a live session count and a single primary action.
+          - New built-in theme **M3Y OmColor**, ported from the Xed-Editor plugin by BONAxze: warm porcelain light scheme and deep-orange AMOLED dark scheme, with a matching terminal palette.
 
           ### Requirements and install
           - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`. x86_64 is not supported.
-          - Install `xyzterm-1.0.1-arm64.apk` (arm64) or `xyzterm-1.0.1-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
-          - Signed with the repository's persistent key, so it installs over 1.0.0.
+          - Install `xyzterm-1.0.3-arm64.apk` (arm64) or `xyzterm-1.0.3-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
+          - Signed with the repository's persistent key, so it installs over 1.0.0 and 1.0.1.
 
           Licensed under GPL-3.0-or-later. Built from source on GitHub Actions.
           RELEASE_NOTES

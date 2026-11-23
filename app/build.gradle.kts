@@ -18,8 +18,8 @@ android {
         targetSdk = 37
 
         // versioning
-        versionCode = 3
-        versionName = "1.0.1"
+        versionCode = 4
+        versionName = "1.0.3"
         vectorDrawables { useSupportLibrary = true }
     }
 
@@ -35,12 +35,12 @@ android {
     productFlavors {
         create("arm") {
             dimension = "abi"
-            versionCode = 3
+            versionCode = 4
             ndk { abiFilters += "armeabi-v7a" }
         }
         create("arm64") {
             dimension = "abi"
-            versionCode = 4
+            versionCode = 5
             ndk { abiFilters += "arm64-v8a" }
         }
     }
