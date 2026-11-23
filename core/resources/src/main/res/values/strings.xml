@@ -237,7 +237,7 @@
 <string name="user_data">User data</string>
 <string name="terminate_all_sessions">Terminate all sessions</string>
     <string name="terminate_all_sessions_desc">Kill all terminal sessions when app is closed</string>
-<string name="warn_dont_leave_setup">⚠ Do not leave this screen while setup is in progress</string>
+<string name="warn_dont_leave_setup">Do not leave this screen while setup is in progress</string>
 <string name="stop">Stop</string>
 <string name="time_just_now">Just now</string>
     <plurals name="time_seconds_ago">
@@ -347,4 +347,7 @@
     <string name="permission_later">You can change these later in Settings.</string>
     <string name="terms_scroll_hint">Scroll to the end to continue</string>
     <string name="terms_title">Before you begin</string>
+    <string name="terms_ready">You've reached the end</string>
+    <string name="setup_tagline">terminal-only · no root · no telemetry</string>
+    <string name="permission_allowed_count">%1$d of %2$d allowed</string>
 </resources>

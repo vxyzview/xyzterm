@@ -179,7 +179,7 @@
 <string name="user_data">Data pengguna</string>
 <string name="terminate_all_sessions">Hentikan semua sesi</string>
     <string name="terminate_all_sessions_desc">Hentikan semua sesi terminal saat aplikasi ditutup</string>
-<string name="warn_dont_leave_setup">⚠ Jangan tinggalkan layar ini saat proses pengaturan sedang berlangsung</string>
+<string name="warn_dont_leave_setup">Jangan tinggalkan layar ini saat proses pengaturan sedang berlangsung</string>
 <string name="logs">Catatan</string>
     <string name="view_logs">Lihat catatan</string>
     <string name="view_app_logs">Lihat catatan aplikasi</string>

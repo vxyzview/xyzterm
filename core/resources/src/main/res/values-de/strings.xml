@@ -179,7 +179,7 @@
 <string name="user_data">Benutzerdaten</string>
 <string name="terminate_all_sessions">Alle Sitzungen beenden</string>
     <string name="terminate_all_sessions_desc">Alle Terminal-Sitzungen beim Schließen der App beenden</string>
-    <string name="warn_dont_leave_setup">⚠ Verlasse diesen Bildschirm nicht, während die Einrichtung läuft</string>
+    <string name="warn_dont_leave_setup">Verlasse diesen Bildschirm nicht, während die Einrichtung läuft</string>
     <string name="logs">Logs</string>
     <string name="view_logs">Logs anzeigen</string>
     <string name="view_app_logs">Anwendungs-Logs anzeigen</string>

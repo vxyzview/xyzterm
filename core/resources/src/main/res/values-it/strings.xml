@@ -185,7 +185,7 @@
 <string name="user_data">Dati utente</string>
 <string name="terminate_all_sessions">Termina tutte le sessioni</string>
     <string name="terminate_all_sessions_desc">Termina tutte le sessioni del terminale alla chiusura dell\'app</string>
-<string name="warn_dont_leave_setup">⚠ Non abbandonare questa schermata mentre la configurazione è in corso</string>
+<string name="warn_dont_leave_setup">Non abbandonare questa schermata mentre la configurazione è in corso</string>
 <string name="stop">Interrompi</string>
 <string name="time_just_now">Proprio ora</string>
     <plurals name="time_seconds_ago">

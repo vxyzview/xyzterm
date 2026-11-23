@@ -20,16 +20,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -80,6 +85,8 @@ import com.xyzterm.terminal.gamepadBytes
 import com.xyzterm.terminal.pickRootfsAsset
 import com.xyzterm.terminal.terminalView
 import com.xyzterm.theme.XyzTheme
+import com.xyzterm.theme.onWarningSurface
+import com.xyzterm.theme.warningSurface
 import com.xyzterm.utils.AppDialogHost
 import java.io.File
 import java.lang.ref.WeakReference
@@ -475,21 +482,28 @@ class Terminal : AppCompatActivity() {
                                     containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                                 ),
                         ) {
-                            Column(modifier = Modifier.padding(24.dp)) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Warning,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(32.dp),
+                                    tint = MaterialTheme.colorScheme.error,
+                                )
                                 Text(
                                     text = stringResource(strings.unsupported_cpu),
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = stringResource(strings.unsupported_cpu_desc),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
-                                Spacer(modifier = Modifier.height(24.dp))
                                 Button(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                                     onClick = { finishAffinity() },
                                 ) {
                                     Text(text = stringResource(strings.ok))
@@ -511,15 +525,29 @@ class Terminal : AppCompatActivity() {
                                     containerColor = MaterialTheme.colorScheme.errorContainer,
                                 ),
                         ) {
-                            Column(modifier = Modifier.padding(24.dp)) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Warning,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(32.dp),
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                )
                                 Text(
-                                    text = errorMessage.ifBlank { stringResource(strings.install_failed) },
-                                    style = MaterialTheme.typography.bodyLarge,
+                                    text = stringResource(strings.install_failed),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onErrorContainer,
                                 )
-                                Spacer(modifier = Modifier.height(24.dp))
+                                Text(
+                                    text = errorMessage.ifBlank { stringResource(strings.install_failed) },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
                                 Button(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                                     onClick = { retryKey++ },
                                 ) {
                                     Text(text = stringResource(strings.retry))
@@ -540,53 +568,85 @@ class Terminal : AppCompatActivity() {
                                     containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                                 ),
                         ) {
-                            Column(modifier = Modifier.padding(24.dp)) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                val progress =
+                                    if (totalBytes > 0) {
+                                        (downloadedBytes.toFloat() / totalBytes).coerceIn(0f, 1f)
+                                    } else {
+                                        null
+                                    }
+                                Box(modifier = Modifier.size(120.dp), contentAlignment = Alignment.Center) {
+                                    if (progress == null) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.fillMaxSize(),
+                                            strokeWidth = 8.dp,
+                                            trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        )
+                                    } else {
+                                        CircularProgressIndicator(
+                                            progress = { progress },
+                                            modifier = Modifier.fillMaxSize(),
+                                            strokeWidth = 8.dp,
+                                            trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        )
+                                        Text(
+                                            text = "${(progress * 100).toInt()}%",
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                        )
+                                    }
+                                }
                                 Text(
                                     text = stringResource(strings.install_heading),
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center,
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = stringResource(strings.install_desc),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
                                 )
-                                Spacer(modifier = Modifier.height(24.dp))
-                                if (totalBytes > 0) {
-                                    LinearProgressIndicator(
-                                        progress = { downloadedBytes.toFloat() / totalBytes },
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                    val percent = (downloadedBytes.toFloat() / totalBytes * 100).toInt()
-                                    Text(
-                                        text = "$percent%  ·  $progressText",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier =
-                                            Modifier.padding(top = 8.dp).semantics {
-                                                liveRegion = LiveRegionMode.Polite
-                                            },
-                                    )
-                                } else {
-                                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                                    Text(
-                                        text = progressText,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier =
-                                            Modifier.padding(top = 8.dp).semantics {
-                                                liveRegion = LiveRegionMode.Polite
-                                            },
-                                    )
-                                }
+                                Text(
+                                    text = progressText,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier =
+                                        Modifier.semantics {
+                                            liveRegion = LiveRegionMode.Polite
+                                        },
+                                )
                             }
                         }
-                        Text(
-                            text = stringResource(strings.warn_dont_leave_setup),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center,
+                        Surface(
                             modifier = Modifier.fillMaxWidth(),
-                        )
+                            shape = MaterialTheme.shapes.medium,
+                            color = MaterialTheme.colorScheme.warningSurface,
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Warning,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onWarningSurface,
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = stringResource(strings.warn_dont_leave_setup),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onWarningSurface,
+                                )
+                            }
+                        }
                     }
                 }
             }

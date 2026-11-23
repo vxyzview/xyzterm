@@ -179,7 +179,7 @@
 <string name="user_data">使用者數據</string>
 <string name="terminate_all_sessions">終止所有會話</string>
     <string name="terminate_all_sessions_desc">應用程式關閉時終止所有終端會話</string>
-<string name="warn_dont_leave_setup">⚠ 設定過程中請勿離開此畫面</string>
+<string name="warn_dont_leave_setup">設定過程中請勿離開此畫面</string>
 <string name="logs">日誌</string>
     <string name="view_logs">查看日誌</string>
     <string name="view_app_logs">查看應用程式日誌</string>

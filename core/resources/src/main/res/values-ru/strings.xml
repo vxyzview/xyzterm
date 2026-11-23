@@ -179,7 +179,7 @@
     <string name="terminate_all_sessions_desc">Принудительно завершать все сеансы терминала при закрытии приложения</string>
     <string name="use">Открыть с помощью…</string>
     <string name="default_option">По умолчанию</string>
-<string name="warn_dont_leave_setup">⚠ Не покидайте этот экран, пока выполняется настройка</string>
+<string name="warn_dont_leave_setup">Не покидайте этот экран, пока выполняется настройка</string>
 <string name="logs">Журнал</string>
     <string name="view_logs">Посмотреть журнал</string>
     <string name="view_app_logs">Посмотреть журнал приложения</string>

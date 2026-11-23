@@ -146,7 +146,7 @@
     <string name="logs_too_long">Nhật ký quá dài</string>
     <string name="logs_too_long_desc">Tệp nhật ký bạn muốn báo cáo quá dài. Vui lòng dán thủ công tệp nhật ký vào báo cáo.</string>
 <string name="user_data">Dữ liệu người dùng</string>
-<string name="warn_dont_leave_setup">⚠ Không được rời màn hình này trong khi quá trình thiết lập đang diễn ra</string>
+<string name="warn_dont_leave_setup">Không được rời màn hình này trong khi quá trình thiết lập đang diễn ra</string>
     <string name="time_just_now">Vừa rồi</string>
     <string name="underline">Gạch chân</string>
     <string name="bar">Thanh</string>

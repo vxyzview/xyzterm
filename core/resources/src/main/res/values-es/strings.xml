@@ -179,7 +179,7 @@
 <string name="terminate_all_sessions">Terminar todas las sesiones</string>
     <string name="terminate_all_sessions_desc">Mata todas las sesiones del terminal cuando se cierre la app</string>
 <string name="drawer">Cajón</string>
-<string name="warn_dont_leave_setup">⚠ No abandone esta pantalla mientras la configuración está en curso</string>
+<string name="warn_dont_leave_setup">No abandone esta pantalla mientras la configuración está en curso</string>
 <string name="logs">Bitácoras</string>
     <string name="view_logs">Vista de bitácoras</string>
     <string name="view_app_logs">Vista de bitácoras de aplicación</string>

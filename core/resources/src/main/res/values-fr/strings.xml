@@ -179,7 +179,7 @@
 <string name="user_data">Données de l\'utilisateur</string>
 <string name="terminate_all_sessions">Fermer toutes les sessions</string>
     <string name="terminate_all_sessions_desc">Ferme toutes les sessions du terminal lorsque l\'on quitte l\'application</string>
-    <string name="warn_dont_leave_setup">⚠ Ne quittez pas cet écran pendant la mise en place</string>
+    <string name="warn_dont_leave_setup">Ne quittez pas cet écran pendant la mise en place</string>
 <string name="logs">Journaux</string>
     <string name="view_logs">Affiche les journaux</string>
     <string name="view_app_logs">Affiche les journaux d\'application</string>

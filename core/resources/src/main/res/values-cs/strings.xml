@@ -172,7 +172,7 @@
 <string name="user_data">Uživatelská data</string>
 <string name="terminate_all_sessions">Ukončit všechny relace</string>
     <string name="terminate_all_sessions_desc">Ukončit všechny relace v terminálu pokud je aplikace uzavřena</string>
-<string name="warn_dont_leave_setup">⚠ Neopouštějte aktuální obrazovku, probíhá nastavení aplikace</string>
+<string name="warn_dont_leave_setup">Neopouštějte aktuální obrazovku, probíhá nastavení aplikace</string>
 <string name="stop">Zastavit</string>
 <string name="time_just_now">Právě teď</string>
     <plurals name="time_seconds_ago">

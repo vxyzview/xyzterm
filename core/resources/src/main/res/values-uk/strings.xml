@@ -192,7 +192,7 @@
 <string name="debug">Налагодження</string>
     <string name="manifest_missing_fields">Файл manifest.json відсутній або містить неправильні величини:\n%s\n\nБудь ласка, перевірте файл і спробуйте знову.</string>
 <string name="invalid_terminal_extra_keys">Список додаткових клавіш термінала неправильно відформатовано. Будуть використані стандартні клавіші.</string>
-    <string name="warn_dont_leave_setup">⚠ Не покидайте цей екран, поки відбувається встановлення</string>
+    <string name="warn_dont_leave_setup">Не покидайте цей екран, поки відбувається встановлення</string>
 <string name="manifest_missing">Файл manifest.json відсутній. Будь ласка, додайте його та спробуйте знову.</string>
     <string name="scrollback_buffer_desc">Кількість рядків, які термінал тримає в пам\'яті як історію</string>
 <string name="enable_logcat_desc">Запустити Logcat і вивести журнали на екран журналів</string>
