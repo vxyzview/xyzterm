@@ -101,10 +101,10 @@ jobs:
             --jni-libs features/terminal/src/main/jniLibs
 
       - name: Run unit tests
-        run: ./gradlew :features:terminal:testDebugUnitTest --no-daemon
+        run: ./gradlew :features:terminal:testDebugUnitTest --no-daemon --warning-mode all
 
       - name: Build with Gradle
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease --no-daemon --warning-mode all
         env:
           KEYSTORE_FILE: /tmp/xyzterm.keystore
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties

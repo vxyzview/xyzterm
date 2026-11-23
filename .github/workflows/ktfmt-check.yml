@@ -7,6 +7,10 @@ on:
     branches: [ main ]
   workflow_dispatch:   # 👈 Allows manual run from GitHub UI
 
+concurrency:
+  group: ktfmt-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   ktfmt:
     runs-on: ubuntu-latest
@@ -30,16 +34,20 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Run ktfmt format
-        run: ./gradlew ktfmtFormat --no-daemon
+        run: ./gradlew ktfmtFormat --no-daemon --warning-mode all
 
       - name: Commit formatted code
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -A
             git commit -m "style: auto-format Kotlin with ktfmt"
-            git push
+            # Another push may have landed while formatting ran; rebase or the push is rejected.
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
           else
             echo "No formatting changes"
           fi

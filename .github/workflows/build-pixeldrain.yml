@@ -19,6 +19,10 @@ on:
         type: boolean
         default: true
 
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-release:
     name: Build Release
@@ -104,7 +108,7 @@ jobs:
             --jni-libs features/terminal/src/main/jniLibs
 
       - name: Build with Gradle
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease --no-daemon --warning-mode all
         env:
           KEYSTORE_FILE: /tmp/xyzterm.keystore
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
