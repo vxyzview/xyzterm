@@ -655,4 +655,149 @@ val ayu =
             },
     )
 
-val builtInThemes = listOf(lime, tokyonight, gruvbox, ayu)
+// Palette ported from the Xed-Editor plugin "M3Y OmColor" by BONAxze (MIT):
+// https://github.com/BONAxze/M3Y_Color-Xed-Editor
+val omColor =
+    ThemeHolder(
+        id = "omcolor",
+        name = "M3Y OmColor",
+        inheritBase = true,
+        lightScheme =
+            lightColorScheme(
+                primary = Color(0xFF675E51),
+                onPrimary = Color(0xFFFFFFFF),
+                primaryContainer = Color(0xFFF5EBE0),
+                onPrimaryContainer = Color(0xFF362F25),
+                secondary = Color(0xFF635B4F),
+                onSecondary = Color(0xFFFFFFFF),
+                secondaryContainer = Color(0xFFEFE0D0),
+                onSecondaryContainer = Color(0xFF2C2217),
+                tertiary = Color(0xFF4A5F70),
+                onTertiary = Color(0xFFFFFFFF),
+                tertiaryContainer = Color(0xFFD3E4F5),
+                onTertiaryContainer = Color(0xFF001D33),
+                error = Color(0xFFBA1A1A),
+                errorContainer = Color(0xFFFFDAD6),
+                onError = Color(0xFFFFFFFF),
+                onErrorContainer = Color(0xFF410002),
+                background = Color(0xFFFDFBF7),
+                onBackground = Color(0xFF1C1B19),
+                surface = Color(0xFFFDFBF7),
+                onSurface = Color(0xFF1C1B19),
+                surfaceVariant = Color(0xFFEBE7DF),
+                onSurfaceVariant = Color(0xFF4C463F),
+                outline = Color(0xFF7D766E),
+                inverseOnSurface = Color(0xFFF5F0EB),
+                inverseSurface = Color(0xFF32302D),
+                inversePrimary = Color(0xFFD3C4B4),
+                surfaceTint = Color(0xFF675E51),
+                outlineVariant = Color(0xFFCFC5BA),
+                scrim = Color(0xFF000000),
+                surfaceDim = Color(0xFFDDD8D1),
+                surfaceBright = Color(0xFFFDFBF7),
+                surfaceContainerLowest = Color(0xFFFFFFFF),
+                surfaceContainerLow = Color(0xFFF8F5F0),
+                surfaceContainer = Color(0xFFF3EEE7),
+                surfaceContainerHigh = Color(0xFFEDE7DE),
+                surfaceContainerHighest = Color(0xFFE7E0D5),
+            ),
+        darkScheme =
+            darkColorScheme(
+                primary = Color(0xFFD4AB88),
+                onPrimary = Color(0xFF362F25),
+                primaryContainer = Color(0xFF4E463A),
+                onPrimaryContainer = Color(0xFFF5EBE0),
+                secondary = Color(0xFFD3C4B4),
+                onSecondary = Color(0xFF2C2217),
+                secondaryContainer = Color(0xFF42372B),
+                onSecondaryContainer = Color(0xFFEFE0D0),
+                tertiary = Color(0xFF9CCFD8),
+                onTertiary = Color(0xFF00363B),
+                tertiaryContainer = Color(0xFF1E4D52),
+                onTertiaryContainer = Color(0xFFBCEBF0),
+                error = Color(0xFFFFB4AB),
+                errorContainer = Color(0xFF93000A),
+                onError = Color(0xFF690005),
+                onErrorContainer = Color(0xFFFFDAD6),
+                background = Color(0xFF000000),
+                onBackground = Color(0xFFE6E1DA),
+                surface = Color(0xFF000000),
+                onSurface = Color(0xFFE6E1DA),
+                surfaceVariant = Color(0xFF000000),
+                onSurfaceVariant = Color(0xFFCBC5BA),
+                outline = Color(0xFF968F85),
+                inverseOnSurface = Color(0xFF000000),
+                inverseSurface = Color(0xFFE6E1DA),
+                inversePrimary = Color(0xFF675E51),
+                surfaceTint = Color(0xFFD4AB88),
+                outlineVariant = Color(0xFF1E1E1E),
+                scrim = Color(0xFF000000),
+                surfaceDim = Color(0xFF000000),
+                surfaceBright = Color(0xFF2C2824),
+                surfaceContainerLowest = Color(0xFF000000),
+                surfaceContainerLow = Color(0xFF0A0908),
+                surfaceContainer = Color(0xFF121110),
+                surfaceContainerHigh = Color(0xFF1A1816),
+                surfaceContainerHighest = Color(0xFF23201D),
+            ),
+        lightTokenColors = JsonArray(),
+        darkTokenColors = JsonArray(),
+        lightTerminalColors =
+            Properties().also {
+                it["background"] = "#FDFBF7"
+                it["foreground"] = "#1C1B19"
+                it["cursor"] = "#635B4F"
+                it["color0"] = "#1C1B19"
+                it["color1"] = "#BA1A1A"
+                it["color2"] = "#4E6751"
+                it["color3"] = "#7D673F"
+                it["color4"] = "#4A5F70"
+                it["color5"] = "#6B5677"
+                it["color6"] = "#4A5F70"
+                it["color7"] = "#7D766E"
+                it["color8"] = "#4C463F"
+                it["color9"] = "#BA1A1A"
+                it["color10"] = "#4E6751"
+                it["color11"] = "#7D673F"
+                it["color12"] = "#4A5F70"
+                it["color13"] = "#6B5677"
+                it["color14"] = "#4A5F70"
+                it["color15"] = "#FFFFFF"
+                it["color16"] = "#7D673F"
+                it["color17"] = "#4A5F70"
+                it["color18"] = "#EBE7DF"
+                it["color19"] = "#CFC5BA"
+                it["color20"] = "#7D766E"
+                it["color21"] = "#FDFBF7"
+            },
+        darkTerminalColors =
+            Properties().also {
+                it["background"] = "#000000"
+                it["foreground"] = "#E6E1DA"
+                it["cursor"] = "#968F85"
+                it["color0"] = "#1E1E1E"
+                it["color8"] = "#4E463A"
+                it["color1"] = "#E8A29F"
+                it["color9"] = "#E8A29F"
+                it["color2"] = "#D3C4B4"
+                it["color10"] = "#D3C4B4"
+                it["color3"] = "#D4AB88"
+                it["color11"] = "#D4AB88"
+                it["color4"] = "#CBC5BA"
+                it["color12"] = "#CBC5BA"
+                it["color5"] = "#BCAAA4"
+                it["color13"] = "#BCAAA4"
+                it["color6"] = "#EFE0D0"
+                it["color14"] = "#EFE0D0"
+                it["color7"] = "#E6E1DA"
+                it["color15"] = "#FFFFFF"
+                it["color16"] = "#D4AB88"
+                it["color17"] = "#CBC5BA"
+                it["color18"] = "#4E463A"
+                it["color19"] = "#968F85"
+                it["color20"] = "#E6E1DA"
+                it["color21"] = "#FFFFFF"
+            },
+    )
+
+val builtInThemes = listOf(lime, tokyonight, gruvbox, ayu, omColor)
