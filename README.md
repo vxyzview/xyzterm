@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="core/main/src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="104" alt="xyzterm icon — a cyan terminal prompt on a deep dark plate" />
+<img src="core/main/src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="112" alt="xyzterm icon — a cyan terminal prompt on a deep dark plate" />
 
 # xyzterm
 
-**a proot Linux shell in your pocket**
+### a real Arch Linux shell in your pocket
 
 `terminal-only` · `no root` · `no telemetry` · `no tracking`
 
@@ -20,6 +20,18 @@
 
 ---
 
+> **Tap the icon. You're in a shell.**
+> Nothing sits between you and the prompt.
+
+| | |
+|:---|:---|
+| **Base** | Arch Linux ARM (archm), bundled per ABI |
+| **Runtime** | proot — no root, no privileged binaries |
+| **Interface** | full terminal, named sessions, Material You |
+| **Network** | none, except what you run yourself |
+
+---
+
 ## Contents
 
 [What is xyzterm?](#what-is-xyzterm) · [Highlights](#highlights) · [Screenshots](#screenshots) · [Get started](#get-started) · [Build](#build) · [Docs](#docs) · [Privacy](#privacy) · [Credits](#credits) · [License](#license)
@@ -32,8 +44,6 @@
 
 Tap the icon and you are in a shell. That's it. No code editor, no file manager, no git UI, no extension marketplace — nothing between you and the command line. If you've ever wanted a pocket Linux box that respects your attention as much as your privacy, this is it.
 
-> The shell is the product. Everything else stays out of the way.
-
 ```console
 $ pfetch
         root@localhost
@@ -42,8 +52,10 @@ $ pfetch
   |  |   ()       kernel  5.4.210-qgki-perf
    \  ---(_)_     uptime  0m
     ` -----(_)    pkgs    371
-                  memory  5682M / 7264M
+                   memory  5682M / 7264M
 ```
+
+> **The shell is the product.** Everything else stays out of the way.
 
 ---
 
@@ -107,8 +119,6 @@ $ pfetch
 2. Open **xyzterm** — the bundled archm rootfs extracts automatically on first launch (a one-time local setup, no download).
 3. You're in a real Arch Linux shell. `pacman -Syu` if that's your thing.
 
-> **Where are my files?** Your device storage is bound into the container — files live on normal Android storage, mounted as `/home` and `/root`.
-
 <details>
 <summary><b>First-launch tips</b></summary>
 
@@ -125,7 +135,7 @@ $ pfetch
 
 Choose one of the following build methods.
 
-### Option 1: Build locally
+### Option 1 — Build locally
 
 Requires JDK 21 and the Android SDK. Build the **debug APK** (signed with the included test key):
 
@@ -139,7 +149,7 @@ The compiled APK lands at:
 app/build/outputs/apk/debug/app-debug.apk
 ```
 
-### Option 2: Build with Docker
+### Option 2 — Build with Docker
 
 No Android SDK or JDK 21 installed? Build in a container:
 
@@ -188,7 +198,7 @@ If xyzterm is useful to you, consider [buying me a coffee on Ko-fi](https://ko-f
 
 Copyright © 2026 vxyzview.
 
-Distributed under the [GNU General Public License v3.0](/LICENSE), inherited from the upstream [Xed-Editor](https://github.com/Xed-Editor/Xed-Editor) project. See [COPYRIGHT](COPYRIGHT) for the copyright notice.
+Distributed under the [GNU General Public License v3.0](LICENSE), inherited from the upstream [Xed-Editor](https://github.com/Xed-Editor/Xed-Editor) project. See [COPYRIGHT](COPYRIGHT) for the copyright notice.
 
 <div align="center">
 
