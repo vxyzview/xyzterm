@@ -81,7 +81,7 @@ fun SetupShell(
             ) {
                 Column(
                     modifier = Modifier.width(260.dp).padding(end = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     SetupBrand()
                     SetupStepRail(step = step, vertical = true)
@@ -94,7 +94,7 @@ fun SetupShell(
                 }
                 Column(
                     modifier = Modifier.widthIn(max = 560.dp).verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     content()
                 }
@@ -110,7 +110,7 @@ fun SetupShell(
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     SetupBrand()
                     SetupStepRail(step = step)

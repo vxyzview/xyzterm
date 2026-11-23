@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -46,14 +47,16 @@ fun DisclaimerScreen(
     val canAccept by remember { derivedStateOf { !scrollState.canScrollForward } }
 
     SetupShell(step = 1, scrollState = scrollState) {
+        // Small top offset so the terms don't sit flush against the step rail.
+        Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = stringResource(strings.terms_title),
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
         Text(
             text = stringResource(strings.disclaimer_read_carefully),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
@@ -130,9 +133,9 @@ private fun TermsSection(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Surface(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(36.dp),
                 shape = MaterialTheme.shapes.medium,
                 color =
                     if (important) {
@@ -144,7 +147,7 @@ private fun TermsSection(
                 Icon(
                     imageVector = if (important) Icons.Outlined.Warning else Icons.Outlined.Info,
                     contentDescription = null,
-                    modifier = Modifier.padding(10.dp),
+                    modifier = Modifier.padding(8.dp),
                     tint =
                         if (important) {
                             MaterialTheme.colorScheme.onErrorContainer
@@ -153,9 +156,9 @@ private fun TermsSection(
                         },
                 )
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(text = title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 Text(
                     text = body,
                     style = MaterialTheme.typography.bodySmall,
