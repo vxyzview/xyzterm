@@ -238,8 +238,12 @@ class Terminal : AppCompatActivity() {
             return
         }
 
-        if (intent.data?.scheme == "xyzterm") {
-            handleDeepLink(intent.data ?: return)
+        val link = intent.data
+        if (link?.scheme == "xyzterm") {
+            // Consume the URI: handleIntent runs from several entry points and
+            // re-handling would write the prefilled command a second time.
+            intent.data = null
+            handleDeepLink(link)
             return
         }
 
@@ -271,17 +275,29 @@ class Terminal : AppCompatActivity() {
                 // and special segments before they reach MkSession.childSafe / deleteRecursively.
                 if (!isValidSessionName(name)) return
                 val command = uri.getQueryParameter("cmd")?.takeIf { isValidDeepLinkCommand(it) }
+                if (command != null) pendingPrefill = name to command
                 lifecycleScope.launch(Dispatchers.Main) {
                     if (name !in binder.getService().sessionList) {
                         binder.createSession(name, TerminalBackEnd(), this@Terminal)
                     }
                     this@Terminal.changeSession(name)
-                    // Prefill only: no newline means the shell waits for the user's Enter.
-                    if (command != null) binder.getSession(name)?.write(command)
+                    // Covers a session whose emulator was already set; onEmulatorSet covers a cold one.
+                    flushPendingPrefill()
                 }
             }
         // Prefilled text is never executed automatically; no "run" host exists.
         }
+    }
+
+    /** Writes a pending command once the target session actually has a shell process. */
+    fun flushPendingPrefill() {
+        val (sessionId, command) = pendingPrefill ?: return
+        val session = terminalView.get()?.mTermSession ?: return
+        val service = sessionBinder?.get()?.getService() ?: return
+        if (service.sessionIdFor(session) != sessionId) return
+        // Prefill only: no newline means the shell waits for the user's Enter.
+        session.write(command)
+        pendingPrefill = null
     }
 
     override fun onStop() {
@@ -317,6 +333,9 @@ class Terminal : AppCompatActivity() {
 
         /** The session attached to the view; only this session's bell is suppressed in-app. */
         var visibleSession: TerminalSession? = null
+
+        /** One-shot command text to write when its target session's emulator becomes ready. */
+        var pendingPrefill: Pair<String, String>? = null
     }
 
     private val notificationPermissionLauncher =

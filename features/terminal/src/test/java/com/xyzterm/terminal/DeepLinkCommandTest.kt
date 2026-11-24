@@ -31,6 +31,11 @@ class DeepLinkCommandTest {
     }
 
     @Test
+    fun rejects_carriage_return() {
+        assertFalse(isValidDeepLinkCommand("echo hi\rmore"))
+    }
+
+    @Test
     fun rejects_tab() {
         assertFalse(isValidDeepLinkCommand("echo\thi"))
     }

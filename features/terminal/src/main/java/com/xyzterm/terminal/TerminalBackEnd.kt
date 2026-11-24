@@ -329,6 +329,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
 
     override fun onEmulatorSet() {
         setTerminalCursorBlinkingState(true)
+        Terminal.instance?.flushPendingPrefill()
     }
 
     private fun setTerminalCursorBlinkingState(start: Boolean) {
