@@ -685,7 +685,7 @@ class Terminal : AppCompatActivity() {
                                             text = "$percent%",
                                             style =
                                                 MaterialTheme.typography.displaySmall.copy(
-                                                    fontFeatureSettings = "tnum"
+                                                    fontFeatureSettings = "tnum",
                                                 ),
                                             fontWeight = FontWeight.ExtraBold,
                                         )
@@ -699,12 +699,11 @@ class Terminal : AppCompatActivity() {
                                 LinearProgressIndicator(
                                     progress = { progress ?: 0f },
                                     modifier =
-                                        Modifier.fillMaxWidth()
-                                            .height(6.dp)
-                                            .clip(CircleShape)
-                                            .semantics(mergeDescendants = true) {
-                                                contentDescription = installStatus
-                                            },
+                                        Modifier.fillMaxWidth().height(6.dp).clip(CircleShape).semantics(
+                                            mergeDescendants = true,
+                                        ) {
+                                            contentDescription = installStatus
+                                        },
                                 )
                                 Text(
                                     text = stringResource(strings.install_patience),
