@@ -191,7 +191,7 @@ class Terminal : AppCompatActivity() {
         }
     }
 
-    override fun onContextMenuClosed(menu: ContextMenu) {
+    override fun onContextMenuClosed(menu: Menu) {
         terminalView.get()?.onContextMenuClosed(menu)
         super.onContextMenuClosed(menu)
     }
