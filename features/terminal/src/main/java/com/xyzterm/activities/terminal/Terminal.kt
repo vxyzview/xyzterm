@@ -95,6 +95,7 @@ import com.xyzterm.terminal.archmAssetForAbi
 import com.xyzterm.terminal.changeSession
 import com.xyzterm.terminal.fullScrollbackBounds
 import com.xyzterm.terminal.gamepadBytes
+import com.xyzterm.terminal.isValidDeepLinkCommand
 import com.xyzterm.terminal.isValidSessionName
 import com.xyzterm.terminal.pickRootfsAsset
 import com.xyzterm.terminal.terminalView
@@ -257,8 +258,9 @@ class Terminal : AppCompatActivity() {
     }
 
     /**
-     * Handles xyzterm:// URIs: xyzterm://run?cmd=<command> write command to the current session
-     * xyzterm://session/<name>?cmd=<cmd> create or switch to session <name>, optionally run <cmd>
+     * Handles xyzterm:// URIs:
+     * xyzterm://session/<name> switches to (or creates) a named session.
+     * xyzterm://session/<name>?cmd=<text> prefills input; the user presses Enter to run it.
      */
     private fun handleDeepLink(uri: Uri) {
         val binder = sessionBinder?.get() ?: return
@@ -268,15 +270,17 @@ class Terminal : AppCompatActivity() {
                 // ponytail: deep-link session name is attacker-controlled; reject traversal
                 // and special segments before they reach MkSession.childSafe / deleteRecursively.
                 if (!isValidSessionName(name)) return
+                val command = uri.getQueryParameter("cmd")?.takeIf { isValidDeepLinkCommand(it) }
                 lifecycleScope.launch(Dispatchers.Main) {
                     if (name !in binder.getService().sessionList) {
                         binder.createSession(name, TerminalBackEnd(), this@Terminal)
                     }
                     this@Terminal.changeSession(name)
+                    // Prefill only: no newline means the shell waits for the user's Enter.
+                    if (command != null) binder.getSession(name)?.write(command)
                 }
             }
-        // "run" and "?cmd=" intentionally dropped: a BROWSABLE link writing commands
-        // into a live session is unprompted command execution inside the sandbox.
+        // Prefilled text is never executed automatically; no "run" host exists.
         }
     }
 
