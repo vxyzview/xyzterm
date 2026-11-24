@@ -42,6 +42,14 @@ alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias pkg='pacman'
 
+# Ring the bell when a command ends so the app can notify the session.
+note() {
+    "$@"
+    local status=$?
+    printf '\a'
+    return $status
+}
+
 if [[ -f /initrc ]]; then
     # shellcheck disable=SC1090
     source /initrc
