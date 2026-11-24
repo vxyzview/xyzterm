@@ -33,8 +33,8 @@ import com.xyzterm.components.compose.preferences.base.PreferenceTemplate
 import com.xyzterm.exec.Binding
 import com.xyzterm.exec.UserBindings
 import com.xyzterm.resources.strings
-import com.xyzterm.terminal.PortableLogicKtShadow
 import com.xyzterm.settings.Settings
+import com.xyzterm.terminal.PortableLogicKtShadow
 
 @Composable
 fun UserBindingsScreen() {
@@ -156,7 +156,8 @@ private fun BindEditDialog(existing: Set<String>, onDismiss: () -> Unit, onSave:
                     error =
                         when {
                             !UserBindings.isValidHostPath(outside) -> strings.bind_invalid_host
-                            inside != null && !PortableLogicKtShadow.isValidGuestPath(inside) -> strings.bind_invalid_guest
+                            inside != null && !PortableLogicKtShadow.isValidGuestPath(inside) ->
+                                strings.bind_invalid_guest
                             existing.contains(outside) -> strings.bind_duplicate
                             else -> null
                         }

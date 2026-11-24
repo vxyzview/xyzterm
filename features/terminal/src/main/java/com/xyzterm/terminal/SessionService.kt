@@ -253,8 +253,7 @@ class SessionService : Service() {
     }
 
     /** Identity lookup for a live session; map values are the TerminalSession objects themselves. */
-    fun sessionIdFor(session: TerminalSession): SessionId? =
-        sessions.entries.firstOrNull { it.value === session }?.key
+    fun sessionIdFor(session: TerminalSession): SessionId? = sessions.entries.firstOrNull { it.value === session }?.key
 
     override fun onDestroy() {
         sessions.forEach { s -> s.value.finishIfRunning() }
@@ -429,7 +428,8 @@ class SessionService : Service() {
     companion object {
         const val SAVED_SESSIONS_KEY = "saved_sessions"
         private var instanceRef = WeakReference<SessionService>(null)
-        val instance: SessionService? get() = instanceRef.get()
+        val instance: SessionService?
+            get() = instanceRef.get()
     }
 
     private fun saveSession(id: SessionId, pwd: SessionPwd) {

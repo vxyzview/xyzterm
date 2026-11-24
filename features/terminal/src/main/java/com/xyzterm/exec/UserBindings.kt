@@ -47,7 +47,8 @@ object UserBindings {
         isValidHostPath(outside) && (inside == null || PortableLogicKtShadow.isValidGuestPath(inside))
 
     /** Add-time validation: the host folder must exist right now. */
-    fun isValidHostPath(path: String): Boolean = PortableLogicKtShadow.isWellFormedHost(path) && java.io.File(path).exists()
+    fun isValidHostPath(path: String): Boolean =
+        PortableLogicKtShadow.isWellFormedHost(path) && java.io.File(path).exists()
 
     fun isValidGuestPath(path: String): Boolean = path.startsWith("/") && path.length > 1
 
