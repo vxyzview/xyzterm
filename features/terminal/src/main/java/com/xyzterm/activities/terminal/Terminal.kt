@@ -240,9 +240,9 @@ class Terminal : AppCompatActivity() {
 
         val link = intent.data
         if (link?.scheme == "xyzterm") {
-            // Consume the URI: handleIntent runs from several entry points and
-            // re-handling would write the prefilled command a second time.
-            intent.data = null
+            // Keep the URI: the AndroidView factory re-drives handleIntent once a
+            // view exists, and pendingPrefill is one-shot so re-handling cannot
+            // write the command twice.
             handleDeepLink(link)
             return
         }
@@ -291,7 +291,11 @@ class Terminal : AppCompatActivity() {
     /** Writes a pending command once the target session actually has a shell process. */
     fun flushPendingPrefill() {
         val (sessionId, command) = pendingPrefill ?: return
-        val session = terminalView.get()?.mTermSession ?: return
+        val view = terminalView.get() ?: return
+        // TerminalSession.write() is a no-op until the shell exists; keep the
+        // command pending so onEmulatorSet can retry instead of losing it.
+        if (view.mEmulator == null) return
+        val session = view.mTermSession ?: return
         val service = sessionBinder?.get()?.getService() ?: return
         if (service.sessionIdFor(session) != sessionId) return
         // Prefill only: no newline means the shell waits for the user's Enter.
