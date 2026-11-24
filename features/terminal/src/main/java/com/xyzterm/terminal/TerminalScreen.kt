@@ -309,6 +309,7 @@ private fun ColumnScope.TerminalView(
                     // (restorePending below) and NPE if setTerminalViewClient() were
                     // deferred until a session exists.
                     setTerminalViewClient(client)
+                    terminalActivity.registerForContextMenu(this)
 
                     // Legacy behavior
                     val fontFile = sandboxDir().child("etc/font.ttf")

@@ -11,7 +11,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.view.ContextMenu
 import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -65,6 +69,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.termux.terminal.TerminalSession
+import com.termux.view.TerminalView
 import com.xyzterm.UpdateManager
 import com.xyzterm.commands.ActionContext
 import com.xyzterm.commands.KeyCombination
@@ -88,6 +93,7 @@ import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
 import com.xyzterm.terminal.archmAssetForAbi
 import com.xyzterm.terminal.changeSession
+import com.xyzterm.terminal.fullScrollbackBounds
 import com.xyzterm.terminal.gamepadBytes
 import com.xyzterm.terminal.isValidSessionName
 import com.xyzterm.terminal.pickRootfsAsset
@@ -170,6 +176,46 @@ class Terminal : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handleIntent(intent)
+    }
+
+    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        if (v !is TerminalView) return
+        menu.add(Menu.NONE, 1, Menu.NONE, strings.copy_all.getString()).setOnMenuItemClickListener { _: MenuItem ->
+            copyAllTerminalText(v)
+            true
+        }
+        menu.add(Menu.NONE, 2, Menu.NONE, strings.share.getString()).setOnMenuItemClickListener { _: MenuItem ->
+            shareTerminalText(v)
+            true
+        }
+    }
+
+    override fun onContextMenuClosed(menu: ContextMenu) {
+        terminalView.get()?.onContextMenuClosed(menu)
+        super.onContextMenuClosed(menu)
+    }
+
+    private fun terminalTextForMenu(view: TerminalView): String? {
+        val emulator = view.mEmulator ?: return null
+        val screen = emulator.getScreen()
+        val bounds = fullScrollbackBounds(screen.getActiveTranscriptRows(), emulator.mColumns, emulator.mRows)
+        return screen.getSelectedText(bounds[0], bounds[1], bounds[2], bounds[3])
+    }
+
+    private fun copyAllTerminalText(view: TerminalView) {
+        val text = terminalTextForMenu(view) ?: return
+        view.mTermSession?.onCopyTextToClipboard(text)
+    }
+
+    private fun shareTerminalText(view: TerminalView) {
+        val text = terminalTextForMenu(view)?.takeIf { it.isNotBlank() } ?: return
+        val intent =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, text)
+            }
+        startActivity(Intent.createChooser(intent, strings.share.getString()))
     }
 
     override fun onResume() {
