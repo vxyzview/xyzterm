@@ -28,6 +28,7 @@ import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Preference
 import com.xyzterm.settings.Settings
+import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -251,6 +252,10 @@ class SessionService : Service() {
         return binder
     }
 
+    /** Identity lookup for a live session; map values are the TerminalSession objects themselves. */
+    fun sessionIdFor(session: TerminalSession): SessionId? =
+        sessions.entries.firstOrNull { it.value === session }?.key
+
     override fun onDestroy() {
         sessions.forEach { s -> s.value.finishIfRunning() }
 
@@ -263,6 +268,7 @@ class SessionService : Service() {
             // IO dispatcher: tar blocks for minutes; Default pool is for CPU.
             DefaultScope.launch(Dispatchers.IO) { runCatching { TerminalBackup.autoBackup() } }
         }
+        instanceRef.clear()
         super.onDestroy()
     }
 
@@ -276,6 +282,7 @@ class SessionService : Service() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
+        instanceRef = WeakReference(this)
         createNotificationChannel()
         val notification = createNotification()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -419,8 +426,10 @@ class SessionService : Service() {
         }
     }
 
-    private companion object {
+    companion object {
         const val SAVED_SESSIONS_KEY = "saved_sessions"
+        private var instanceRef = WeakReference<SessionService>(null)
+        val instance: SessionService? get() = instanceRef.get()
     }
 
     private fun saveSession(id: SessionId, pwd: SessionPwd) {
