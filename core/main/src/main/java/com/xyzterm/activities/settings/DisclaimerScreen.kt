@@ -114,8 +114,9 @@ fun DisclaimerScreen(
 
         Row(
             modifier =
-                Modifier.fillMaxWidth()
-                    .toggleable(value = consentChecked, role = Role.Checkbox) { consentChecked = it },
+                Modifier.fillMaxWidth().toggleable(value = consentChecked, role = Role.Checkbox) {
+                    consentChecked = it
+                },
             verticalAlignment = Alignment.Top,
         ) {
             Checkbox(checked = consentChecked, onCheckedChange = null)

@@ -123,10 +123,7 @@ fun SetupShell(
                 }
                 Column(
                     modifier =
-                        Modifier.widthIn(max = 640.dp)
-                            .fillMaxWidth()
-                            .fillMaxHeight()
-                            .verticalScroll(scrollState),
+                        Modifier.widthIn(max = 640.dp).fillMaxWidth().fillMaxHeight().verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     content()
@@ -134,10 +131,7 @@ fun SetupShell(
             }
         } else {
             Column(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .safeContentPadding()
-                        .padding(horizontal = 12.dp, vertical = 16.dp),
+                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 12.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 SetupBrand(trailing = brandTrailing)
@@ -145,11 +139,7 @@ fun SetupShell(
                 SetupStepRail(step = step)
                 Spacer(modifier = Modifier.height(18.dp))
                 Column(
-                    modifier =
-                        Modifier.widthIn(max = 640.dp)
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .verticalScroll(scrollState),
+                    modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth().weight(1f).verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     content()
