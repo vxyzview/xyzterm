@@ -266,15 +266,15 @@
     <string name="permission_storage">Accès aux fichiers (facultatif)</string>
     <string name="permission_storage_desc">Permet au shell de voir /sdcard et les autres fichiers. Le terminal fonctionne sans cela.</string>
     <string name="permission_notifications">Notifications (facultatif)</string>
-    <string name="permission_notifications_desc">Alertes lorsqu'une commande en arrière-plan se termine.</string>
+    <string name="permission_notifications_desc">Alertes lorsqu\'une commande en arrière-plan se termine.</string>
     <string name="permission_continue">Continuer</string>
     <string name="permission_skip">Plus tard</string>
     <string name="install_heading">Préparation de votre shell Linux</string>
-    <string name="install_desc">Copie de l'environnement Arch Linux fourni. Cela ne se produit qu'une fois.</string>
+    <string name="install_desc">Copie de l\'environnement Arch Linux fourni. Cela ne se produit qu\'une fois.</string>
     <string name="permission_granted">Accordée</string>
     <string name="permission_not_granted">Appuyez pour autoriser</string>
     <string name="permission_later">Vous pourrez modifier ces options dans les paramètres.</string>
-    <string name="terms_scroll_hint">Faites défiler jusqu'à la fin pour continuer</string>
+    <string name="terms_scroll_hint">Faites défiler jusqu\'à la fin pour continuer</string>
     <string name="terms_title">Avant de commencer</string>
     <string name="terms_ready">Vous êtes arrivé à la fin</string>
     <string name="setup_tagline">terminal uniquement · pas de root · pas de télémétrie</string>
@@ -285,6 +285,6 @@
     <string name="setup_complete_open">Ouvrir xyzterm</string>
     <string name="install_patience">Cela peut prendre quelques minutes…</string>
     <string name="install_failed_no_space">Espace libre insuffisant. Libérez de la place et réessayez.</string>
-    <string name="install_failed_missing_asset">Cet APK ne contient pas l'environnement Linux. Réinstallez xyzterm.</string>
-    <string name="install_failed_other">L'environnement Linux n'a pas pu être installé. Réessayez.</string>
+    <string name="install_failed_missing_asset">Cet APK ne contient pas l\'environnement Linux. Réinstallez xyzterm.</string>
+    <string name="install_failed_other">L\'environnement Linux n\'a pas pu être installé. Réessayez.</string>
 </resources>
