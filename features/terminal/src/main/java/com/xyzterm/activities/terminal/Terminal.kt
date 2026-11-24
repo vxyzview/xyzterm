@@ -64,6 +64,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
+import com.termux.terminal.TerminalSession
 import com.xyzterm.UpdateManager
 import com.xyzterm.commands.ActionContext
 import com.xyzterm.commands.KeyCombination
@@ -263,6 +264,9 @@ class Terminal : AppCompatActivity() {
 
         /** True while the terminal UI is visible; gates bell notifications. */
         var isForeground = false
+
+        /** The session attached to the view; only this session's bell is suppressed in-app. */
+        var visibleSession: TerminalSession? = null
     }
 
     private val notificationPermissionLauncher =

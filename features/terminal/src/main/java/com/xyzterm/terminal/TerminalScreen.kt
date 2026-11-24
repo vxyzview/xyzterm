@@ -817,6 +817,7 @@ suspend fun Terminal.changeSession(sessionId: String) {
 
     session.updateTerminalSessionClient(client)
     terminalView.attachSession(session)
+    Terminal.visibleSession = session
     terminalView.setTerminalViewClient(client)
 
     terminalView.apply {

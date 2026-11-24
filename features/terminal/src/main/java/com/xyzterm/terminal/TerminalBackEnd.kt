@@ -9,6 +9,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
@@ -83,12 +84,16 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     private var lastBellNotifyAt = 0L
 
     private fun notifyBellInBackground(session: TerminalSession) {
-        if (Terminal.isForeground) return
+        if (Terminal.isForeground && Terminal.visibleSession === session) return
         val now = SystemClock.elapsedRealtime()
         if (now - lastBellNotifyAt < BELL_NOTIFY_THROTTLE_MS) return
         lastBellNotifyAt = now
 
-        val context = terminalView.get()?.context?.applicationContext ?: return
+        // The service outlives the activity and owns the session-name map.
+        val service = SessionService.instance ?: return
+        val context = service.applicationContext
+        val id = service.sessionIdFor(session) ?: return
+        if (!isValidSessionName(id)) return
 
         val nm = context.getSystemService(NotificationManager::class.java) ?: return
         runCatching {
@@ -109,7 +114,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
             return
         }
 
-        val intent = Intent(context, Terminal::class.java)
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("xyzterm://session/${Uri.encode(id)}"))
         val pendingIntent =
             PendingIntent.getActivity(
                 context,
@@ -121,8 +126,8 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         val notification =
             Notification.Builder(context, BELL_CHANNEL_ID)
                 .setSmallIcon(drawables.terminal)
-                .setContentTitle(strings.app_name.getString())
-                .setContentText(strings.bell_notification.getString())
+                .setContentTitle(strings.bell_notification.getString())
+                .setContentText(id)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .build()
