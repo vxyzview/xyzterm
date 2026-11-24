@@ -24,16 +24,8 @@ if [[ -f ~/.bashrc ]]; then
     source ~/.bashrc
 fi
 
-# Prompt set AFTER ~/.bashrc so a stock prompt cannot override it. Plain
-# (non-bold) 32/34 map straight to the theme palette's green/blue slots, so
-# the prompt always matches the selected color scheme. User@host is hardcoded
-# per brand ("roo@xyz"); see TerminalScreen wiring. Guard PS1 so a stale
-# dotfile cannot re-inject another host name via PROMPT_COMMAND.
-export PS1="\[\e[32m\]roo@xyz\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \$ "
-case "$PROMPT_COMMAND" in
-  *roo@xyz*) ;;
-  *) pc="${PROMPT_COMMAND%;}"; export PROMPT_COMMAND="${pc:+${pc}; }PS1='\[\e[32m\]roo@xyz\[\e[0m\]:\[\e[34m\]\w\[\e[0m\] \$ '" ;;
-esac
+# Keep archm's native prompt from /etc/bash.bashrc (root@archm). The shell is
+# the product; no branded PS1 override here.
 
 
 alias ls='ls --color=auto'

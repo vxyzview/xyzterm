@@ -840,7 +840,7 @@ suspend fun Terminal.changeSession(sessionId: String) {
 // fresh emulator whose colors reset to Termux defaults, and the composable only
 // calls applyTerminalColors on recomposition/layout — so a switched or added
 // ("other") session would otherwise render with the default palette, making the
-// roo@xyz prompt (ANSI 32/34) mismatch the themed app until a relayout. The
+// shell prompt (ANSI colors) mismatch the themed app until a relayout. The
 // last-applied signature lives on the view tag, so this is cheap + idempotent.
 private fun reapplyTerminalColors(view: TerminalView) {
     val sig = view.tag as? TerminalColorSignature ?: return
