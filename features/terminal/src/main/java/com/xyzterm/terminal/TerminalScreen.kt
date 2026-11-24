@@ -419,6 +419,7 @@ private suspend fun TerminalView.attachOrCreateSession(
     if (session != null) {
         session.updateTerminalSessionClient(client)
         attachSession(session)
+        Terminal.visibleSession = session
         setTerminalViewClient(client)
         // On-screen extra-keys (TAB/arrows) follow the attached session — same
         // as changeSession. Posted to dodge the extra-keys-factory race.

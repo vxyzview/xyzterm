@@ -46,7 +46,7 @@ alias pkg='pacman'
 note() {
     "$@"
     local status=$?
-    printf '\a'
+    printf '\a' >&2
     return $status
 }
 
