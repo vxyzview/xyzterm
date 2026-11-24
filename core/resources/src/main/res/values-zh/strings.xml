@@ -257,6 +257,8 @@
     <string name="auto_backup_desc">服务退出时备份终端环境，保留最近 3 个备份</string>
     <string name="backup_now">立即备份</string>
     <string name="bell_notification">终端会话需要你的注意</string>
+    <string name="copy_all">复制全部</string>
+    <string name="share">分享</string>
     <string name="bind_add">添加绑定</string>
     <string name="bind_duplicate">该文件夹已被绑定</string>
     <string name="bind_guest_path">访客路径（可选，默认与宿主路径相同）</string>
