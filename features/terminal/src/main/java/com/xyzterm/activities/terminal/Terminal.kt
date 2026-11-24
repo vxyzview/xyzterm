@@ -262,8 +262,7 @@ class Terminal : AppCompatActivity() {
     }
 
     /**
-     * Handles xyzterm:// URIs:
-     * xyzterm://session/<name> switches to (or creates) a named session.
+     * Handles xyzterm:// URIs: xyzterm://session/<name> switches to (or creates) a named session.
      * xyzterm://session/<name>?cmd=<text> prefills input; the user presses Enter to run it.
      */
     private fun handleDeepLink(uri: Uri) {
