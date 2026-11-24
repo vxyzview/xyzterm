@@ -58,6 +58,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,6 +74,7 @@ import com.xyzterm.commands.ActionContext
 import com.xyzterm.commands.KeyCombination
 import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.components.BrandHeader
+import com.xyzterm.components.SetupCard
 import com.xyzterm.components.SetupHeading
 import com.xyzterm.components.SetupShell
 import com.xyzterm.exec.isTerminalInstalled
@@ -547,11 +550,7 @@ class Terminal : AppCompatActivity() {
             when (stage) {
                 InstallStage.UnsupportedCpu -> {
                     SetupShell(step = 3) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        ) {
+                        SetupCard {
                             Column(
                                 modifier = Modifier.fillMaxWidth().padding(18.dp),
                                 verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -609,11 +608,7 @@ class Terminal : AppCompatActivity() {
 
                 InstallStage.Failed -> {
                     SetupShell(step = 3) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colorScheme.errorContainer,
-                        ) {
+                        SetupCard(color = MaterialTheme.colorScheme.errorContainer) {
                             Column(
                                 modifier = Modifier.fillMaxWidth().padding(18.dp),
                                 verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -660,16 +655,13 @@ class Terminal : AppCompatActivity() {
                             null
                         }
                     val percent = ((progress ?: 0f) * 100).toInt()
+                    val installStatus = "${stringResource(strings.installing)} $percent%"
                     SetupShell(step = 3) {
                         SetupHeading(
                             title = stringResource(strings.install_heading),
                             description = stringResource(strings.install_desc),
                         )
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        ) {
+                        SetupCard {
                             Column(
                                 modifier = Modifier.fillMaxWidth().padding(18.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -691,7 +683,10 @@ class Terminal : AppCompatActivity() {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = "$percent%",
-                                            style = MaterialTheme.typography.displaySmall,
+                                            style =
+                                                MaterialTheme.typography.displaySmall.copy(
+                                                    fontFeatureSettings = "tnum"
+                                                ),
                                             fontWeight = FontWeight.ExtraBold,
                                         )
                                         Text(
@@ -703,27 +698,29 @@ class Terminal : AppCompatActivity() {
                                 }
                                 LinearProgressIndicator(
                                     progress = { progress ?: 0f },
-                                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .height(6.dp)
+                                            .clip(CircleShape)
+                                            .semantics(mergeDescendants = true) {
+                                                contentDescription = installStatus
+                                            },
                                 )
                                 Text(
                                     text = stringResource(strings.install_patience),
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                                 if (totalBytes > 0) {
                                     Text(
                                         text = "${formatFileSize(downloadedBytes)} / ${formatFileSize(totalBytes)}",
-                                        style = MaterialTheme.typography.labelSmall,
+                                        style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                             }
                         }
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colorScheme.warningSurface,
-                        ) {
+                        SetupCard(color = MaterialTheme.colorScheme.warningSurface) {
                             Row(
                                 modifier = Modifier.padding(14.dp),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -737,7 +734,7 @@ class Terminal : AppCompatActivity() {
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
                                     text = stringResource(strings.warn_dont_leave_setup),
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onWarningSurface,
                                     modifier = Modifier.weight(1f),
                                 )

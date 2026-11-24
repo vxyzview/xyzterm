@@ -1,5 +1,6 @@
 package com.xyzterm.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -90,6 +92,23 @@ fun SetupHeading(
     }
 }
 
+/** Flat tonal card shared by every setup step; the outline keeps it legible on AMOLED and light themes. */
+@Composable
+fun SetupCard(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.surfaceContainerLow,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = color,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+    ) {
+        Column(content = content)
+    }
+}
+
 /**
  * Frame shared by setup steps. Phone: the brand and step rail stay fixed while the step content scrolls. Wide window: a
  * progress sidebar beside the step content, so a tablet shows structure instead of a stretched phone layout.
@@ -103,9 +122,13 @@ fun SetupShell(
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val expanded = maxWidth >= 840.dp
+        val compactHeight = maxHeight < 480.dp
         if (expanded) {
             Row(
-                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 24.dp, vertical = 24.dp),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .safeContentPadding()
+                        .padding(horizontal = 24.dp, vertical = if (compactHeight) 8.dp else 24.dp),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Column(
@@ -131,13 +154,16 @@ fun SetupShell(
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 12.dp, vertical = 16.dp),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .safeContentPadding()
+                        .padding(horizontal = 16.dp, vertical = if (compactHeight) 8.dp else 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 SetupBrand(trailing = brandTrailing)
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(if (compactHeight) 8.dp else 14.dp))
                 SetupStepRail(step = step)
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(if (compactHeight) 8.dp else 18.dp))
                 Column(
                     modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth().weight(1f).verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(16.dp),

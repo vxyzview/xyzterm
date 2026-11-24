@@ -34,8 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.xyzterm.components.SetupCard
 import com.xyzterm.components.SetupHeading
 import com.xyzterm.components.SetupShell
 import com.xyzterm.resources.strings
@@ -73,11 +75,7 @@ fun DisclaimerScreen(
     ) {
         SetupHeading(title = termsTitle, description = termsIntro)
 
-        Surface(
-            shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        SetupCard {
             Column {
                 TermsSection(
                     title = stringResource(strings.data_loss_risk),
@@ -85,7 +83,7 @@ fun DisclaimerScreen(
                     important = true,
                 )
                 HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 14.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
                 )
                 TermsSection(
@@ -94,7 +92,7 @@ fun DisclaimerScreen(
                     important = true,
                 )
                 HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 14.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
                 )
                 TermsSection(
@@ -102,7 +100,7 @@ fun DisclaimerScreen(
                     body = stringResource(strings.no_warranty_content),
                 )
                 HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 14.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
                 )
                 TermsSection(
@@ -119,10 +117,14 @@ fun DisclaimerScreen(
                 },
             verticalAlignment = Alignment.Top,
         ) {
-            Checkbox(checked = consentChecked, onCheckedChange = null)
+            Checkbox(
+                checked = consentChecked,
+                onCheckedChange = null,
+                modifier = Modifier.clearAndSetSemantics {},
+            )
             Text(
                 text = stringResource(strings.consent_statement),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f).padding(top = 12.dp),
             )
@@ -130,7 +132,7 @@ fun DisclaimerScreen(
 
         Text(
             text = stringResource(if (canAccept) strings.terms_ready else strings.terms_scroll_hint),
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodyMedium,
             color =
                 if (canAccept) {
                     MaterialTheme.colorScheme.primary
@@ -169,7 +171,7 @@ private fun TermsSection(
     important: Boolean = false,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top,
     ) {
         Surface(
@@ -199,7 +201,7 @@ private fun TermsSection(
             Text(text = title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
             Text(
                 text = body,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

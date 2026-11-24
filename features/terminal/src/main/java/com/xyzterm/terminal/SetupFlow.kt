@@ -45,7 +45,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +60,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.xyzterm.activities.settings.DisclaimerScreen
 import com.xyzterm.activities.terminal.Terminal
+import com.xyzterm.components.SetupCard
 import com.xyzterm.components.SetupHeading
 import com.xyzterm.components.SetupShell
 import com.xyzterm.file.FilePermission
@@ -141,11 +145,7 @@ fun SetupCompleteScreen(
                 textAlign = TextAlign.Center,
             )
 
-            Surface(
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            SetupCard {
                 Row(
                     modifier = Modifier.padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -165,7 +165,7 @@ fun SetupCompleteScreen(
                     Spacer(modifier = Modifier.width(14.dp))
                     Text(
                         text = stringResource(strings.setup_complete_info),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
@@ -232,11 +232,7 @@ private fun PermissionStep(
         )
         PermissionProgress(allowed = allowed, required = required)
 
-        Surface(
-            shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.surfaceContainerLow,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        SetupCard {
             Column {
                 PermissionRow(
                     icon = Icons.Outlined.Info,
@@ -252,7 +248,7 @@ private fun PermissionStep(
                 )
                 if (showNotifications) {
                     HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 14.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
                     )
                     PermissionRow(
@@ -294,7 +290,15 @@ private fun PermissionProgress(
     allowed: Int,
     required: Int,
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    val status = stringResource(strings.permission_allowed_count, allowed, required)
+    Row(
+        modifier =
+            Modifier.fillMaxWidth().semantics(mergeDescendants = true) {
+                liveRegion = LiveRegionMode.Polite
+                contentDescription = status
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             repeat(required) { index ->
                 Box(
@@ -314,7 +318,7 @@ private fun PermissionProgress(
         }
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = stringResource(strings.permission_allowed_count, allowed, required),
+            text = status,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = if (allowed == required) FontWeight.SemiBold else FontWeight.Medium,
             color =
@@ -347,7 +351,7 @@ private fun PermissionRow(
                         stringResource(if (granted) strings.permission_granted else strings.permission_not_granted),
                     onClick = onClick,
                 )
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Surface(
@@ -377,12 +381,12 @@ private fun PermissionRow(
             Text(text = label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = stringResource(if (granted) strings.permission_granted else strings.permission_not_granted),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelMedium,
                 color =
                     if (granted) {
                         MaterialTheme.colorScheme.primary
