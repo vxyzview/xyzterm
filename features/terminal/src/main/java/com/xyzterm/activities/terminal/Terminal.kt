@@ -87,7 +87,6 @@ import com.xyzterm.settings.Settings
 import com.xyzterm.terminal.InstallFailure
 import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
-import com.xyzterm.terminal.installFailureFor
 import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.SetupCompleteScreen
 import com.xyzterm.terminal.SetupFlow
@@ -97,6 +96,7 @@ import com.xyzterm.terminal.archmAssetForAbi
 import com.xyzterm.terminal.changeSession
 import com.xyzterm.terminal.fullScrollbackBounds
 import com.xyzterm.terminal.gamepadBytes
+import com.xyzterm.terminal.installFailureFor
 import com.xyzterm.terminal.isValidDeepLinkCommand
 import com.xyzterm.terminal.isValidSessionName
 import com.xyzterm.terminal.pickRootfsAsset

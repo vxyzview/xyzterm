@@ -26,7 +26,5 @@ private fun SetupStepRailPreview() {
 @Preview(name = "Terms", showBackground = true)
 @Composable
 private fun DisclaimerScreenPreview() {
-    MaterialTheme {
-        DisclaimerScreen(onAccept = {}, onDecline = {})
-    }
+    MaterialTheme { DisclaimerScreen(onAccept = {}, onDecline = {}) }
 }
