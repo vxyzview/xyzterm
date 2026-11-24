@@ -121,7 +121,7 @@ fun SetupShell(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        val expanded = maxWidth >= 840.dp
+        val expanded = maxWidth >= Breakpoints.ExpandedWidth
         val compactHeight = maxHeight < 480.dp
         if (expanded) {
             Row(

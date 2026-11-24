@@ -42,7 +42,9 @@ fun ResponsiveDrawer(
     val density = LocalDensity.current
     val screenWidthDp = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
     val isPermanentDrawer =
-        remember(screenWidthDp, Settings.desktop_mode) { Settings.desktop_mode && screenWidthDp >= 1080.dp }
+        remember(screenWidthDp, Settings.desktop_mode) {
+            Settings.desktop_mode && screenWidthDp >= Breakpoints.PermanentDrawerWidth
+        }
 
     if (isPermanentDrawer) {
         PermanentNavigationDrawer(

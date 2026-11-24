@@ -81,12 +81,13 @@ import com.xyzterm.exec.isTerminalInstalled
 import com.xyzterm.file.FilePermission
 import com.xyzterm.file.sandboxDir
 import com.xyzterm.resources.drawables
-import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
+import com.xyzterm.terminal.InstallFailure
 import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
+import com.xyzterm.terminal.installFailureFor
 import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.SetupCompleteScreen
 import com.xyzterm.terminal.SetupFlow
@@ -472,7 +473,7 @@ class Terminal : AppCompatActivity() {
             val asset = pickRootfsAsset(preferred, available)
             if (asset == null) {
                 failed = true
-                errorMessage = "Bundled rootfs is missing from this APK"
+                errorMessage = strings.install_failed_missing_asset.getString()
                 return@LaunchedEffect
             }
 
@@ -502,7 +503,12 @@ class Terminal : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 failed = true
-                errorMessage = strings.setup_failed.getFilledString(e.message)
+                errorMessage =
+                    when (installFailureFor(e.message)) {
+                        InstallFailure.NoSpace -> strings.install_failed_no_space.getString()
+                        InstallFailure.MissingAsset -> strings.install_failed_missing_asset.getString()
+                        InstallFailure.Other -> strings.install_failed_other.getString()
+                    }
             }
         }
 

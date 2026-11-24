@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import com.xyzterm.components.Breakpoints
 
 /**
  * Represents the layout of all Preference screens. Uses a combination of [PreferenceScaffold] and [PreferenceColumn] to
@@ -142,6 +143,6 @@ val LocalIsExpandedScreen = compositionLocalOf { false }
 @Composable
 fun ProvideIsExpandedScreen(content: @Composable () -> Unit) {
     val screenWidthDp = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() }
-    val isExpanded = remember(screenWidthDp) { screenWidthDp >= 840.dp }
+    val isExpanded = remember(screenWidthDp) { screenWidthDp >= Breakpoints.ExpandedWidth }
     CompositionLocalProvider(LocalIsExpandedScreen provides isExpanded) { content() }
 }
