@@ -21,7 +21,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,18 +28,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -57,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -75,6 +72,7 @@ import com.xyzterm.commands.ActionContext
 import com.xyzterm.commands.KeyCombination
 import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.components.BrandHeader
+import com.xyzterm.components.SetupHeading
 import com.xyzterm.components.SetupShell
 import com.xyzterm.exec.isTerminalInstalled
 import com.xyzterm.file.FilePermission
@@ -103,6 +101,7 @@ import com.xyzterm.theme.XyzTheme
 import com.xyzterm.theme.onWarningSurface
 import com.xyzterm.theme.warningSurface
 import com.xyzterm.utils.AppDialogHost
+import com.xyzterm.utils.formatFileSize
 import java.io.File
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -548,36 +547,43 @@ class Terminal : AppCompatActivity() {
             when (stage) {
                 InstallStage.UnsupportedCpu -> {
                     SetupShell(step = 3) {
-                        Card(
+                        Surface(
                             modifier = Modifier.fillMaxWidth(),
                             shape = MaterialTheme.shapes.large,
-                            colors =
-                                CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                                ),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
                         ) {
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(24.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth().padding(18.dp),
+                                verticalArrangement = Arrangement.spacedBy(14.dp),
                             ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Warning,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(32.dp),
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                                Text(
-                                    text = stringResource(strings.unsupported_cpu),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold,
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Surface(
+                                        modifier = Modifier.size(44.dp),
+                                        shape = MaterialTheme.shapes.medium,
+                                        color = MaterialTheme.colorScheme.warningSurface,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Warning,
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(10.dp),
+                                            tint = MaterialTheme.colorScheme.onWarningSurface,
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(14.dp))
+                                    Text(
+                                        text = stringResource(strings.unsupported_cpu),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
                                 Text(
                                     text = stringResource(strings.unsupported_cpu_desc),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                                 Button(
-                                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                                     shape = CircleShape,
                                     onClick = { finishAffinity() },
                                 ) {
@@ -603,37 +609,38 @@ class Terminal : AppCompatActivity() {
 
                 InstallStage.Failed -> {
                     SetupShell(step = 3) {
-                        Card(
+                        Surface(
                             modifier = Modifier.fillMaxWidth(),
                             shape = MaterialTheme.shapes.large,
-                            colors =
-                                CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                                ),
+                            color = MaterialTheme.colorScheme.errorContainer,
                         ) {
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(24.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth().padding(18.dp),
+                                verticalArrangement = Arrangement.spacedBy(14.dp),
                             ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Warning,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(32.dp),
-                                    tint = MaterialTheme.colorScheme.onErrorContainer,
-                                )
-                                Text(
-                                    text = stringResource(strings.install_failed),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onErrorContainer,
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Warning,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(28.dp),
+                                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = stringResource(strings.install_failed),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onErrorContainer,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
                                 Text(
                                     text = errorMessage.ifBlank { stringResource(strings.install_failed) },
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onErrorContainer,
                                 )
                                 Button(
-                                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                                     shape = CircleShape,
                                     onClick = { retryKey++ },
                                 ) {
@@ -646,55 +653,46 @@ class Terminal : AppCompatActivity() {
 
                 InstallStage.Copying,
                 InstallStage.Extracting -> {
-                    SetupShell(
-                        step = 3,
-                        railInCard = true,
-                        brandTrailing = {
-                            Icon(
-                                imageVector = Icons.Filled.MoreVert,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
-                    ) {
-                        val progress =
-                            if (totalBytes > 0) {
-                                (downloadedBytes.toFloat() / totalBytes).coerceIn(0f, 1f)
-                            } else {
-                                null
-                            }
-                        val percent = ((progress ?: 0f) * 100).toInt()
-                        Card(
+                    val progress =
+                        if (totalBytes > 0) {
+                            (downloadedBytes.toFloat() / totalBytes).coerceIn(0f, 1f)
+                        } else {
+                            null
+                        }
+                    val percent = ((progress ?: 0f) * 100).toInt()
+                    SetupShell(step = 3) {
+                        SetupHeading(
+                            title = stringResource(strings.install_heading),
+                            description = stringResource(strings.install_desc),
+                        )
+                        Surface(
                             modifier = Modifier.fillMaxWidth(),
                             shape = MaterialTheme.shapes.large,
-                            colors =
-                                CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                                ),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
                         ) {
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                                modifier = Modifier.fillMaxWidth().padding(18.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        painter = painterResource(drawables.arch_linux),
-                                        contentDescription = null,
+                                    Surface(
                                         modifier = Modifier.size(56.dp),
-                                        tint = Color.Unspecified,
-                                    )
+                                        shape = MaterialTheme.shapes.medium,
+                                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(drawables.arch_linux),
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(10.dp),
+                                            tint = Color.Unspecified,
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.width(16.dp))
-                                    Box(
-                                        modifier =
-                                            Modifier.size(width = 1.dp, height = 56.dp)
-                                                .background(MaterialTheme.colorScheme.outlineVariant),
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Column {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = "$percent%",
-                                            style = MaterialTheme.typography.headlineLarge,
-                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.displaySmall,
+                                            fontWeight = FontWeight.ExtraBold,
                                         )
                                         Text(
                                             text = stringResource(strings.installing),
@@ -703,51 +701,22 @@ class Terminal : AppCompatActivity() {
                                         )
                                     }
                                 }
-                                Text(
-                                    text = stringResource(strings.install_heading),
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
+                                LinearProgressIndicator(
+                                    progress = { progress ?: 0f },
+                                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
                                 )
-                                Text(
-                                    text = stringResource(strings.install_desc),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    LinearProgressIndicator(
-                                        progress = { progress ?: 0f },
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Text(
-                                        text = "$percent%",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Info,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
                                 Text(
                                     text = stringResource(strings.install_patience),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                                if (totalBytes > 0) {
+                                    Text(
+                                        text = "${formatFileSize(downloadedBytes)} / ${formatFileSize(totalBytes)}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                             }
                         }
                         Surface(
@@ -770,6 +739,7 @@ class Terminal : AppCompatActivity() {
                                     text = stringResource(strings.warn_dont_leave_setup),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onWarningSurface,
+                                    modifier = Modifier.weight(1f),
                                 )
                             }
                         }

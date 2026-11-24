@@ -3,14 +3,15 @@ package com.xyzterm.components
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
@@ -68,41 +69,51 @@ fun SetupBrand(
     }
 }
 
+/** Page title and one-line explanation shared by the setup steps. */
+@Composable
+fun SetupHeading(
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
 /**
- * Centered frame shared by setup steps. Phone: one column. Wide window: a progress sidebar beside the step content, so
- * a tablet shows structure instead of a stretched phone layout.
+ * Frame shared by setup steps. Phone: the brand and step rail stay fixed while the step content scrolls. Wide window: a
+ * progress sidebar beside the step content, so a tablet shows structure instead of a stretched phone layout.
  */
 @Composable
 fun SetupShell(
     step: Int,
     scrollState: ScrollState = rememberScrollState(),
     brandTrailing: @Composable () -> Unit = {},
-    railInCard: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val expanded = maxWidth >= 840.dp
         if (expanded) {
             Row(
-                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 36.dp, vertical = 32.dp),
+                modifier = Modifier.fillMaxSize().safeContentPadding().padding(horizontal = 24.dp, vertical = 24.dp),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Column(
-                    modifier = Modifier.width(260.dp).padding(end = 32.dp),
+                    modifier = Modifier.width(228.dp).padding(end = 28.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     SetupBrand(trailing = brandTrailing)
-                    if (railInCard) {
-                        Surface(
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Box(Modifier.padding(16.dp)) { SetupStepRail(step = step, vertical = true) }
-                        }
-                    } else {
-                        SetupStepRail(step = step, vertical = true)
-                    }
+                    SetupStepRail(step = step, vertical = true)
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = stringResource(strings.permission_later),
@@ -111,7 +122,11 @@ fun SetupShell(
                     )
                 }
                 Column(
-                    modifier = Modifier.widthIn(max = 640.dp).verticalScroll(scrollState),
+                    modifier =
+                        Modifier.widthIn(max = 640.dp)
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     content()
@@ -122,25 +137,21 @@ fun SetupShell(
                 modifier =
                     Modifier.fillMaxSize()
                         .safeContentPadding()
-                        .padding(horizontal = 16.dp, vertical = 20.dp)
-                        .verticalScroll(scrollState),
+                        .padding(horizontal = 12.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                SetupBrand(trailing = brandTrailing)
+                Spacer(modifier = Modifier.height(14.dp))
+                SetupStepRail(step = step)
+                Spacer(modifier = Modifier.height(18.dp))
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.widthIn(max = 640.dp)
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    SetupBrand(trailing = brandTrailing)
-                    if (railInCard) {
-                        Surface(
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Box(Modifier.padding(16.dp)) { SetupStepRail(step = step) }
-                        }
-                    } else {
-                        SetupStepRail(step = step)
-                    }
                     content()
                 }
             }

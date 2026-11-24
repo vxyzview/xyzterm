@@ -5,7 +5,6 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,8 +26,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -42,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -59,6 +57,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.xyzterm.activities.settings.DisclaimerScreen
 import com.xyzterm.activities.terminal.Terminal
+import com.xyzterm.components.SetupHeading
 import com.xyzterm.components.SetupShell
 import com.xyzterm.file.FilePermission
 import com.xyzterm.resources.drawables
@@ -110,39 +109,23 @@ fun SetupCompleteScreen(
 ) {
     SetupShell(step = 3) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier =
-                        Modifier.size(width = 18.dp, height = 3.dp)
-                            .clip(MaterialTheme.shapes.extraSmall)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Surface(
-                    shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    modifier = Modifier.size(96.dp),
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
+            Surface(
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(112.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(56.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
-                Box(
-                    modifier =
-                        Modifier.size(width = 18.dp, height = 3.dp)
-                            .clip(MaterialTheme.shapes.extraSmall)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
-                )
             }
 
             Text(
@@ -164,7 +147,7 @@ fun SetupCompleteScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Surface(
@@ -179,11 +162,12 @@ fun SetupCompleteScreen(
                             tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
                     Text(
                         text = stringResource(strings.setup_complete_info),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
@@ -242,66 +226,44 @@ private fun PermissionStep(
     val canContinue = allowed == required || skipped
 
     SetupShell(step = 2) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier.size(width = 4.dp, height = 32.dp).background(MaterialTheme.colorScheme.primary),
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = stringResource(strings.permission_heading),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-        Text(
-            text = stringResource(strings.permission_desc),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        SetupHeading(
+            title = stringResource(strings.permission_heading),
+            description = stringResource(strings.permission_desc),
         )
+        PermissionProgress(allowed = allowed, required = required)
 
         Surface(
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = stringResource(strings.permission_allowed_count, allowed, required),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+            Column {
+                PermissionRow(
+                    icon = Icons.Outlined.Info,
+                    label = stringResource(strings.permission_storage),
+                    description = stringResource(strings.permission_storage_desc),
+                    granted = storageGranted,
+                    onClick = {
+                        activity.lifecycleScope.launch {
+                            FilePermission.verifyStoragePermission(activity)
+                            storageGranted = FilePermission.hasStorageAccess(activity)
+                        }
+                    },
                 )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-            }
-        }
-
-        PermissionCard(
-            icon = Icons.Outlined.Info,
-            label = stringResource(strings.permission_storage),
-            description = stringResource(strings.permission_storage_desc),
-            granted = storageGranted,
-            onClick = {
-                activity.lifecycleScope.launch {
-                    FilePermission.verifyStoragePermission(activity)
-                    storageGranted = FilePermission.hasStorageAccess(activity)
+                if (showNotifications) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 14.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+                    )
+                    PermissionRow(
+                        icon = Icons.Outlined.Settings,
+                        label = stringResource(strings.permission_notifications),
+                        description = stringResource(strings.permission_notifications_desc),
+                        granted = notificationsGranted,
+                        onClick = { notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) },
+                    )
                 }
-            },
-        )
-        if (showNotifications) {
-            PermissionCard(
-                icon = Icons.Outlined.Settings,
-                label = stringResource(strings.permission_notifications),
-                description = stringResource(strings.permission_notifications_desc),
-                granted = notificationsGranted,
-                onClick = { notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) },
-            )
+            }
         }
 
         Button(
@@ -313,12 +275,6 @@ private fun PermissionStep(
             Text(text = stringResource(strings.permission_continue))
         }
         if (!canContinue) {
-            Text(
-                text = stringResource(strings.permission_later),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth(),
-            )
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 shape = CircleShape,
@@ -334,17 +290,55 @@ private fun PermissionStep(
 }
 
 @Composable
-private fun PermissionCard(
+private fun PermissionProgress(
+    allowed: Int,
+    required: Int,
+) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            repeat(required) { index ->
+                Box(
+                    modifier =
+                        Modifier.weight(1f)
+                            .height(6.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (index < allowed) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerHighest
+                                },
+                            ),
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = stringResource(strings.permission_allowed_count, allowed, required),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = if (allowed == required) FontWeight.SemiBold else FontWeight.Medium,
+            color =
+                if (allowed == required) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+        )
+    }
+}
+
+@Composable
+private fun PermissionRow(
     icon: ImageVector,
     label: String,
     description: String,
     granted: Boolean,
     onClick: () -> Unit,
 ) {
-    Card(
+    Row(
         modifier =
             Modifier.fillMaxWidth()
-                .heightIn(min = 88.dp)
+                .heightIn(min = 84.dp)
                 // A granted row is a status, not an action: don't announce it as a button.
                 .semantics { if (!granted) role = Role.Button }
                 .clickable(
@@ -352,90 +346,67 @@ private fun PermissionCard(
                     onClickLabel =
                         stringResource(if (granted) strings.permission_granted else strings.permission_not_granted),
                     onClick = onClick,
-                ),
-        shape = MaterialTheme.shapes.large,
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    if (granted) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    },
-            ),
+                )
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = MaterialTheme.shapes.medium,
+            color =
+                if (granted) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.secondaryContainer
+                },
         ) {
-            Surface(
-                modifier = Modifier.size(44.dp),
-                shape = MaterialTheme.shapes.medium,
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.padding(10.dp),
+                tint =
+                    if (granted) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                    },
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(text = label, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(if (granted) strings.permission_granted else strings.permission_not_granted),
+                style = MaterialTheme.typography.labelSmall,
                 color =
                     if (granted) {
                         MaterialTheme.colorScheme.primary
                     } else {
-                        MaterialTheme.colorScheme.secondaryContainer
+                        MaterialTheme.colorScheme.onSurfaceVariant
                     },
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.padding(10.dp),
-                    tint =
-                        if (granted) {
-                            MaterialTheme.colorScheme.onPrimary
-                        } else {
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        },
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = stringResource(if (granted) strings.permission_granted else strings.permission_not_granted),
-                    style = MaterialTheme.typography.labelSmall,
-                    color =
-                        if (granted) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Box(
-                modifier =
-                    Modifier.size(28.dp)
-                        .clip(CircleShape)
-                        .background(if (granted) MaterialTheme.colorScheme.primary else Color.Transparent)
-                        .border(
-                            width = 3.dp,
-                            color =
-                                if (granted) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.outline
-                                },
-                            shape = CircleShape,
-                        ),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (granted) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                    )
-                }
-            }
+            )
         }
+        Spacer(modifier = Modifier.width(8.dp))
+        Icon(
+            imageVector =
+                if (granted) {
+                    Icons.Default.Check
+                } else {
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight
+                },
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint =
+                if (granted) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+        )
     }
 }

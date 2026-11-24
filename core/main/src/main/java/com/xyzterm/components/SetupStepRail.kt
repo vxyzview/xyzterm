@@ -1,7 +1,6 @@
 package com.xyzterm.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
@@ -40,14 +38,14 @@ fun SetupStepRail(
             stringResource(strings.setup_install),
         )
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(strings.setup_step, step),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 12.dp),
-        )
-        if (vertical) {
+    if (vertical) {
+        Column(modifier = modifier.fillMaxWidth()) {
+            Text(
+                text = stringResource(strings.setup_step, step),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
             labels.forEachIndexed { index, label ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     StepNode(index = index, step = step)
@@ -79,7 +77,9 @@ fun SetupStepRail(
                     )
                 }
             }
-        } else {
+        }
+    } else {
+        Column(modifier = modifier.fillMaxWidth()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 labels.forEachIndexed { index, _ ->
                     if (index > 0) {
@@ -99,21 +99,20 @@ fun SetupStepRail(
                     StepNode(index = index, step = step)
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                labels.forEachIndexed { index, label ->
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = if (index == step - 1) FontWeight.Bold else FontWeight.Medium,
-                        color =
-                            if (index < step) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                    )
-                }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(strings.setup_step, step),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = labels[step - 1],
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
             }
         }
     }
@@ -126,43 +125,37 @@ private fun StepNode(
 ) {
     val done = index < step - 1
     val current = index == step - 1
-    if (done) {
-        Box(
-            modifier = Modifier.size(32.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center,
-        ) {
+    val background =
+        when {
+            done -> MaterialTheme.colorScheme.primaryContainer
+            current -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.surfaceContainerHighest
+        }
+    val foreground =
+        when {
+            done -> MaterialTheme.colorScheme.onPrimaryContainer
+            current -> MaterialTheme.colorScheme.onPrimary
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
+    Box(
+        modifier = Modifier.size(32.dp).clip(MaterialTheme.shapes.extraSmall).background(background),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (done) {
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.onPrimary,
+                tint = foreground,
+            )
+        } else {
+            Text(
+                text = "${index + 1}",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = foreground,
             )
         }
-        return
-    }
-    Box(
-        modifier =
-            Modifier.size(32.dp)
-                .clip(CircleShape)
-                .background(
-                    if (current) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerHighest
-                    },
-                ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "${index + 1}",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color =
-                if (current) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-        )
     }
 }
