@@ -82,6 +82,7 @@ import com.xyzterm.terminal.NEXT_STAGE
 import com.xyzterm.terminal.RootfsInstaller
 import com.xyzterm.terminal.SessionService
 import com.xyzterm.terminal.SetupCompleteScreen
+import com.xyzterm.terminal.isValidSessionName
 import com.xyzterm.terminal.SetupFlow
 import com.xyzterm.terminal.TerminalBackEnd
 import com.xyzterm.terminal.TerminalScreen
@@ -219,16 +220,7 @@ class Terminal : AppCompatActivity() {
                 val name = uri.lastPathSegment?.trim().orEmpty()
                 // ponytail: deep-link session name is attacker-controlled; reject traversal
                 // and special segments before they reach MkSession.childSafe / deleteRecursively.
-                if (
-                    name.isEmpty() ||
-                        name == "." ||
-                        name == ".." ||
-                        name.contains("/") ||
-                        name.contains("\\") ||
-                        name.any { it.isISOControl() }
-                ) {
-                    return
-                }
+                if (!isValidSessionName(name)) return
                 lifecycleScope.launch(Dispatchers.Main) {
                     if (name !in binder.getService().sessionList) {
                         binder.createSession(name, TerminalBackEnd(), this@Terminal)
