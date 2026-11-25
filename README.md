@@ -11,7 +11,7 @@
 [![Latest release](https://img.shields.io/badge/release-v1.0.7-1976D2?style=for-the-badge)](https://github.com/vxyzview/xyzterm/releases/latest)
 
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
-[![F-Droid](https://img.shields.io/badge/available%20on-F--Droid-1976D2?style=flat-square)](https://f-droid.org/)
+[![F-Droid pending](https://img.shields.io/badge/F--Droid-pending-lightgrey?style=flat-square)](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/46623)
 [![Android 8.0+](https://img.shields.io/badge/platform-Android%208.0%2B-3DDC84?style=flat-square)](https://www.android.com/)
 [![CI](https://github.com/vxyzview/xyzterm/actions/workflows/android.yml/badge.svg?style=flat-square)](https://github.com/vxyzview/xyzterm/actions/workflows/android.yml)
 [![Reproducible builds](https://img.shields.io/badge/builds-reproducible-success?style=flat-square)](.github/workflows/reproducible.yml)
@@ -96,7 +96,7 @@ Tap the icon and you are in a shell. That's it. No code editor, no file manager,
 - **Zero telemetry** — no analytics, no third-party crash reporting, no network calls you didn't make yourself.
 - **Verified rootfs** — CI downloads the latest archm release, checks its published SHA-256, unpacks it and bundles one per ABI. No rootfs is downloaded at runtime.
 - **Stable release signing** — every GitHub release is signed with the same key, so updates install in place.
-- **GitHub Releases first** — the bundled rootfs makes the APK large (~428 MB with both ABIs), which may exceed F-Droid's size limits. Releases are published on [GitHub Releases](https://github.com/vxyzview/xyzterm/releases).
+- **GitHub Releases first** — each APK bundles one ABI's rootfs (~214–222 MB), and F-Droid inclusion is still pending. Releases are published on [GitHub Releases](https://github.com/vxyzview/xyzterm/releases).
 - **Reproducible builds** — verify our APKs match the source with [apksigcopier + diffoscope](docs/CONTRIBUTING.md).
 
 ---
@@ -122,7 +122,7 @@ Tap the icon and you are in a shell. That's it. No code editor, no file manager,
 
 ## Get started
 
-1. Install **v1.0.7** from [GitHub Releases](https://github.com/vxyzview/xyzterm/releases/tag/v1.0.7) (F-Droid metadata is included; submission is in progress), or [build it yourself](#build).
+1. Install **v1.0.7** from [GitHub Releases](https://github.com/vxyzview/xyzterm/releases/tag/v1.0.7) (pick the APK matching your device's ABI), or [build it yourself](#build).
 2. Open **xyzterm** — the bundled archm rootfs extracts automatically on first launch (a one-time local setup, no download).
 3. You're in a real Arch Linux shell. `pacman -Syu` if that's your thing.
 

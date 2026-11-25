@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import com.xyzterm.BuildConfig
-import com.xyzterm.commands.ToolbarConfiguration
 import com.xyzterm.feature.FeatureRegistry
 import com.xyzterm.utils.application
 import java.lang.ref.WeakReference
@@ -108,12 +107,6 @@ object Settings {
 
     // Long settings
     var last_version_code by CachedPreference("last_version_code", -1L)
-
-    var action_items by
-        CachedPreference(
-            "action_items",
-            ToolbarConfiguration.DEFAULT_EDITOR_TOOLBAR_COMMANDS,
-        )
 }
 
 object Preference {
