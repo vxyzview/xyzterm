@@ -33,6 +33,7 @@ import com.xyzterm.components.InfoBlock
 import com.xyzterm.components.SingleInputDialog
 import com.xyzterm.components.compose.preferences.base.PreferenceLayoutLazyColumn
 import com.xyzterm.components.compose.preferences.base.PreferenceTemplate
+import com.xyzterm.file.child
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
