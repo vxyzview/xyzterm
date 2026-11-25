@@ -30,6 +30,8 @@ object SandboxEnv {
                     },
                 "COLORTERM" to "truecolor",
                 "TERM" to "xterm-256color",
+                "EDITOR" to "nano",
+                "VISUAL" to "nano",
                 "LANG" to "C.UTF-8",
                 "DEBUG" to FeatureRegistry.isEnabled("debug_mode").toString(),
                 "PUBLIC_HOME" to context.getExternalFilesDir(null)?.absolutePath.orEmpty(),
