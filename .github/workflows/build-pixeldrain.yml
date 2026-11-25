@@ -116,6 +116,7 @@ jobs:
 
       - name: Verify Rust port against recorded cases
         run: |
+          rust-anything build rust/portable-rs
           rust-anything diff rust/portable-rs
           rust-anything gate rust/portable-rs
 
