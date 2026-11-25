@@ -61,8 +61,10 @@ pub fn detect_backup_layout_name(entries_joined: String) -> Result<String, Strin
     } else {
         entries_joined.split('\n').collect()
     };
-    let v2 = entries.iter().any(|entry| *entry == "sandbox" || entry.starts_with("sandbox/"))
-        && entries.iter().any(|entry| *entry == "home");
+    let v2 = entries
+        .iter()
+        .any(|entry| *entry == "sandbox" || entry.starts_with("sandbox/"))
+        && entries.contains(&"home");
     Ok(if v2 {
         "V2_SANDBOX_HOME".to_string()
     } else {

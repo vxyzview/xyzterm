@@ -26,10 +26,9 @@ android {
     kotlin { jvmToolchain(21) }
 }
 
-// Pin one release so the checksum and tarball can never come from different
-// versions; the app ships an extracted copy so first launch never runs tar or proot.
-// archm tags are dates, not app versions; bump this to adopt a newer rootfs.
-private val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/download/2026.11.23"
+// Always ship the newest verified archm rootfs. The download task is never
+// up-to-date, so the checksum and tarball are fetched together on every build.
+private val ARCHM_BASE = "https://github.com/vxyzview/archm/releases/latest/download"
 
 val downloadRootfs =
     tasks.register<DownloadRootfsTask>("downloadRootfs") {

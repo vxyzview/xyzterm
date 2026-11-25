@@ -2746,8 +2746,8 @@
 {"fn":"detectBackupLayoutName","args":["sandbox/etc\nhome"],"ok":"V2_SANDBOX_HOME"}
 {"fn":"detectBackupLayoutName","args":["etc\nusr\nhome"],"ok":"V1_ROOT"}
 {"fn":"detectBackupLayoutName","args":[""],"ok":"V1_ROOT"}
-{"fn":"detectBackupLayoutName","args":["sandbox"],"ok":"V2_SANDBOX_HOME"}
-{"fn":"detectBackupLayoutName","args":["sandbox/"],"ok":"V2_SANDBOX_HOME"}
+{"fn":"detectBackupLayoutName","args":["sandbox"],"ok":"V1_ROOT"}
+{"fn":"detectBackupLayoutName","args":["sandbox/"],"ok":"V1_ROOT"}
 {"fn":"detectBackupLayoutName","args":["sandboxfoo\nhome"],"ok":"V1_ROOT"}
 {"fn":"detectBackupLayoutName","args":["Sandbox\nhome"],"ok":"V1_ROOT"}
 {"fn":"nameSafe","args":[""],"ok":"session_0"}
@@ -2767,7 +2767,7 @@
 {"fn":"isNewer","args":["v2.0.0","v1.99.99"],"ok":true}
 {"fn":"isNewer","args":["v1.2","v1.2.3"],"ok":false}
 {"fn":"isNewer","args":["garbage","v1.2.3"],"ok":false}
-{"fn":"isNewer","args":["v1.2.3","garbage"],"ok":true}
+{"fn":"isNewer","args":["v1.2.3","garbage"],"ok":false}
 {"fn":"isNewer","args":[" v1.2.3 ","v1.2.2"],"ok":true}
 {"fn":"isNewer","args":["v10.0.0","v9.9.9"],"ok":true}
 {"fn":"isNewer","args":["v1.2.3","v1.2.3"],"ok":false}
@@ -5602,7 +5602,7 @@
 {"fn":"isWellFormedHost","args":["/a\rb"],"ok":false}
 {"fn":"isValidGuestPath","args":[""],"ok":false}
 {"fn":"isValidGuestPath","args":["/"],"ok":false}
-{"fn":"isValidGuestPath","args":["//"],"ok":true}
+{"fn":"isValidGuestPath","args":["//"],"ok":false}
 {"fn":"isValidGuestPath","args":["/a"],"ok":true}
 {"fn":"isValidGuestPath","args":["a"],"ok":false}
 {"fn":"isValidGuestPath","args":["a/b"],"ok":false}
@@ -5612,7 +5612,7 @@
 {"fn":"isValidGuestPath","args":["/é"],"ok":true}
 {"fn":"isValidGuestPath","args":["/\u0000"],"ok":false}
 {"fn":"isValidGuestPath","args":["/\n"],"ok":false}
-{"fn":"isValidGuestPath","args":["/.."],"ok":true}
+{"fn":"isValidGuestPath","args":["/.."],"ok":false}
 {"fn":"isValidGuestPath","args":["/a:b"],"ok":false}
 {"fn":"isValidGuestPath","args":["//x"],"ok":true}
 {"fn":"isValidGuestPath","args":[" /a"],"ok":false}
@@ -5620,7 +5620,7 @@
 {"fn":"isValidGuestPath","args":["／"],"ok":false}
 {"fn":"isValidGuestPath","args":["／a"],"ok":false}
 {"fn":"isValidGuestPath","args":["/a/b"],"ok":true}
-{"fn":"isValidGuestPath","args":["///"],"ok":true}
+{"fn":"isValidGuestPath","args":["///"],"ok":false}
 {"fn":"isValidGuestPath","args":["/\t"],"ok":false}
 {"fn":"isValidGuestPath","args":["/中文"],"ok":true}
 {"fn":"isValidGuestPath","args":["/a\rb"],"ok":false}
