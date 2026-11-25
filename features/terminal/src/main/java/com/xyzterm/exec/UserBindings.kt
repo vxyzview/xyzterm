@@ -50,7 +50,14 @@ object UserBindings {
     fun isValidHostPath(path: String): Boolean =
         PortableLogicKtShadow.isWellFormedHost(path) && java.io.File(path).exists()
 
-    fun isValidGuestPath(path: String): Boolean = path.startsWith("/") && path.length > 1
+    fun isValidGuestPath(path: String): Boolean = isWellFormedHost(path)
 
-    internal fun isWellFormedHost(path: String): Boolean = path.startsWith("/") && path.length > 1
+    // proot splits "-b source:target" on ':' and sandbox.sh reads newline-separated binds;
+    // a path containing either would silently bind the wrong directory.
+    internal fun isWellFormedHost(path: String): Boolean =
+        path.startsWith("/") &&
+            path.length > 1 &&
+            ':' !in path &&
+            '\\' !in path &&
+            path.none { it.isISOControl() }
 }

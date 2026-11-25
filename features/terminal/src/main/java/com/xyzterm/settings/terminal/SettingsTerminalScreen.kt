@@ -41,6 +41,7 @@ import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
+import com.xyzterm.terminal.AutoBackupPassphrase
 import com.xyzterm.terminal.BackupCrypto
 import com.xyzterm.terminal.TerminalBackup
 import com.xyzterm.terminal.terminalView
@@ -214,6 +215,8 @@ fun TerminalDataSettings(navController: NavController) {
         var exportPassphrase by remember { mutableStateOf<String?>(null) }
         var pendingRestoreFile by remember { mutableStateOf<File?>(null) }
         var restorePassphrase by remember { mutableStateOf("") }
+        var autoBackupPhrase by remember { mutableStateOf("") }
+        var showAutoBackupPhrase by remember { mutableStateOf(false) }
 
         fun launchExport(passphrase: String) {
             (activity as? SettingsActivity)?.fileManager?.let { fileManager ->
@@ -368,6 +371,17 @@ fun TerminalDataSettings(navController: NavController) {
                 sideEffect = { Settings.auto_backup = it },
             )
 
+            SettingsItem(
+                label = stringResource(strings.auto_backup_encrypt),
+                description = stringResource(strings.auto_backup_encrypt_desc),
+                showSwitch = false,
+                default = false,
+                sideEffect = {
+                    autoBackupPhrase = AutoBackupPassphrase.get().orEmpty()
+                    showAutoBackupPhrase = true
+                },
+            )
+
             NextScreenCard(
                 label = stringResource(strings.manage_backups),
                 description = stringResource(strings.manage_backups_desc),
@@ -474,6 +488,30 @@ fun TerminalDataSettings(navController: NavController) {
                     encryptedRestoreFile.delete()
                     pendingRestoreFile = null
                     restorePassphrase = ""
+                },
+            )
+        }
+
+        if (showAutoBackupPhrase) {
+            SingleInputDialog(
+                title = stringResource(strings.auto_backup_encrypt),
+                inputLabel = stringResource(strings.auto_backup_encrypt_desc),
+                inputValue = autoBackupPhrase,
+                onInputValueChange = { autoBackupPhrase = it },
+                isPassword = true,
+                onConfirm = {
+                    if (autoBackupPhrase.isBlank()) {
+                        AutoBackupPassphrase.clear()
+                    } else {
+                        AutoBackupPassphrase.save(autoBackupPhrase)
+                    }
+                    autoBackupPhrase = ""
+                    showAutoBackupPhrase = false
+                    toast(strings.success)
+                },
+                onDismiss = {
+                    autoBackupPhrase = ""
+                    showAutoBackupPhrase = false
                 },
             )
         }

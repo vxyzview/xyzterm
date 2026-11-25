@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.xyzterm.DefaultScope
+import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.components.EmptyState
 import com.xyzterm.components.InfoBlock
 import com.xyzterm.components.SingleInputDialog
@@ -130,6 +131,14 @@ fun TerminalBackupsScreen() {
                         okRes = strings.restore,
                         onCancel = {},
                         onOk = {
+                            // Same rule as the other restore screen: swapping the rootfs under
+                            // a live session silently strands that session's writes.
+                            val hasSessions =
+                                Terminal.instance?.sessionBinder?.get()?.getService()?.sessionList?.isNotEmpty() == true
+                            if (hasSessions) {
+                                toast(strings.restore_sessions_active)
+                                return@onOk
+                            }
                             if (BackupCrypto.isEncrypted(backup)) {
                                 pendingEncrypted = backup
                                 passphrase = ""

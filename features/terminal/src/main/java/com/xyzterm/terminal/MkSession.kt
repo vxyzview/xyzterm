@@ -80,6 +80,10 @@ object MkSession {
         tmpDir.mkdirs()
 
         val envMap = SandboxEnv.build(context, tmpDir.absolutePath)
+        // setup.sh rewrites resolv.conf after extraction; hand it the same DNS the app uses.
+        if (isExtraction) {
+            envMap["DNS_SERVERS"] = systemDns().ifEmpty { listOf("8.8.8.8", "8.8.4.4") }.joinToString(" ")
+        }
         envMap["WKDIR"] = workingDir
         envMap["PATH"] = "${System.getenv("PATH")}:${localBinDir(context).absolutePath}"
 

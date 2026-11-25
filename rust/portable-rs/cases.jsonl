@@ -2773,6 +2773,7 @@
 {"fn":"isNewer","args":["v1.2.3","v1.2.3"],"ok":false}
 {"fn":"isNewer","args":["v01.02.03","v1.2.2"],"ok":true}
 {"fn":"isNewer","args":["v1.2.3.4","v1.2.3"],"ok":false}
+{"fn":"isNewer","args":["v1.1.0-rc1","v1.0.7"],"ok":true}
 {"fn":"hasBinaryChars","args":[""],"ok":false}
 {"fn":"hasBinaryChars","args":["abc"],"ok":false}
 {"fn":"hasBinaryChars","args":["\u0000"],"ok":true}
@@ -5585,9 +5586,10 @@
 {"fn":"isWellFormedHost","args":["\\a"],"ok":false}
 {"fn":"isWellFormedHost","args":["/😀"],"ok":true}
 {"fn":"isWellFormedHost","args":["/é"],"ok":true}
-{"fn":"isWellFormedHost","args":["/\u0000"],"ok":true}
-{"fn":"isWellFormedHost","args":["/\n"],"ok":true}
+{"fn":"isWellFormedHost","args":["/\u0000"],"ok":false}
+{"fn":"isWellFormedHost","args":["/\n"],"ok":false}
 {"fn":"isWellFormedHost","args":["/.."],"ok":true}
+{"fn":"isWellFormedHost","args":["/a:b"],"ok":false}
 {"fn":"isWellFormedHost","args":["//x"],"ok":true}
 {"fn":"isWellFormedHost","args":[" /a"],"ok":false}
 {"fn":"isWellFormedHost","args":["/a "],"ok":true}
@@ -5595,9 +5597,9 @@
 {"fn":"isWellFormedHost","args":["／a"],"ok":false}
 {"fn":"isWellFormedHost","args":["/a/b"],"ok":true}
 {"fn":"isWellFormedHost","args":["///"],"ok":true}
-{"fn":"isWellFormedHost","args":["/\t"],"ok":true}
+{"fn":"isWellFormedHost","args":["/\t"],"ok":false}
 {"fn":"isWellFormedHost","args":["/中文"],"ok":true}
-{"fn":"isWellFormedHost","args":["/a\rb"],"ok":true}
+{"fn":"isWellFormedHost","args":["/a\rb"],"ok":false}
 {"fn":"isValidGuestPath","args":[""],"ok":false}
 {"fn":"isValidGuestPath","args":["/"],"ok":false}
 {"fn":"isValidGuestPath","args":["//"],"ok":true}
@@ -5608,9 +5610,10 @@
 {"fn":"isValidGuestPath","args":["\\a"],"ok":false}
 {"fn":"isValidGuestPath","args":["/😀"],"ok":true}
 {"fn":"isValidGuestPath","args":["/é"],"ok":true}
-{"fn":"isValidGuestPath","args":["/\u0000"],"ok":true}
-{"fn":"isValidGuestPath","args":["/\n"],"ok":true}
+{"fn":"isValidGuestPath","args":["/\u0000"],"ok":false}
+{"fn":"isValidGuestPath","args":["/\n"],"ok":false}
 {"fn":"isValidGuestPath","args":["/.."],"ok":true}
+{"fn":"isValidGuestPath","args":["/a:b"],"ok":false}
 {"fn":"isValidGuestPath","args":["//x"],"ok":true}
 {"fn":"isValidGuestPath","args":[" /a"],"ok":false}
 {"fn":"isValidGuestPath","args":["/a "],"ok":true}
@@ -5618,6 +5621,6 @@
 {"fn":"isValidGuestPath","args":["／a"],"ok":false}
 {"fn":"isValidGuestPath","args":["/a/b"],"ok":true}
 {"fn":"isValidGuestPath","args":["///"],"ok":true}
-{"fn":"isValidGuestPath","args":["/\t"],"ok":true}
+{"fn":"isValidGuestPath","args":["/\t"],"ok":false}
 {"fn":"isValidGuestPath","args":["/中文"],"ok":true}
-{"fn":"isValidGuestPath","args":["/a\rb"],"ok":true}
+{"fn":"isValidGuestPath","args":["/a\rb"],"ok":false}

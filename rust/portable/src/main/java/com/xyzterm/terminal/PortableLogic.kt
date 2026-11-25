@@ -40,10 +40,15 @@ fun detectBackupLayoutName(entriesJoined: String): String {
 }
 
 /** Shape check for a host bind path (verbatim from UserBindings). */
-fun isWellFormedHost(path: String): Boolean = path.startsWith("/") && path.length > 1
+fun isWellFormedHost(path: String): Boolean =
+    path.startsWith("/") &&
+        path.length > 1 &&
+        ':' !in path &&
+        '\\' !in path &&
+        path.none { it.isISOControl() }
 
 /** Guest bind path validation (verbatim from UserBindings). */
-fun isValidGuestPath(path: String): Boolean = path.startsWith("/") && path.length > 1
+fun isValidGuestPath(path: String): Boolean = isWellFormedHost(path)
 
 /** Sanitize a session id for use as a directory name (verbatim from MkSession.nameSafe). */
 fun nameSafe(id: String): String {
@@ -166,10 +171,10 @@ fun shouldCaptureLog(line: String): Boolean {
     return true
 }
 
-/** Compare "vX.Y.Z" (or "X.Y.Z") tags (verbatim from UpdateManager.isNewer). */
+/** Compare "vX.Y.Z" (or "X.Y.Z") tags, ignoring suffixes like "-rc1" (verbatim from UpdateManager.isNewer). */
 fun isNewer(latest: String, installed: String): Boolean {
     val parse = { v: String ->
-        Regex("""v?(\d+)\.(\d+)\.(\d+)""").matchEntire(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
+        Regex("""v?(\d+)\.(\d+)\.(\d+)""").find(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
     }
     val a = parse(latest) ?: return false
     val b = parse(installed) ?: return true

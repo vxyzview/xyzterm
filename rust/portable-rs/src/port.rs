@@ -141,14 +141,19 @@ pub fn is_safe_file_name(file_name: String) -> Result<bool, String> {
         && !file_name.contains('\\'))
 }
 
-/// Port of `UserBindings.isWellFormedHost`: Kotlin `length` counts UTF-16 units.
+/// Port of `UserBindings.isWellFormedHost`: Kotlin `length` counts UTF-16 units,
+/// and `Char.isISOControl()` is the same range as Rust's `char::is_control()`.
 pub fn is_well_formed_host(path: String) -> Result<bool, String> {
-    Ok(path.starts_with('/') && path.encode_utf16().count() > 1)
+    Ok(path.starts_with('/')
+        && path.encode_utf16().count() > 1
+        && !path.contains(':')
+        && !path.contains('\\')
+        && !path.chars().any(|c| c.is_control()))
 }
 
 /// Port of `UserBindings.isValidGuestPath`: same shape check as the host path.
 pub fn is_valid_guest_path(path: String) -> Result<bool, String> {
-    Ok(path.starts_with('/') && path.encode_utf16().count() > 1)
+    is_well_formed_host(path)
 }
 
 /// Port of `matchesLogLevel` (level value replaces the Android-backed enum).
@@ -211,7 +216,7 @@ pub fn should_capture_log(line: String) -> Result<bool, String> {
     Ok(!NOISY.iter().any(|k| contains_ignore_case(&line, k)))
 }
 
-/// Parse the `v?(\d+)\.(\d+)\.(\d+)` version shape with `matchEntire` semantics.
+/// Parse the leading `v?(\d+)\.(\d+)\.(\d+)` version shape, ignoring a trailing suffix.
 fn parse_version(v: &str) -> Option<[i32; 3]> {
     let s = v.trim();
     let s = s.strip_prefix('v').unwrap_or(s);
@@ -228,7 +233,7 @@ fn parse_version(v: &str) -> Option<[i32; 3]> {
             rest = rest.strip_prefix('.')?;
         }
     }
-    if rest.is_empty() { Some(parts) } else { None }
+    Some(parts)
 }
 
 /// Port of `isNewer` from UpdateManager.

@@ -92,10 +92,6 @@ SANDBOX_DIR="$LOCAL/sandbox"
 
 info "Setting up the archm container…"
 
-# values you want written
-nameserver="nameserver 8.8.8.8
-nameserver 8.8.4.4"
-
 hosts="127.0.0.1   localhost.localdomain localhost xyz
 
 # IPv6.
@@ -112,9 +108,11 @@ mkdir -p "$SANDBOX_DIR/etc"
 # write hostname
 printf '%s\n' "xyz" > "$SANDBOX_DIR/etc/hostname"
 
-# write resolv.conf (create file if not exists, then overwrite)
+# write resolv.conf from the device's active DNS, falling back to public resolvers
 : > "$SANDBOX_DIR/etc/resolv.conf"
-printf '%s\n' "$nameserver" > "$SANDBOX_DIR/etc/resolv.conf"
+for dns in ${DNS_SERVERS:-8.8.8.8 8.8.4.4}; do
+    printf 'nameserver %s\n' "$dns" >> "$SANDBOX_DIR/etc/resolv.conf"
+done
 
 # write hosts
 printf '%s\n' "$hosts" > "$SANDBOX_DIR/etc/hosts"

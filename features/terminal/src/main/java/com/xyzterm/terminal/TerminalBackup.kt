@@ -90,7 +90,9 @@ object TerminalBackup {
     suspend fun autoBackup(): Boolean {
         val dir = backupDir()
         dir.mkdirs()
-        val target = File(dir, "terminal-backup-${System.currentTimeMillis()}.tar.gz")
+        val phrase = AutoBackupPassphrase.get()
+        val suffix = if (phrase.isNullOrEmpty()) ".tar.gz" else ".tar.gz.enc"
+        val target = File(dir, "terminal-backup-${System.currentTimeMillis()}$suffix")
         // Write to a temp name first so an interrupted run never leaves a
         // truncated archive that a later restore would choke on.
         val partial = File(dir, target.name + ".part")
@@ -98,11 +100,26 @@ object TerminalBackup {
             partial.delete()
             return false
         }
-        if (!partial.renameTo(target)) {
+        // Stale .part files must not count towards KEEP, or one evicts a good archive.
+        dir.listFiles { it.name.startsWith("terminal-backup-") && it.name.endsWith(".part") }
+            ?.forEach { it.delete() }
+        val finished =
+            if (phrase.isNullOrEmpty()) {
+                partial.renameTo(target)
+            } else {
+                // encrypt() writes the named target itself; no rename needed.
+                runCatching { BackupCrypto.encrypt(partial, target, phrase) }.isSuccess
+            }
+        if (!finished) {
             partial.delete()
+            target.delete()
             return false
         }
-        dir.listFiles { f -> f.name.startsWith("terminal-backup-") }
+        partial.delete()
+        dir.listFiles { f ->
+            f.name.startsWith("terminal-backup-") &&
+                (f.name.endsWith(".tar.gz") || f.name.endsWith(".tar.gz.enc"))
+        }
             ?.sortedByDescending { it.name }
             ?.drop(KEEP)
             ?.forEach { it.delete() }
@@ -168,7 +185,7 @@ object TerminalBackup {
                 }
 
                 val sandboxTarget = localDir().child("sandbox")
-                when (detectBackupLayoutViaRust(staging.list()?.toList().orEmpty())) {
+                when (detectBackupLayout(staging.list()?.toList().orEmpty())) {
                     BackupLayout.V1_ROOT -> {
                         // Old archives never contained home; leave the user's home alone.
                         swapDirectory(staging, sandboxTarget)?.let {

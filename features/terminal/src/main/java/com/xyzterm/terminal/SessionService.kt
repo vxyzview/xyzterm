@@ -18,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
-import com.xyzterm.DefaultScope
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.exec.TerminalCommand
 import com.xyzterm.exec.pendingCommand
@@ -264,8 +263,8 @@ class SessionService : Service() {
             wakeLock?.release()
         }
         if (Settings.auto_backup) {
-            // IO dispatcher: tar blocks for minutes; Default pool is for CPU.
-            DefaultScope.launch(Dispatchers.IO) { runCatching { TerminalBackup.autoBackup() } }
+            // Fire-and-forget here loses the backup when the process dies; let the OS run it.
+            AutoBackupJobService.schedule(this)
         }
         instanceRef.clear()
         super.onDestroy()

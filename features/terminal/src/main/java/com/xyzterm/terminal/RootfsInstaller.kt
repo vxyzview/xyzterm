@@ -140,7 +140,8 @@ object RootfsInstaller {
         root.child("tmp").mkdirs()
         runCatching { Os.chmod(root.child("tmp").absolutePath, 0b1000000000 or 0b111111111) }
         root.child("etc/hostname").writeText("xyz\n")
-        root.child("etc/resolv.conf").writeText("nameserver 8.8.8.8\nnameserver 8.8.4.4\n")
+        val dns = systemDns().ifEmpty { listOf("8.8.8.8", "8.8.4.4") }
+        root.child("etc/resolv.conf").writeText(dns.joinToString("\n") { "nameserver $it" } + "\n")
         root
             .child("etc/hosts")
             .writeText(

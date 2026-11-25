@@ -255,6 +255,8 @@
     <!-- Missing translations (audit) -->
     <string name="auto_backup">自动备份</string>
     <string name="auto_backup_desc">服务退出时备份终端环境，保留最近 3 个备份</string>
+    <string name="auto_backup_encrypt">加密自动备份</string>
+    <string name="auto_backup_encrypt_desc">口令保存在设备密钥库中。留空即关闭。</string>
     <string name="backup_now">立即备份</string>
     <string name="bell_notification">终端会话需要你的注意</string>
     <string name="copy_all">复制全部</string>

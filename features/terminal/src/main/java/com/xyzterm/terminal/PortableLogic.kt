@@ -98,17 +98,14 @@ fun shouldCaptureLog(line: String): Boolean {
 }
 
 fun isNewer(latest: String, installed: String): Boolean {
-    // Verbatim from core/main/.../UpdateManager.kt; that function is private in its own module.
+    // Verbatim from core/main/.../UpdateManager.kt, which is internal in its own module.
     val parse = { v: String ->
-        Regex("""v?(\d+)\.(\d+)\.(\d+)""").matchEntire(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
+        Regex("""v?(\d+)\.(\d+)\.(\d+)""").find(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
     }
     val a = parse(latest) ?: return false
     val b = parse(installed) ?: return true
     return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
 }
-
-internal fun detectBackupLayoutViaRust(entries: List<String>): BackupLayout =
-    BackupLayout.valueOf(PortableLogicKtShadow.detectBackupLayoutName(entries.joinToString("\n")))
 
 fun nameSafeViaRust(id: String): String = PortableLogicKtShadow.nameSafe(id)
 

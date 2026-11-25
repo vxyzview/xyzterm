@@ -111,6 +111,8 @@
     <string name="backup_unlock">Unlock backup</string>
     <string name="no_backups_yet">No backups yet</string>
     <string name="auto_backup_desc">Back up the terminal environment when the service exits, keeping the last 3 backups</string>
+    <string name="auto_backup_encrypt">Encrypt automatic backups</string>
+    <string name="auto_backup_encrypt_desc">Passphrase kept in the device keystore. Leave empty to turn off.</string>
     <string name="success">Success</string>
     <string name="failed">Failed</string>
     <string name="setup_failed">Setup failed: %s</string>

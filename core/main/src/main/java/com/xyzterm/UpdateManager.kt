@@ -47,10 +47,10 @@ object UpdateManager {
     /** App-lifetime scope for update work; replaces GlobalScope so jobs are cancellable and testable. */
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    /** Compares "vX.Y.Z" (or "X.Y.Z") tags. Returns true if [latest] > [installed]. */
-    private fun isNewer(latest: String, installed: String): Boolean {
+    /** Compares "vX.Y.Z" (or "X.Y.Z") tags, ignoring suffixes like "-rc1". */
+    internal fun isNewer(latest: String, installed: String): Boolean {
         val parse = { v: String ->
-            Regex("""v?(\d+)\.(\d+)\.(\d+)""").matchEntire(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
+            Regex("""v?(\d+)\.(\d+)\.(\d+)""").find(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
         }
         val a = parse(latest) ?: return false
         val b = parse(installed) ?: return true
