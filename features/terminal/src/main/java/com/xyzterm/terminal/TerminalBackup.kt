@@ -101,8 +101,7 @@ object TerminalBackup {
             return false
         }
         // Stale .part files must not count towards KEEP, or one evicts a good archive.
-        dir.listFiles { it.name.startsWith("terminal-backup-") && it.name.endsWith(".part") }
-            ?.forEach { it.delete() }
+        dir.listFiles { it.name.startsWith("terminal-backup-") && it.name.endsWith(".part") }?.forEach { it.delete() }
         val finished =
             if (phrase.isNullOrEmpty()) {
                 partial.renameTo(target)
@@ -117,9 +116,8 @@ object TerminalBackup {
         }
         partial.delete()
         dir.listFiles { f ->
-            f.name.startsWith("terminal-backup-") &&
-                (f.name.endsWith(".tar.gz") || f.name.endsWith(".tar.gz.enc"))
-        }
+                f.name.startsWith("terminal-backup-") && (f.name.endsWith(".tar.gz") || f.name.endsWith(".tar.gz.enc"))
+            }
             ?.sortedByDescending { it.name }
             ?.drop(KEEP)
             ?.forEach { it.delete() }

@@ -12,8 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * Durable auto-backup. A coroutine started from Service.onDestroy() dies with the process;
- * a scheduled job survives it and is retried by the OS if the app is killed mid-run.
+ * Durable auto-backup. A coroutine started from Service.onDestroy() dies with the process; a scheduled job survives it
+ * and is retried by the OS if the app is killed mid-run.
  */
 @OptIn(DelicateCoroutinesApi::class)
 class AutoBackupJobService : JobService() {

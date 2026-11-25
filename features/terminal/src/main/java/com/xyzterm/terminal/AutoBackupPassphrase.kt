@@ -15,11 +15,11 @@ internal object AutoBackupPassphrase {
     private const val KEY = "auto_backup_passphrase_cipher"
     private const val ALIAS = "xyzterm_auto_backup_passphrase"
 
-    fun get(): String? =
-        runCatching {
-            val packed = Preference.getString(KEY, "")
-            if (packed.isEmpty()) null else open(key(), packed)
-        }.getOrNull()
+    fun get(): String? = runCatching {
+        val packed = Preference.getString(KEY, "")
+        if (packed.isEmpty()) null else open(key(), packed)
+    }
+        .getOrNull()
 
     fun save(phrase: String) {
         Preference.setString(KEY, seal(key(), phrase))
@@ -46,7 +46,9 @@ internal object AutoBackupPassphrase {
 
     private fun key(): SecretKey {
         val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-        (store.getEntry(ALIAS, null) as? KeyStore.SecretKeyEntry)?.secretKey?.let { return it }
+        (store.getEntry(ALIAS, null) as? KeyStore.SecretKeyEntry)?.secretKey?.let {
+            return it
+        }
         val spec =
             KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)

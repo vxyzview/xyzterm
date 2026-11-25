@@ -1,8 +1,8 @@
 package com.xyzterm.terminal
 
+import javax.crypto.spec.SecretKeySpec
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import javax.crypto.spec.SecretKeySpec
 
 class AutoBackupPassphraseTest {
     @Test
