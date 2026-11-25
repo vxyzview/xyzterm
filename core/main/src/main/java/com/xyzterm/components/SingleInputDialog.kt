@@ -66,7 +66,8 @@ fun SingleInputDialog(
                         onInputValueChange(it.text)
                     },
                     label = { Text(inputLabel) },
-                    visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+                    visualTransformation =
+                        if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
                     modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
                     isError = errorMessage != null,
                     supportingText =

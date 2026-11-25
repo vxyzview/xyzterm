@@ -186,12 +186,11 @@ fun TerminalBackupsScreen() {
                             val loading = LoadingPopup(activity, null)
                             withContext(Dispatchers.Main) { runCatching { loading.show() } }
                             val plain = getTempDir().child("terminal-backup-decrypted.tar.gz")
-                            val error =
-                                runCatching {
-                                    BackupCrypto.decrypt(encryptedBackup, plain, phrase)
-                                    TerminalBackup.restore(plain)
-                                }
-                                    .getOrElse { it.message ?: "restore failed" }
+                            val error = runCatching {
+                                BackupCrypto.decrypt(encryptedBackup, plain, phrase)
+                                TerminalBackup.restore(plain)
+                            }
+                                .getOrElse { it.message ?: "restore failed" }
                             withContext(Dispatchers.Main + NonCancellable) {
                                 runCatching { loading.hide() }
                                 if (error == null) {

@@ -22,9 +22,9 @@ import com.xyzterm.activities.settings.SettingsRoutes
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.components.NextScreenCard
 import com.xyzterm.components.PreferenceList
-import com.xyzterm.components.SingleInputDialog
 import com.xyzterm.components.RoundedValueSlider
 import com.xyzterm.components.SettingsItem
+import com.xyzterm.components.SingleInputDialog
 import com.xyzterm.components.SteppedValueSlider
 import com.xyzterm.components.compose.preferences.base.PreferenceGroup
 import com.xyzterm.components.compose.preferences.base.PreferenceLayout
@@ -450,12 +450,11 @@ fun TerminalDataSettings(navController: NavController) {
                         val loading = LoadingPopup(activity, null)
                         withContext(Dispatchers.Main) { runCatching { loading.show() } }
                         val plain = getTempDir().child("terminal-backup-decrypted.tar.gz")
-                        val error =
-                            runCatching {
-                                BackupCrypto.decrypt(encryptedRestoreFile, plain, phrase)
-                                TerminalBackup.restore(plain)
-                            }
-                                .getOrElse { it.message ?: "restore failed" }
+                        val error = runCatching {
+                            BackupCrypto.decrypt(encryptedRestoreFile, plain, phrase)
+                            TerminalBackup.restore(plain)
+                        }
+                            .getOrElse { it.message ?: "restore failed" }
                         withContext(Dispatchers.Main + NonCancellable) {
                             runCatching { loading.hide() }
                             if (error == null) {
