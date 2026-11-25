@@ -41,8 +41,10 @@ import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
+import com.xyzterm.terminal.AutoBackupJobService
 import com.xyzterm.terminal.AutoBackupPassphrase
 import com.xyzterm.terminal.BackupCrypto
+import com.xyzterm.terminal.PassphraseState
 import com.xyzterm.terminal.TerminalBackup
 import com.xyzterm.terminal.terminalView
 import com.xyzterm.utils.LoadingPopup
@@ -226,8 +228,8 @@ fun TerminalDataSettings(navController: NavController) {
                 ) { fileObject ->
                     DefaultScope.launch(Dispatchers.IO) {
                         if (fileObject == null) return@launch
-                        val targetFile = getTempDir().child("terminal-backup.tar.gz")
-                        val encryptedFile = getTempDir().child("terminal-backup.tar.gz.enc")
+                        val targetFile = File.createTempFile("terminal-backup-", ".tar.gz", getTempDir())
+                        val encryptedFile = File.createTempFile("terminal-backup-", ".tar.gz.enc", getTempDir())
                         val loading = LoadingPopup(activity, null)
                         withContext(Dispatchers.Main) { runCatching { loading.show() } }
 
@@ -303,7 +305,7 @@ fun TerminalDataSettings(navController: NavController) {
                     DefaultScope.launch(Dispatchers.IO) {
                         val fileObject = uri.toFileObject(expectedIsFile = true)
 
-                        val tempFile = getTempDir().child("terminal-backup.tar.gz")
+                        val tempFile = File.createTempFile("terminal-backup-", ".tar.gz", getTempDir())
                         var handedOff = false
 
                         try {
@@ -368,7 +370,14 @@ fun TerminalDataSettings(navController: NavController) {
                 label = stringResource(strings.auto_backup),
                 description = stringResource(strings.auto_backup_desc),
                 default = Settings.auto_backup,
-                sideEffect = { Settings.auto_backup = it },
+                sideEffect = {
+                    Settings.auto_backup = it
+                    if (it) {
+                        AutoBackupJobService.schedule(context)
+                    } else {
+                        AutoBackupJobService.cancel(context)
+                    }
+                },
             )
 
             SettingsItem(
@@ -377,7 +386,11 @@ fun TerminalDataSettings(navController: NavController) {
                 showSwitch = false,
                 default = false,
                 sideEffect = {
-                    autoBackupPhrase = AutoBackupPassphrase.get().orEmpty()
+                    autoBackupPhrase =
+                        when (val state = AutoBackupPassphrase.getState()) {
+                            is PassphraseState.Ready -> state.phrase
+                            else -> ""
+                        }
                     showAutoBackupPhrase = true
                 },
             )
@@ -463,7 +476,7 @@ fun TerminalDataSettings(navController: NavController) {
                     DefaultScope.launch(Dispatchers.IO) {
                         val loading = LoadingPopup(activity, null)
                         withContext(Dispatchers.Main) { runCatching { loading.show() } }
-                        val plain = getTempDir().child("terminal-backup-decrypted.tar.gz")
+                        val plain = File.createTempFile("terminal-backup-decrypted-", ".tar.gz", getTempDir())
                         val error = runCatching {
                             BackupCrypto.decrypt(encryptedRestoreFile, plain, phrase)
                             TerminalBackup.restore(plain)

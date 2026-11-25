@@ -25,9 +25,17 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
+/** Only well-formed release tags may reach the APK filename/path. */
+internal val RELEASE_TAG = Regex("""^v?\d+\.\d+\.\d+(?:-[\w.]+)?$""")
+
 /** Matches the per-ABI names produced by android.yml and build-pixeldrain.yml. */
-internal fun updateApkName(version: String, supportedAbis: Array<String>): String {
-    val abi = if (supportedAbis.any { it.contains("arm64-v8a") }) "arm64" else "arm"
+internal fun updateApkName(version: String, supportedAbis: Array<String>): String? {
+    val abi =
+        when {
+            supportedAbis.any { it.contains("arm64-v8a") } -> "arm64"
+            supportedAbis.any { it.contains("arm") } -> "arm"
+            else -> return null
+        }
     return "xyzterm-$version-$abi.apk"
 }
 
@@ -47,14 +55,18 @@ object UpdateManager {
     /** App-lifetime scope for update work; replaces GlobalScope so jobs are cancellable and testable. */
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    /** Compares "vX.Y.Z" (or "X.Y.Z") tags, ignoring suffixes like "-rc1". */
+    /** Compares "vX.Y.Z" (or "X.Y.Z") tags; a final release outranks an equal-numbered prerelease. */
     internal fun isNewer(latest: String, installed: String): Boolean {
-        val parse = { v: String ->
-            Regex("""v?(\d+)\.(\d+)\.(\d+)""").find(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
+        fun parse(v: String): List<Int>? {
+            val parts = Regex("""v?(\d+)\.(\d+)\.(\d+)""").find(v.trim())?.groupValues?.drop(1) ?: return null
+            return parts.map { it.toIntOrNull() ?: return null }
         }
         val a = parse(latest) ?: return false
-        val b = parse(installed) ?: return true
-        return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
+        val b = parse(installed) ?: return false
+        val diff =
+            a.zip(b).firstOrNull { it.first != it.second }
+                ?: return installed.trim().contains('-') && !latest.trim().contains('-')
+        return diff.first > diff.second
     }
 
     private fun installedVersionName(): String? = runCatching {
@@ -97,8 +109,8 @@ object UpdateManager {
         Preference.setLong(LAST_UPDATE_CHECK_KEY, now)
 
         scope.launch(Dispatchers.Main) {
-            val latest = GithubReleasesApi(UPDATE_OWNER, UPDATE_REPO).fetchLatestVersion()
-            if (latest == null) {
+            val latest = GithubReleasesApi(UPDATE_OWNER, UPDATE_REPO).fetchLatestVersion()?.trim()
+            if (latest == null || !RELEASE_TAG.matches(latest)) {
                 Preference.setLong(LAST_UPDATE_CHECK_KEY, 0L)
                 return@launch
             }
@@ -122,7 +134,7 @@ object UpdateManager {
         scope.launch(Dispatchers.Main) {
             val file = runCatching {
                 withContext(Dispatchers.IO) {
-                    val apkName = updateApkName(version, Build.SUPPORTED_ABIS)
+                    val apkName = updateApkName(version, Build.SUPPORTED_ABIS) ?: error("unsupported abi")
                     val target = File(application!!.filesDir, "update/$apkName")
                     target.parentFile?.mkdirs()
                     val request =
@@ -166,15 +178,17 @@ object UpdateManager {
     /** True when the release APK is signed with the same key as the installed app. */
     @Suppress("DEPRECATION")
     private fun signatureMatches(apkPath: String): Boolean {
-        val app = application ?: return true
+        val app = application ?: return false
         val pm = app.packageManager
         val installed =
-            runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return true
+            runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull()
+                ?: return false
         val archive =
-            runCatching { pm.getPackageArchiveInfo(apkPath, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return false
-        val a = installed.signatures?.firstOrNull() ?: return true
-        val b = archive.signatures?.firstOrNull() ?: return false
-        return a == b
+            runCatching { pm.getPackageArchiveInfo(apkPath, PackageManager.GET_SIGNATURES) }.getOrNull()
+                ?: return false
+        val a = installed.signatures ?: return false
+        val b = archive.signatures ?: return false
+        return a.isNotEmpty() && b.isNotEmpty() && a.contentEquals(b)
     }
 
     private fun deleteCommonFiles() =

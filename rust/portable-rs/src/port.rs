@@ -56,13 +56,13 @@ fn utf16_index(s: &str, needle: u16) -> Option<usize> {
 
 /// Port of `detectBackupLayoutName`.
 pub fn detect_backup_layout_name(entries_joined: String) -> Result<String, String> {
-    let v2 = if entries_joined.is_empty() {
-        false
+    let entries: Vec<&str> = if entries_joined.is_empty() {
+        Vec::new()
     } else {
-        entries_joined
-            .split('\n')
-            .any(|entry| entry == "sandbox" || entry.starts_with("sandbox/"))
+        entries_joined.split('\n').collect()
     };
+    let v2 = entries.iter().any(|entry| *entry == "sandbox" || entry.starts_with("sandbox/"))
+        && entries.iter().any(|entry| *entry == "home");
     Ok(if v2 {
         "V2_SANDBOX_HOME".to_string()
     } else {
@@ -151,9 +151,11 @@ pub fn is_well_formed_host(path: String) -> Result<bool, String> {
         && !path.chars().any(|c| c.is_control()))
 }
 
-/// Port of `UserBindings.isValidGuestPath`: same shape check as the host path.
+/// Port of `UserBindings.isValidGuestPath`: host shape plus no root-only and no `..` segment.
 pub fn is_valid_guest_path(path: String) -> Result<bool, String> {
-    is_well_formed_host(path)
+    Ok(is_well_formed_host(path.clone())?
+        && !path.trim_matches('/').is_empty()
+        && !path.split('/').any(|segment| segment == ".."))
 }
 
 /// Port of `matchesLogLevel` (level value replaces the Android-backed enum).
@@ -244,14 +246,14 @@ pub fn is_newer(latest: String, installed: String) -> Result<bool, String> {
     };
     let b = match parse_version(&installed) {
         Some(b) => b,
-        None => return Ok(true),
+        None => return Ok(false),
     };
     for (x, y) in a.iter().zip(b.iter()) {
         if x != y {
             return Ok(x > y);
         }
     }
-    Ok(false)
+    Ok(installed.trim().contains('-') && !latest.trim().contains('-'))
 }
 
 #[cfg(test)]
@@ -266,6 +268,10 @@ mod tests {
         );
         assert_eq!(
             detect_backup_layout_name("etc\nusr\nhome".into()).unwrap(),
+            "V1_ROOT"
+        );
+        assert_eq!(
+            detect_backup_layout_name("sandbox\netc".into()).unwrap(),
             "V1_ROOT"
         );
     }
@@ -291,6 +297,9 @@ mod tests {
 
     #[test]
     fn path_and_log_filters() {
+        assert!(!is_valid_guest_path("//".into()).unwrap());
+        assert!(!is_valid_guest_path("/home/../../data".into()).unwrap());
+        assert!(is_valid_guest_path("/home/x".into()).unwrap());
         assert!(!is_safe_file_name("a/b".into()).unwrap());
         assert!(is_safe_file_name("a..".into()).unwrap());
         assert!(!should_capture_log("I/ViewRootImpl: x".into()).unwrap());
@@ -307,6 +316,8 @@ mod tests {
         );
         assert!(is_newer("v1.2.3".into(), "v1.2.2".into()).unwrap());
         assert!(!is_newer("garbage".into(), "v1.2.3".into()).unwrap());
+        assert!(!is_newer("v1.2.3".into(), "dev".into()).unwrap());
+        assert!(is_newer("v1.0.0".into(), "v1.0.0-rc1".into()).unwrap());
     }
 }
 

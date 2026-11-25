@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 class AutoBackupJobService : JobService() {
     override fun onStartJob(params: JobParameters?): Boolean {
         DefaultScope.launch(Dispatchers.IO) {
-            runCatching { TerminalBackup.autoBackup() }
-            if (params != null) jobFinished(params, false)
+            val ok = runCatching { TerminalBackup.autoBackup() }.getOrDefault(false)
+            if (params != null) jobFinished(params, !ok)
         }
         return true
     }
@@ -35,9 +35,14 @@ class AutoBackupJobService : JobService() {
             val job =
                 JobInfo.Builder(JOB_ID, ComponentName(context, AutoBackupJobService::class.java))
                     .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
-                    .setOverrideDeadline(60_000L)
+                    .setPeriodic(6 * 60 * 60 * 1000L)
                     .build()
             runCatching { scheduler.schedule(job) }
+        }
+
+        fun cancel(context: Context) {
+            val scheduler = context.getSystemService(JobScheduler::class.java) ?: return
+            runCatching { scheduler.cancel(JOB_ID) }
         }
     }
 }

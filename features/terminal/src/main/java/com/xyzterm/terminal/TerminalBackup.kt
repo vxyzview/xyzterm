@@ -7,6 +7,7 @@ import com.xyzterm.file.sandboxHomeDir
 import com.xyzterm.utils.getTempDir
 import java.io.File
 import java.nio.file.Files
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,7 +25,9 @@ internal enum class BackupLayout {
  * filesystem.
  */
 internal fun detectBackupLayout(entries: List<String>): BackupLayout =
-    if (entries.any { it == "sandbox" || it.startsWith("sandbox/") }) {
+    if (entries.any { it == "sandbox" || it.startsWith("sandbox/") } &&
+        entries.any { it == "home" || it.startsWith("home/") }
+    ) {
         BackupLayout.V2_SANDBOX_HOME
     } else {
         BackupLayout.V1_ROOT
@@ -88,22 +91,30 @@ object TerminalBackup {
 
     /** Backs up the sandbox to a timestamped file in [backupDir], keeping the newest [KEEP]. */
     suspend fun autoBackup(): Boolean {
+        val phrase =
+            when (val state = AutoBackupPassphrase.getState()) {
+                is PassphraseState.Ready -> state.phrase
+                PassphraseState.NotSet -> null
+                // A sealed-but-unreadable passphrase must silently fail, not
+                // fall back to an unencrypted archive.
+                PassphraseState.Error -> return false
+            }
         val dir = backupDir()
         dir.mkdirs()
-        val phrase = AutoBackupPassphrase.get()
-        val suffix = if (phrase.isNullOrEmpty()) ".tar.gz" else ".tar.gz.enc"
-        val target = File(dir, "terminal-backup-${System.currentTimeMillis()}$suffix")
+        val suffix = if (phrase == null) ".tar.gz" else ".tar.gz.enc"
+        // Keep the timestamp so pruning still keeps the newest KEEP archives;
+        // the UUID makes concurrent/same-millisecond runs non-colliding.
+        val unique = "${System.currentTimeMillis()}-${UUID.randomUUID()}"
+        val target = File(dir, "terminal-backup-$unique$suffix")
         // Write to a temp name first so an interrupted run never leaves a
         // truncated archive that a later restore would choke on.
-        val partial = File(dir, target.name + ".part")
+        val partial = File(dir, "${target.name}.part")
         if (!create(partial)) {
             partial.delete()
             return false
         }
-        // Stale .part files must not count towards KEEP, or one evicts a good archive.
-        dir.listFiles { it.name.startsWith("terminal-backup-") && it.name.endsWith(".part") }?.forEach { it.delete() }
         val finished =
-            if (phrase.isNullOrEmpty()) {
+            if (phrase == null) {
                 partial.renameTo(target)
             } else {
                 // encrypt() writes the named target itself; no rename needed.
@@ -165,14 +176,19 @@ object TerminalBackup {
 
                 // User-supplied archives are a trust boundary: reject symlinks
                 // that point outside the staging tree before swapping directories.
+                val stagingRoot =
+                    runCatching { staging.toPath().toRealPath() }.getOrNull()
+                        ?: return@withContext "backup contains unsafe symlinks"
                 val unsafeSymlink = runCatching {
                     Files.walk(staging.toPath()).use { paths ->
                         paths.iterator().asSequence().any { path ->
                             if (!Files.isSymbolicLink(path)) {
                                 false
                             } else {
-                                val target = Files.readSymbolicLink(path).toString()
-                                target.split('/').contains("..")
+                                val link = Files.readSymbolicLink(path)
+                                link.isAbsolute ||
+                                    link.toString().split('/').contains("..") ||
+                                    !path.toRealPath().startsWith(stagingRoot)
                             }
                         }
                     }
@@ -183,7 +199,22 @@ object TerminalBackup {
                 }
 
                 val sandboxTarget = localDir().child("sandbox")
-                when (detectBackupLayout(staging.list()?.toList().orEmpty())) {
+                val stagedSandbox = File(staging, "sandbox")
+                val stagedHome = File(staging, "home")
+                // A V1 archive is itself a rootfs, so it can legitimately contain both
+                // /sandbox and /home. `bin/bash` at the archive root settles the case.
+                val isRootfsAtRoot = File(staging, "bin/bash").isFile
+                val layout =
+                    if (!isRootfsAtRoot &&
+                        detectBackupLayout(staging.list()?.toList().orEmpty()) == BackupLayout.V2_SANDBOX_HOME &&
+                        stagedSandbox.isDirectory &&
+                        stagedHome.isDirectory
+                    ) {
+                        BackupLayout.V2_SANDBOX_HOME
+                    } else {
+                        BackupLayout.V1_ROOT
+                    }
+                when (layout) {
                     BackupLayout.V1_ROOT -> {
                         // Old archives never contained home; leave the user's home alone.
                         swapDirectory(staging, sandboxTarget)?.let {
@@ -191,22 +222,19 @@ object TerminalBackup {
                         }
                     }
                     BackupLayout.V2_SANDBOX_HOME -> {
-                        val stagedSandbox = File(staging, "sandbox")
-                        if (!stagedSandbox.isDirectory) {
-                            return@withContext "backup is missing its sandbox directory"
-                        }
                         swapDirectory(stagedSandbox, sandboxTarget)?.let {
                             return@withContext it
                         }
-                        // Only replace home when the archive actually carries it.
-                        val stagedHome = File(staging, "home")
-                        if (stagedHome.isDirectory) {
-                            swapDirectory(stagedHome, sandboxHomeDir())?.let {
-                                return@withContext it
-                            }
+                        swapDirectory(stagedHome, sandboxHomeDir())?.let {
+                            return@withContext it
                         }
                     }
                 }
+
+                // Every swap succeeded, so the restored tree is authoritative. Old
+                // copies stay in place on any error to keep a rollback possible.
+                oldBackups(sandboxTarget).forEach { it.deleteRecursively() }
+                oldBackups(sandboxHomeDir()).forEach { it.deleteRecursively() }
 
                 localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
                 null
@@ -218,12 +246,33 @@ object TerminalBackup {
         }
 
     /**
-     * Moves [source] into [target], keeping the old target as `<name>.old` until the move succeeds. Restores the old
-     * directory if the second rename fails. Returns null on success, otherwise an error message.
+     * Moves [source] into [target], keeping the old target as `<name>.old` for cleanup after every swap succeeds.
+     * Restores the old directory if the second rename fails. Returns null on success, otherwise an error message.
      */
+    private fun oldBackups(target: File): List<File> =
+        target.parentFile
+            ?.listFiles { file ->
+                file.name == "${target.name}.old" || file.name.startsWith("${target.name}.old-")
+            }
+            ?.toList()
+            .orEmpty()
+
     private fun swapDirectory(source: File, target: File): String? {
-        val previous = File(target.parentFile, "${target.name}.old")
-        previous.deleteRecursively()
+        // An interrupted restore can leave an old tree without a live target;
+        // recover the newest one first so there is always something to roll back to.
+        if (!target.exists()) {
+            val backup = oldBackups(target).maxByOrNull { it.lastModified() }
+            if (backup != null && !backup.renameTo(target)) {
+                return "could not recover the previous ${target.name}"
+            }
+        }
+        // A previous failed restore may have left a `.old` behind. Use a fresh name
+        // instead of deleting it: it may be the only recoverable copy.
+        var previous = File(target.parentFile, "${target.name}.old")
+        var suffix = 1
+        while (previous.exists()) {
+            previous = File(target.parentFile, "${target.name}.old-${suffix++}")
+        }
         val hadTarget = target.exists()
         if (hadTarget && !target.renameTo(previous)) {
             return "could not move the current ${target.name} aside"
@@ -232,7 +281,7 @@ object TerminalBackup {
             if (hadTarget) previous.renameTo(target)
             return "could not move the restored ${target.name} into place"
         }
-        previous.deleteRecursively()
+        // Intentionally left for restore() to delete once all swaps succeeded.
         return null
     }
 }

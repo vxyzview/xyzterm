@@ -34,7 +34,6 @@ import com.xyzterm.components.InfoBlock
 import com.xyzterm.components.SingleInputDialog
 import com.xyzterm.components.compose.preferences.base.PreferenceLayoutLazyColumn
 import com.xyzterm.components.compose.preferences.base.PreferenceTemplate
-import com.xyzterm.file.child
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
@@ -192,7 +191,7 @@ fun TerminalBackupsScreen() {
                         DefaultScope.launch(Dispatchers.IO) {
                             val loading = LoadingPopup(activity, null)
                             withContext(Dispatchers.Main) { runCatching { loading.show() } }
-                            val plain = getTempDir().child("terminal-backup-decrypted.tar.gz")
+                            val plain = File.createTempFile("terminal-backup-decrypted-", ".tar.gz", getTempDir())
                             val error = runCatching {
                                 BackupCrypto.decrypt(encryptedBackup, plain, phrase)
                                 TerminalBackup.restore(plain)

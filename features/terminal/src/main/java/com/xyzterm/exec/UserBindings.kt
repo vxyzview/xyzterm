@@ -13,6 +13,7 @@ import org.json.JSONObject
 object UserBindings {
     fun decode(json: String): List<Binding> = runCatching {
         val array = JSONArray(json)
+        val seenGuests = mutableSetOf<String>()
         (0 until array.length()).mapNotNull { i ->
             val obj = array.optJSONObject(i) ?: return@mapNotNull null
             val outside = obj.optString("outside").trim()
@@ -28,7 +29,9 @@ object UserBindings {
             if (inside != null && !PortableLogicKtShadow.isValidGuestPath(inside)) {
                 return@mapNotNull null
             }
-            Binding(outside, inside)
+            val binding = Binding(outside, inside)
+            // Two binds to one guest target would silently shadow each other in proot.
+            if (seenGuests.add(binding.inside ?: binding.outside)) binding else null
         }
     }
         .getOrDefault(emptyList())
@@ -50,7 +53,10 @@ object UserBindings {
     fun isValidHostPath(path: String): Boolean =
         PortableLogicKtShadow.isWellFormedHost(path) && java.io.File(path).exists()
 
-    fun isValidGuestPath(path: String): Boolean = isWellFormedHost(path)
+    fun isValidGuestPath(path: String): Boolean =
+        isWellFormedHost(path) &&
+            path.trim('/').isNotEmpty() &&
+            path.split('/').none { it == ".." }
 
     // proot splits "-b source:target" on ':' and sandbox.sh reads newline-separated binds;
     // a path containing either would silently bind the wrong directory.

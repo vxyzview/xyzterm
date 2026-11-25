@@ -99,12 +99,16 @@ fun shouldCaptureLog(line: String): Boolean {
 
 fun isNewer(latest: String, installed: String): Boolean {
     // Verbatim from core/main/.../UpdateManager.kt, which is internal in its own module.
-    val parse = { v: String ->
-        Regex("""v?(\d+)\.(\d+)\.(\d+)""").find(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
+    fun parse(v: String): List<Int>? {
+        val parts = Regex("""v?(\d+)\.(\d+)\.(\d+)""").find(v.trim())?.groupValues?.drop(1) ?: return null
+        return parts.map { it.toIntOrNull() ?: return null }
     }
     val a = parse(latest) ?: return false
-    val b = parse(installed) ?: return true
-    return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
+    val b = parse(installed) ?: return false
+    val diff =
+        a.zip(b).firstOrNull { it.first != it.second }
+            ?: return installed.trim().contains('-') && !latest.trim().contains('-')
+    return diff.first > diff.second
 }
 
 fun nameSafeViaRust(id: String): String = PortableLogicKtShadow.nameSafe(id)

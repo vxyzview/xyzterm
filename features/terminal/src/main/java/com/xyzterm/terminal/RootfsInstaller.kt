@@ -44,6 +44,26 @@ internal fun parseRootfsManifest(text: String): RootfsManifest {
     return RootfsManifest(bytes, entries)
 }
 
+/** Rejects absolute paths and any `..` segment before they touch the filesystem. */
+internal fun isSafeEntryPath(path: String): Boolean = !path.startsWith("/") && path.split('/').none { it == ".." }
+
+/** A link target is safe only if it stays inside the rootfs relative to the link's own directory. */
+internal fun isSafeLinkTarget(linkPath: String, target: String): Boolean {
+    if (target.startsWith("/")) return false
+    val segments = mutableListOf<String>()
+    (File(linkPath).parent.orEmpty() + "/" + target).split('/').forEach { part ->
+        when {
+            part.isEmpty() || part == "." -> Unit
+            part == ".." -> {
+                if (segments.isEmpty()) return false
+                segments.removeAt(segments.lastIndex)
+            }
+            else -> segments += part
+        }
+    }
+    return true
+}
+
 /**
  * Copies a rootfs that was already unpacked at build time. No tar, no proot, no ptrace overhead on the device — just
  * files, directories and symlinks.
@@ -83,7 +103,7 @@ object RootfsInstaller {
         // A lost marker must not destroy a working userspace: recreate it
         // instead. Only a clearly incomplete tree is replaced.
         val marker = File(root.parentFile, ".terminal_setup_ok_DO_NOT_REMOVE")
-        if (File(root, "bin/bash").exists()) {
+        if (isInstallComplete(root, manifest)) {
             marker.createNewFile()
             writeContainerConfig(root)
             onProgress(manifest.bytes, manifest.bytes)
@@ -92,21 +112,22 @@ object RootfsInstaller {
         if (root.exists()) root.deleteRecursively()
         root.mkdirs()
 
-        val modes = manifest.entries.associate { it.path to it.mode }
+        val modes =
+            manifest.entries
+                .filter { isSafeEntryPath(it.path) }
+                .associate { it.path to it.mode }
         // Android creates dirs with 0700; pacman compares them to the
         // package's 0755, so apply the archived modes to every directory.
         manifest.entries
-            .filter { it.type == "d" }
+            .filter { it.type == "d" && isSafeEntryPath(it.path) }
             .forEach { entry ->
                 val dir = File(root, entry.path)
                 dir.mkdirs()
                 if (entry.mode != 0) runCatching { Os.chmod(dir.absolutePath, entry.mode) }
             }
         runCatching { Os.chmod(root.absolutePath, 493) }
-        manifest.entries
-            .filter { it.type == "l" }
-            .forEach { entry -> runCatching { Os.symlink(entry.target, File(root, entry.path).absolutePath) } }
 
+        // Files first: a malicious symlink must never redirect a later write outside the rootfs.
         var copied = 0L
         var lastEmit = 0L
         context.assets.open(zipName).use { raw ->
@@ -114,6 +135,11 @@ object RootfsInstaller {
                 var entry = zip.nextEntry
                 while (entry != null) {
                     val name = entry.name
+                    if (!isSafeEntryPath(name)) {
+                        zip.closeEntry()
+                        entry = zip.nextEntry
+                        continue
+                    }
                     val target = File(root, name)
                     target.parentFile?.mkdirs()
                     FileOutputStream(target).use { out -> zip.copyTo(out, 64 * 1024) }
@@ -131,8 +157,30 @@ object RootfsInstaller {
         }
 
         onProgress(manifest.bytes, manifest.bytes)
+        manifest.entries
+            .filter { it.type == "l" }
+            .forEach { entry ->
+                val target = entry.target
+                if (target == null || !isSafeEntryPath(entry.path) || !isSafeLinkTarget(entry.path, target)) {
+                    return@forEach
+                }
+                runCatching { Os.symlink(target, File(root, entry.path).absolutePath) }
+            }
         writeContainerConfig(root)
         marker.createNewFile()
+    }
+
+    private fun isInstallComplete(root: File, manifest: RootfsManifest): Boolean {
+        // writeContainerConfig() deliberately replaces these three on every install,
+        // so their sizes will never match the bundled manifest.
+        val regenerated = setOf("etc/hostname", "etc/resolv.conf", "etc/hosts")
+        val files =
+            manifest.entries.filter { it.type == "f" && isSafeEntryPath(it.path) && it.path !in regenerated }
+        return files.isNotEmpty() &&
+            files.all { entry ->
+                val file = File(root, entry.path)
+                file.isFile && file.length() == entry.size
+            }
     }
 
     private fun writeContainerConfig(root: File) {

@@ -10,16 +10,26 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
+/** State of the optional auto-backup passphrase: unset, usable, or unreadable. */
+internal sealed interface PassphraseState {
+    data object NotSet : PassphraseState
+    data class Ready(val phrase: String) : PassphraseState
+    data object Error : PassphraseState
+}
+
+/** Pure mapping from the stored packed value to a state, so it can be unit-tested. */
+internal fun passphraseState(packed: String, open: (String) -> String): PassphraseState =
+    runCatching {
+        if (packed.isEmpty()) PassphraseState.NotSet else PassphraseState.Ready(open(packed))
+    }
+        .getOrDefault(PassphraseState.Error)
+
 /** Optional passphrase for encrypted auto-backups, sealed with a device-only AES key. */
 internal object AutoBackupPassphrase {
     private const val KEY = "auto_backup_passphrase_cipher"
     private const val ALIAS = "xyzterm_auto_backup_passphrase"
 
-    fun get(): String? = runCatching {
-        val packed = Preference.getString(KEY, "")
-        if (packed.isEmpty()) null else open(key(), packed)
-    }
-        .getOrNull()
+    fun getState(): PassphraseState = passphraseState(Preference.getString(KEY, "")) { open(key(), it) }
 
     fun save(phrase: String) {
         Preference.setString(KEY, seal(key(), phrase))

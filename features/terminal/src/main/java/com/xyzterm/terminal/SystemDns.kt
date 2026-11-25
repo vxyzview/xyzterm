@@ -7,5 +7,9 @@ import com.xyzterm.utils.application
 internal fun systemDns(): List<String> {
     val manager = application?.getSystemService(ConnectivityManager::class.java) ?: return emptyList()
     val network = manager.activeNetwork ?: return emptyList()
-    return manager.getLinkProperties(network)?.dnsServers?.mapNotNull { it.hostAddress }.orEmpty()
+    return manager.getLinkProperties(network)
+        ?.dnsServers
+        ?.filterNot { it.isLinkLocalAddress }
+        ?.mapNotNull { it.hostAddress?.substringBefore('%') }
+        .orEmpty()
 }

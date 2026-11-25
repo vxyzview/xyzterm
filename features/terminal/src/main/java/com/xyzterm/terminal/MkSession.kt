@@ -2,6 +2,7 @@ package com.xyzterm.terminal
 
 import android.app.Activity
 import android.content.Context
+import com.termux.terminal.TerminalEmulator
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 import com.xyzterm.exec.SandboxEnv
@@ -55,7 +56,10 @@ object MkSession {
                     prepared.processCwd,
                     prepared.args,
                     prepared.env.toTypedArray(),
-                    Settings.terminal_scrollback_buffer,
+                    Settings.terminal_scrollback_buffer.coerceIn(
+                        TerminalEmulator.TERMINAL_TRANSCRIPT_ROWS_MIN,
+                        TerminalEmulator.TERMINAL_TRANSCRIPT_ROWS_MAX,
+                    ),
                     sessionClient,
                 )
             session to prepared.workingDir

@@ -23,7 +23,7 @@ internal enum class BackupLayout {
 
 /** Detect the archive layout from its top-level entry names. */
 internal fun detectBackupLayout(entries: List<String>): BackupLayout =
-    if (entries.any { it == "sandbox" || it.startsWith("sandbox/") }) {
+    if (entries.any { it == "sandbox" || it.startsWith("sandbox/") } && entries.any { it == "home" }) {
         BackupLayout.V2_SANDBOX_HOME
     } else {
         BackupLayout.V1_ROOT
@@ -48,7 +48,8 @@ fun isWellFormedHost(path: String): Boolean =
         path.none { it.isISOControl() }
 
 /** Guest bind path validation (verbatim from UserBindings). */
-fun isValidGuestPath(path: String): Boolean = isWellFormedHost(path)
+fun isValidGuestPath(path: String): Boolean =
+    isWellFormedHost(path) && path.trim('/').isNotEmpty() && path.split('/').none { it == ".." }
 
 /** Sanitize a session id for use as a directory name (verbatim from MkSession.nameSafe). */
 fun nameSafe(id: String): String {
@@ -173,12 +174,16 @@ fun shouldCaptureLog(line: String): Boolean {
 
 /** Compare "vX.Y.Z" (or "X.Y.Z") tags, ignoring suffixes like "-rc1" (verbatim from UpdateManager.isNewer). */
 fun isNewer(latest: String, installed: String): Boolean {
-    val parse = { v: String ->
-        Regex("""v?(\d+)\.(\d+)\.(\d+)""").find(v.trim())?.groupValues?.drop(1)?.map { it.toInt() }
+    fun parse(v: String): List<Int>? {
+        val parts = Regex("""v?(\d+)\.(\d+)\.(\d+)""").find(v.trim())?.groupValues?.drop(1) ?: return null
+        return parts.map { it.toIntOrNull() ?: return null }
     }
     val a = parse(latest) ?: return false
-    val b = parse(installed) ?: return true
-    return a.zip(b).firstOrNull { it.first != it.second }?.let { it.first > it.second } ?: false
+    val b = parse(installed) ?: return false
+    val diff =
+        a.zip(b).firstOrNull { it.first != it.second }
+            ?: return installed.trim().contains('-') && !latest.trim().contains('-')
+    return diff.first > diff.second
 }
 
 /** File size formatting (verbatim from Utils.kt:formatFileSize). */

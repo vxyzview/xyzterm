@@ -6,6 +6,8 @@ import com.xyzterm.resources.strings
 import com.xyzterm.settings.Preference
 import com.xyzterm.settings.keybinds.KeyUtils
 import com.xyzterm.utils.application
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -92,7 +94,15 @@ object KeybindingsManager {
     }
 
     fun saveKeybindings() {
-        keybindingsFile.writeText(json.encodeToString(serializer, customKeybinds))
+        // Write beside the target and replace by rename so a crash mid-write
+        // cannot leave a half-written keybindings file behind.
+        val temp = Files.createTempFile(keybindingsFile.parentFile.toPath(), "keybindings-", ".tmp")
+        try {
+            Files.write(temp, json.encodeToString(serializer, customKeybinds).toByteArray())
+            Files.move(temp, keybindingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        } finally {
+            Files.deleteIfExists(temp)
+        }
     }
 
     fun loadKeybindings() {
@@ -102,7 +112,9 @@ object KeybindingsManager {
         if (content.isEmpty()) return
 
         customKeybinds.clear()
-        customKeybinds.putAll(json.decodeFromString(serializer, content))
+        // A corrupt file is left untouched; bad binds must not break startup.
+        runCatching { json.decodeFromString(serializer, content) }
+            .onSuccess { customKeybinds.putAll(it) }
         invalidate()
     }
 

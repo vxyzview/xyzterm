@@ -253,7 +253,7 @@ class Terminal : AppCompatActivity() {
         val pwd = intent.getStringExtra("cwd") ?: return
         terminalView.get() ?: return
 
-        val sessionId = File(pwd).name
+        val sessionId = File(pwd).name.takeIf { it.isNotBlank() } ?: return
 
         lifecycleScope.launch(Dispatchers.Main) {
             val client = TerminalBackEnd()
@@ -390,7 +390,7 @@ class Terminal : AppCompatActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (Settings.gamepad_input) {
+        if (terminalView.get()?.isFocused == true && Settings.gamepad_input) {
             val bytes = gamepadBytes(event.keyCode)
             if (bytes != null && (event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP)) {
                 // Consume both halves so the terminal view never sees a partial
@@ -409,7 +409,7 @@ class Terminal : AppCompatActivity() {
         // TerminalView consumes hardware keys in its own dispatch path, so
         // Compose-level onPreviewKeyEvent would never see them. Only exact
         // matches fire, and auto-repeat is ignored.
-        if (event != null && event.repeatCount == 0) {
+        if (event != null && event.repeatCount == 0 && terminalView.get()?.isFocused == true) {
             // Alt+1..9 jumps to the Nth session in drawer order. Intercepted here
             // because TerminalView consumes hardware keys before Compose sees them.
             if (
