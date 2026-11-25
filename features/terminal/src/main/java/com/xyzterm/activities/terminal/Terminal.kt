@@ -410,6 +410,21 @@ class Terminal : AppCompatActivity() {
         // Compose-level onPreviewKeyEvent would never see them. Only exact
         // matches fire, and auto-repeat is ignored.
         if (event != null && event.repeatCount == 0) {
+            // Alt+1..9 jumps to the Nth session in drawer order. Intercepted here
+            // because TerminalView consumes hardware keys before Compose sees them.
+            if (
+                event.isAltPressed &&
+                !event.isCtrlPressed &&
+                !event.isMetaPressed &&
+                keyCode in KeyEvent.KEYCODE_1..KeyEvent.KEYCODE_9
+            ) {
+                val index = keyCode - KeyEvent.KEYCODE_1
+                val id = sessionBinder?.get()?.getService()?.sessionList?.getOrNull(index)
+                if (id != null) {
+                    lifecycleScope.launch { changeSession(id) }
+                    return true
+                }
+            }
             val command = KeybindingsManager.findCommandForKey(KeyCombination.fromEvent(event))
             if (command != null && command.isEnabled() && command.isSupported()) {
                 command.performCommand(ActionContext(this))

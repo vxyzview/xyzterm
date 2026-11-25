@@ -2,6 +2,7 @@ package com.xyzterm.terminal
 
 import android.content.Context
 import android.os.SystemClock
+import android.os.Trace
 import android.system.Os
 import com.xyzterm.file.child
 import java.io.File
@@ -60,64 +61,79 @@ object RootfsInstaller {
         onProgress: suspend (copied: Long, total: Long) -> Unit,
     ) =
         withContext(Dispatchers.IO) {
-            val manifestName = "terminal/rootfs-${asset.abi}.tsv"
-            val zipName = "terminal/rootfs-${asset.abi}.zip"
-            val manifest = context.assets.open(manifestName).use { parseRootfsManifest(it.reader().readText()) }
-
-            // A lost marker must not destroy a working userspace: recreate it
-            // instead. Only a clearly incomplete tree is replaced.
-            val marker = File(root.parentFile, ".terminal_setup_ok_DO_NOT_REMOVE")
-            if (File(root, "bin/bash").exists()) {
-                marker.createNewFile()
-                writeContainerConfig(root)
-                onProgress(manifest.bytes, manifest.bytes)
-                return@withContext
+            // Named trace section so macrobenchmark can measure the real first-launch cost.
+            Trace.beginSection("rootfs_install")
+            try {
+                installInternal(context, asset, root, onProgress)
+            } finally {
+                Trace.endSection()
             }
-            if (root.exists()) root.deleteRecursively()
-            root.mkdirs()
-
-            val modes = manifest.entries.associate { it.path to it.mode }
-            // Android creates dirs with 0700; pacman compares them to the
-            // package's 0755, so apply the archived modes to every directory.
-            manifest.entries
-                .filter { it.type == "d" }
-                .forEach { entry ->
-                    val dir = File(root, entry.path)
-                    dir.mkdirs()
-                    if (entry.mode != 0) runCatching { Os.chmod(dir.absolutePath, entry.mode) }
-                }
-            runCatching { Os.chmod(root.absolutePath, 493) }
-            manifest.entries
-                .filter { it.type == "l" }
-                .forEach { entry -> runCatching { Os.symlink(entry.target, File(root, entry.path).absolutePath) } }
-
-            var copied = 0L
-            var lastEmit = 0L
-            context.assets.open(zipName).use { raw ->
-                ZipInputStream(raw.buffered()).use { zip ->
-                    var entry = zip.nextEntry
-                    while (entry != null) {
-                        val name = entry.name
-                        val target = File(root, name)
-                        target.parentFile?.mkdirs()
-                        FileOutputStream(target).use { out -> zip.copyTo(out, 64 * 1024) }
-                        modes[name]?.let { mode -> if (mode != 0) runCatching { Os.chmod(target.absolutePath, mode) } }
-                        copied += target.length()
-                        val now = SystemClock.elapsedRealtime()
-                        if (now - lastEmit >= 250L) {
-                            lastEmit = now
-                            onProgress(copied, manifest.bytes)
-                        }
-                        zip.closeEntry()
-                        entry = zip.nextEntry
-                    }
-                }
-            }
-
-            onProgress(manifest.bytes, manifest.bytes)
-            writeContainerConfig(root)
-            marker.createNewFile()
         }
+
+    private suspend fun installInternal(
+        context: Context,
+        asset: ArchmAsset,
+        root: File,
+        onProgress: suspend (copied: Long, total: Long) -> Unit,
+    ) {
+        val manifestName = "terminal/rootfs-${asset.abi}.tsv"
+        val zipName = "terminal/rootfs-${asset.abi}.zip"
+        val manifest = context.assets.open(manifestName).use { parseRootfsManifest(it.reader().readText()) }
+
+        // A lost marker must not destroy a working userspace: recreate it
+        // instead. Only a clearly incomplete tree is replaced.
+        val marker = File(root.parentFile, ".terminal_setup_ok_DO_NOT_REMOVE")
+        if (File(root, "bin/bash").exists()) {
+            marker.createNewFile()
+            writeContainerConfig(root)
+            onProgress(manifest.bytes, manifest.bytes)
+            return
+        }
+        if (root.exists()) root.deleteRecursively()
+        root.mkdirs()
+
+        val modes = manifest.entries.associate { it.path to it.mode }
+        // Android creates dirs with 0700; pacman compares them to the
+        // package's 0755, so apply the archived modes to every directory.
+        manifest.entries
+            .filter { it.type == "d" }
+            .forEach { entry ->
+                val dir = File(root, entry.path)
+                dir.mkdirs()
+                if (entry.mode != 0) runCatching { Os.chmod(dir.absolutePath, entry.mode) }
+            }
+        runCatching { Os.chmod(root.absolutePath, 493) }
+        manifest.entries
+            .filter { it.type == "l" }
+            .forEach { entry -> runCatching { Os.symlink(entry.target, File(root, entry.path).absolutePath) } }
+
+        var copied = 0L
+        var lastEmit = 0L
+        context.assets.open(zipName).use { raw ->
+            ZipInputStream(raw.buffered()).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    val name = entry.name
+                    val target = File(root, name)
+                    target.parentFile?.mkdirs()
+                    FileOutputStream(target).use { out -> zip.copyTo(out, 64 * 1024) }
+                    modes[name]?.let { mode -> if (mode != 0) runCatching { Os.chmod(target.absolutePath, mode) } }
+                    copied += target.length()
+                    val now = SystemClock.elapsedRealtime()
+                    if (now - lastEmit >= 250L) {
+                        lastEmit = now
+                        onProgress(copied, manifest.bytes)
+                    }
+                    zip.closeEntry()
+                    entry = zip.nextEntry
+                }
+            }
+        }
+
+        onProgress(manifest.bytes, manifest.bytes)
+        writeContainerConfig(root)
+        marker.createNewFile()
+    }
 
     private fun writeContainerConfig(root: File) {
         root.child("etc").mkdirs()

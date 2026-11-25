@@ -67,4 +67,6 @@ dependencies {
     implementation("com.github.termux.termux-app:terminal-emulator:v0.118.3")
 
     testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.runner)
 }

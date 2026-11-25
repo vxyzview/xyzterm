@@ -36,12 +36,17 @@ import com.xyzterm.components.compose.preferences.base.PreferenceTemplate
 import com.xyzterm.resources.drawables
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
+import com.xyzterm.settings.Preference
 import com.xyzterm.utils.copyToClipboard
 import com.xyzterm.utils.okHttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 import org.json.JSONObject
+
+private const val STARS_KEY = "github_stars"
+private const val STARS_TIME_KEY = "github_stars_fetched_at"
+private const val STARS_TTL_MS = 24 * 60 * 60 * 1000L
 
 @Composable
 fun AboutScreen() {
@@ -145,9 +150,16 @@ fun AboutScreen() {
         }
 
         PreferenceGroup(heading = stringResource(strings.community)) {
-            val stars = remember { mutableStateOf(strings.loading.getString()) }
+            val stars = remember { mutableStateOf(Preference.getString(STARS_KEY, strings.loading.getString())) }
 
             LaunchedEffect(Unit) {
+                // Cached for a day: opening About shouldn't make a network call
+                // every time, and the count isn't time-sensitive.
+                val cached = Preference.getString(STARS_KEY, "")
+                val fresh = System.currentTimeMillis() - Preference.getLong(STARS_TIME_KEY, 0L) < STARS_TTL_MS
+                if (cached.isNotEmpty() && fresh) {
+                    return@LaunchedEffect
+                }
                 val client = okHttpClient
                 val url = "https://api.github.com/repos/vxyzview/xyzterm"
                 val request = Request.Builder().url(url).build()
@@ -159,8 +171,11 @@ fun AboutScreen() {
                                 val jsonBody = response.body.string()
                                 val json = JSONObject(jsonBody)
                                 val count = json.getInt("stargazers_count")
+                                val value = count.toString()
 
-                                withContext(Dispatchers.Main) { stars.value = count.toString() }
+                                Preference.setString(STARS_KEY, value)
+                                Preference.setLong(STARS_TIME_KEY, System.currentTimeMillis())
+                                withContext(Dispatchers.Main) { stars.value = value }
                             } else {
                                 stars.value = strings.error.getString()
                             }
