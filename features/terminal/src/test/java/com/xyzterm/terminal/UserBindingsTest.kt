@@ -37,7 +37,17 @@ class UserBindingsTest {
             ]
             """
                 .trimIndent()
-        val decoded = UserBindings.decode(json)
+        // decode() calls the generated JNI shadow; JVM unit tests have no native
+        // library, so force the Kotlin-only oracle for this test.
+        val previousMode = System.getProperty("rust-anything.mode")
+        System.setProperty("rust-anything.mode", "old")
+        val decoded =
+            try {
+                UserBindings.decode(json)
+            } finally {
+                if (previousMode == null) System.clearProperty("rust-anything.mode")
+                else System.setProperty("rust-anything.mode", previousMode)
+            }
         assertEquals(2, decoded.size)
         assertEquals("/a", decoded[0].outside)
         assertEquals("/c", decoded[1].outside)

@@ -172,11 +172,15 @@ object RootfsInstaller {
         // so their sizes will never match the bundled manifest.
         val regenerated = setOf("etc/hostname", "etc/resolv.conf", "etc/hosts")
         val files = manifest.entries.filter { it.type == "f" && isSafeEntryPath(it.path) && it.path !in regenerated }
+        // Symlinks are created after the file loop; without this an interruption
+        // between the two is mistaken for a finished install.
+        val links = manifest.entries.filter { it.type == "l" && isSafeEntryPath(it.path) }
         return files.isNotEmpty() &&
             files.all { entry ->
                 val file = File(root, entry.path)
                 file.isFile && file.length() == entry.size
-            }
+            } &&
+            links.all { File(root, it.path).exists() }
     }
 
     private fun writeContainerConfig(root: File) {

@@ -40,7 +40,8 @@ class RootfsManifestTest {
     @Test
     fun symlink_targets_escaping_root_are_rejected() {
         assertTrue(isSafeLinkTarget("bin", "usr/bin"))
-        assertTrue(isSafeLinkTarget("usr/bin", "../../bin"))
+        assertTrue(isSafeLinkTarget("usr/bin", "../bin"))
+        assertFalse(isSafeLinkTarget("usr/bin", "../../bin"))
         assertFalse(isSafeLinkTarget("bin", "/etc/passwd"))
         assertFalse(isSafeLinkTarget("usr/bin", "../../../etc/passwd"))
         assertFalse(isSafeLinkTarget("bin", "../.."))

@@ -101,6 +101,8 @@ object UpdateManager {
     fun checkForUpdates(activity: Activity) {
         if (!Settings.check_for_update) return
         if (installedFromStore()) return
+        // No arm rootfs exists for x86 devices; don't offer an update we cannot install.
+        if (Build.SUPPORTED_ABIS.none { it.contains("arm") }) return
         val now = System.currentTimeMillis()
         if (now - Preference.getLong(LAST_UPDATE_CHECK_KEY, 0L) < UPDATE_INTERVAL_MS) return
         // Stamp optimistically so parallel opens don't stack checks; a failed

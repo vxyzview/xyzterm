@@ -108,7 +108,7 @@ object KeybindingsManager {
     fun loadKeybindings() {
         if (!keybindingsFile.exists()) return
 
-        val content = keybindingsFile.readText()
+        val content = runCatching { keybindingsFile.readText() }.getOrNull() ?: return
         if (content.isEmpty()) return
 
         customKeybinds.clear()
