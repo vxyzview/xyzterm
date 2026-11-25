@@ -184,8 +184,7 @@ object UpdateManager {
             runCatching { pm.getPackageInfo(app.packageName, PackageManager.GET_SIGNATURES) }.getOrNull()
                 ?: return false
         val archive =
-            runCatching { pm.getPackageArchiveInfo(apkPath, PackageManager.GET_SIGNATURES) }.getOrNull()
-                ?: return false
+            runCatching { pm.getPackageArchiveInfo(apkPath, PackageManager.GET_SIGNATURES) }.getOrNull() ?: return false
         val a = installed.signatures ?: return false
         val b = archive.signatures ?: return false
         return a.isNotEmpty() && b.isNotEmpty() && a.contentEquals(b)

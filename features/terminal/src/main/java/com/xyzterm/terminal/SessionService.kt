@@ -65,36 +65,35 @@ class SessionService : Service() {
             client: TerminalSessionClient,
             activity: Terminal,
             cwd: String? = null,
-        ): SessionInfo =
-            sessionCreationMutex.withLock {
-                // Deep-link and in-app callers can both ask for the same id; reuse a
-                // session that was already published instead of spawning a second
-                // shell. The maps are only touched on Main.
-                val existing = withContext(Dispatchers.Main.immediate) { sessions[id] }
-                if (existing != null) {
-                    return@withLock SessionInfo(id, sessionWorkDirs[id].orEmpty(), existing)
-                }
-                // No SessionInfo can be returned for an unusable id — fail before
-                // creating a directory or shell for it.
-                if (id.isBlank()) throw IllegalArgumentException("Session id must not be blank")
-
-                // Capture the one-shot extraction flag: setup.sh consumes (and deletes)
-                // the rootfs tarball, so reusing it for later sessions would make them
-                // exit immediately with "Session ended".
-                val extraction = activity.installNextStage == NEXT_STAGE.EXTRACTION
-                val info =
-                    MkSession.createSession(activity, client, id, extraction, cwd).let {
-                        val (session, pwd) = it
-                        sessions[id] = session
-                        sessionWorkDirs[id] = pwd
-                        sessionList.add(id)
-                        saveSession(id, pwd)
-                        updateNotification()
-                        SessionInfo(id, pwd, session)
-                    }
-                if (extraction) activity.installNextStage = NEXT_STAGE.NONE
-                info
+        ): SessionInfo = sessionCreationMutex.withLock {
+            // Deep-link and in-app callers can both ask for the same id; reuse a
+            // session that was already published instead of spawning a second
+            // shell. The maps are only touched on Main.
+            val existing = withContext(Dispatchers.Main.immediate) { sessions[id] }
+            if (existing != null) {
+                return@withLock SessionInfo(id, sessionWorkDirs[id].orEmpty(), existing)
             }
+            // No SessionInfo can be returned for an unusable id — fail before
+            // creating a directory or shell for it.
+            if (id.isBlank()) throw IllegalArgumentException("Session id must not be blank")
+
+            // Capture the one-shot extraction flag: setup.sh consumes (and deletes)
+            // the rootfs tarball, so reusing it for later sessions would make them
+            // exit immediately with "Session ended".
+            val extraction = activity.installNextStage == NEXT_STAGE.EXTRACTION
+            val info =
+                MkSession.createSession(activity, client, id, extraction, cwd).let {
+                    val (session, pwd) = it
+                    sessions[id] = session
+                    sessionWorkDirs[id] = pwd
+                    sessionList.add(id)
+                    saveSession(id, pwd)
+                    updateNotification()
+                    SessionInfo(id, pwd, session)
+                }
+            if (extraction) activity.installNextStage = NEXT_STAGE.NONE
+            info
+        }
 
         /** Creates a session owned by the service only — no Terminal activity is opened or switched. */
         suspend fun createBackgroundSession(

@@ -113,8 +113,7 @@ object KeybindingsManager {
 
         customKeybinds.clear()
         // A corrupt file is left untouched; bad binds must not break startup.
-        runCatching { json.decodeFromString(serializer, content) }
-            .onSuccess { customKeybinds.putAll(it) }
+        runCatching { json.decodeFromString(serializer, content) }.onSuccess { customKeybinds.putAll(it) }
         invalidate()
     }
 

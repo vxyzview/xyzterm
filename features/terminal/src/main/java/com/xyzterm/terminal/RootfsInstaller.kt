@@ -112,10 +112,7 @@ object RootfsInstaller {
         if (root.exists()) root.deleteRecursively()
         root.mkdirs()
 
-        val modes =
-            manifest.entries
-                .filter { isSafeEntryPath(it.path) }
-                .associate { it.path to it.mode }
+        val modes = manifest.entries.filter { isSafeEntryPath(it.path) }.associate { it.path to it.mode }
         // Android creates dirs with 0700; pacman compares them to the
         // package's 0755, so apply the archived modes to every directory.
         manifest.entries
@@ -174,8 +171,7 @@ object RootfsInstaller {
         // writeContainerConfig() deliberately replaces these three on every install,
         // so their sizes will never match the bundled manifest.
         val regenerated = setOf("etc/hostname", "etc/resolv.conf", "etc/hosts")
-        val files =
-            manifest.entries.filter { it.type == "f" && isSafeEntryPath(it.path) && it.path !in regenerated }
+        val files = manifest.entries.filter { it.type == "f" && isSafeEntryPath(it.path) && it.path !in regenerated }
         return files.isNotEmpty() &&
             files.all { entry ->
                 val file = File(root, entry.path)

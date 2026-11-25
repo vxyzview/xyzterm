@@ -25,8 +25,9 @@ internal enum class BackupLayout {
  * filesystem.
  */
 internal fun detectBackupLayout(entries: List<String>): BackupLayout =
-    if (entries.any { it == "sandbox" || it.startsWith("sandbox/") } &&
-        entries.any { it == "home" || it.startsWith("home/") }
+    if (
+        entries.any { it == "sandbox" || it.startsWith("sandbox/") } &&
+            entries.any { it == "home" || it.startsWith("home/") }
     ) {
         BackupLayout.V2_SANDBOX_HOME
     } else {
@@ -205,10 +206,11 @@ object TerminalBackup {
                 // /sandbox and /home. `bin/bash` at the archive root settles the case.
                 val isRootfsAtRoot = File(staging, "bin/bash").isFile
                 val layout =
-                    if (!isRootfsAtRoot &&
-                        detectBackupLayout(staging.list()?.toList().orEmpty()) == BackupLayout.V2_SANDBOX_HOME &&
-                        stagedSandbox.isDirectory &&
-                        stagedHome.isDirectory
+                    if (
+                        !isRootfsAtRoot &&
+                            detectBackupLayout(staging.list()?.toList().orEmpty()) == BackupLayout.V2_SANDBOX_HOME &&
+                            stagedSandbox.isDirectory &&
+                            stagedHome.isDirectory
                     ) {
                         BackupLayout.V2_SANDBOX_HOME
                     } else {
@@ -251,9 +253,7 @@ object TerminalBackup {
      */
     private fun oldBackups(target: File): List<File> =
         target.parentFile
-            ?.listFiles { file ->
-                file.name == "${target.name}.old" || file.name.startsWith("${target.name}.old-")
-            }
+            ?.listFiles { file -> file.name == "${target.name}.old" || file.name.startsWith("${target.name}.old-") }
             ?.toList()
             .orEmpty()
 

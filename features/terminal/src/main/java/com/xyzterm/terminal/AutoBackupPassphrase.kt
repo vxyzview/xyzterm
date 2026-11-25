@@ -13,16 +13,17 @@ import javax.crypto.spec.GCMParameterSpec
 /** State of the optional auto-backup passphrase: unset, usable, or unreadable. */
 internal sealed interface PassphraseState {
     data object NotSet : PassphraseState
+
     data class Ready(val phrase: String) : PassphraseState
+
     data object Error : PassphraseState
 }
 
 /** Pure mapping from the stored packed value to a state, so it can be unit-tested. */
-internal fun passphraseState(packed: String, open: (String) -> String): PassphraseState =
-    runCatching {
-        if (packed.isEmpty()) PassphraseState.NotSet else PassphraseState.Ready(open(packed))
-    }
-        .getOrDefault(PassphraseState.Error)
+internal fun passphraseState(packed: String, open: (String) -> String): PassphraseState = runCatching {
+    if (packed.isEmpty()) PassphraseState.NotSet else PassphraseState.Ready(open(packed))
+}
+    .getOrDefault(PassphraseState.Error)
 
 /** Optional passphrase for encrypted auto-backups, sealed with a device-only AES key. */
 internal object AutoBackupPassphrase {
