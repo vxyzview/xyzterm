@@ -22,7 +22,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import com.xyzterm.icons.Error
 import com.xyzterm.icons.XyzIcons
 import com.xyzterm.resources.strings
@@ -40,6 +42,7 @@ fun SingleInputDialog(
     confirmText: String = stringResource(strings.apply),
     confirmEnabled: Boolean = true,
     errorMessage: String? = null,
+    isPassword: Boolean = false,
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -63,6 +66,7 @@ fun SingleInputDialog(
                         onInputValueChange(it.text)
                     },
                     label = { Text(inputLabel) },
+                    visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
                     modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
                     isError = errorMessage != null,
                     supportingText =

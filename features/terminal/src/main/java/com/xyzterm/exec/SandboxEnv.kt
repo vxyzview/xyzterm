@@ -75,10 +75,16 @@ object SandboxEnv {
         // sandbox.sh builds its own proot args and never runs getDefaultBindings(),
         // so hand it the user's custom binds here. Newline-separated entries of
         // "outside" or "outside:inside"; the script drops missing sources.
+        // sandbox.sh reads these via a <<__CUSTOM_BINDS__ heredoc; a bind
+        // containing that literal would terminate the heredoc early.
+        val bindDelimiter = "__CUSTOM_BINDS__"
         env["CUSTOM_BINDS"] =
-            UserBindings.decode(Settings.custom_bindings).joinToString("\n") { binding ->
-                if (binding.inside.isNullOrBlank()) binding.outside else "${binding.outside}:${binding.inside}"
-            }
+            UserBindings.decode(Settings.custom_bindings)
+                .map { binding ->
+                    if (binding.inside.isNullOrBlank()) binding.outside else "${binding.outside}:${binding.inside}"
+                }
+                .filter { !it.contains(bindDelimiter) }
+                .joinToString("\n")
 
         val loader32 = "$nativeLibDir/libloader32.so"
         if (File(loader32).exists()) {

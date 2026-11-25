@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.item
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -30,14 +31,17 @@ import androidx.compose.ui.unit.dp
 import com.xyzterm.DefaultScope
 import com.xyzterm.components.EmptyState
 import com.xyzterm.components.InfoBlock
+import com.xyzterm.components.SingleInputDialog
 import com.xyzterm.components.compose.preferences.base.PreferenceLayoutLazyColumn
 import com.xyzterm.components.compose.preferences.base.PreferenceTemplate
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
+import com.xyzterm.terminal.BackupCrypto
 import com.xyzterm.terminal.TerminalBackup
 import com.xyzterm.utils.LoadingPopup
 import com.xyzterm.utils.dialogRes
+import com.xyzterm.utils.getTempDir
 import com.xyzterm.utils.toast
 import java.io.File
 import java.text.DateFormat
@@ -55,11 +59,16 @@ fun TerminalBackupsScreen() {
     // Bumped after every create/delete/restore to re-list the backup directory.
     var refreshTrigger by remember { mutableIntStateOf(0) }
     var backups by remember { mutableStateOf(emptyList<File>()) }
+    var pendingEncrypted by remember { mutableStateOf<File?>(null) }
+    var passphrase by remember { mutableStateOf("") }
     LaunchedEffect(refreshTrigger) {
         backups =
             withContext(Dispatchers.IO) {
                 TerminalBackup.backupDir()
-                    .listFiles { f -> f.name.startsWith("terminal-backup-") && f.name.endsWith(".tar.gz") }
+                    .listFiles { f ->
+                        f.name.startsWith("terminal-backup-") &&
+                            (f.name.endsWith(".tar.gz") || f.name.endsWith(".tar.gz.enc"))
+                    }
                     ?.sortedByDescending { it.name }
                     .orEmpty()
             }
@@ -121,23 +130,28 @@ fun TerminalBackupsScreen() {
                         okRes = strings.restore,
                         onCancel = {},
                         onOk = {
-                            val loading = LoadingPopup(activity, null)
-                            loading.show()
-                            DefaultScope.launch(Dispatchers.IO) {
-                                val error = runCatching {
-                                    TerminalBackup.restore(backup)
-                                }
-                                    .getOrElse { it.message ?: "restore failed" }
-                                withContext(Dispatchers.Main + NonCancellable) {
-                                    runCatching { loading.hide() }
-                                    if (error == null) {
-                                        // Running sessions keep the old rootfs mapped.
-                                        toast(strings.restart_required)
-                                    } else {
-                                        toast(strings.setup_failed.getFilledString(error))
+                            if (BackupCrypto.isEncrypted(backup)) {
+                                pendingEncrypted = backup
+                                passphrase = ""
+                            } else {
+                                val loading = LoadingPopup(activity, null)
+                                loading.show()
+                                DefaultScope.launch(Dispatchers.IO) {
+                                    val error = runCatching {
+                                        TerminalBackup.restore(backup)
                                     }
+                                        .getOrElse { it.message ?: "restore failed" }
+                                    withContext(Dispatchers.Main + NonCancellable) {
+                                        runCatching { loading.hide() }
+                                        if (error == null) {
+                                            // Running sessions keep the old rootfs mapped.
+                                            toast(strings.restart_required)
+                                        } else {
+                                            toast(strings.setup_failed.getFilledString(error))
+                                        }
+                                    }
+                                    refreshTrigger++
                                 }
-                                refreshTrigger++
                             }
                         },
                     )
@@ -152,6 +166,49 @@ fun TerminalBackupsScreen() {
                     }
                 },
             )
+        }
+
+        val encryptedBackup = pendingEncrypted
+        if (encryptedBackup != null) {
+            item {
+                SingleInputDialog(
+                    title = stringResource(strings.backup_unlock),
+                    inputLabel = stringResource(strings.backup_passphrase),
+                    inputValue = passphrase,
+                    onInputValueChange = { passphrase = it },
+                    confirmEnabled = passphrase.isNotEmpty(),
+                    isPassword = true,
+                    onConfirm = {
+                        pendingEncrypted = null
+                        val phrase = passphrase
+                        passphrase = ""
+                        DefaultScope.launch(Dispatchers.IO) {
+                            val loading = LoadingPopup(activity, null)
+                            withContext(Dispatchers.Main) { runCatching { loading.show() } }
+                            val plain = getTempDir().child("terminal-backup-decrypted.tar.gz")
+                            val error =
+                                runCatching {
+                                    BackupCrypto.decrypt(encryptedBackup, plain, phrase)
+                                    TerminalBackup.restore(plain)
+                                }
+                                    .getOrElse { it.message ?: "restore failed" }
+                            withContext(Dispatchers.Main + NonCancellable) {
+                                runCatching { loading.hide() }
+                                if (error == null) {
+                                    toast(strings.restart_required)
+                                } else {
+                                    toast(strings.setup_failed.getFilledString(error))
+                                }
+                            }
+                            withContext(NonCancellable) { plain.delete() }
+                        }
+                    },
+                    onDismiss = {
+                        pendingEncrypted = null
+                        passphrase = ""
+                    },
+                )
+            }
         }
     }
 }

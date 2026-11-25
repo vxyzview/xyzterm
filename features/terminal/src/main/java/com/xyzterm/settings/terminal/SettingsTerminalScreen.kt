@@ -22,6 +22,7 @@ import com.xyzterm.activities.settings.SettingsRoutes
 import com.xyzterm.activities.terminal.Terminal
 import com.xyzterm.components.NextScreenCard
 import com.xyzterm.components.PreferenceList
+import com.xyzterm.components.SingleInputDialog
 import com.xyzterm.components.RoundedValueSlider
 import com.xyzterm.components.SettingsItem
 import com.xyzterm.components.SteppedValueSlider
@@ -40,6 +41,7 @@ import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
+import com.xyzterm.terminal.BackupCrypto
 import com.xyzterm.terminal.TerminalBackup
 import com.xyzterm.terminal.terminalView
 import com.xyzterm.utils.LoadingPopup
@@ -47,6 +49,7 @@ import com.xyzterm.utils.dialogRes
 import com.xyzterm.utils.dpToPx
 import com.xyzterm.utils.getTempDir
 import com.xyzterm.utils.toast
+import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -208,6 +211,76 @@ fun TerminalDataSettings(navController: NavController) {
         var terminalInstalled by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) { terminalInstalled = withContext(Dispatchers.IO) { isTerminalInstalled() } }
 
+        var exportPassphrase by remember { mutableStateOf<String?>(null) }
+        var pendingRestoreFile by remember { mutableStateOf<File?>(null) }
+        var restorePassphrase by remember { mutableStateOf("") }
+
+        fun launchExport(passphrase: String) {
+            (activity as? SettingsActivity)?.fileManager?.let { fileManager ->
+                fileManager.createNewFile(
+                    mimeType = "application/octet-stream",
+                    title = if (passphrase.isEmpty()) "terminal-backup.tar.gz" else "terminal-backup.tar.gz.enc",
+                ) { fileObject ->
+                    DefaultScope.launch(Dispatchers.IO) {
+                        if (fileObject == null) return@launch
+                        val targetFile = getTempDir().child("terminal-backup.tar.gz")
+                        val encryptedFile = getTempDir().child("terminal-backup.tar.gz.enc")
+                        val loading = LoadingPopup(activity, null)
+                        withContext(Dispatchers.Main) { runCatching { loading.show() } }
+
+                        try {
+                            val ok = TerminalBackup.create(targetFile)
+                            val toCopy =
+                                if (!ok) {
+                                    null
+                                } else if (passphrase.isEmpty()) {
+                                    targetFile
+                                } else {
+                                    runCatching {
+                                        BackupCrypto.encrypt(targetFile, encryptedFile, passphrase)
+                                        encryptedFile
+                                    }
+                                        .onFailure { it.printStackTrace() }
+                                        .getOrNull()
+                                }
+                            var copied = false
+                            if (toCopy != null) {
+                                copied =
+                                    runCatching {
+                                        toCopy.inputStream().use { input ->
+                                            fileObject.getOutputStream(false).use { output -> input.copyTo(output) }
+                                        }
+                                    }
+                                        .onFailure { it.printStackTrace() }
+                                        .isSuccess
+                            }
+
+                            withContext(Dispatchers.Main + NonCancellable) {
+                                runCatching { loading.hide() }
+                                when {
+                                    copied -> toast(strings.success)
+                                    ok -> toast(strings.export_failed)
+                                    else -> toast(strings.failed)
+                                }
+                            }
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main + NonCancellable) {
+                                runCatching { loading.hide() }
+                                toast(strings.setup_failed.getFilledString(e.message))
+                            }
+                        } finally {
+                            withContext(NonCancellable) {
+                                targetFile.delete()
+                                encryptedFile.delete()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         PreferenceGroup(heading = stringResource(strings.user_data)) {
             val restore =
                 rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -228,10 +301,21 @@ fun TerminalDataSettings(navController: NavController) {
                         val fileObject = uri.toFileObject(expectedIsFile = true)
 
                         val tempFile = getTempDir().child("terminal-backup.tar.gz")
+                        var handedOff = false
 
                         try {
                             fileObject.getInputStream().use { inputStream ->
                                 FileOutputStream(tempFile).use { outputStream -> inputStream.copyTo(outputStream) }
+                            }
+
+                            if (BackupCrypto.isEncrypted(tempFile)) {
+                                handedOff = true
+                                withContext(Dispatchers.Main) {
+                                    runCatching { loading.hide() }
+                                    pendingRestoreFile = tempFile
+                                    restorePassphrase = ""
+                                }
+                                return@launch
                             }
 
                             // Extraction happens into a staging dir inside restore();
@@ -256,7 +340,7 @@ fun TerminalDataSettings(navController: NavController) {
                                 toast(strings.setup_failed.getFilledString(e.message))
                             }
                         } finally {
-                            withContext(NonCancellable) { tempFile.delete() }
+                            if (!handedOff) withContext(NonCancellable) { tempFile.delete() }
                         }
                     }
                 }
@@ -266,61 +350,7 @@ fun TerminalDataSettings(navController: NavController) {
                 description = stringResource(strings.terminal_backup),
                 showSwitch = false,
                 default = false,
-                sideEffect = {
-                    (activity as? SettingsActivity)?.fileManager?.let { fileManager ->
-                        fileManager.createNewFile(
-                            mimeType = "application/octet-stream",
-                            title = "terminal-backup.tar.gz",
-                        ) { fileObject ->
-                            DefaultScope.launch(Dispatchers.IO) {
-                                if (fileObject != null) {
-                                    val targetFile = getTempDir().child("terminal-backup.tar.gz")
-
-                                    val loading = LoadingPopup(activity, null)
-                                    withContext(Dispatchers.Main) { runCatching { loading.show() } }
-
-                                    try {
-                                        val ok = TerminalBackup.create(targetFile)
-
-                                        // Copy into the SAF target first, then toast:
-                                        // success must mean the archive actually landed.
-                                        var copied = false
-                                        if (ok) {
-                                            copied =
-                                                runCatching {
-                                                    targetFile.inputStream().use { inputStream ->
-                                                        fileObject.getOutputStream(false).use { outputStream ->
-                                                            inputStream.copyTo(outputStream)
-                                                        }
-                                                    }
-                                                }
-                                                    .onFailure { it.printStackTrace() }
-                                                    .isSuccess
-                                        }
-
-                                        withContext(Dispatchers.Main + NonCancellable) {
-                                            runCatching { loading.hide() }
-                                            when {
-                                                ok && copied -> toast(strings.success)
-                                                ok -> toast(strings.export_failed)
-                                                else -> toast(strings.failed)
-                                            }
-                                        }
-                                    } catch (e: CancellationException) {
-                                        throw e
-                                    } catch (e: Exception) {
-                                        withContext(Dispatchers.Main + NonCancellable) {
-                                            runCatching { loading.hide() }
-                                            toast(strings.setup_failed.getFilledString(e.message))
-                                        }
-                                    } finally {
-                                        withContext(NonCancellable) { targetFile.delete() }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
+                sideEffect = { exportPassphrase = "" },
             )
 
             SettingsItem(
@@ -382,6 +412,69 @@ fun TerminalDataSettings(navController: NavController) {
                             }
                         },
                     )
+                },
+            )
+        }
+
+        if (exportPassphrase != null) {
+            SingleInputDialog(
+                title = stringResource(strings.backup_encrypt),
+                inputLabel = stringResource(strings.backup_passphrase),
+                inputValue = exportPassphrase.orEmpty(),
+                onInputValueChange = { exportPassphrase = it },
+                confirmEnabled = exportPassphrase?.isNotEmpty() == true,
+                isPassword = true,
+                onConfirm = {
+                    val phrase = exportPassphrase.orEmpty()
+                    exportPassphrase = null
+                    launchExport(phrase)
+                },
+                onDismiss = { exportPassphrase = null },
+            )
+        }
+
+        val encryptedRestoreFile = pendingRestoreFile
+        if (encryptedRestoreFile != null) {
+            SingleInputDialog(
+                title = stringResource(strings.backup_unlock),
+                inputLabel = stringResource(strings.backup_passphrase),
+                inputValue = restorePassphrase,
+                onInputValueChange = { restorePassphrase = it },
+                confirmEnabled = restorePassphrase.isNotEmpty(),
+                isPassword = true,
+                onConfirm = {
+                    pendingRestoreFile = null
+                    val phrase = restorePassphrase
+                    restorePassphrase = ""
+                    DefaultScope.launch(Dispatchers.IO) {
+                        val loading = LoadingPopup(activity, null)
+                        withContext(Dispatchers.Main) { runCatching { loading.show() } }
+                        val plain = getTempDir().child("terminal-backup-decrypted.tar.gz")
+                        val error =
+                            runCatching {
+                                BackupCrypto.decrypt(encryptedRestoreFile, plain, phrase)
+                                TerminalBackup.restore(plain)
+                            }
+                                .getOrElse { it.message ?: "restore failed" }
+                        withContext(Dispatchers.Main + NonCancellable) {
+                            runCatching { loading.hide() }
+                            if (error == null) {
+                                terminalInstalled = isTerminalInstalled()
+                                toast(strings.restart_required)
+                            } else {
+                                toast(strings.setup_failed.getFilledString(error))
+                            }
+                        }
+                        withContext(NonCancellable) {
+                            encryptedRestoreFile.delete()
+                            plain.delete()
+                        }
+                    }
+                },
+                onDismiss = {
+                    encryptedRestoreFile.delete()
+                    pendingRestoreFile = null
+                    restorePassphrase = ""
                 },
             )
         }
