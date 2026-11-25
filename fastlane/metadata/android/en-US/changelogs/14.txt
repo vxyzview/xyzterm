@@ -1,0 +1,7 @@
+xyzterm 1.0.8
+
+- Restore keeps a rollback copy and recovers from interrupted restores
+- Encrypted backups never silently become plaintext; auto-backup now recurs
+- Self-update verifies all signing certificates and rejects malformed tags
+- Rootfs install checks the complete tree and always fetches latest archm
+- Custom binds are consistent; IPv6 DNS and corrupt settings no longer break startup

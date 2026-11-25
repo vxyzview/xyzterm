@@ -154,17 +154,21 @@ jobs:
           esac
           NOTES_FILE="$RUNNER_TEMP/xyzterm-release-notes.md"
           cat > "$NOTES_FILE" <<'RELEASE_NOTES'
-          ## xyzterm 1.0.7 — desktop control and reference-matched setup
+          ## xyzterm 1.0.8 — reliability and security hardening
 
-          A feature and visual release. The bundled Arch Linux userspace, shell engine, binds and backups are unchanged.
+          A maintenance release. The shell and the bundled Arch Linux userspace are unchanged; startup, restore, updates and session handling are hardened.
 
-          ### Changed
-          - First-run screens (Terms, Permissions, Loading) now follow the supplied reference visuals: full-width cards with even side gutters, chevrons, accent bars, consent checkbox, progress card and status rows.
-          - **M3Y OmColor** is now the default theme for new installs. Dynamic color and the other themes remain selectable.
+          ### Fixed
+          - Restore keeps a rollback copy and recovers from an interrupted restore; old-format backups with a top-level `sandbox` folder are no longer mistaken for the current format.
+          - Encrypted auto-backups never fall back to plaintext when the device key is unavailable. Auto-backup now runs on a real recurring schedule and reports failures to Android.
+          - Self-update verifies the full signing certificate set and rejects malformed release tags; x86 devices no longer get an install prompt they cannot complete.
+          - Rootfs install verifies the complete extracted tree, rejects unsafe manifest paths and symlinks, and always fetches the newest archm release.
+          - Custom binds are ordered and validated consistently; IPv6 DNS no longer breaks guest name lookup.
+          - Corrupt settings files no longer crash startup; sessions are deduplicated; gamepad and key shortcuts no longer fire while typing.
 
           ### Requirements and install
           - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`. x86_64 is not supported.
-          - Install `xyzterm-1.0.7-arm64.apk` (arm64) or `xyzterm-1.0.7-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
+          - Install `xyzterm-1.0.8-arm64.apk` (arm64) or `xyzterm-1.0.8-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
           - Signed with the repository's persistent key, so it installs over earlier releases.
 
           Licensed under GPL-3.0-or-later. Built from source on GitHub Actions.
