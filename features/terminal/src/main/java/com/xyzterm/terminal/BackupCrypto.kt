@@ -20,11 +20,10 @@ internal object BackupCrypto {
     private const val KEY_BITS = 256
     private const val TAG_BITS = 128
 
-    fun isEncrypted(file: File): Boolean =
-        runCatching {
-            file.inputStream().use { input -> readExact(input, MAGIC.length)?.contentEquals(MAGIC.toByteArray()) == true }
-        }
-            .getOrDefault(false)
+    fun isEncrypted(file: File): Boolean = runCatching {
+        file.inputStream().use { input -> readExact(input, MAGIC.length)?.contentEquals(MAGIC.toByteArray()) == true }
+    }
+        .getOrDefault(false)
 
     fun encrypt(plain: File, target: File, passphrase: String) {
         require(passphrase.isNotEmpty()) { "passphrase required" }
