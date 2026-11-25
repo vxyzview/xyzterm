@@ -7,8 +7,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * On-device smoke test. Unit tests cannot prove the real Activity starts;
- * this catches crash-on-launch regressions in setup/session wiring.
+ * On-device smoke test. Unit tests cannot prove the real Activity starts; this catches crash-on-launch regressions in
+ * setup/session wiring.
  */
 @RunWith(AndroidJUnit4::class)
 class TerminalSmokeTest {

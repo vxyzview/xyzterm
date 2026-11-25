@@ -414,9 +414,9 @@ class Terminal : AppCompatActivity() {
             // because TerminalView consumes hardware keys before Compose sees them.
             if (
                 event.isAltPressed &&
-                !event.isCtrlPressed &&
-                !event.isMetaPressed &&
-                keyCode in KeyEvent.KEYCODE_1..KeyEvent.KEYCODE_9
+                    !event.isCtrlPressed &&
+                    !event.isMetaPressed &&
+                    keyCode in KeyEvent.KEYCODE_1..KeyEvent.KEYCODE_9
             ) {
                 val index = keyCode - KeyEvent.KEYCODE_1
                 val id = sessionBinder?.get()?.getService()?.sessionList?.getOrNull(index)
