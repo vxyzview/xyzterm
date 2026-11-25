@@ -114,6 +114,11 @@ jobs:
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
         continue-on-error: false
 
+      - name: Verify Rust port against recorded cases
+        run: |
+          rust-anything diff rust/portable-rs
+          rust-anything gate rust/portable-rs
+
       - name: Verify per-ABI rootfs assets
         run: |
           for abi in arm arm64; do

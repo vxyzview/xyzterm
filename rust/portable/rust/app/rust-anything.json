@@ -6,11 +6,11 @@
     {
       "name": "terminal",
       "crate": "terminal-rs",
-      "path": "/home/xyzterm/rust/portable-rs",
+      "path": "../../../portable-rs",
       "commands": [],
       "switch": "RUST_ANYTHING_UNIT_TERMINAL",
       "unit": "src/main/java/com/xyzterm/terminal/",
-      "shadow": "/home/xyzterm/rust/portable-rs/java/com/xyzterm/terminal/PortableLogicKtShadow.java"
+      "shadow": "../../../portable-rs/java/com/xyzterm/terminal/PortableLogicKtShadow.java"
     }
   ],
   "kind": "library",

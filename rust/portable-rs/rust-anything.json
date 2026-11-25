@@ -1,6 +1,6 @@
 {
   "schema": "rust-anything/bridge@1",
-  "root": "/home/xyzterm/rust/portable",
+  "root": "rust/portable",
   "unit": "src/main/java/com/xyzterm/terminal/",
   "language": "kotlin",
   "kind": "ffi",

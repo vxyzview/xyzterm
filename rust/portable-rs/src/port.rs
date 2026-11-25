@@ -206,20 +206,9 @@ pub fn should_capture_log(line: String) -> Result<bool, String> {
         "ImeFocusController",
         "Insets",
     ];
-    if NOISY.iter().any(|k| contains_ignore_case(&line, k)) {
-        return Ok(false);
-    }
-    let slash = utf16_index(&line, b'/' as u16);
-    let paren = utf16_index(&line, b'(' as u16);
-    if slash.is_none() || paren.is_none() {
-        return Ok(true);
-    }
-    // shortcut: the original's priority/tag branches after this guard all return true;
+    // shortcut: the original's remaining branches after this filter all return true;
     // upgrade only if one of them starts doing real filtering.
-    if slash != Some(1) || paren <= slash {
-        return Ok(true);
-    }
-    Ok(true)
+    Ok(!NOISY.iter().any(|k| contains_ignore_case(&line, k)))
 }
 
 /// Parse the `v?(\d+)\.(\d+)\.(\d+)` version shape with `matchEntire` semantics.
