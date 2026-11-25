@@ -137,9 +137,7 @@ fun TerminalBackupsScreen() {
                                 Terminal.instance?.sessionBinder?.get()?.getService()?.sessionList?.isNotEmpty() == true
                             if (hasSessions) {
                                 toast(strings.restore_sessions_active)
-                                return@onOk
-                            }
-                            if (BackupCrypto.isEncrypted(backup)) {
+                            } else if (BackupCrypto.isEncrypted(backup)) {
                                 pendingEncrypted = backup
                                 passphrase = ""
                             } else {
