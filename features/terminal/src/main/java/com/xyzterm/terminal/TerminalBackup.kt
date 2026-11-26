@@ -7,6 +7,7 @@ import com.xyzterm.file.sandboxHomeDir
 import com.xyzterm.utils.getTempDir
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +34,9 @@ internal fun detectBackupLayout(entries: List<String>): BackupLayout =
     } else {
         BackupLayout.V1_ROOT
     }
+
+/** True only for a real directory — a symlink to one must never be swapped in as a rootfs. */
+internal fun isRealDirectory(file: File): Boolean = Files.isDirectory(file.toPath(), LinkOption.NOFOLLOW_LINKS)
 
 /** Creates and prunes terminal environment backups (sandbox + user home). */
 object TerminalBackup {
@@ -196,6 +200,17 @@ object TerminalBackup {
                 }
                     .getOrDefault(true)
                 if (unsafeSymlink) {
+                    return@withContext "backup contains unsafe symlinks"
+                }
+
+                // A symlink inside the tree was already rejected above; a link *named*
+                // sandbox or home can still pass that walk because it resolves inside
+                // staging. Reject it at the swap boundary for both V1 and V2 archives.
+                val topLevelLinks = listOf("sandbox", "home").any { name ->
+                    val entry = File(staging, name)
+                    Files.exists(entry.toPath(), LinkOption.NOFOLLOW_LINKS) && !isRealDirectory(entry)
+                }
+                if (topLevelLinks) {
                     return@withContext "backup contains unsafe symlinks"
                 }
 
