@@ -40,11 +40,11 @@ import com.xyzterm.utils.toast
 @Composable
 fun SnippetsScreen() {
     var refreshTrigger by remember { mutableIntStateOf(0) }
-    // distinctBy guards LazyColumn item keys (label+command): pairs persisted by
-    // older builds without the duplicate check would crash on first composition.
+    // Distinct values keep LazyColumn keys safe even when two different snippets
+    // happen to concatenate to the same string.
     val snippets =
         remember(refreshTrigger) {
-            SnippetStore.decode(Settings.terminal_snippets).distinctBy { it.label + it.command }
+            SnippetStore.decode(Settings.terminal_snippets).distinctBy { it }
         }
 
     // Index of the snippet being edited, or NO_ADDING sentinel values.
@@ -69,7 +69,7 @@ fun SnippetsScreen() {
     ) {
         item { InfoBlock(text = stringResource(strings.manage_snippets_desc)) }
 
-        items(snippets, key = { it.label + it.command }) { snippet ->
+        items(snippets, key = { it }) { snippet ->
             val index = snippets.indexOf(snippet)
             PreferenceTemplate(
                 modifier = Modifier.clickable(onClick = { editIndex = index }),
@@ -112,7 +112,7 @@ fun SnippetsScreen() {
             },
             onSave = { label, command ->
                 val list = snippets.toMutableList()
-                // Duplicate pairs would collide as LazyColumn item keys and crash.
+                // Keep the persisted list free of exact duplicates.
                 val isDuplicate =
                     list.withIndex().any { (i, s) -> s.label == label && s.command == command && i != editIndex }
                 if (isDuplicate) {

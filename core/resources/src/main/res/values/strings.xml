@@ -54,6 +54,7 @@
     <string name="bind_invalid_host">Host path must be absolute and must exist on the device</string>
     <string name="bind_invalid_guest">Guest path must be absolute and must not be /</string>
     <string name="bind_duplicate">This folder is already bound</string>
+    <string name="bind_duplicate_target">This guest path is already bound</string>
     <string name="bind_warning">Binds are writable. Guest processes run as fake root and can modify these files.</string>
     <string name="previous">Previous</string>
     <string name="next">Next</string>

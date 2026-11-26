@@ -61,7 +61,7 @@ fun UserBindingsScreen() {
     ) {
         item { InfoBlock(text = stringResource(strings.bind_warning), warning = true) }
 
-        items(bindings, key = { it.outside + it.inside.orEmpty() }) { binding ->
+        items(bindings, key = { it }) { binding ->
             PreferenceTemplate(
                 verticalPadding = 16.dp,
                 title = { Text(text = binding.outside, maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -96,6 +96,7 @@ fun UserBindingsScreen() {
     if (showAddDialog) {
         BindEditDialog(
             existing = bindings.map { it.outside }.toSet(),
+            takenGuests = bindings.map { it.inside ?: it.outside }.toSet(),
             onDismiss = { showAddDialog = false },
             onSave = { outside, inside ->
                 persist(bindings + Binding(outside, inside))
@@ -106,7 +107,12 @@ fun UserBindingsScreen() {
 }
 
 @Composable
-private fun BindEditDialog(existing: Set<String>, onDismiss: () -> Unit, onSave: (String, String?) -> Unit) {
+private fun BindEditDialog(
+    existing: Set<String>,
+    takenGuests: Set<String>,
+    onDismiss: () -> Unit,
+    onSave: (String, String?) -> Unit,
+) {
     var hostPath by remember { mutableStateOf("") }
     var guestPath by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<Int?>(null) }
@@ -159,6 +165,7 @@ private fun BindEditDialog(existing: Set<String>, onDismiss: () -> Unit, onSave:
                             inside != null && !PortableLogicKtShadow.isValidGuestPath(inside) ->
                                 strings.bind_invalid_guest
                             existing.contains(outside) -> strings.bind_duplicate
+                            takenGuests.contains(inside ?: outside) -> strings.bind_duplicate_target
                             else -> null
                         }
                     if (error == null) onSave(outside, inside)

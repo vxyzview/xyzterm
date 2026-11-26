@@ -491,6 +491,11 @@ class SessionService : Service() {
             get() = instanceRef.get()
     }
 
+    fun clearSavedSessions() {
+        Preference.removeKey(SAVED_SESSIONS_KEY)
+        Preference.removeKey(ACTIVE_SESSION_KEY)
+    }
+
     private fun saveSession(id: SessionId, pwd: SessionPwd) {
         val existing = runCatching {
             JSONObject(Preference.getString(SAVED_SESSIONS_KEY, "{}"))

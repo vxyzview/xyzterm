@@ -46,6 +46,7 @@ import com.xyzterm.terminal.AutoBackupPassphrase
 import com.xyzterm.terminal.BackupCrypto
 import com.xyzterm.terminal.PassphraseState
 import com.xyzterm.terminal.TerminalBackup
+import com.xyzterm.terminal.resetTerminalFiles
 import com.xyzterm.terminal.terminalView
 import com.xyzterm.utils.LoadingPopup
 import com.xyzterm.utils.dialogRes
@@ -431,6 +432,8 @@ fun TerminalDataSettings(navController: NavController) {
                                     sandboxDir().deleteRecursively()
                                     localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").delete()
                                 }
+                                resetTerminalFiles()
+                                Terminal.instance?.sessionBinder?.get()?.getService()?.clearSavedSessions()
                                 terminalInstalled = false
                                 withContext(Dispatchers.Main + NonCancellable) {
                                     runCatching { loading.hide() }
