@@ -167,19 +167,15 @@ object RootfsInstaller {
         marker.createNewFile()
     }
 
-    private fun isInstallComplete(root: File, manifest: RootfsManifest): Boolean {
-        // writeContainerConfig() deliberately replaces these three on every install,
-        // so their sizes will never match the bundled manifest.
-        val regenerated = setOf("etc/hostname", "etc/resolv.conf", "etc/hosts")
-        val files = manifest.entries.filter { it.type == "f" && isSafeEntryPath(it.path) && it.path !in regenerated }
+    internal fun isInstallComplete(root: File, manifest: RootfsManifest): Boolean {
+        // Only existence matters here. Comparing byte length used to wipe a working
+        // rootfs when a user edited a config file and the marker was missing.
+        val files = manifest.entries.filter { it.type == "f" && isSafeEntryPath(it.path) }
         // Symlinks are created after the file loop; without this an interruption
         // between the two is mistaken for a finished install.
         val links = manifest.entries.filter { it.type == "l" && isSafeEntryPath(it.path) }
         return files.isNotEmpty() &&
-            files.all { entry ->
-                val file = File(root, entry.path)
-                file.isFile && file.length() == entry.size
-            } &&
+            files.all { File(root, it.path).isFile } &&
             links.all { File(root, it.path).exists() }
     }
 
