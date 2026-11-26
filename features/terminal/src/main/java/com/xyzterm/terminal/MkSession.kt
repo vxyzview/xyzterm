@@ -83,7 +83,7 @@ object MkSession {
         val command = if (consumePendingCommand) pendingCommand else null
         val workingDir = cwd ?: getPwd(context, command?.workingDir)
 
-        val tmpDir = localDir().child("tmp").childSafe(nameSafeViaRust(sessionId))
+        val tmpDir = localDir().child("tmp").childSafe(nameSafe(sessionId))
 
         if (tmpDir.exists()) {
             tmpDir.deleteRecursively()

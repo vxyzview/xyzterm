@@ -6,7 +6,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.Handler
@@ -19,8 +18,6 @@ import androidx.core.app.NotificationCompat
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 import com.xyzterm.activities.terminal.Terminal
-import com.xyzterm.exec.TerminalCommand
-import com.xyzterm.exec.pendingCommand
 import com.xyzterm.resources.drawables
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
@@ -120,28 +117,6 @@ class SessionService : Service() {
                 }
             if (extraction) activity.installNextStage = NEXT_STAGE.NONE
             return info
-        }
-
-        /** Creates a session owned by the service only — no Terminal activity is opened or switched. */
-        suspend fun createBackgroundSession(
-            id: SessionId,
-            client: TerminalSessionClient,
-            context: Context,
-            command: TerminalCommand,
-        ): SessionInfo {
-            pendingCommand = command
-            return try {
-                MkSession.createSession(context, client, id, false, null).let { (session, pwd) ->
-                    sessions[id] = session
-                    sessionWorkDirs[id] = pwd
-                    sessionList.add(id)
-                    saveSession(id, pwd)
-                    updateNotification()
-                    SessionInfo(id, pwd, session)
-                }
-            } finally {
-                pendingCommand = null
-            }
         }
 
         fun getSession(id: SessionId): TerminalSession? {

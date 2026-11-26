@@ -34,7 +34,6 @@ import com.xyzterm.exec.Binding
 import com.xyzterm.exec.UserBindings
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
-import com.xyzterm.terminal.PortableLogicKtShadow
 
 @Composable
 fun UserBindingsScreen() {
@@ -162,7 +161,7 @@ private fun BindEditDialog(
                     error =
                         when {
                             !UserBindings.isValidHostPath(outside) -> strings.bind_invalid_host
-                            inside != null && !PortableLogicKtShadow.isValidGuestPath(inside) ->
+                            inside != null && !UserBindings.isValidGuestPath(inside) ->
                                 strings.bind_invalid_guest
                             existing.contains(outside) -> strings.bind_duplicate
                             takenGuests.contains(inside ?: outside) -> strings.bind_duplicate_target

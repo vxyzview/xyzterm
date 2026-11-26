@@ -1,6 +1,5 @@
 package com.xyzterm.exec
 
-import com.xyzterm.terminal.PortableLogicKtShadow
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -23,10 +22,10 @@ object UserBindings {
             // (storage unmounted, permission revoked) must survive the
             // roundtrip, otherwise saving the list would silently delete
             // it. attachTo() skips missing paths at launch time anyway.
-            if (!PortableLogicKtShadow.isWellFormedHost(outside)) {
+            if (!isWellFormedHost(outside)) {
                 return@mapNotNull null
             }
-            if (inside != null && !PortableLogicKtShadow.isValidGuestPath(inside)) {
+            if (inside != null && !isValidGuestPath(inside)) {
                 return@mapNotNull null
             }
             val binding = Binding(outside, inside)
@@ -47,11 +46,11 @@ object UserBindings {
     }
 
     fun isValid(outside: String, inside: String?): Boolean =
-        isValidHostPath(outside) && (inside == null || PortableLogicKtShadow.isValidGuestPath(inside))
+        isValidHostPath(outside) && (inside == null || isValidGuestPath(inside))
 
     /** Add-time validation: the host folder must exist right now. */
     fun isValidHostPath(path: String): Boolean =
-        PortableLogicKtShadow.isWellFormedHost(path) && java.io.File(path).exists()
+        isWellFormedHost(path) && java.io.File(path).exists()
 
     fun isValidGuestPath(path: String): Boolean =
         isWellFormedHost(path) && path.trim('/').isNotEmpty() && path.split('/').none { it == ".." }

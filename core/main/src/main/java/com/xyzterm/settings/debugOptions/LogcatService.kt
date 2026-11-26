@@ -50,11 +50,7 @@ class LogcatService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun shouldCaptureLog(line: String): Boolean {
-        if (line.isEmpty()) {
-            return false
-        }
-
-        // Filter out known noisy system verbose logs
+        // Filter out known noisy system verbose logs; everything else is captured.
         val noisyKeywords =
             listOf(
                 "ViewRootImpl",
@@ -77,35 +73,7 @@ class LogcatService : Service() {
                 "ImeFocusController",
                 "Insets",
             )
-        if (noisyKeywords.any { line.contains(it, ignoreCase = true) }) {
-            return false
-        }
-
-        if (!line.contains('/') || !line.contains('(')) {
-            return true
-        }
-
-        val slashIdx = line.indexOf('/')
-        val parenIdx = line.indexOf('(')
-        if (slashIdx != 1 || parenIdx <= slashIdx) {
-            return true
-        }
-
-        val priority = line[0]
-        val tag = line.substring(slashIdx + 1, parenIdx).trim()
-
-        // 1. Capture warning + error + fatal + assert logs
-        if (priority == 'W' || priority == 'E' || priority == 'F' || priority == 'A') {
-            return true
-        }
-
-        // 2. Capture System.* calls
-        if (tag.startsWith("System.out") || tag.startsWith("System.err")) {
-            return true
-        }
-
-        // 3. Default to capturing
-        return true
+        return line.isNotEmpty() && !noisyKeywords.any { line.contains(it, ignoreCase = true) }
     }
 
     override fun onCreate() {

@@ -1,4 +1,0 @@
-target/
-.rust-anything/
-ruby/*.so
-ruby/*.bundle
