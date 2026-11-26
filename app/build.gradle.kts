@@ -45,8 +45,8 @@ android {
         }
     }
     sourceSets {
-        getByName("arm") { assets.srcDirs("src/arm/assets") }
-        getByName("arm64") { assets.srcDirs("src/arm64/assets") }
+        getByName("arm") { assets.directories.add(file("src/arm/assets")) }
+        getByName("arm64") { assets.directories.add(file("src/arm64/assets")) }
     }
 
     dependenciesInfo {
