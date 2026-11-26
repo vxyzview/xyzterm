@@ -7,6 +7,17 @@ import org.junit.Test
 
 class BackupSettingsTest {
     @Test
+    fun `schema maps declared Kotlin classes to tags`() {
+        val schema =
+            BackupSettings.schemaFromClasses(
+                mapOf("flag" to Boolean::class, "count" to Int::class, "unknown" to StringBuilder::class),
+            )
+        assertEquals("Boolean", schema["flag"])
+        assertEquals("Int", schema["count"])
+        assertEquals("", schema["unknown"])
+    }
+
+    @Test
     fun `snapshot records each preference type`() {
         val json =
             BackupSettings.snapshot(
@@ -67,7 +78,7 @@ class BackupSettingsTest {
     @Test
     fun `device bound passphrase is excluded from the snapshot`() {
         val source =
-            BackupSettings.snapshotSource(
+            BackupSettings.withoutDeviceBoundKeys(
                 mapOf("theme" to "omcolor", "auto_backup_passphrase_cipher" to "sealed-with-old-device-key"),
             )
         assertTrue(source.containsKey("theme"))

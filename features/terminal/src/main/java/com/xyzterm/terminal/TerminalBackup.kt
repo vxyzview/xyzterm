@@ -100,7 +100,7 @@ object TerminalBackup {
             try {
                 File(metaDir, "settings.json")
                     .writeText(
-                        BackupSettings.snapshot(BackupSettings.snapshotSource(Preference.getAll())),
+                        BackupSettings.snapshot(BackupSettings.withoutDeviceBoundKeys(Preference.getAll())),
                     )
                 val keybindings = application!!.filesDir.resolve("keybindings.json")
                 if (keybindings.exists()) {
@@ -319,7 +319,10 @@ object TerminalBackup {
                         File(meta, "settings.json")
                             .takeIf { it.isFile }
                             ?.let { file ->
-                                BackupSettings.restore(file.readText(), preferenceSchema()) { key, value ->
+                                BackupSettings.restore(
+                                    file.readText(),
+                                    BackupSettings.schemaFromClasses(Preference.preferenceTypes),
+                                ) { key, value ->
                                     Preference.put(key, value)
                                 }
                             }
@@ -341,29 +344,13 @@ object TerminalBackup {
         }
     }
 
-    /**
-     * Moves [source] into [target], keeping the old target as `<name>.old` for cleanup after every swap succeeds.
-     * Restores the old directory if the second rename fails. Returns null on success, otherwise an error message.
-     */
-    /** The installed app's preference types — the authority when importing an archive. */
-    private fun preferenceSchema(): Map<String, String> =
-        Preference.preferenceTypes.mapValues { (_, type) ->
-            when (type) {
-                Boolean::class -> "Boolean"
-                Int::class -> "Int"
-                Long::class -> "Long"
-                Float::class -> "Float"
-                String::class -> "String"
-                else -> ""
-            }
-        }
-
     private fun oldBackups(target: File): List<File> =
         target.parentFile
             ?.listFiles { file -> file.name == "${target.name}.old" || file.name.startsWith("${target.name}.old-") }
             ?.toList()
             .orEmpty()
 
+    /** Moves [source] into [target], keeping the old target as `<name>.old` until every swap succeeds. */
     private fun swapDirectory(source: File, target: File): SwapResult {
         // An interrupted restore can leave an old tree without a live target;
         // recover the newest one first so there is always something to roll back to.

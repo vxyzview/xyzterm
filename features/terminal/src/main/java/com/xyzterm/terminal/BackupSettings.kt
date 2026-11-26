@@ -2,6 +2,7 @@ package com.xyzterm.terminal
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import kotlin.reflect.KClass
 
 /**
  * Settings travel with a backup as a typed JSON map. The type tag is stored next to each value because Gson erases the
@@ -14,9 +15,22 @@ internal object BackupSettings {
     // Sealed with the device's AndroidKeyStore key; useless and harmful on another device.
     private val DEVICE_BOUND_KEYS = setOf("auto_backup_passphrase_cipher")
 
-    fun snapshotSource(settings: Map<String, Any?>): Map<String, Any?> = settings.filterKeys {
+    private val TAG_BY_CLASS =
+        mapOf(
+            Boolean::class to "Boolean",
+            Int::class to "Int",
+            Long::class to "Long",
+            Float::class to "Float",
+            String::class to "String",
+        )
+
+    fun withoutDeviceBoundKeys(settings: Map<String, Any?>): Map<String, Any?> = settings.filterKeys {
         it !in DEVICE_BOUND_KEYS
     }
+
+    /** The installed app's declared preference types — the authority when importing an archive. */
+    fun schemaFromClasses(types: Map<String, KClass<*>>): Map<String, String> =
+        types.mapValues { TAG_BY_CLASS[it.value].orEmpty() }
 
     fun snapshot(settings: Map<String, Any?>): String {
         val root = JsonObject()
