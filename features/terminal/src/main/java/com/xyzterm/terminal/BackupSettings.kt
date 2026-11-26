@@ -1,0 +1,67 @@
+package com.xyzterm.terminal
+
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+
+/**
+ * Settings travel with a backup as a typed JSON map. The type tag is stored next to each value because Gson erases the
+ * difference between Int, Long and Float once the archive is read back.
+ *
+ * This object is deliberately free of Android references so it can be unit-tested on the JVM; the caller supplies the
+ * preference map on snapshot and a `put` callback on restore.
+ */
+internal object BackupSettings {
+    fun snapshot(settings: Map<String, Any?>): String {
+        val root = JsonObject()
+        settings.forEach { (key, value) ->
+            val entry = JsonObject()
+            when (value) {
+                is String -> {
+                    entry.addProperty("type", "String")
+                    entry.addProperty("value", value)
+                }
+                is Boolean -> {
+                    entry.addProperty("type", "Boolean")
+                    entry.addProperty("value", value)
+                }
+                is Int -> {
+                    entry.addProperty("type", "Int")
+                    entry.addProperty("value", value)
+                }
+                is Long -> {
+                    entry.addProperty("type", "Long")
+                    entry.addProperty("value", value)
+                }
+                is Float -> {
+                    entry.addProperty("type", "Float")
+                    entry.addProperty("value", value)
+                }
+                else -> return@forEach
+            }
+            root.add(key, entry)
+        }
+        return root.toString()
+    }
+
+    fun restore(
+        json: String,
+        put: (String, Any) -> Unit,
+    ) {
+        val root = runCatching { JsonParser.parseString(json).asJsonObject }.getOrNull() ?: return
+        root.entrySet().forEach { (key, element) ->
+            val entry = element.takeIf { it.isJsonObject }?.asJsonObject ?: return@forEach
+            val type = entry.get("type")?.asString ?: return@forEach
+            val value = entry.get("value") ?: return@forEach
+            runCatching {
+                when (type) {
+                    "String" -> put(key, value.asString)
+                    "Boolean" -> put(key, value.asBoolean)
+                    "Int" -> put(key, value.asInt)
+                    "Long" -> put(key, value.asLong)
+                    "Float" -> put(key, value.asFloat)
+                    else -> Unit
+                }
+            }
+        }
+    }
+}
