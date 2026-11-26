@@ -191,15 +191,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Install rust-anything CLI and build JNI library
-        run: |
-          set -euo pipefail
-          cargo install rust-anything --version 3.2.0 --locked
-          rustup target add aarch64-linux-android
-          rust-anything build rust/portable-rs --profile android \
-            --ndk "/usr/local/lib/android/sdk/ndk/$NDK_VERSION" --api 26 \
-            --abi arm64-v8a --jni-libs features/terminal/src/main/jniLibs
-
       - name: Generate signing material
         run: |
           # Both builds must sign identically so apkdiff compares content only.

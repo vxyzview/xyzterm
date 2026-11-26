@@ -29,12 +29,6 @@ abstract class DownloadRootfsTask : DefaultTask() {
     @get:OutputDirectory abstract val armAssetsDir: DirectoryProperty
     @get:OutputDirectory abstract val arm64AssetsDir: DirectoryProperty
 
-    init {
-        // The pinned release assets are immutable, but the published checksum/tarball pair
-        // must be re-fetched together on every build rather than trusting a stale task output.
-        outputs.upToDateWhen { false }
-    }
-
     @TaskAction
     fun download() {
         val dirs = mapOf("arm" to armAssetsDir.get().asFile, "arm64" to arm64AssetsDir.get().asFile)

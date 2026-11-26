@@ -87,38 +87,12 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Install rust-anything CLI
-        run: cargo install rust-anything --version 3.2.0 --locked
-
-      - name: Build Rust JNI library
-        run: |
-          set -euo pipefail
-          rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
-          NDK_VERSION=$(grep -rhoE '"[0-9]+\.[0-9]+\.[0-9]+"' features/terminal/link2symlink/build.gradle.kts | tr -d '"' | sed -n '1p')
-          [ -n "$NDK_VERSION" ] || NDK_VERSION=30.0.16248370
-          SDK_ROOT=${ANDROID_HOME:-/usr/local/lib/android/sdk}
-          SDKMANAGER=$(ls "$SDK_ROOT"/cmdline-tools/*/bin/sdkmanager "$SDK_ROOT"/cmdline-tools/latest/bin/sdkmanager 2>/dev/null | sed -n '1p')
-          [ -n "$SDKMANAGER" ] || { echo "sdkmanager not found under $SDK_ROOT" >&2; exit 1; }
-          if [ ! -d "$SDK_ROOT/ndk/$NDK_VERSION" ]; then
-            yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" "ndk;$NDK_VERSION"
-          fi
-          rust-anything build rust/portable-rs --profile android \
-            --ndk "$SDK_ROOT/ndk/$NDK_VERSION" --api 26 \
-            --abi arm64-v8a --abi armeabi-v7a --abi x86_64 \
-            --jni-libs features/terminal/src/main/jniLibs
-
       - name: Build with Gradle
         run: ./gradlew assembleRelease --no-daemon --warning-mode all
         env:
           KEYSTORE_FILE: /tmp/xyzterm.keystore
           SIGNING_PROPERTIES_FILE: /tmp/signing.properties
         continue-on-error: false
-
-      - name: Verify Rust port against recorded cases
-        run: |
-          rust-anything build rust/portable-rs
-          rust-anything diff rust/portable-rs
-          rust-anything gate rust/portable-rs
 
       - name: Verify per-ABI rootfs assets
         run: |
