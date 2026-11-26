@@ -29,8 +29,9 @@ internal object BackupSettings {
     }
 
     /** The installed app's declared preference types — the authority when importing an archive. */
-    fun schemaFromClasses(types: Map<String, KClass<*>>): Map<String, String> =
-        types.mapValues { TAG_BY_CLASS[it.value].orEmpty() }
+    fun schemaFromClasses(types: Map<String, KClass<*>>): Map<String, String> = types.mapValues {
+        TAG_BY_CLASS[it.value].orEmpty()
+    }
 
     fun snapshot(settings: Map<String, Any?>): String {
         val root = JsonObject()
