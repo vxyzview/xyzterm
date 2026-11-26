@@ -19,6 +19,11 @@ import kotlinx.coroutines.launch
 class AutoBackupJobService : JobService() {
     override fun onStartJob(params: JobParameters?): Boolean {
         DefaultScope.launch(Dispatchers.IO) {
+            // Swapping the rootfs or tar-ing a live tree produces torn backups.
+            if (SessionService.instance?.hasActiveWork() == true) {
+                if (params != null) jobFinished(params, true)
+                return@launch
+            }
             val ok = runCatching { TerminalBackup.autoBackup() }.getOrDefault(false)
             if (params != null) jobFinished(params, !ok)
         }
@@ -32,6 +37,8 @@ class AutoBackupJobService : JobService() {
 
         fun schedule(context: Context) {
             val scheduler = context.getSystemService(JobScheduler::class.java) ?: return
+            // Service teardown must not restart the six-hour period on every exit.
+            if (scheduler.getPendingJob(JOB_ID) != null) return
             val job =
                 JobInfo.Builder(JOB_ID, ComponentName(context, AutoBackupJobService::class.java))
                     .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)

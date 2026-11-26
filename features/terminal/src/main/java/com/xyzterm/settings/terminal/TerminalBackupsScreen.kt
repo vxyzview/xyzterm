@@ -133,7 +133,7 @@ fun TerminalBackupsScreen() {
                             // Same rule as the other restore screen: swapping the rootfs under
                             // a live session silently strands that session's writes.
                             val hasSessions =
-                                Terminal.instance?.sessionBinder?.get()?.getService()?.sessionList?.isNotEmpty() == true
+                                Terminal.instance?.sessionBinder?.get()?.getService()?.hasActiveWork() == true
                             if (hasSessions) {
                                 toast(strings.restore_sessions_active)
                             } else if (BackupCrypto.isEncrypted(backup)) {

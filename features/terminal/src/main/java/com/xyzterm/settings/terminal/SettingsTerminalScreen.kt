@@ -293,7 +293,7 @@ fun TerminalDataSettings(navController: NavController) {
                         return@rememberLauncherForActivityResult
                     }
                     val activeSessions =
-                        Terminal.instance?.sessionBinder?.get()?.getService()?.sessionList?.isNotEmpty() == true
+                        Terminal.instance?.sessionBinder?.get()?.getService()?.hasActiveWork() == true
                     if (activeSessions) {
                         toast(strings.restore_sessions_active)
                         return@rememberLauncherForActivityResult

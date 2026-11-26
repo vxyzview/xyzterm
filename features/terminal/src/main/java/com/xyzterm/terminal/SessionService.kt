@@ -253,6 +253,9 @@ class SessionService : Service() {
     private val binder = SessionBinder()
     private val notificationManager by lazy { getSystemService(NotificationManager::class.java) }
 
+    /** True while shells are running or being restored — backups and restores must wait. */
+    fun hasActiveWork(): Boolean = restorePending || sessionList.isNotEmpty()
+
     /** Runs [callback] once the in-flight session restore has published, or immediately. */
     fun onRestored(callback: () -> Unit) {
         if (restorePending) {
