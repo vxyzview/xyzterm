@@ -392,8 +392,7 @@ private suspend fun TerminalView.attachOrCreateSession(
             service.awaitRestored()
             val commandId = pendingCommand?.id ?: return
             service.currentSession.value = commandId
-            binder.getSession(commandId)
-                ?: binder.createSession(commandId, client, terminalActivity).session
+            binder.getSession(commandId) ?: binder.createSession(commandId, client, terminalActivity).session
         } else {
             val binder = terminalActivity.sessionBinder?.get() ?: return
             val service = binder.getService()

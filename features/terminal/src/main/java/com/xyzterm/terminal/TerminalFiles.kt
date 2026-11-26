@@ -18,10 +18,7 @@ private val installMutex = Mutex()
 private var terminalFilesInstalled = false
 
 /** Called when the terminal is uninstalled in a live process so the next session reinstalls the scripts. */
-suspend fun resetTerminalFiles() =
-    installMutex.withLock {
-        terminalFilesInstalled = false
-    }
+suspend fun resetTerminalFiles() = installMutex.withLock { terminalFilesInstalled = false }
 
 suspend fun setupTerminalFiles() {
     if (terminalFilesInstalled) return

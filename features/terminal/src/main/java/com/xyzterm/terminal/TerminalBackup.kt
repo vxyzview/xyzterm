@@ -47,12 +47,11 @@ internal fun isRealDirectory(file: File): Boolean = Files.isDirectory(file.toPat
 internal fun restoreRollback(
     target: File,
     old: File,
-): Boolean =
-    runCatching {
-        if (target.exists() && !target.deleteRecursively()) return false
-        old.renameTo(target)
-    }
-        .getOrDefault(false)
+): Boolean = runCatching {
+    if (target.exists() && !target.deleteRecursively()) return false
+    old.renameTo(target)
+}
+    .getOrDefault(false)
 
 // Two restores at once would delete each other's staging tree.
 private val restoreMutex = Mutex()
@@ -99,23 +98,24 @@ object TerminalBackup {
             val metaDir = localDir().child("backup-meta-${UUID.randomUUID()}")
             metaDir.mkdirs()
             try {
-                File(metaDir, "settings.json").writeText(
-                    BackupSettings.snapshot(BackupSettings.snapshotSource(Preference.getAll())),
-                )
+                File(metaDir, "settings.json")
+                    .writeText(
+                        BackupSettings.snapshot(BackupSettings.snapshotSource(Preference.getAll())),
+                    )
                 val keybindings = application!!.filesDir.resolve("keybindings.json")
                 if (keybindings.exists()) {
                     keybindings.copyTo(File(metaDir, "keybindings.json"), overwrite = true)
                 }
                 val process =
                     ProcessBuilder(
-                        "tar",
-                        "-czf",
-                        targetFile.absolutePath,
-                        *EXCLUDES,
-                        "sandbox",
-                        "home",
-                        metaDir.name,
-                    )
+                            "tar",
+                            "-czf",
+                            targetFile.absolutePath,
+                            *EXCLUDES,
+                            "sandbox",
+                            "home",
+                            metaDir.name,
+                        )
                         .directory(localDir())
                         .redirectErrorStream(true)
                         .start()
@@ -196,141 +196,150 @@ object TerminalBackup {
      *
      * Returns null on success, otherwise a human-readable error string.
      */
-    suspend fun restore(archive: File): String? =
-        restoreMutex.withLock {
-            withContext(Dispatchers.IO) {
-                val staging = getTempDir().child("terminal-restore-staging")
-                try {
-                    staging.deleteRecursively()
-                    staging.mkdirs()
+    suspend fun restore(archive: File): String? = restoreMutex.withLock {
+        withContext(Dispatchers.IO) {
+            val staging = getTempDir().child("terminal-restore-staging")
+            try {
+                staging.deleteRecursively()
+                staging.mkdirs()
 
-                    // -z is explicit: some toybox builds don't sniff gzip.
-                    val process = ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", staging.absolutePath).start()
-                    // Drain stderr concurrently; reading after waitFor() deadlocks if
-                    // tar fills the pipe before exiting.
-                    var stderr = ""
-                    val stderrDrain = Thread {
-                        stderr = runCatching { process.errorStream.bufferedReader().use { it.readText() } }.getOrDefault("")
-                    }
-                    stderrDrain.start()
-                    val timedOut = !process.waitFor(TAR_TIMEOUT_MINUTES, TimeUnit.MINUTES)
-                    if (timedOut) {
-                        process.destroyForcibly()
-                    }
-                    stderrDrain.join(5_000)
+                // -z is explicit: some toybox builds don't sniff gzip.
+                val process = ProcessBuilder("tar", "-xzf", archive.absolutePath, "-C", staging.absolutePath).start()
+                // Drain stderr concurrently; reading after waitFor() deadlocks if
+                // tar fills the pipe before exiting.
+                var stderr = ""
+                val stderrDrain = Thread {
+                    stderr = runCatching { process.errorStream.bufferedReader().use { it.readText() } }.getOrDefault("")
+                }
+                stderrDrain.start()
+                val timedOut = !process.waitFor(TAR_TIMEOUT_MINUTES, TimeUnit.MINUTES)
+                if (timedOut) {
+                    process.destroyForcibly()
+                }
+                stderrDrain.join(5_000)
 
-                    if (timedOut) {
-                        return@withContext "tar timed out"
-                    }
+                if (timedOut) {
+                    return@withContext "tar timed out"
+                }
 
-                    val code = process.exitValue()
-                    if (code != 0) {
-                        return@withContext (stderr.lineSequence().firstOrNull { it.isNotBlank() }
-                            ?: "tar exited with $code")
-                    }
+                val code = process.exitValue()
+                if (code != 0) {
+                    return@withContext (stderr.lineSequence().firstOrNull { it.isNotBlank() }
+                        ?: "tar exited with $code")
+                }
 
-                    // User-supplied archives are a trust boundary: reject symlinks
-                    // that point outside the staging tree before swapping directories.
-                    val stagingRoot =
-                        runCatching { staging.toPath().toRealPath() }.getOrNull()
-                            ?: return@withContext "backup contains unsafe symlinks"
-                    val unsafeSymlink = runCatching {
-                        Files.walk(staging.toPath()).use { paths ->
-                            paths.iterator().asSequence().any { path ->
-                                if (!Files.isSymbolicLink(path)) {
-                                    false
-                                } else {
-                                    val link = Files.readSymbolicLink(path)
-                                    link.isAbsolute ||
-                                        link.toString().split('/').contains("..") ||
-                                        !path.toRealPath().startsWith(stagingRoot)
-                                }
+                // User-supplied archives are a trust boundary: reject symlinks
+                // that point outside the staging tree before swapping directories.
+                val stagingRoot =
+                    runCatching { staging.toPath().toRealPath() }.getOrNull()
+                        ?: return@withContext "backup contains unsafe symlinks"
+                val unsafeSymlink = runCatching {
+                    Files.walk(staging.toPath()).use { paths ->
+                        paths.iterator().asSequence().any { path ->
+                            if (!Files.isSymbolicLink(path)) {
+                                false
+                            } else {
+                                val link = Files.readSymbolicLink(path)
+                                link.isAbsolute ||
+                                    link.toString().split('/').contains("..") ||
+                                    !path.toRealPath().startsWith(stagingRoot)
                             }
                         }
                     }
-                        .getOrDefault(true)
-                    if (unsafeSymlink) {
-                        return@withContext "backup contains unsafe symlinks"
-                    }
+                }
+                    .getOrDefault(true)
+                if (unsafeSymlink) {
+                    return@withContext "backup contains unsafe symlinks"
+                }
 
-                    // A symlink inside the tree was already rejected above; a link *named*
-                    // sandbox or home can still pass that walk because it resolves inside
-                    // staging. Reject it at the swap boundary for both V1 and V2 archives.
-                    val topLevelLinks = listOf("sandbox", "home").any { name ->
+                // A symlink inside the tree was already rejected above; a link *named*
+                // sandbox or home can still pass that walk because it resolves inside
+                // staging. Reject it at the swap boundary for both V1 and V2 archives.
+                val topLevelLinks =
+                    listOf("sandbox", "home").any { name ->
                         val entry = File(staging, name)
                         Files.exists(entry.toPath(), LinkOption.NOFOLLOW_LINKS) && !isRealDirectory(entry)
                     }
-                    if (topLevelLinks) {
-                        return@withContext "backup contains unsafe symlinks"
-                    }
+                if (topLevelLinks) {
+                    return@withContext "backup contains unsafe symlinks"
+                }
 
-                    val sandboxTarget = localDir().child("sandbox")
-                    val stagedSandbox = File(staging, "sandbox")
-                    val stagedHome = File(staging, "home")
-                    // A V1 archive is itself a rootfs, so it can legitimately contain both
-                    // /sandbox and /home. `bin/bash` at the archive root settles the case.
-                    val isRootfsAtRoot = File(staging, "bin/bash").isFile
-                    val layout =
-                        if (
-                            !isRootfsAtRoot &&
-                                detectBackupLayout(staging.list()?.toList().orEmpty()) == BackupLayout.V2_SANDBOX_HOME &&
-                                stagedSandbox.isDirectory &&
-                                stagedHome.isDirectory
-                        ) {
-                            BackupLayout.V2_SANDBOX_HOME
-                        } else {
-                            BackupLayout.V1_ROOT
+                val sandboxTarget = localDir().child("sandbox")
+                val stagedSandbox = File(staging, "sandbox")
+                val stagedHome = File(staging, "home")
+                // A V1 archive is itself a rootfs, so it can legitimately contain both
+                // /sandbox and /home. `bin/bash` at the archive root settles the case.
+                val isRootfsAtRoot = File(staging, "bin/bash").isFile
+                val layout =
+                    if (
+                        !isRootfsAtRoot &&
+                            detectBackupLayout(staging.list()?.toList().orEmpty()) == BackupLayout.V2_SANDBOX_HOME &&
+                            stagedSandbox.isDirectory &&
+                            stagedHome.isDirectory
+                    ) {
+                        BackupLayout.V2_SANDBOX_HOME
+                    } else {
+                        BackupLayout.V1_ROOT
+                    }
+                when (layout) {
+                    BackupLayout.V1_ROOT -> {
+                        // Old archives never contained home; leave the user's home alone.
+                        swapDirectory(staging, sandboxTarget).error?.let {
+                            return@withContext it
                         }
-                    when (layout) {
-                        BackupLayout.V1_ROOT -> {
-                            // Old archives never contained home; leave the user's home alone.
-                            swapDirectory(staging, sandboxTarget).error?.let { return@withContext it }
+                    }
+                    BackupLayout.V2_SANDBOX_HOME -> {
+                        val sandboxSwap = swapDirectory(stagedSandbox, sandboxTarget)
+                        sandboxSwap.error?.let {
+                            return@withContext it
                         }
-                        BackupLayout.V2_SANDBOX_HOME -> {
-                            val sandboxSwap = swapDirectory(stagedSandbox, sandboxTarget)
-                            sandboxSwap.error?.let { return@withContext it }
-                            val homeSwap = swapDirectory(stagedHome, sandboxHomeDir())
-                            homeSwap.error?.let { error ->
-                                // The sandbox was already replaced; put the exact old tree back.
-                                val rollback = sandboxSwap.rollback
-                                if (rollback != null && !restoreRollback(sandboxTarget, rollback)) {
-                                    return@withContext "restore failed; previous sandbox left at ${rollback.name}: $error"
-                                }
-                                return@withContext error
+                        val homeSwap = swapDirectory(stagedHome, sandboxHomeDir())
+                        homeSwap.error?.let { error ->
+                            // The sandbox was already replaced; put the exact old tree back.
+                            val rollback = sandboxSwap.rollback
+                            if (rollback != null && !restoreRollback(sandboxTarget, rollback)) {
+                                return@withContext "restore failed; previous sandbox left at ${rollback.name}: $error"
                             }
+                            return@withContext error
                         }
                     }
+                }
 
-                    // Every swap succeeded, so the restored tree is authoritative. Old
-                    // copies stay in place on any error to keep a rollback possible.
-                    oldBackups(sandboxTarget).forEach { it.deleteRecursively() }
-                    oldBackups(sandboxHomeDir()).forEach { it.deleteRecursively() }
+                // Every swap succeeded, so the restored tree is authoritative. Old
+                // copies stay in place on any error to keep a rollback possible.
+                oldBackups(sandboxTarget).forEach { it.deleteRecursively() }
+                oldBackups(sandboxHomeDir()).forEach { it.deleteRecursively() }
 
-                    // Newer archives carry a settings/keybindings snapshot. Older ones simply
-                    // skip this step, so restoring them stays backwards compatible.
-                    staging.listFiles { file -> file.isDirectory && file.name.startsWith("backup-meta-") }
-                        ?.firstOrNull()
-                        ?.let { meta ->
-                            File(meta, "settings.json").takeIf { it.isFile }?.let { file ->
+                // Newer archives carry a settings/keybindings snapshot. Older ones simply
+                // skip this step, so restoring them stays backwards compatible.
+                staging
+                    .listFiles { file -> file.isDirectory && file.name.startsWith("backup-meta-") }
+                    ?.firstOrNull()
+                    ?.let { meta ->
+                        File(meta, "settings.json")
+                            .takeIf { it.isFile }
+                            ?.let { file ->
                                 BackupSettings.restore(file.readText(), preferenceSchema()) { key, value ->
                                     Preference.put(key, value)
                                 }
                             }
-                            File(meta, "keybindings.json").takeIf { it.isFile }?.let { file ->
+                        File(meta, "keybindings.json")
+                            .takeIf { it.isFile }
+                            ?.let { file ->
                                 file.copyTo(application!!.filesDir.resolve("keybindings.json"), overwrite = true)
                                 KeybindingsManager.loadKeybindings()
                             }
-                        }
+                    }
 
-                    localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
-                    null
-                } catch (e: Exception) {
-                    e.message ?: "restore failed"
-                } finally {
-                    if (staging.exists()) staging.deleteRecursively()
-                }
+                localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
+                null
+            } catch (e: Exception) {
+                e.message ?: "restore failed"
+            } finally {
+                if (staging.exists()) staging.deleteRecursively()
             }
         }
+    }
 
     /**
      * Moves [source] into [target], keeping the old target as `<name>.old` for cleanup after every swap succeeds.

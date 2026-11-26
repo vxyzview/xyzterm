@@ -42,10 +42,7 @@ fun SnippetsScreen() {
     var refreshTrigger by remember { mutableIntStateOf(0) }
     // Distinct values keep LazyColumn keys safe even when two different snippets
     // happen to concatenate to the same string.
-    val snippets =
-        remember(refreshTrigger) {
-            SnippetStore.decode(Settings.terminal_snippets).distinctBy { it }
-        }
+    val snippets = remember(refreshTrigger) { SnippetStore.decode(Settings.terminal_snippets).distinctBy { it } }
 
     // Index of the snippet being edited, or NO_ADDING sentinel values.
     var editIndex by remember { mutableStateOf<Int?>(null) }

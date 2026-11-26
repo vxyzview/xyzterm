@@ -14,8 +14,9 @@ internal object BackupSettings {
     // Sealed with the device's AndroidKeyStore key; useless and harmful on another device.
     private val DEVICE_BOUND_KEYS = setOf("auto_backup_passphrase_cipher")
 
-    fun snapshotSource(settings: Map<String, Any?>): Map<String, Any?> =
-        settings.filterKeys { it !in DEVICE_BOUND_KEYS }
+    fun snapshotSource(settings: Map<String, Any?>): Map<String, Any?> = settings.filterKeys {
+        it !in DEVICE_BOUND_KEYS
+    }
 
     fun snapshot(settings: Map<String, Any?>): String {
         val root = JsonObject()

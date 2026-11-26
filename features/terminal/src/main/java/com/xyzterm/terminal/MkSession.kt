@@ -123,9 +123,7 @@ object MkSession {
                 args = command.args
                 command.exe
             } else {
-                args =
-                    mutableListOf(sandboxSH.absolutePath, command.exe, *command.args)
-                        .toTypedArray<String>()
+                args = mutableListOf(sandboxSH.absolutePath, command.exe, *command.args).toTypedArray<String>()
 
                 "/system/bin/sh"
             }

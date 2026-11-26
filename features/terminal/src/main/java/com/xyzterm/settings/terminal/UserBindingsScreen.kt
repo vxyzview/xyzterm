@@ -161,8 +161,7 @@ private fun BindEditDialog(
                     error =
                         when {
                             !UserBindings.isValidHostPath(outside) -> strings.bind_invalid_host
-                            inside != null && !UserBindings.isValidGuestPath(inside) ->
-                                strings.bind_invalid_guest
+                            inside != null && !UserBindings.isValidGuestPath(inside) -> strings.bind_invalid_guest
                             existing.contains(outside) -> strings.bind_duplicate
                             takenGuests.contains(inside ?: outside) -> strings.bind_duplicate_target
                             else -> null

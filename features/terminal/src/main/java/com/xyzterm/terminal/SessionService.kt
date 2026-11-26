@@ -34,11 +34,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
@@ -64,25 +64,21 @@ class SessionService : Service() {
             client: TerminalSessionClient,
             activity: Terminal,
             cwd: String? = null,
-        ): SessionInfo =
-            sessionCreationMutex.withLock {
-                createSessionLocked(id, client, activity, cwd)
-            }
+        ): SessionInfo = sessionCreationMutex.withLock { createSessionLocked(id, client, activity, cwd) }
 
         /** Allocates the next free numbered name and creates it under the same lock as [createSession]. */
         suspend fun createNumberedSession(
             client: TerminalSessionClient,
             activity: Terminal,
-        ): SessionInfo =
-            sessionCreationMutex.withLock {
-                val existing = sessionList.toSet()
-                var index = 1
-                var name: String
-                do {
-                    name = strings.default_session_numbered.getString().format(index++)
-                } while (name in existing)
-                createSessionLocked(name, client, activity, null)
-            }
+        ): SessionInfo = sessionCreationMutex.withLock {
+            val existing = sessionList.toSet()
+            var index = 1
+            var name: String
+            do {
+                name = strings.default_session_numbered.getString().format(index++)
+            } while (name in existing)
+            createSessionLocked(name, client, activity, null)
+        }
 
         private suspend fun createSessionLocked(
             id: SessionId,
@@ -277,10 +273,7 @@ class SessionService : Service() {
     }
 
     /** Suspends until any cold-start restore has published its sessions. */
-    suspend fun awaitRestored() =
-        suspendCancellableCoroutine<Unit> { cont ->
-            onRestored { cont.resume(Unit) }
-        }
+    suspend fun awaitRestored() = suspendCancellableCoroutine<Unit> { cont -> onRestored { cont.resume(Unit) } }
 
     override fun onBind(intent: Intent?): IBinder {
         return binder

@@ -49,8 +49,7 @@ object UserBindings {
         isValidHostPath(outside) && (inside == null || isValidGuestPath(inside))
 
     /** Add-time validation: the host folder must exist right now. */
-    fun isValidHostPath(path: String): Boolean =
-        isWellFormedHost(path) && java.io.File(path).exists()
+    fun isValidHostPath(path: String): Boolean = isWellFormedHost(path) && java.io.File(path).exists()
 
     fun isValidGuestPath(path: String): Boolean =
         isWellFormedHost(path) && path.trim('/').isNotEmpty() && path.split('/').none { it == ".." }
