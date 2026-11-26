@@ -43,6 +43,17 @@ internal fun detectBackupLayout(entries: List<String>): BackupLayout =
 /** True only for a real directory — a symlink to one must never be swapped in as a rootfs. */
 internal fun isRealDirectory(file: File): Boolean = Files.isDirectory(file.toPath(), LinkOption.NOFOLLOW_LINKS)
 
+/** Puts [old] back at [target]; a plain rename fails when target is a non-empty directory. */
+internal fun restoreRollback(
+    target: File,
+    old: File,
+): Boolean =
+    runCatching {
+        if (target.exists() && !target.deleteRecursively()) return false
+        old.renameTo(target)
+    }
+        .getOrDefault(false)
+
 // Two restores at once would delete each other's staging tree.
 private val restoreMutex = Mutex()
 
@@ -88,7 +99,9 @@ object TerminalBackup {
             val metaDir = localDir().child("backup-meta-${UUID.randomUUID()}")
             metaDir.mkdirs()
             try {
-                File(metaDir, "settings.json").writeText(BackupSettings.snapshot(Preference.getAll()))
+                File(metaDir, "settings.json").writeText(
+                    BackupSettings.snapshot(BackupSettings.snapshotSource(Preference.getAll())),
+                )
                 val keybindings = application!!.filesDir.resolve("keybindings.json")
                 if (keybindings.exists()) {
                     keybindings.copyTo(File(metaDir, "keybindings.json"), overwrite = true)
@@ -279,7 +292,10 @@ object TerminalBackup {
                             val homeSwap = swapDirectory(stagedHome, sandboxHomeDir())
                             homeSwap.error?.let { error ->
                                 // The sandbox was already replaced; put the exact old tree back.
-                                sandboxSwap.rollback?.renameTo(sandboxTarget)
+                                val rollback = sandboxSwap.rollback
+                                if (rollback != null && !restoreRollback(sandboxTarget, rollback)) {
+                                    return@withContext "restore failed; previous sandbox left at ${rollback.name}: $error"
+                                }
                                 return@withContext error
                             }
                         }
@@ -296,7 +312,9 @@ object TerminalBackup {
                         ?.firstOrNull()
                         ?.let { meta ->
                             File(meta, "settings.json").takeIf { it.isFile }?.let { file ->
-                                BackupSettings.restore(file.readText()) { key, value -> Preference.put(key, value) }
+                                BackupSettings.restore(file.readText(), preferenceSchema()) { key, value ->
+                                    Preference.put(key, value)
+                                }
                             }
                             File(meta, "keybindings.json").takeIf { it.isFile }?.let { file ->
                                 file.copyTo(application!!.filesDir.resolve("keybindings.json"), overwrite = true)
@@ -318,6 +336,19 @@ object TerminalBackup {
      * Moves [source] into [target], keeping the old target as `<name>.old` for cleanup after every swap succeeds.
      * Restores the old directory if the second rename fails. Returns null on success, otherwise an error message.
      */
+    /** The installed app's preference types — the authority when importing an archive. */
+    private fun preferenceSchema(): Map<String, String> =
+        Preference.preferenceTypes.mapValues { (_, type) ->
+            when (type) {
+                Boolean::class -> "Boolean"
+                Int::class -> "Int"
+                Long::class -> "Long"
+                Float::class -> "Float"
+                String::class -> "String"
+                else -> ""
+            }
+        }
+
     private fun oldBackups(target: File): List<File> =
         target.parentFile
             ?.listFiles { file -> file.name == "${target.name}.old" || file.name.startsWith("${target.name}.old-") }

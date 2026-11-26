@@ -1,6 +1,7 @@
 package com.xyzterm.terminal
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -37,13 +38,39 @@ class BackupSettingsTest {
             }
             """
                 .trimIndent()
+        val schema =
+            mapOf(
+                "a_bool" to "Boolean",
+                "an_int" to "Int",
+                "a_long" to "Long",
+                "a_string" to "String",
+                "a_float" to "Float",
+            )
         val restored = mutableMapOf<String, Any>()
-        BackupSettings.restore(json) { key, value -> restored[key] = value }
+        BackupSettings.restore(json, schema) { key, value -> restored[key] = value }
 
         assertEquals(true, restored["a_bool"])
         assertEquals(13, restored["an_int"])
         assertEquals(99L, restored["a_long"])
         assertEquals("hello", restored["a_string"])
         assertEquals(1.5f, restored["a_float"])
+    }
+
+    @Test
+    fun `declared preference type wins over a mismatched archive tag`() {
+        val json = """{"an_int":{"type":"String","value":"13"}}"""
+        val restored = mutableMapOf<String, Any>()
+        BackupSettings.restore(json, mapOf("an_int" to "Int")) { key, value -> restored[key] = value }
+        assertEquals(13, restored["an_int"])
+    }
+
+    @Test
+    fun `device bound passphrase is excluded from the snapshot`() {
+        val source =
+            BackupSettings.snapshotSource(
+                mapOf("theme" to "omcolor", "auto_backup_passphrase_cipher" to "sealed-with-old-device-key"),
+            )
+        assertTrue(source.containsKey("theme"))
+        assertFalse(source.containsKey("auto_backup_passphrase_cipher"))
     }
 }

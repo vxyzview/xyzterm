@@ -11,6 +11,12 @@ import com.google.gson.JsonParser
  * preference map on snapshot and a `put` callback on restore.
  */
 internal object BackupSettings {
+    // Sealed with the device's AndroidKeyStore key; useless and harmful on another device.
+    private val DEVICE_BOUND_KEYS = setOf("auto_backup_passphrase_cipher")
+
+    fun snapshotSource(settings: Map<String, Any?>): Map<String, Any?> =
+        settings.filterKeys { it !in DEVICE_BOUND_KEYS }
+
     fun snapshot(settings: Map<String, Any?>): String {
         val root = JsonObject()
         settings.forEach { (key, value) ->
@@ -43,15 +49,19 @@ internal object BackupSettings {
         return root.toString()
     }
 
+    /**
+     * [schema] maps a key to the type the *installed app* declares. The archive's tag is only a hint for Gson — the
+     * declared type always wins, so a crafted or stale tag cannot put a wrong type into SharedPreferences.
+     */
     fun restore(
         json: String,
+        schema: Map<String, String>,
         put: (String, Any) -> Unit,
     ) {
         val root = runCatching { JsonParser.parseString(json).asJsonObject }.getOrNull() ?: return
         root.entrySet().forEach { (key, element) ->
-            val entry = element.takeIf { it.isJsonObject }?.asJsonObject ?: return@forEach
-            val type = entry.get("type")?.asString ?: return@forEach
-            val value = entry.get("value") ?: return@forEach
+            val type = schema[key] ?: return@forEach
+            val value = element.takeIf { it.isJsonObject }?.asJsonObject?.get("value") ?: return@forEach
             runCatching {
                 when (type) {
                     "String" -> put(key, value.asString)

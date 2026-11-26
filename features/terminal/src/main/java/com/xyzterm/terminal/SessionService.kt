@@ -169,42 +169,42 @@ class SessionService : Service() {
                         .awaitAll()
                         .filterNotNull()
                 withContext(Dispatchers.Main) {
-                    // App exited while the restore was in flight — drop the shells.
-                    if (!daemonRunning) {
-                        built.forEach { it.second.first.finishIfRunning() }
-                        restorePending = false
-                        // Release anyone waiting on awaitRestored() before leaving.
-                        restoreCallbacks.toList().forEach { runCatching { it() } }
-                        restoreCallbacks.clear()
-                        return@withContext
-                    }
-                    built.forEach { (id, pair) ->
-                        val (session, pwd) = pair
-                        if (id in sessions) {
-                            // Already created on the main thread meanwhile (e.g.
-                            // from the drawer) — drop the duplicate shell.
-                            session.finishIfRunning()
-                        } else {
-                            sessions[id] = session
-                            sessionWorkDirs[id] = pwd
-                            sessionList.add(id)
+                    try {
+                        // App exited while the restore was in flight — drop the shells.
+                        if (!daemonRunning) {
+                            built.forEach { it.second.first.finishIfRunning() }
+                            return@withContext
                         }
-                    }
-                    restorePending = false
-                    if (sessionList.isNotEmpty()) {
-                        // Restore the session captured before spawning, not whichever
-                        // finished last (and not a session a launcher attached meanwhile).
-                        currentSession.value =
-                            if (activeId in sessionList) {
-                                activeId
+                        built.forEach { (id, pair) ->
+                            val (session, pwd) = pair
+                            if (id in sessions) {
+                                // Already created on the main thread meanwhile (e.g.
+                                // from the drawer) — drop the duplicate shell.
+                                session.finishIfRunning()
                             } else {
-                                sessionList.first()
+                                sessions[id] = session
+                                sessionWorkDirs[id] = pwd
+                                sessionList.add(id)
                             }
+                        }
+                        if (sessionList.isNotEmpty()) {
+                            // Restore the session captured before spawning, not whichever
+                            // finished last (and not a session a launcher attached meanwhile).
+                            currentSession.value =
+                                if (activeId in sessionList) {
+                                    activeId
+                                } else {
+                                    sessionList.first()
+                                }
+                        }
+                        if (sessions.isNotEmpty()) updateNotification()
+                    } finally {
+                        // Any exit path must release waiters and clear the busy guard.
+                        restorePending = false
+                        val callbacks = restoreCallbacks.toList()
+                        restoreCallbacks.clear()
+                        callbacks.forEach { runCatching { it() } }
                     }
-                    val callbacks = restoreCallbacks.toList()
-                    restoreCallbacks.clear()
-                    callbacks.forEach { runCatching { it() } }
-                    if (sessions.isNotEmpty()) updateNotification()
                 }
             }
         }
