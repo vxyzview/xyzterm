@@ -28,6 +28,7 @@ import com.xyzterm.resources.strings
 import com.xyzterm.settings.Preference
 import com.xyzterm.settings.Settings
 import java.lang.ref.WeakReference
+import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
@@ -65,13 +67,38 @@ class SessionService : Service() {
             client: TerminalSessionClient,
             activity: Terminal,
             cwd: String? = null,
-        ): SessionInfo = sessionCreationMutex.withLock {
+        ): SessionInfo =
+            sessionCreationMutex.withLock {
+                createSessionLocked(id, client, activity, cwd)
+            }
+
+        /** Allocates the next free numbered name and creates it under the same lock as [createSession]. */
+        suspend fun createNumberedSession(
+            client: TerminalSessionClient,
+            activity: Terminal,
+        ): SessionInfo =
+            sessionCreationMutex.withLock {
+                val existing = sessionList.toSet()
+                var index = 1
+                var name: String
+                do {
+                    name = strings.default_session_numbered.getString().format(index++)
+                } while (name in existing)
+                createSessionLocked(name, client, activity, null)
+            }
+
+        private suspend fun createSessionLocked(
+            id: SessionId,
+            client: TerminalSessionClient,
+            activity: Terminal,
+            cwd: String?,
+        ): SessionInfo {
             // Deep-link and in-app callers can both ask for the same id; reuse a
             // session that was already published instead of spawning a second
             // shell. The maps are only touched on Main.
             val existing = withContext(Dispatchers.Main.immediate) { sessions[id] }
             if (existing != null) {
-                return@withLock SessionInfo(id, sessionWorkDirs[id].orEmpty(), existing)
+                return SessionInfo(id, sessionWorkDirs[id].orEmpty(), existing)
             }
             // No SessionInfo can be returned for an unusable id — fail before
             // creating a directory or shell for it.
@@ -92,7 +119,7 @@ class SessionService : Service() {
                     SessionInfo(id, pwd, session)
                 }
             if (extraction) activity.installNextStage = NEXT_STAGE.NONE
-            info
+            return info
         }
 
         /** Creates a session owned by the service only — no Terminal activity is opened or switched. */
@@ -150,7 +177,14 @@ class SessionService : Service() {
                             async {
                                 gate.withPermit {
                                     runCatching {
-                                        MkSession.createSession(activity, TerminalBackEnd(), id, false, pwd)
+                                        MkSession.createSession(
+                                            activity,
+                                            TerminalBackEnd(),
+                                            id,
+                                            false,
+                                            pwd,
+                                            consumePendingCommand = false,
+                                        )
                                     }
                                         .getOrNull()
                                         ?.let { id to it }
@@ -164,6 +198,9 @@ class SessionService : Service() {
                     if (!daemonRunning) {
                         built.forEach { it.second.first.finishIfRunning() }
                         restorePending = false
+                        // Release anyone waiting on awaitRestored() before leaving.
+                        restoreCallbacks.toList().forEach { runCatching { it() } }
+                        restoreCallbacks.clear()
                         return@withContext
                     }
                     built.forEach { (id, pair) ->
@@ -180,12 +217,11 @@ class SessionService : Service() {
                     }
                     restorePending = false
                     if (sessionList.isNotEmpty()) {
-                        // Restore the session the user was actually using when
-                        // the app closed, not whichever restored last.
-                        val savedActive = Preference.getString(ACTIVE_SESSION_KEY, "")
+                        // Restore the session captured before spawning, not whichever
+                        // finished last (and not a session a launcher attached meanwhile).
                         currentSession.value =
-                            if (savedActive in sessionList) {
-                                savedActive
+                            if (activeId in sessionList) {
+                                activeId
                             } else {
                                 sessionList.first()
                             }
@@ -220,7 +256,7 @@ class SessionService : Service() {
         }
 
         fun renameSession(oldId: String, newId: String) {
-            if (oldId == newId || newId.isEmpty() || newId in sessionList) return
+            if (oldId == newId || !isValidSessionName(newId) || newId in sessionList) return
 
             val session = sessions.remove(oldId) ?: return
             val pwd = sessionWorkDirs.remove(oldId) ?: return
@@ -264,6 +300,12 @@ class SessionService : Service() {
             callback()
         }
     }
+
+    /** Suspends until any cold-start restore has published its sessions. */
+    suspend fun awaitRestored() =
+        suspendCancellableCoroutine<Unit> { cont ->
+            onRestored { cont.resume(Unit) }
+        }
 
     override fun onBind(intent: Intent?): IBinder {
         return binder

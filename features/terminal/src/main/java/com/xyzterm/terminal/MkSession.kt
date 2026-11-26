@@ -46,8 +46,12 @@ object MkSession {
         sessionId: String,
         isExtraction: Boolean = false,
         cwd: String? = null,
+        consumePendingCommand: Boolean = true,
     ): Pair<TerminalSession, SessionPwd> {
-        val prepared = withContext(Dispatchers.IO) { prepareEnvironment(context, sessionId, isExtraction, cwd) }
+        val prepared =
+            withContext(Dispatchers.IO) {
+                prepareEnvironment(context, sessionId, isExtraction, cwd, consumePendingCommand)
+            }
 
         return withContext(Dispatchers.Main.immediate) {
             val session =
@@ -72,8 +76,12 @@ object MkSession {
         sessionId: String,
         isExtraction: Boolean,
         cwd: String?,
+        consumePendingCommand: Boolean,
     ): Prepared {
-        val workingDir = cwd ?: getPwd(context)
+        // Snapshot the one-shot launcher command. A cold-start restore spawns saved
+        // shells with consumePendingCommand=false so none of them can steal it.
+        val command = if (consumePendingCommand) pendingCommand else null
+        val workingDir = cwd ?: getPwd(context, command?.workingDir)
 
         val tmpDir = localDir().child("tmp").childSafe(nameSafeViaRust(sessionId))
 
@@ -93,7 +101,7 @@ object MkSession {
 
         val env = envMap.map { "${it.key}=${it.value}" }.toMutableList()
 
-        pendingCommand?.env?.let { env.addAll(it) }
+        command?.env?.let { env.addAll(it) }
 
         setupTerminalFiles()
 
@@ -103,7 +111,7 @@ object MkSession {
         val args: Array<String>
 
         val shell =
-            if (pendingCommand == null) {
+            if (command == null) {
                 args =
                     if (Settings.sandbox) {
                         arrayOf(sandboxSH.absolutePath)
@@ -111,12 +119,12 @@ object MkSession {
                         arrayOf()
                     }
                 "/system/bin/sh"
-            } else if (pendingCommand!!.sandbox.not()) {
-                args = pendingCommand!!.args
-                pendingCommand!!.exe
+            } else if (command.sandbox.not()) {
+                args = command.args
+                command.exe
             } else {
                 args =
-                    mutableListOf(sandboxSH.absolutePath, pendingCommand!!.exe, *pendingCommand!!.args)
+                    mutableListOf(sandboxSH.absolutePath, command.exe, *command.args)
                         .toTypedArray<String>()
 
                 "/system/bin/sh"
@@ -132,7 +140,7 @@ object MkSession {
                 arrayOf("-c", *args)
             }
 
-        pendingCommand = null
+        if (consumePendingCommand) pendingCommand = null
 
         return Prepared(
             workingDir = workingDir,
@@ -144,8 +152,10 @@ object MkSession {
     }
 }
 
-fun getPwd(context: Context): String {
-    val pendingWorkingDir = pendingCommand?.workingDir
+fun getPwd(
+    context: Context,
+    pendingWorkingDir: String? = null,
+): String {
     if (pendingWorkingDir != null) {
         return pendingWorkingDir
     }

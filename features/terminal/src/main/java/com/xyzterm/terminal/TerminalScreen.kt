@@ -260,14 +260,8 @@ private fun newSession(
 ) {
     val binder = terminalActivity.sessionBinder?.get() ?: return
     if (terminalView.get() == null) return
-    val existing = binder.getService().sessionList
-    var index = 1
-    var name: String
-    do {
-        name = strings.default_session_numbered.getString().format(index++)
-    } while (name in existing)
     scope.launch {
-        val info = binder.createSession(name, TerminalBackEnd(), terminalActivity)
+        val info = binder.createNumberedSession(TerminalBackEnd(), terminalActivity)
         terminalActivity.changeSession(info.id)
     }
 }
@@ -392,9 +386,14 @@ private suspend fun TerminalView.attachOrCreateSession(
     val session =
         if (pendingCommand != null) {
             val binder = terminalActivity.sessionBinder?.get() ?: return // service unbound mid-recreate
-            binder.getService().currentSession.value = pendingCommand!!.id
-            binder.getSession(pendingCommand!!.id)
-                ?: binder.createSession(pendingCommand!!.id, client, terminalActivity).session
+            val service = binder.getService()
+            // Cold-start shells must not consume the launcher command before its
+            // own session exists.
+            service.awaitRestored()
+            val commandId = pendingCommand?.id ?: return
+            service.currentSession.value = commandId
+            binder.getSession(commandId)
+                ?: binder.createSession(commandId, client, terminalActivity).session
         } else {
             val binder = terminalActivity.sessionBinder?.get() ?: return
             val service = binder.getService()
@@ -456,6 +455,8 @@ private fun ColumnScope.TerminalDrawer(terminalActivity: Terminal) {
                 renameError =
                     if (it.isBlank()) {
                         strings.name_empty_err.getString()
+                    } else if (!isValidSessionName(it)) {
+                        strings.name_invalid_err.getString()
                     } else if (it != sessionToRename && service?.sessionList?.contains(it) == true) {
                         strings.session_name_exists.getString()
                     } else null

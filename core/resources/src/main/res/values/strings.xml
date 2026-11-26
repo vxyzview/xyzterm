@@ -94,6 +94,7 @@
     <string name="session_empty">No sessions yet. Add one to start a shell.</string>
     <string name="session_running_short">Running</string>
 <string name="name_empty_err">Name cannot be empty</string>
+<string name="name_invalid_err">Use letters, numbers, dots, dashes or underscores only</string>
 <string name="installing">Installing…</string>
 <string name="loading">Loading…</string>
 <string name="file">File</string>
