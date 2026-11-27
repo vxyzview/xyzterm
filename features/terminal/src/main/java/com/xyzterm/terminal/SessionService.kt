@@ -290,6 +290,9 @@ class SessionService : Service() {
         if (wakeLock?.isHeld == true) {
             wakeLock?.release()
         }
+        // Only an explicit destroy clears the choice; an LMK kill skips this
+        // method, so onCreate still restores it after a low-memory restart.
+        Settings.wake_lock_active = false
         if (Settings.auto_backup) {
             // Fire-and-forget here loses the backup when the process dies; let the OS run it.
             AutoBackupJobService.schedule(this)
