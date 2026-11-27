@@ -294,6 +294,8 @@ class Terminal : AppCompatActivity() {
                             pendingPrefill = name to command
                             flushPendingPrefill()
                         },
+                        // dialogRes only renders Cancel when onCancel is non-null.
+                        onCancel = {},
                         cancelable = false,
                     )
                 }
