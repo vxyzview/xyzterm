@@ -81,6 +81,7 @@ import com.xyzterm.exec.isTerminalInstalled
 import com.xyzterm.file.FilePermission
 import com.xyzterm.file.sandboxDir
 import com.xyzterm.resources.drawables
+import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
 import com.xyzterm.resources.strings
 import com.xyzterm.settings.Settings
@@ -105,6 +106,7 @@ import com.xyzterm.theme.XyzTheme
 import com.xyzterm.theme.onWarningSurface
 import com.xyzterm.theme.warningSurface
 import com.xyzterm.utils.AppDialogHost
+import com.xyzterm.utils.dialogRes
 import com.xyzterm.utils.formatFileSize
 import java.io.File
 import java.lang.ref.WeakReference
@@ -179,6 +181,9 @@ class Terminal : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        // Each newly delivered deep link needs its own confirmation; re-drives of
+        // the same intent (AndroidView factory) must not re-prompt.
+        confirmedDeepLink = null
         handleIntent(intent)
     }
 
@@ -277,7 +282,21 @@ class Terminal : AppCompatActivity() {
                 // and special segments before they reach MkSession.childSafe / deleteRecursively.
                 if (!isValidSessionName(name)) return
                 val command = uri.getQueryParameter("cmd")?.takeIf { isValidDeepLinkCommand(it) }
-                if (command != null) pendingPrefill = name to command
+                // ponytail: internal notifications never carry cmd, so a cmd link is
+                // always external. Require explicit approval before typing anything.
+                if (command != null && confirmedDeepLink != uri.toString()) {
+                    confirmedDeepLink = uri.toString()
+                    dialogRes(
+                        activity = this@Terminal,
+                        title = strings.deep_link_command_title.getString(),
+                        msg = strings.deep_link_command_msg.getFilledString(command),
+                        onOk = {
+                            pendingPrefill = name to command
+                            flushPendingPrefill()
+                        },
+                        cancelable = false,
+                    )
+                }
                 lifecycleScope.launch(Dispatchers.Main) {
                     if (name !in binder.getService().sessionList) {
                         binder.createSession(name, TerminalBackEnd(), this@Terminal)
@@ -342,6 +361,9 @@ class Terminal : AppCompatActivity() {
 
         /** One-shot command text to write when its target session's emulator becomes ready. */
         var pendingPrefill: Pair<String, String>? = null
+
+        /** URI of the deep link already confirmed, so re-driven intents don't stack dialogs. */
+        private var confirmedDeepLink: String? = null
     }
 
     private val notificationPermissionLauncher =

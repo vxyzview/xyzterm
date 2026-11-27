@@ -372,4 +372,6 @@
     <string name="install_failed_no_space">Not enough free space. Free up storage and try again.</string>
     <string name="install_failed_missing_asset">This APK is missing its bundled Linux environment. Reinstall xyzterm.</string>
     <string name="install_failed_other">The Linux environment could not be installed. Try again.</string>
+    <string name="deep_link_command_title">Command from another app</string>
+    <string name="deep_link_command_msg">Another app wants to type this into your terminal:\n\n%s\n\nOnly accept if you trust the source. Nothing runs until you press Enter.</string>
 </resources>
