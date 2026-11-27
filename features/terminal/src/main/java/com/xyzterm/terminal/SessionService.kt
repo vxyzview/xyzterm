@@ -366,7 +366,9 @@ class SessionService : Service() {
                     wakeLock?.acquire()
                     Settings.wake_lock_active = true
                 }
-                updateNotification()
+                // User tapped a notification action: show the new state now,
+                // not after the 500ms session-churn coalescing window.
+                postNotification()
             }
         }
         // Let the system recreate the service after an LMK kill; an explicit
