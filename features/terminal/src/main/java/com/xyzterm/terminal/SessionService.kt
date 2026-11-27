@@ -287,12 +287,9 @@ class SessionService : Service() {
 
         restoreScope.cancel()
         daemonRunning = false
-        if (wakeLock?.isHeld == true) {
-            wakeLock?.release()
-        }
         // Only an explicit destroy clears the choice; an LMK kill skips this
         // method, so onCreate still restores it after a low-memory restart.
-        Settings.wake_lock_active = false
+        setWakeLockActive(false)
         if (Settings.auto_backup) {
             // Fire-and-forget here loses the backup when the process dies; let the OS run it.
             AutoBackupJobService.schedule(this)
@@ -309,7 +306,6 @@ class SessionService : Service() {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    @SuppressLint("WakelockTimeout", "Wakelock")
     override fun onCreate() {
         super.onCreate()
         instanceRef = WeakReference(this)
@@ -324,9 +320,7 @@ class SessionService : Service() {
         }
         // A process kill drops the wakelock; restore the user's choice before the
         // notification is built so its label matches reality.
-        if (Settings.wake_lock_active && wakeLock?.isHeld == false) {
-            wakeLock?.acquire()
-        }
+        setWakeLockActive(Settings.wake_lock_active)
 
         val notification = createNotification()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -346,6 +340,20 @@ class SessionService : Service() {
 
     var wakeLock: PowerManager.WakeLock? = null
 
+    /** Single source of truth for the lock and its persisted choice. */
+    @SuppressLint("WakelockTimeout", "Wakelock")
+    private fun setWakeLockActive(active: Boolean) {
+        val lock = wakeLock ?: return
+        if (active != lock.isHeld) {
+            if (active) {
+                lock.acquire()
+            } else {
+                lock.release()
+            }
+        }
+        Settings.wake_lock_active = lock.isHeld
+    }
+
     fun actionExit() {
         sessions.forEach { s -> s.value.finishIfRunning() }
         if (daemonRunning) {
@@ -354,7 +362,6 @@ class SessionService : Service() {
         stopSelf()
     }
 
-    @SuppressLint("WakelockTimeout", "Wakelock")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             "ACTION_EXIT" -> {
@@ -362,16 +369,10 @@ class SessionService : Service() {
             }
 
             "ACTION_WAKE_LOCK" -> {
-                if (wakeLock?.isHeld == true) {
-                    wakeLock?.release()
-                    Settings.wake_lock_active = false
-                } else {
-                    wakeLock?.acquire()
-                    Settings.wake_lock_active = true
-                }
+                setWakeLockActive(wakeLock?.isHeld != true)
                 // User tapped a notification action: show the new state now,
                 // not after the 500ms session-churn coalescing window.
-                postNotification()
+                postNotificationNow()
             }
         }
         // Let the system recreate the service after an LMK kill; an explicit
@@ -442,7 +443,7 @@ class SessionService : Service() {
     }
 
     private val notificationHandler = Handler(Looper.getMainLooper())
-    private val notificationRunnable = Runnable { postNotification() }
+    private val notificationRunnable = Runnable { postNotificationNow() }
 
     private fun updateNotification() {
         // Coalesce bursts (a script spawning many shells) into a single post.
@@ -451,7 +452,7 @@ class SessionService : Service() {
         notificationHandler.postDelayed(notificationRunnable, 500)
     }
 
-    private fun postNotification() {
+    private fun postNotificationNow() {
         runCatching {
             val notification = createNotification()
             notificationManager.notify(1, notification)

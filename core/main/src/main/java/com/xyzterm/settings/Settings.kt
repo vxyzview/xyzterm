@@ -52,7 +52,8 @@ object Settings {
 
     var terminate_sessions_on_exit by CachedPreference("terminate_sessions_on_exit", false)
     var auto_backup by CachedPreference("auto_backup", false)
-    var wake_lock_active by CachedPreference("wake_lock_active", false)
+    // Survives an LMK kill even if it happens milliseconds after the tap.
+    var wake_lock_active by CachedPreference("wake_lock_active", false, commitImmediately = true)
     var donated by CachedPreference("donated", false)
     var sandbox by CachedPreference("sandbox", true)
     var seccomp_mode by CachedPreference("seccomp_mode", "unspecified")
@@ -215,11 +216,11 @@ object Preference {
             }
     }
 
-    fun setBoolean(key: String, value: Boolean) {
+    fun setBoolean(key: String, value: Boolean, commit: Boolean = false) {
         notifyDelegate(key, value)
         boolCache[key] = value
         runCatching {
-            sharedPreferences.edit {
+            sharedPreferences.edit(commit = commit) {
                 putBoolean(
                     key,
                     value,
@@ -351,7 +352,11 @@ object Preference {
 }
 
 @Suppress("UNCHECKED_CAST")
-open class CachedPreference<T>(val key: String, val defaultValue: T) : ReadWriteProperty<Any?, T> {
+open class CachedPreference<T>(
+    val key: String,
+    val defaultValue: T,
+    private val commitImmediately: Boolean = false,
+) : ReadWriteProperty<Any?, T> {
     private var state by mutableStateOf(loadInitialValue())
 
     init {
@@ -373,7 +378,7 @@ open class CachedPreference<T>(val key: String, val defaultValue: T) : ReadWrite
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         when (value) {
-            is Boolean -> Preference.setBoolean(key, value)
+            is Boolean -> Preference.setBoolean(key, value, commitImmediately)
             is String -> Preference.setString(key, value)
             is Int -> Preference.setInt(key, value)
             is Long -> Preference.setLong(key, value)
