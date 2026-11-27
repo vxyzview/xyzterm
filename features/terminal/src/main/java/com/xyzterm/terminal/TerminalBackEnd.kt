@@ -25,6 +25,9 @@ import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 import com.termux.view.TerminalViewClient
 import com.xyzterm.activities.terminal.Terminal
+import com.xyzterm.file.child
+import com.xyzterm.file.localDir
+import com.xyzterm.file.sandboxHomeDir
 import com.xyzterm.resources.drawables
 import com.xyzterm.resources.getFilledString
 import com.xyzterm.resources.getString
@@ -46,6 +49,7 @@ private const val BELL_NOTIFICATION_ID = 2
 private const val BELL_NOTIFY_THROTTLE_MS = 5_000L
 private const val FINISHED_CHANNEL_ID = "terminal_finished"
 private const val FINISHED_NOTIFICATION_ID = 3
+private const val CLIPBOARD_TEXT_LIMIT = 200_000
 
 /** Live OSC 0/2 title and shell working directory, keyed by session so early title changes are not lost. */
 object TerminalLiveState {
@@ -54,26 +58,57 @@ object TerminalLiveState {
 }
 
 /**
- * A full scrollback easily exceeds the ~1 MB binder transaction limit, so copy and share hand around a FileProvider URI
- * backed by one cache file instead of a String.
+ * A full scrollback easily exceeds the ~1 MB binder transaction limit, so copy and
+ * share hand around a FileProvider URI backed by one cache file instead of a String.
  */
+/** /proc reports the host path; translate the paths proot binds back into guest paths. */
+private fun guestCwd(hostPath: String): String {
+    val sandboxRoot = localDir().child("sandbox").absolutePath.trimEnd('/')
+    if (hostPath == sandboxRoot || hostPath.startsWith("$sandboxRoot/")) {
+        return hostPath.removePrefix(sandboxRoot).ifEmpty { "/" }
+    }
+    val home = sandboxHomeDir().absolutePath.trimEnd('/')
+    if (hostPath == home || hostPath.startsWith("$home/")) {
+        return "/home" + hostPath.removePrefix(home)
+    }
+    val local = localDir().absolutePath.trimEnd('/')
+    if (hostPath == local || hostPath.startsWith("$local/")) {
+        return hostPath.removePrefix(local).ifEmpty { "/" }
+    }
+    return hostPath
+}
+
 internal fun terminalTextUri(
     context: Context,
     text: String,
 ): Uri? {
     val dir = File(context.cacheDir, "terminal-text").apply { mkdirs() }
-    dir.listFiles()?.forEach { it.delete() }
-    val file = File(dir, "scrollback.txt")
+    // Only prune stale files: an in-flight share or earlier clipboard item must
+    // keep pointing at the text it was created with.
+    val cutoff = System.currentTimeMillis() - 60 * 60 * 1000L
+    dir.listFiles()?.forEach { file -> if (file.lastModified() < cutoff) file.delete() }
     return runCatching {
+        val file = File.createTempFile("scrollback-", ".txt", dir)
         file.writeText(text)
         FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-    }
-        .getOrNull()
+    }.getOrNull()
 }
 
 class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
+    private var lastCwdPollAt = 0L
+
+    /** OSC 7 is not exposed by the pinned emulator; poll /proc for the same live view. */
+    private fun refreshCwd(session: TerminalSession) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastCwdPollAt < 500L) return
+        lastCwdPollAt = now
+        session.getCwd()?.let { TerminalLiveState.cwds[session] = guestCwd(it) }
+    }
+
     override fun onTextChanged(changedSession: TerminalSession) {
         terminalView.get()?.onScreenUpdated()
+        // A plain `cd` does not change the title, so refresh on output too.
+        if (Terminal.visibleSession === changedSession) refreshCwd(changedSession)
     }
 
     override fun onTitleChanged(changedSession: TerminalSession) {
@@ -84,23 +119,32 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         } else {
             TerminalLiveState.titles[changedSession] = title
         }
-        // The emulator has no OSC 7 hook; /proc/<pid>/cwd gives the same live view.
-        changedSession.getCwd()?.let { TerminalLiveState.cwds[changedSession] = it }
+        refreshCwd(changedSession)
     }
 
     override fun onSessionFinished(finishedSession: TerminalSession) {
         TerminalLiveState.titles.remove(finishedSession)
         TerminalLiveState.cwds.remove(finishedSession)
-        val status = runCatching { finishedSession.getExitStatus() }.getOrDefault(0)
-        toast(
-            if (status == 0) strings.session_ended.getString() else strings.session_ended_code.getFilledString(status),
-        )
+        val status = finishedSession.getExitStatus()
+        val message =
+            when {
+                status == 0 -> strings.session_ended.getString()
+                status < 0 -> strings.session_ended_signal.getFilledString(-status)
+                else -> strings.session_ended_code.getFilledString(status)
+            }
+        toast(message)
         if (Settings.command_finished_notifications) notifyFinishedInBackground(finishedSession, status)
     }
 
     override fun onCopyTextToClipboard(session: TerminalSession, text: String) {
         val context = terminalView.get()?.context ?: return
         val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return
+        // Small selections stay real text so other apps can paste them normally;
+        // only oversized scrollback needs the URI workaround.
+        if (text.length <= CLIPBOARD_TEXT_LIMIT) {
+            clipboard.setPrimaryClip(ClipData.newPlainText("Terminal", text))
+            return
+        }
         val uri = terminalTextUri(context, text) ?: return
         clipboard.setPrimaryClip(ClipData.newUri(context.contentResolver, "Terminal", uri))
     }
@@ -108,18 +152,18 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     override fun onPasteTextFromClipboard(session: TerminalSession?) {
         val view = terminalView.get() ?: return
         val emulator = view.mEmulator ?: return
-        val item = view.context.getSystemService(ClipboardManager::class.java)?.primaryClip?.getItemAt(0)
+        val item =
+            view.context
+                .getSystemService(ClipboardManager::class.java)
+                ?.primaryClip
+                ?.getItemAt(0)
         val clip =
             item?.text?.toString()
-                ?: item
-                    ?.uri
-                    ?.let { uri ->
-                        runCatching {
-                            view.context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
-                        }
-                            .getOrNull()
-                    }
-                    .orEmpty()
+                ?: item?.uri?.let { uri ->
+                    runCatching {
+                        view.context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                    }.getOrNull()
+                }.orEmpty()
         if (clip.isNotBlank()) {
             emulator.paste(clip)
         }
@@ -294,8 +338,19 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
             // getWordAtLocation follows line-wrap metadata, so a URL broken across
             // visual rows is returned as one word instead of a partial fragment.
             val word = emulator.getScreen().getWordAtLocation(column, row)
-            val url = URL_REGEX.find(word)?.value?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
-            if (url != null) {
+            val url =
+                URL_REGEX.find(word)
+                    ?.value
+                    ?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
+            // A wrapped URL is absent from the tapped visual row; otherwise
+            // require the tap to land on the URL, not just in the same word.
+            val line = emulator.getScreen().getSelectedText(0, row, emulator.mColumns - 1, row)
+            val onUrl =
+                url?.let { candidate ->
+                    val start = line.indexOf(candidate)
+                    start < 0 || column in start..(start + candidate.length - 1)
+                } ?: false
+            if (url != null && onUrl) {
                 openUrlPrompt(url)
                 return
             }

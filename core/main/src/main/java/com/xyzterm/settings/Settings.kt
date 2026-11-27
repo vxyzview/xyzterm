@@ -54,6 +54,7 @@ object Settings {
     var command_finished_notifications by CachedPreference("command_finished_notifications", false)
     var auto_backup by CachedPreference("auto_backup", false)
     var backup_tree_uri by CachedPreference("backup_tree_uri", "")
+    var backup_mode by CachedPreference("backup_mode", "full")
     // Survives an LMK kill even if it happens milliseconds after the tap.
     var wake_lock_active by CachedPreference("wake_lock_active", false, commitImmediately = true)
     var donated by CachedPreference("donated", false)

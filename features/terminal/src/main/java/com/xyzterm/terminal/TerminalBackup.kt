@@ -1,8 +1,10 @@
 package com.xyzterm.terminal
 
 import android.net.Uri
+import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import com.xyzterm.commands.KeybindingsManager
+import com.xyzterm.exec.ShellUtils
 import com.xyzterm.file.child
 import com.xyzterm.file.createFileIfNot
 import com.xyzterm.file.localDir
@@ -42,6 +44,15 @@ internal fun detectBackupLayout(entries: List<String>): BackupLayout =
     } else {
         BackupLayout.V1_ROOT
     }
+
+/**
+ * Links inside backup metadata are read by host-side File APIs, so guest-absolute
+ * targets must not be followed there even though proot would contain them.
+ */
+internal fun isUnsafeBackupLink(
+    guestPath: String,
+    target: String,
+): Boolean = guestPath.startsWith("backup-meta-") || !isSafeLinkTarget(guestPath, target)
 
 /** True only for a real directory — a symlink to one must never be swapped in as a rootfs. */
 internal fun isRealDirectory(file: File): Boolean = Files.isDirectory(file.toPath(), LinkOption.NOFOLLOW_LINKS)
@@ -109,16 +120,26 @@ object TerminalBackup {
                 if (keybindings.exists()) {
                     keybindings.copyTo(File(metaDir, "keybindings.json"), overwrite = true)
                 }
+                // Light backups keep the user's home and a package manifest, not
+                // the whole rootfs. Layout detection in restore() relies on the
+                // manifest file being inside the staged meta directory.
+                val sources =
+                    if (Settings.backup_mode == "light") {
+                        val packages = ShellUtils.runUbuntu("pacman", "-Qqe", timeoutSeconds = 30)
+                        File(metaDir, "installed-packages.txt")
+                            .writeText(
+                                if (packages.exitCode == 0 && !packages.timedOut) {
+                                    packages.output
+                                } else {
+                                    "# pacman -Qqe failed (exit ${packages.exitCode})\n"
+                                },
+                            )
+                        arrayOf("home", metaDir.name)
+                    } else {
+                        arrayOf("sandbox", "home", metaDir.name)
+                    }
                 val process =
-                    ProcessBuilder(
-                            "tar",
-                            "-czf",
-                            targetFile.absolutePath,
-                            *EXCLUDES,
-                            "sandbox",
-                            "home",
-                            metaDir.name,
-                        )
+                    ProcessBuilder("tar", "-czf", targetFile.absolutePath, *EXCLUDES, *sources)
                         .directory(localDir())
                         .redirectErrorStream(true)
                         .start()
@@ -210,17 +231,17 @@ object TerminalBackup {
         val tree = runCatching { DocumentFile.fromTreeUri(context, Uri.parse(uriString)) }.getOrNull() ?: return
         runCatching {
             tree.findFile(archive.name)?.delete()
-            val document = tree.createFile("application/gzip", archive.name) ?: return
-            context.contentResolver.openOutputStream(document.uri)?.use { output ->
-                archive.inputStream().use { it.copyTo(output) }
-            }
+            val document = tree.createFile("application/gzip", archive.name) ?: error("cannot create SAF document")
+            val output = context.contentResolver.openOutputStream(document.uri) ?: error("cannot open SAF output")
+            output.use { archive.inputStream().use { input -> input.copyTo(it) } }
+            check(document.length() == archive.length()) { "SAF copy size mismatch" }
             tree
                 .listFiles()
                 .filter { it.name?.startsWith("terminal-backup-") == true }
                 .sortedByDescending { it.lastModified() }
                 .drop(KEEP)
                 .forEach { it.delete() }
-        }
+        }.onFailure { Log.w("TerminalBackup", "SAF mirror failed: ${it.message}") }
     }
 
     /**
@@ -271,11 +292,14 @@ object TerminalBackup {
                 val unsafeSymlink = runCatching {
                     Files.walk(stagingPath).use { paths ->
                         paths.iterator().asSequence().any { path ->
-                            if (!Files.isSymbolicLink(path)) {
-                                false
+                            val guestPath = stagingPath.relativize(path).toString()
+                            if (Files.isSymbolicLink(path)) {
+                                // A host-side read of a meta directory would follow an
+                                // absolute guest link outside staging. Never allow links
+                                // in the metadata tree we later read with File APIs.
+                                isUnsafeBackupLink(guestPath, Files.readSymbolicLink(path).toString())
                             } else {
-                                val guestPath = stagingPath.relativize(path).toString()
-                                !isSafeLinkTarget(guestPath, Files.readSymbolicLink(path).toString())
+                                false
                             }
                         }
                     }
@@ -300,9 +324,20 @@ object TerminalBackup {
                 val sandboxTarget = localDir().child("sandbox")
                 val stagedSandbox = File(staging, "sandbox")
                 val stagedHome = File(staging, "home")
+                val metaDirs = staging.listFiles { file ->
+                    file.name.startsWith("backup-meta-") &&
+                        Files.isDirectory(file.toPath(), LinkOption.NOFOLLOW_LINKS)
+                }.orEmpty()
                 // A V1 archive is itself a rootfs, so it can legitimately contain both
                 // /sandbox and /home. `bin/bash` at the archive root settles the case.
                 val isRootfsAtRoot = File(staging, "bin/bash").isFile
+                // Light archives carry no sandbox at all. They must never be mistaken
+                // for V1 (which would replace the rootfs with the staging directory).
+                val isLight =
+                    !isRootfsAtRoot &&
+                        stagedHome.isDirectory &&
+                        !Files.exists(stagedSandbox.toPath(), LinkOption.NOFOLLOW_LINKS) &&
+                        metaDirs.any { File(it, "installed-packages.txt").isFile }
                 val layout =
                     if (
                         !isRootfsAtRoot &&
@@ -314,14 +349,21 @@ object TerminalBackup {
                     } else {
                         BackupLayout.V1_ROOT
                     }
-                when (layout) {
-                    BackupLayout.V1_ROOT -> {
+                when {
+                    isLight -> {
+                        // Home, settings and the package manifest are the whole
+                        // payload; the installed rootfs stays untouched.
+                        swapDirectory(stagedHome, sandboxHomeDir()).error?.let {
+                            return@withContext it
+                        }
+                    }
+                    layout == BackupLayout.V1_ROOT -> {
                         // Old archives never contained home; leave the user's home alone.
                         swapDirectory(staging, sandboxTarget).error?.let {
                             return@withContext it
                         }
                     }
-                    BackupLayout.V2_SANDBOX_HOME -> {
+                    else -> {
                         val sandboxSwap = swapDirectory(stagedSandbox, sandboxTarget)
                         sandboxSwap.error?.let {
                             return@withContext it
@@ -345,12 +387,11 @@ object TerminalBackup {
 
                 // Newer archives carry a settings/keybindings snapshot. Older ones simply
                 // skip this step, so restoring them stays backwards compatible.
-                staging
-                    .listFiles { file -> file.isDirectory && file.name.startsWith("backup-meta-") }
-                    ?.firstOrNull()
+                metaDirs
+                    .firstOrNull()
                     ?.let { meta ->
                         File(meta, "settings.json")
-                            .takeIf { it.isFile }
+                            .takeIf { Files.isRegularFile(it.toPath(), LinkOption.NOFOLLOW_LINKS) }
                             ?.let { file ->
                                 BackupSettings.restore(
                                     file.readText(),
@@ -360,7 +401,7 @@ object TerminalBackup {
                                 }
                             }
                         File(meta, "keybindings.json")
-                            .takeIf { it.isFile }
+                            .takeIf { Files.isRegularFile(it.toPath(), LinkOption.NOFOLLOW_LINKS) }
                             ?.let { file ->
                                 file.copyTo(application!!.filesDir.resolve("keybindings.json"), overwrite = true)
                                 KeybindingsManager.loadKeybindings()

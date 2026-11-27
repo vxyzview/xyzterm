@@ -318,6 +318,7 @@
     <string name="migrating_themes">Migrating themes…</string>
     <string name="session_ended">Session ended</string>
     <string name="session_ended_code">Session ended (exit code %1$d)</string>
+    <string name="session_ended_signal">Session ended (signal %1$d)</string>
     <string name="command_finished">Command finished</string>
     <string name="command_finished_notifications">Command finished notifications</string>
     <string name="command_finished_notifications_desc">Notify when a background session exits</string>
@@ -325,6 +326,10 @@
     <string name="default_shell_desc">Shell started for new sessions (restart required)</string>
     <string name="backup_folder">Backup folder</string>
     <string name="backup_folder_desc">Also save auto-backups here so they survive uninstalling the app</string>
+    <string name="backup_mode">Backup size</string>
+    <string name="backup_mode_desc">Light keeps your home and package list; full also saves the rootfs</string>
+    <string name="backup_mode_full">Full</string>
+    <string name="backup_mode_light">Light</string>
     <string name="delete_session_confirm">Kill this session? Its processes will be terminated.</string>
     <string name="keep_screen_on">Keep screen on</string>
     <string name="keep_screen_on_desc">Prevent the screen from sleeping while a terminal is open</string>

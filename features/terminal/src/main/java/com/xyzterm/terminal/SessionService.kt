@@ -50,6 +50,8 @@ class SessionService : Service() {
     val sessionList = mutableStateListOf<String>()
     var currentSession = mutableStateOf("main")
     var restorePending = false
+    // The active shell is usable before the remaining saved shells finish building.
+    private var activePublished = false
     private val restoreCallbacks = mutableListOf<() -> Unit>()
     private val restoreScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var daemonRunning = false
@@ -136,84 +138,86 @@ class SessionService : Service() {
             // until the current session is published below.
             restorePending = true
             restoreScope.launch {
-                // Spawn at most two saved shells at a time. Proot startup is
-                // expensive and N parallel processes on a low-end device can
-                // jank or OOM; two keeps cold start quick without spiking.
-                val gate = Semaphore(2)
-                val activeId = Preference.getString(ACTIVE_SESSION_KEY, "")
-                val ordered = saved.entries.sortedByDescending { it.key == activeId }
+                var activePublishedLocally = false
+                try {
+                    // Spawn at most two saved shells at a time. Proot startup is
+                    // expensive and N parallel processes on a low-end device can
+                    // jank or OOM; two keeps cold start quick without spiking.
+                    val gate = Semaphore(2)
+                    val activeId = Preference.getString(ACTIVE_SESSION_KEY, "")
+                    val ordered = saved.entries.sortedByDescending { it.key == activeId }
 
-                suspend fun build(id: String, pwd: String) = gate.withPermit {
-                    runCatching {
-                        MkSession.createSession(
-                            activity,
-                            TerminalBackEnd(),
-                            id,
-                            false,
-                            pwd,
-                            consumePendingCommand = false,
-                        )
-                    }
-                        .getOrNull()
-                        ?.let { id to it }
-                }
-
-                fun publish(built: Pair<String, Pair<TerminalSession, String>>) {
-                    val (id, pair) = built
-                    val (session, pwd) = pair
-                    if (id in sessions) {
-                        // Already created on the main thread meanwhile (e.g. from
-                        // the drawer) — drop the duplicate shell.
-                        session.finishIfRunning()
-                    } else {
-                        sessions[id] = session
-                        sessionWorkDirs[id] = pwd
-                        sessionList.add(id)
-                    }
-                }
-
-                // Build the active shell first and publish it immediately. Every
-                // other shell stays lazy so a slow proot start cannot hold the UI.
-                val first = ordered.first()
-                val firstBuilt = build(first.key, first.value)
-                withContext(Dispatchers.Main) {
-                    try {
-                        // App exited while the restore was in flight — drop the shell.
-                        if (!daemonRunning) {
-                            firstBuilt?.second?.first?.finishIfRunning()
-                            return@withContext
+                    suspend fun build(id: String, pwd: String) =
+                        gate.withPermit {
+                            runCatching {
+                                MkSession.createSession(
+                                    activity,
+                                    TerminalBackEnd(),
+                                    id,
+                                    false,
+                                    pwd,
+                                    consumePendingCommand = false,
+                                )
+                            }
+                                .getOrNull()
+                                ?.let { id to it }
                         }
-                        if (firstBuilt != null) {
+
+                    fun publish(built: Pair<String, Pair<TerminalSession, String>>) {
+                        val (id, pair) = built
+                        val (session, pwd) = pair
+                        if (!daemonRunning || id in sessions) {
+                            // Already created elsewhere or service stopped — drop the duplicate.
+                            session.finishIfRunning()
+                        } else {
+                            sessions[id] = session
+                            sessionWorkDirs[id] = pwd
+                            sessionList.add(id)
+                        }
+                    }
+
+                    // Build the active shell first and publish it immediately so the
+                    // UI can attach, while restorePending stays true until every
+                    // saved shell is ready (hasActiveWork/awaitRestored rely on it).
+                    val first = ordered.first()
+                    val firstBuilt = build(first.key, first.value)
+                    withContext(Dispatchers.Main) {
+                        if (daemonRunning && firstBuilt != null) {
                             publish(firstBuilt)
                             if (sessionList.isNotEmpty()) {
                                 currentSession.value = activeId.takeIf { it in sessionList } ?: sessionList.first()
                             }
                             updateNotification()
+                        } else {
+                            firstBuilt?.second?.first?.finishIfRunning()
                         }
-                    } finally {
-                        restorePending = false
+                        activePublished = true
+                        activePublishedLocally = true
                         val callbacks = restoreCallbacks.toList()
                         restoreCallbacks.clear()
                         callbacks.forEach { runCatching { it() } }
                     }
-                }
-                if (firstBuilt == null || !daemonRunning) return@launch
+                    if (firstBuilt == null || !daemonRunning) return@launch
 
-                ordered
-                    .drop(1)
-                    .map { (id, pwd) -> async { build(id, pwd) } }
-                    .awaitAll()
-                    .filterNotNull()
-                    .forEach { built ->
-                        withContext(Dispatchers.Main) {
-                            if (!daemonRunning) {
-                                built.second.first.finishIfRunning()
-                            } else {
-                                publish(built)
-                                updateNotification()
-                            }
+                    ordered.drop(1)
+                        .map { (id, pwd) -> async { build(id, pwd) } }
+                        .awaitAll()
+                        .filterNotNull()
+                        .forEach { built ->
+                            withContext(Dispatchers.Main) { publish(built) }
+                        }
+                    withContext(Dispatchers.Main) { updateNotification() }
+                } finally {
+                    withContext(Dispatchers.Main) {
+                        restorePending = false
+                        activePublished = false
+                        if (!activePublishedLocally) {
+                            val callbacks = restoreCallbacks.toList()
+                            restoreCallbacks.clear()
+                            callbacks.forEach { runCatching { it() } }
                         }
                     }
+                }
             }
         }
 
@@ -277,7 +281,7 @@ class SessionService : Service() {
 
     /** Runs [callback] once the in-flight session restore has published, or immediately. */
     fun onRestored(callback: () -> Unit) {
-        if (restorePending) {
+        if (restorePending && !activePublished) {
             restoreCallbacks.add(callback)
         } else {
             callback()

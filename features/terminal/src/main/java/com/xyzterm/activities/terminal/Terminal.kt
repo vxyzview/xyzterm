@@ -224,6 +224,8 @@ class Terminal : AppCompatActivity() {
         val intent =
             Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
+                // Many text/plain targets still read EXTRA_TEXT only.
+                if (text.length <= 200_000) putExtra(Intent.EXTRA_TEXT, text)
                 putExtra(Intent.EXTRA_STREAM, uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }

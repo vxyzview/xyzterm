@@ -60,7 +60,7 @@ internal object BackupCrypto {
                     magic.contentEquals(MAGIC.toByteArray()) -> ITERATIONS
                     else -> error("not an encrypted backup")
                 }
-            check(iterations in ITERATIONS..5_000_000) { "unsupported backup iterations" }
+            check(iterations == ITERATIONS || iterations == ITERATIONS_V2) { "unsupported backup iterations" }
             val salt = readExact(input, SALT_BYTES) ?: error("truncated backup")
             val iv = readExact(input, IV_BYTES) ?: error("truncated backup")
             val cipher =

@@ -49,6 +49,14 @@ class BackupLayoutTest {
     }
 
     @Test
+    fun `metadata symlinks are never followed by host side restore code`() {
+        assertTrue(isUnsafeBackupLink("backup-meta-x/settings.json", "/sdcard/settings.json"))
+        assertTrue(isUnsafeBackupLink("backup-meta-x", "/etc"))
+        assertFalse(isUnsafeBackupLink("sandbox/usr/lib/x", "/dev/null"))
+        assertFalse(isUnsafeBackupLink("sandbox/usr/bin", "../lib"))
+    }
+
+    @Test
     fun `symlink named sandbox is not a real directory`() {
         val root = Files.createTempDirectory("backup-layout").toFile()
         try {

@@ -89,6 +89,11 @@ case "$DEFAULT_SHELL" in
   *) SHELL_BIN=/bin/$DEFAULT_SHELL ;;
 esac
 
+# A selected shell may not be installed; never strand a session in exec failure.
+if [ ! -e "$LOCAL/sandbox$SHELL_BIN" ] && [ ! -L "$LOCAL/sandbox$SHELL_BIN" ]; then
+  SHELL_BIN=/bin/bash
+fi
+
 if [ "${SHELL_BIN##*/}" = bash ]; then
   if [ $# -gt 0 ]; then
     exec "$PROOT" "${ARGS[@]}" "$SHELL_BIN" --rcfile "$LOCAL/bin/init" -i -c "$*"

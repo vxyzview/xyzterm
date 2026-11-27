@@ -186,16 +186,22 @@ object RootfsInstaller {
             links.all { Files.exists(File(root, it.path).toPath(), LinkOption.NOFOLLOW_LINKS) }
     }
 
+    /** Never write through a symlink planted at a config path: host writes must stay in the rootfs. */
+    private fun File.writeGuestConfig(text: String) {
+        if (Files.isSymbolicLink(toPath())) runCatching { Files.delete(toPath()) }
+        writeText(text)
+    }
+
     private fun writeContainerConfig(root: File) {
         root.child("etc").mkdirs()
         root.child("tmp").mkdirs()
         runCatching { Os.chmod(root.child("tmp").absolutePath, 0b1000000000 or 0b111111111) }
-        root.child("etc/hostname").writeText("xyz\n")
+        root.child("etc/hostname").writeGuestConfig("xyz\n")
         val dns = systemDns().ifEmpty { listOf("8.8.8.8", "8.8.4.4") }
-        root.child("etc/resolv.conf").writeText(dns.joinToString("\n") { "nameserver $it" } + "\n")
+        root.child("etc/resolv.conf").writeGuestConfig(dns.joinToString("\n") { "nameserver $it" } + "\n")
         root
             .child("etc/hosts")
-            .writeText(
+            .writeGuestConfig(
                 "127.0.0.1   localhost.localdomain localhost xyz\n\n" +
                     "::1         localhost.localdomain localhost ip6-localhost ip6-loopback\n" +
                     "fe00::0     ip6-localnet\nff00::0     ip6-mcastprefix\n" +
