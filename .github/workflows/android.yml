@@ -134,28 +134,34 @@ jobs:
           esac
           NOTES_FILE="$RUNNER_TEMP/xyzterm-release-notes.md"
           cat > "$NOTES_FILE" <<'RELEASE_NOTES'
-          ## xyzterm 1.0.8 — reliability and security hardening
-
-          A maintenance release. The shell and the bundled Arch Linux userspace are unchanged; startup, restore, updates and session handling are hardened.
+          ## xyzterm __VERSION__ — backups, terminal UX and lean-up
 
           ### Fixed
-          - Restore keeps a rollback copy and recovers from an interrupted restore; old-format backups with a top-level `sandbox` folder are no longer mistaken for the current format.
-          - Encrypted auto-backups never fall back to plaintext when the device key is unavailable. Auto-backup now runs on a real recurring schedule and reports failures to Android.
-          - Self-update verifies the full signing certificate set and rejects malformed release tags; x86 devices no longer get an install prompt they cannot complete.
-          - Rootfs install verifies the complete extracted tree, rejects unsafe manifest paths and symlinks, and uses the pinned archm release.
-          - Custom binds are ordered and validated consistently; IPv6 DNS no longer breaks guest name lookup.
-          - Corrupt settings files no longer crash startup; sessions are deduplicated; gamepad and key shortcuts no longer fire while typing.
+          - Restore accepts the real Arch image: guest-relative `..` links and guest-absolute links such as the `/dev/null` pacman hook masks are no longer rejected. The installer now creates those masks too.
+          - Crafted archives can no longer escape the staging tree through symlinks in backup metadata; host-side reads and config writes never follow links.
+          - The Quick Settings tile now appears — `BIND_QUICK_SETTINGS_TILE` is enforced on the tile service instead of declared as a permission.
+          - Copy all / Share no longer fail on large scrollback; oversized text is shared through a FileProvider cache file, with normal copy/paste kept as plain text.
+          - Session restore shows the active shell first while still waiting for every shell before declaring the restore complete.
+          - CI compiles again on `minSdk 26`; a Kotlin nullability warning was cleared.
+
+          ### Added
+          - Auto-backups can be mirrored to a user-picked SAF folder so they survive uninstall; light mode saves the home plus `pacman -Qqe` instead of the whole rootfs.
+          - Auto-backup checks free space and schedules with battery/storage constraints.
+          - Live title and working directory in the toolbar, opt-in command-finished notifications, exit codes on session end, wrapped-URL taps and a default-shell setting.
+
+          ### Changed
+          - PBKDF2 raised to 600k iterations with a versioned header that still reads older archives.
+          - The bundled rootfs drops about 100 MB of unused hwdata/udev/xtables/gir/man data; dead dependencies and blanket R8 keeps removed.
 
           ### Requirements and install
           - Android 8.0+ (`minSdk 26`), `arm64-v8a` or `armeabi-v7a`. x86_64 is not supported.
-          - Install `xyzterm-1.0.8-arm64.apk` (arm64) or `xyzterm-1.0.8-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
-          - Signed with the repository's persistent key, so it installs over earlier releases.
+          - Install `xyzterm-__VERSION__-arm64.apk` (arm64) or `xyzterm-__VERSION__-arm.apk` (armv7). The rootfs is bundled and staged locally on first launch; there is no download.
 
           Licensed under GPL-3.0-or-later. Built from source on GitHub Actions.
           RELEASE_NOTES
           # The heredoc is quoted to keep backticks literal; substitute the real
           # version afterwards so notes never advertise the previous release.
-          sed -i "s/1\.0\.8/${VERSION}/g" "$NOTES_FILE"
+          sed -i "s/__VERSION__/${VERSION}/g" "$NOTES_FILE"
           printf '\nBuilt from commit `%s`. APKs: `xyzterm-%s-arm.apk` (armv7) and `xyzterm-%s-arm64.apk` (arm64). F-Droid metadata: [fdroid/metadata/com.xyzterm.app.yml](fdroid/metadata/com.xyzterm.app.yml).\n' \
             "${{ env.COMMIT_HASH }}" "${{ env.VERSION }}" "${{ env.VERSION }}" >> "$NOTES_FILE"
           # shellcheck disable=SC2086

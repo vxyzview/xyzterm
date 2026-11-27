@@ -8,7 +8,7 @@
 
 `terminal-only` · `no root` · `no telemetry` · `no tracking`
 
-[![Latest release](https://img.shields.io/badge/release-v1.0.8-1976D2?style=for-the-badge)](https://github.com/vxyzview/xyzterm/releases/latest)
+[![Latest release](https://img.shields.io/badge/release-v1.0.9-1976D2?style=for-the-badge)](https://github.com/vxyzview/xyzterm/releases/latest)
 
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 [![F-Droid pending](https://img.shields.io/badge/F--Droid-pending-lightgrey?style=flat-square)](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/46623)
@@ -122,7 +122,7 @@ Tap the icon and you are in a shell. That's it. No code editor, no file manager,
 
 ## Get started
 
-1. Install **v1.0.8** from [GitHub Releases](https://github.com/vxyzview/xyzterm/releases/tag/v1.0.8) (pick the APK matching your device's ABI), or [build it yourself](#build).
+1. Install **v1.0.9** from [GitHub Releases](https://github.com/vxyzview/xyzterm/releases/tag/v1.0.9) (pick the APK matching your device's ABI), or [build it yourself](#build).
 2. Open **xyzterm** — the bundled archm rootfs extracts automatically on first launch (a one-time local setup, no download).
 3. You're in a real Arch Linux shell. `pacman -Syu` if that's your thing.
 

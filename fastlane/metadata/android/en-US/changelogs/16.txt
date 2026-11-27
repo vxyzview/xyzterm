@@ -1,0 +1,11 @@
+xyzterm 1.0.9
+
+- Restore accepts real Arch symlinks; crafted metadata links can no longer escape staging
+- Pacman hook masks are installed instead of being dropped
+- Quick Settings tile now appears
+- Copy all / Share no longer fail on large scrollback
+- Active session shows first while restore still waits for all shells
+- Auto-backups can be mirrored to a SAF folder; light backup mode added
+- PBKDF2 raised to 600k with backward-compatible archives
+- Live title/cwd, finished notifications, exit codes, wrapped URL taps and default shell setting
+- Rootfs trimmed by about 100 MB; unused dependencies removed
