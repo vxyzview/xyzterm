@@ -161,13 +161,11 @@ object TerminalBackup {
         // tar writes a .part and encryption writes a second full copy, so peak
         // usage is roughly three archives. Refuse before creating a truncated one.
         val typicalArchive =
-            dir
-                .listFiles { f ->
+            dir.listFiles { f ->
                     f.name.startsWith("terminal-backup-") &&
                         (f.name.endsWith(".tar.gz") || f.name.endsWith(".tar.gz.enc"))
                 }
-                ?.maxOfOrNull { it.length() }
-                ?: (100L * 1024 * 1024)
+                ?.maxOfOrNull { it.length() } ?: (100L * 1024 * 1024)
         if (dir.usableSpace < typicalArchive * 3) return false
         val suffix = if (phrase == null) ".tar.gz" else ".tar.gz.enc"
         // Keep the timestamp so pruning still keeps the newest KEEP archives;
@@ -209,8 +207,7 @@ object TerminalBackup {
         val uriString = Settings.backup_tree_uri
         if (uriString.isBlank()) return
         val context = application ?: return
-        val tree =
-            runCatching { DocumentFile.fromTreeUri(context, Uri.parse(uriString)) }.getOrNull() ?: return
+        val tree = runCatching { DocumentFile.fromTreeUri(context, Uri.parse(uriString)) }.getOrNull() ?: return
         runCatching {
             tree.findFile(archive.name)?.delete()
             val document = tree.createFile("application/gzip", archive.name) ?: return

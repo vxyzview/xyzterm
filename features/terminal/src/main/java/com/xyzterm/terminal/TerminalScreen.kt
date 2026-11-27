@@ -242,8 +242,7 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
 @Composable
 private fun SessionTitle(terminalActivity: Terminal) {
     val binder = terminalActivity.sessionBinder?.get()
-    val name =
-        binder?.getService()?.currentSession?.value ?: stringResource(strings.default_session_name)
+    val name = binder?.getService()?.currentSession?.value ?: stringResource(strings.default_session_name)
     val session = binder?.getSession(name)
     val liveTitle = session?.let { TerminalLiveState.titles[it] }
     val cwd = session?.let { TerminalLiveState.cwds[it] }

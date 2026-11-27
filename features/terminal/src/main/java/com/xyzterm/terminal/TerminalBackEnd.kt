@@ -54,8 +54,8 @@ object TerminalLiveState {
 }
 
 /**
- * A full scrollback easily exceeds the ~1 MB binder transaction limit, so copy and
- * share hand around a FileProvider URI backed by one cache file instead of a String.
+ * A full scrollback easily exceeds the ~1 MB binder transaction limit, so copy and share hand around a FileProvider URI
+ * backed by one cache file instead of a String.
  */
 internal fun terminalTextUri(
     context: Context,
@@ -67,7 +67,8 @@ internal fun terminalTextUri(
     return runCatching {
         file.writeText(text)
         FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-    }.getOrNull()
+    }
+        .getOrNull()
 }
 
 class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
@@ -91,7 +92,9 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
         TerminalLiveState.titles.remove(finishedSession)
         TerminalLiveState.cwds.remove(finishedSession)
         val status = runCatching { finishedSession.getExitStatus() }.getOrDefault(0)
-        toast(if (status == 0) strings.session_ended.getString() else strings.session_ended_code.getFilledString(status))
+        toast(
+            if (status == 0) strings.session_ended.getString() else strings.session_ended_code.getFilledString(status),
+        )
         if (Settings.command_finished_notifications) notifyFinishedInBackground(finishedSession, status)
     }
 
@@ -105,18 +108,18 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     override fun onPasteTextFromClipboard(session: TerminalSession?) {
         val view = terminalView.get() ?: return
         val emulator = view.mEmulator ?: return
-        val item =
-            view.context
-                .getSystemService(ClipboardManager::class.java)
-                ?.primaryClip
-                ?.getItemAt(0)
+        val item = view.context.getSystemService(ClipboardManager::class.java)?.primaryClip?.getItemAt(0)
         val clip =
             item?.text?.toString()
-                ?: item?.uri?.let { uri ->
-                    runCatching {
-                        view.context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
-                    }.getOrNull()
-                }.orEmpty()
+                ?: item
+                    ?.uri
+                    ?.let { uri ->
+                        runCatching {
+                            view.context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                        }
+                            .getOrNull()
+                    }
+                    .orEmpty()
         if (clip.isNotBlank()) {
             emulator.paste(clip)
         }
@@ -291,10 +294,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
             // getWordAtLocation follows line-wrap metadata, so a URL broken across
             // visual rows is returned as one word instead of a partial fragment.
             val word = emulator.getScreen().getWordAtLocation(column, row)
-            val url =
-                URL_REGEX.find(word)
-                    ?.value
-                    ?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
+            val url = URL_REGEX.find(word)?.value?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
             if (url != null) {
                 openUrlPrompt(url)
                 return

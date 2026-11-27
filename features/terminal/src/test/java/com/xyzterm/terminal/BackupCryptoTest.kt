@@ -10,7 +10,11 @@ import org.junit.Test
 class BackupCryptoTest {
     @Test
     fun encrypted_backup_round_trips() {
-        val dir = File.createTempFile("backup-crypto-", "").apply { delete(); mkdirs() }
+        val dir =
+            File.createTempFile("backup-crypto-", "").apply {
+                delete()
+                mkdirs()
+            }
         val plain = File(dir, "plain.tar.gz").apply { writeBytes(byteArrayOf(1, 2, 3, 4, 5)) }
         val encrypted = File(dir, "backup.tar.gz.enc")
         val restored = File(dir, "restored.tar.gz")
@@ -25,7 +29,11 @@ class BackupCryptoTest {
 
     @Test
     fun legacy_120k_backup_is_still_readable() {
-        val dir = File.createTempFile("backup-legacy-", "").apply { delete(); mkdirs() }
+        val dir =
+            File.createTempFile("backup-legacy-", "").apply {
+                delete()
+                mkdirs()
+            }
         val salt = ByteArray(16) { it.toByte() }
         val iv = ByteArray(12) { it.toByte() }
         val payload = byteArrayOf(9, 8, 7, 6)

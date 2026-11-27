@@ -26,8 +26,9 @@ internal object BackupCrypto {
 
     fun isEncrypted(file: File): Boolean = runCatching {
         file.inputStream().use { input ->
-            readExact(input, MAGIC.length)
-                ?.let { it.contentEquals(MAGIC.toByteArray()) || it.contentEquals(MAGIC_V2.toByteArray()) } == true
+            readExact(input, MAGIC.length)?.let {
+                it.contentEquals(MAGIC.toByteArray()) || it.contentEquals(MAGIC_V2.toByteArray())
+            } == true
         }
     }
         .getOrDefault(false)

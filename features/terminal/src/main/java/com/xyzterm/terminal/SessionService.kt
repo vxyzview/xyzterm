@@ -143,21 +143,20 @@ class SessionService : Service() {
                 val activeId = Preference.getString(ACTIVE_SESSION_KEY, "")
                 val ordered = saved.entries.sortedByDescending { it.key == activeId }
 
-                suspend fun build(id: String, pwd: String) =
-                    gate.withPermit {
-                        runCatching {
-                            MkSession.createSession(
-                                activity,
-                                TerminalBackEnd(),
-                                id,
-                                false,
-                                pwd,
-                                consumePendingCommand = false,
-                            )
-                        }
-                            .getOrNull()
-                            ?.let { id to it }
+                suspend fun build(id: String, pwd: String) = gate.withPermit {
+                    runCatching {
+                        MkSession.createSession(
+                            activity,
+                            TerminalBackEnd(),
+                            id,
+                            false,
+                            pwd,
+                            consumePendingCommand = false,
+                        )
                     }
+                        .getOrNull()
+                        ?.let { id to it }
+                }
 
                 fun publish(built: Pair<String, Pair<TerminalSession, String>>) {
                     val (id, pair) = built
@@ -200,7 +199,8 @@ class SessionService : Service() {
                 }
                 if (firstBuilt == null || !daemonRunning) return@launch
 
-                ordered.drop(1)
+                ordered
+                    .drop(1)
                     .map { (id, pwd) -> async { build(id, pwd) } }
                     .awaitAll()
                     .filterNotNull()
