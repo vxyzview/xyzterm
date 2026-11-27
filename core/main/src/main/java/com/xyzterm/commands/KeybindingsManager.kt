@@ -96,7 +96,7 @@ object KeybindingsManager {
     fun saveKeybindings() {
         // Write beside the target and replace by rename so a crash mid-write
         // cannot leave a half-written keybindings file behind.
-        val temp = Files.createTempFile(keybindingsFile.parentFile.toPath(), "keybindings-", ".tmp")
+        val temp = Files.createTempFile(keybindingsFile.parentFile!!.toPath(), "keybindings-", ".tmp")
         try {
             Files.write(temp, json.encodeToString(serializer, customKeybinds).toByteArray())
             Files.move(temp, keybindingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
