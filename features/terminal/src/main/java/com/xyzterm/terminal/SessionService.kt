@@ -306,10 +306,25 @@ class SessionService : Service() {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
+    @SuppressLint("WakelockTimeout", "Wakelock")
     override fun onCreate() {
         super.onCreate()
         instanceRef = WeakReference(this)
         createNotificationChannel()
+
+        if (wakeLock == null) {
+            wakeLock =
+                (getSystemService(POWER_SERVICE) as PowerManager).newWakeLock(
+                    PowerManager.PARTIAL_WAKE_LOCK,
+                    "${strings.app_name.getString()}::${this::class.java.simpleName}",
+                )
+        }
+        // A process kill drops the wakelock; restore the user's choice before the
+        // notification is built so its label matches reality.
+        if (Settings.wake_lock_active && wakeLock?.isHeld == false) {
+            wakeLock?.acquire()
+        }
+
         val notification = createNotification()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(
@@ -323,14 +338,6 @@ class SessionService : Service() {
 
         if (daemonRunning.not()) {
             daemonRunning = true
-        }
-
-        if (wakeLock == null) {
-            wakeLock =
-                (getSystemService(POWER_SERVICE) as PowerManager).newWakeLock(
-                    PowerManager.PARTIAL_WAKE_LOCK,
-                    "${strings.app_name.getString()}::${this::class.java.simpleName}",
-                )
         }
     }
 
@@ -354,13 +361,17 @@ class SessionService : Service() {
             "ACTION_WAKE_LOCK" -> {
                 if (wakeLock?.isHeld == true) {
                     wakeLock?.release()
+                    Settings.wake_lock_active = false
                 } else {
                     wakeLock?.acquire()
+                    Settings.wake_lock_active = true
                 }
                 updateNotification()
             }
         }
-        return START_NOT_STICKY
+        // Let the system recreate the service after an LMK kill; an explicit
+        // stopSelf() from ACTION_EXIT still keeps it down.
+        return START_STICKY
     }
 
     private fun createNotification(): Notification {

@@ -52,6 +52,7 @@ object Settings {
 
     var terminate_sessions_on_exit by CachedPreference("terminate_sessions_on_exit", false)
     var auto_backup by CachedPreference("auto_backup", false)
+    var wake_lock_active by CachedPreference("wake_lock_active", false)
     var donated by CachedPreference("donated", false)
     var sandbox by CachedPreference("sandbox", true)
     var seccomp_mode by CachedPreference("seccomp_mode", "unspecified")
