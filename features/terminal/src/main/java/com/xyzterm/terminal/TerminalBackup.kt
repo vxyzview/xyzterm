@@ -46,8 +46,8 @@ internal fun detectBackupLayout(entries: List<String>): BackupLayout =
     }
 
 /**
- * Links inside backup metadata are read by host-side File APIs, so guest-absolute
- * targets must not be followed there even though proot would contain them.
+ * Links inside backup metadata are read by host-side File APIs, so guest-absolute targets must not be followed there
+ * even though proot would contain them.
  */
 internal fun isUnsafeBackupLink(
     guestPath: String,
@@ -241,7 +241,8 @@ object TerminalBackup {
                 .sortedByDescending { it.lastModified() }
                 .drop(KEEP)
                 .forEach { it.delete() }
-        }.onFailure { Log.w("TerminalBackup", "SAF mirror failed: ${it.message}") }
+        }
+            .onFailure { Log.w("TerminalBackup", "SAF mirror failed: ${it.message}") }
     }
 
     /**
@@ -324,10 +325,13 @@ object TerminalBackup {
                 val sandboxTarget = localDir().child("sandbox")
                 val stagedSandbox = File(staging, "sandbox")
                 val stagedHome = File(staging, "home")
-                val metaDirs = staging.listFiles { file ->
-                    file.name.startsWith("backup-meta-") &&
-                        Files.isDirectory(file.toPath(), LinkOption.NOFOLLOW_LINKS)
-                }.orEmpty()
+                val metaDirs =
+                    staging
+                        .listFiles { file ->
+                            file.name.startsWith("backup-meta-") &&
+                                Files.isDirectory(file.toPath(), LinkOption.NOFOLLOW_LINKS)
+                        }
+                        .orEmpty()
                 // A V1 archive is itself a rootfs, so it can legitimately contain both
                 // /sandbox and /home. `bin/bash` at the archive root settles the case.
                 val isRootfsAtRoot = File(staging, "bin/bash").isFile
@@ -387,26 +391,24 @@ object TerminalBackup {
 
                 // Newer archives carry a settings/keybindings snapshot. Older ones simply
                 // skip this step, so restoring them stays backwards compatible.
-                metaDirs
-                    .firstOrNull()
-                    ?.let { meta ->
-                        File(meta, "settings.json")
-                            .takeIf { Files.isRegularFile(it.toPath(), LinkOption.NOFOLLOW_LINKS) }
-                            ?.let { file ->
-                                BackupSettings.restore(
-                                    file.readText(),
-                                    BackupSettings.schemaFromClasses(Preference.preferenceTypes),
-                                ) { key, value ->
-                                    Preference.put(key, value)
-                                }
+                metaDirs.firstOrNull()?.let { meta ->
+                    File(meta, "settings.json")
+                        .takeIf { Files.isRegularFile(it.toPath(), LinkOption.NOFOLLOW_LINKS) }
+                        ?.let { file ->
+                            BackupSettings.restore(
+                                file.readText(),
+                                BackupSettings.schemaFromClasses(Preference.preferenceTypes),
+                            ) { key, value ->
+                                Preference.put(key, value)
                             }
-                        File(meta, "keybindings.json")
-                            .takeIf { Files.isRegularFile(it.toPath(), LinkOption.NOFOLLOW_LINKS) }
-                            ?.let { file ->
-                                file.copyTo(application!!.filesDir.resolve("keybindings.json"), overwrite = true)
-                                KeybindingsManager.loadKeybindings()
-                            }
-                    }
+                        }
+                    File(meta, "keybindings.json")
+                        .takeIf { Files.isRegularFile(it.toPath(), LinkOption.NOFOLLOW_LINKS) }
+                        ?.let { file ->
+                            file.copyTo(application!!.filesDir.resolve("keybindings.json"), overwrite = true)
+                            KeybindingsManager.loadKeybindings()
+                        }
+                }
 
                 localDir().child(".terminal_setup_ok_DO_NOT_REMOVE").createFileIfNot()
                 null

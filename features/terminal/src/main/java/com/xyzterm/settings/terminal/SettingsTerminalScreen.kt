@@ -417,15 +417,15 @@ fun TerminalDataSettings(navController: NavController) {
                         val grants =
                             uri.flags and
                                 (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                        val persisted =
-                            runCatching {
-                                if (uri.flags and Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION != 0) {
-                                    context.contentResolver.takePersistableUriPermission(uri, grants)
-                                    true
-                                } else {
-                                    false
-                                }
-                            }.getOrDefault(false)
+                        val persisted = runCatching {
+                            if (uri.flags and Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION != 0) {
+                                context.contentResolver.takePersistableUriPermission(uri, grants)
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                            .getOrDefault(false)
                         Settings.backup_tree_uri = if (persisted) uri.toString() else ""
                         toast(if (persisted) strings.success else strings.failed)
                     }

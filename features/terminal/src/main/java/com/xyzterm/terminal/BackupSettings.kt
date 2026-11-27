@@ -13,8 +13,7 @@ import kotlin.reflect.KClass
  */
 internal object BackupSettings {
     // Sealed with the device's AndroidKeyStore key; useless and harmful on another device.
-    private val DEVICE_BOUND_KEYS =
-        setOf("auto_backup_passphrase_cipher", "backup_tree_uri")
+    private val DEVICE_BOUND_KEYS = setOf("auto_backup_passphrase_cipher", "backup_tree_uri")
 
     private val TAG_BY_CLASS =
         mapOf(

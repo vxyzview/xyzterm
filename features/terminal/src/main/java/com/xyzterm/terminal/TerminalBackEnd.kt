@@ -58,8 +58,8 @@ object TerminalLiveState {
 }
 
 /**
- * A full scrollback easily exceeds the ~1 MB binder transaction limit, so copy and
- * share hand around a FileProvider URI backed by one cache file instead of a String.
+ * A full scrollback easily exceeds the ~1 MB binder transaction limit, so copy and share hand around a FileProvider URI
+ * backed by one cache file instead of a String.
  */
 /** /proc reports the host path; translate the paths proot binds back into guest paths. */
 private fun guestCwd(hostPath: String): String {
@@ -91,7 +91,8 @@ internal fun terminalTextUri(
         val file = File.createTempFile("scrollback-", ".txt", dir)
         file.writeText(text)
         FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-    }.getOrNull()
+    }
+        .getOrNull()
 }
 
 class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
@@ -152,18 +153,18 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
     override fun onPasteTextFromClipboard(session: TerminalSession?) {
         val view = terminalView.get() ?: return
         val emulator = view.mEmulator ?: return
-        val item =
-            view.context
-                .getSystemService(ClipboardManager::class.java)
-                ?.primaryClip
-                ?.getItemAt(0)
+        val item = view.context.getSystemService(ClipboardManager::class.java)?.primaryClip?.getItemAt(0)
         val clip =
             item?.text?.toString()
-                ?: item?.uri?.let { uri ->
-                    runCatching {
-                        view.context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
-                    }.getOrNull()
-                }.orEmpty()
+                ?: item
+                    ?.uri
+                    ?.let { uri ->
+                        runCatching {
+                            view.context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                        }
+                            .getOrNull()
+                    }
+                    .orEmpty()
         if (clip.isNotBlank()) {
             emulator.paste(clip)
         }
@@ -338,10 +339,7 @@ class TerminalBackEnd : TerminalViewClient, TerminalSessionClient {
             // getWordAtLocation follows line-wrap metadata, so a URL broken across
             // visual rows is returned as one word instead of a partial fragment.
             val word = emulator.getScreen().getWordAtLocation(column, row)
-            val url =
-                URL_REGEX.find(word)
-                    ?.value
-                    ?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
+            val url = URL_REGEX.find(word)?.value?.trimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}')
             // A wrapped URL is absent from the tapped visual row; otherwise
             // require the tap to land on the URL, not just in the same word.
             val line = emulator.getScreen().getSelectedText(0, row, emulator.mColumns - 1, row)
