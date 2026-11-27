@@ -416,13 +416,13 @@ fun TerminalDataSettings(navController: NavController) {
                     if (uri != null) {
                         // takePersistableUriPermission throws when the picker did not
                         // grant persistable access — treat that as a failed selection.
-                        val persisted =
-                            runCatching {
-                                context.contentResolver.takePersistableUriPermission(
-                                    uri,
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-                                )
-                            }.isSuccess
+                        val persisted = runCatching {
+                            context.contentResolver.takePersistableUriPermission(
+                                uri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                            )
+                        }
+                            .isSuccess
                         Settings.backup_tree_uri = if (persisted) uri.toString() else ""
                         toast(if (persisted) strings.success else strings.failed)
                     }
