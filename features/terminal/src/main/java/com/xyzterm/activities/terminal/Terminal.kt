@@ -101,6 +101,7 @@ import com.xyzterm.terminal.installFailureFor
 import com.xyzterm.terminal.isValidDeepLinkCommand
 import com.xyzterm.terminal.isValidSessionName
 import com.xyzterm.terminal.pickRootfsAsset
+import com.xyzterm.terminal.terminalTextUri
 import com.xyzterm.terminal.terminalView
 import com.xyzterm.theme.XyzTheme
 import com.xyzterm.theme.onWarningSurface
@@ -219,12 +220,16 @@ class Terminal : AppCompatActivity() {
 
     private fun shareTerminalText(view: TerminalView) {
         val text = terminalTextForMenu(view)?.takeIf { it.isNotBlank() } ?: return
+        val uri = terminalTextUri(this, text) ?: return
         val intent =
             Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, text)
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-        startActivity(Intent.createChooser(intent, strings.share.getString()))
+        startActivity(
+            Intent.createChooser(intent, strings.share.getString()).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
+        )
     }
 
     override fun onResume() {

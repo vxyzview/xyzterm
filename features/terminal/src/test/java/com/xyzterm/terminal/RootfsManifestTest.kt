@@ -42,7 +42,10 @@ class RootfsManifestTest {
         assertTrue(isSafeLinkTarget("bin", "usr/bin"))
         assertTrue(isSafeLinkTarget("usr/bin", "../bin"))
         assertFalse(isSafeLinkTarget("usr/bin", "../../bin"))
-        assertFalse(isSafeLinkTarget("bin", "/etc/passwd"))
+        // Absolute targets are guest-root-relative; they stay inside the rootfs.
+        assertTrue(isSafeLinkTarget("bin", "/etc/passwd"))
+        assertTrue(isSafeLinkTarget("usr/lib/x", "/dev/null"))
+        assertFalse(isSafeLinkTarget("bin", "/../../../etc/passwd"))
         assertFalse(isSafeLinkTarget("usr/bin", "../../../etc/passwd"))
         assertFalse(isSafeLinkTarget("bin", "../.."))
     }

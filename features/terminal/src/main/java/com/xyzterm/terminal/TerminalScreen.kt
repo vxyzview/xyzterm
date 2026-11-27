@@ -241,16 +241,29 @@ private fun TerminalTopBar(terminalActivity: Terminal, scope: CoroutineScope, dr
 
 @Composable
 private fun SessionTitle(terminalActivity: Terminal) {
+    val binder = terminalActivity.sessionBinder?.get()
     val name =
-        terminalActivity.sessionBinder?.get()?.getService()?.currentSession?.value
-            ?: stringResource(strings.default_session_name)
-    Text(
-        text = name,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.SemiBold,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-    )
+        binder?.getService()?.currentSession?.value ?: stringResource(strings.default_session_name)
+    val session = binder?.getSession(name)
+    val liveTitle = session?.let { TerminalLiveState.titles[it] }
+    val cwd = session?.let { TerminalLiveState.cwds[it] }
+    Column {
+        Text(
+            text = liveTitle?.takeIf { it.isNotBlank() } ?: name,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (!cwd.isNullOrBlank()) {
+            Text(
+                text = cwd,
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
 }
 
 /** Creates a uniquely named session and switches to it immediately — shared by the drawer and the chip menu. */

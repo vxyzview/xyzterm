@@ -141,67 +141,79 @@ class SessionService : Service() {
                 // jank or OOM; two keeps cold start quick without spiking.
                 val gate = Semaphore(2)
                 val activeId = Preference.getString(ACTIVE_SESSION_KEY, "")
-                val built =
-                    saved.entries
-                        .sortedByDescending { it.key == activeId }
-                        .map { (id, pwd) ->
-                            async {
-                                gate.withPermit {
-                                    runCatching {
-                                        MkSession.createSession(
-                                            activity,
-                                            TerminalBackEnd(),
-                                            id,
-                                            false,
-                                            pwd,
-                                            consumePendingCommand = false,
-                                        )
-                                    }
-                                        .getOrNull()
-                                        ?.let { id to it }
-                                }
-                            }
+                val ordered = saved.entries.sortedByDescending { it.key == activeId }
+
+                suspend fun build(id: String, pwd: String) =
+                    gate.withPermit {
+                        runCatching {
+                            MkSession.createSession(
+                                activity,
+                                TerminalBackEnd(),
+                                id,
+                                false,
+                                pwd,
+                                consumePendingCommand = false,
+                            )
                         }
-                        .awaitAll()
-                        .filterNotNull()
+                            .getOrNull()
+                            ?.let { id to it }
+                    }
+
+                fun publish(built: Pair<String, Pair<TerminalSession, String>>) {
+                    val (id, pair) = built
+                    val (session, pwd) = pair
+                    if (id in sessions) {
+                        // Already created on the main thread meanwhile (e.g. from
+                        // the drawer) — drop the duplicate shell.
+                        session.finishIfRunning()
+                    } else {
+                        sessions[id] = session
+                        sessionWorkDirs[id] = pwd
+                        sessionList.add(id)
+                    }
+                }
+
+                // Build the active shell first and publish it immediately. Every
+                // other shell stays lazy so a slow proot start cannot hold the UI.
+                val first = ordered.first()
+                val firstBuilt = build(first.key, first.value)
                 withContext(Dispatchers.Main) {
                     try {
-                        // App exited while the restore was in flight — drop the shells.
+                        // App exited while the restore was in flight — drop the shell.
                         if (!daemonRunning) {
-                            built.forEach { it.second.first.finishIfRunning() }
+                            firstBuilt?.second?.first?.finishIfRunning()
                             return@withContext
                         }
-                        built.forEach { (id, pair) ->
-                            val (session, pwd) = pair
-                            if (id in sessions) {
-                                // Already created on the main thread meanwhile (e.g.
-                                // from the drawer) — drop the duplicate shell.
-                                session.finishIfRunning()
-                            } else {
-                                sessions[id] = session
-                                sessionWorkDirs[id] = pwd
-                                sessionList.add(id)
+                        if (firstBuilt != null) {
+                            publish(firstBuilt)
+                            if (sessionList.isNotEmpty()) {
+                                currentSession.value = activeId.takeIf { it in sessionList } ?: sessionList.first()
                             }
+                            updateNotification()
                         }
-                        if (sessionList.isNotEmpty()) {
-                            // Restore the session captured before spawning, not whichever
-                            // finished last (and not a session a launcher attached meanwhile).
-                            currentSession.value =
-                                if (activeId in sessionList) {
-                                    activeId
-                                } else {
-                                    sessionList.first()
-                                }
-                        }
-                        if (sessions.isNotEmpty()) updateNotification()
                     } finally {
-                        // Any exit path must release waiters and clear the busy guard.
                         restorePending = false
                         val callbacks = restoreCallbacks.toList()
                         restoreCallbacks.clear()
                         callbacks.forEach { runCatching { it() } }
                     }
                 }
+                if (firstBuilt == null || !daemonRunning) return@launch
+
+                ordered.drop(1)
+                    .map { (id, pwd) -> async { build(id, pwd) } }
+                    .awaitAll()
+                    .filterNotNull()
+                    .forEach { built ->
+                        withContext(Dispatchers.Main) {
+                            if (!daemonRunning) {
+                                built.second.first.finishIfRunning()
+                            } else {
+                                publish(built)
+                                updateNotification()
+                            }
+                        }
+                    }
             }
         }
 

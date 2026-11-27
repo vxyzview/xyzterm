@@ -83,8 +83,20 @@ if [ ! -f "$LOCAL/.bin_chmod_done" ]; then
   touch "$LOCAL/.bin_chmod_done"
 fi
 
-if [ $# -gt 0 ]; then
-    exec "$PROOT" "${ARGS[@]}" /bin/bash --rcfile "$LOCAL/bin/init" -i -c "$*"
+DEFAULT_SHELL=${DEFAULT_SHELL:-bash}
+case "$DEFAULT_SHELL" in
+  /*) SHELL_BIN=$DEFAULT_SHELL ;;
+  *) SHELL_BIN=/bin/$DEFAULT_SHELL ;;
+esac
+
+if [ "${SHELL_BIN##*/}" = bash ]; then
+  if [ $# -gt 0 ]; then
+    exec "$PROOT" "${ARGS[@]}" "$SHELL_BIN" --rcfile "$LOCAL/bin/init" -i -c "$*"
+  else
+    exec "$PROOT" "${ARGS[@]}" "$SHELL_BIN" --rcfile "$LOCAL/bin/init" -i
+  fi
+elif [ $# -gt 0 ]; then
+  exec "$PROOT" "${ARGS[@]}" "$SHELL_BIN" -c "$*"
 else
-    exec "$PROOT" "${ARGS[@]}" /bin/bash --rcfile "$LOCAL/bin/init" -i
+  exec "$PROOT" "${ARGS[@]}" "$SHELL_BIN" -i
 fi

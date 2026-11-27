@@ -42,6 +42,7 @@ object SandboxEnv {
                         sandboxHomeDir(context).absolutePath
                     },
                 "PROMPT_DIRTRIM" to "2",
+                "DEFAULT_SHELL" to Settings.default_shell,
                 "SANDBOX" to Settings.sandbox.toString(),
                 "LOCAL" to localDir(context).absolutePath,
                 "PRIVATE_DIR" to context.filesDir.parentFile!!.absolutePath,

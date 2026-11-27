@@ -1,5 +1,6 @@
 package com.xyzterm.settings.terminal
 
+import android.content.Intent
 import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -140,6 +141,24 @@ fun TerminalAdvancedSettings(navController: NavController) {
                     onItemSelected = { Settings.seccomp_mode = it },
                 )
             }
+
+            PreferenceList(
+                label = stringResource(strings.default_shell),
+                description = stringResource(strings.default_shell_desc),
+                items = listOf("bash", "sh", "zsh", "fish").map { it to it },
+                selectedItem = Settings.default_shell,
+                onItemSelected = {
+                    Settings.default_shell = it
+                    toast(strings.restart_required)
+                },
+            )
+
+            SettingsItem(
+                label = stringResource(strings.command_finished_notifications),
+                description = stringResource(strings.command_finished_notifications_desc),
+                default = Settings.command_finished_notifications,
+                sideEffect = { Settings.command_finished_notifications = it },
+            )
 
             NextScreenCard(
                 label = stringResource(strings.terminal_health),
@@ -378,6 +397,22 @@ fun TerminalDataSettings(navController: NavController) {
                         AutoBackupJobService.cancel(context)
                     }
                 },
+            )
+
+            val pickBackupFolder =
+                rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+                    if (uri != null) {
+                        val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        runCatching { context.contentResolver.takePersistableUriPermission(uri, flags) }
+                        Settings.backup_tree_uri = uri.toString()
+                    }
+                }
+            SettingsItem(
+                label = stringResource(strings.backup_folder),
+                description = stringResource(strings.backup_folder_desc),
+                showSwitch = false,
+                default = false,
+                sideEffect = { pickBackupFolder.launch(null) },
             )
 
             SettingsItem(

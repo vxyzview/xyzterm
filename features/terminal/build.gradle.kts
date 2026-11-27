@@ -52,8 +52,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.browser)
+    implementation(libs.androidx.documentfile)
     implementation(libs.gson)
-    implementation(libs.semver)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

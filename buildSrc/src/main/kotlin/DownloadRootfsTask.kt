@@ -18,6 +18,20 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
+/** Package data that a terminal shell never reads; see the rootfs lean-up in the task below. */
+private val TRIMMABLE =
+    listOf(
+        "usr/share/hwdata",
+        "usr/lib/udev",
+        "usr/share/udev",
+        "usr/lib/xtables",
+        "usr/share/xtables",
+        "usr/lib/girepository-1.0",
+        "usr/share/gir-1.0",
+        "usr/share/man",
+        "usr/man",
+    )
+
 /**
  * Downloads the latest archm release, unpacks it here, and ships the extracted
  * tree as a zip + manifest so the app never runs tar or proot on first launch.
@@ -53,6 +67,9 @@ abstract class DownloadRootfsTask : DefaultTask() {
                     .redirectErrorStream(true)
                     .start()
             check(process.waitFor() == 0) { "Failed to extract $remote" }
+            // ~100 MB of the image is data the shell never needs. Drop it before
+            // packaging so the APK and every update download stay smaller.
+            TRIMMABLE.forEach { File(tree, it).deleteRecursively() }
             // Some archm helpers ship with restrictive modes; give the build
             // user access so they can be packaged. Runtime modes come from the manifest.
             Files.walkFileTree(

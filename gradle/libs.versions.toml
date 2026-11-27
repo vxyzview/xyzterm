@@ -3,7 +3,6 @@
 # kotlin and agp must be compatible with each other after update
 agp = "9.5.2"
 kotlin = "2.4.21"
-ksp = "2.3.14"
 kotlinReflect = "2.4.21"
 
 annotation = "1.11.0"
@@ -21,7 +20,6 @@ navigation = "2.10.2"
 coreKtx = "1.19.1"
 activity = "1.13.0"
 okhttp = "5.5.1"
-photoview = "2.3.0"
 composeRuntime = "1.12.1"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -37,11 +35,8 @@ benchmark = "1.5.0"
 baselineprofile = "1.5.0"
 profileinstaller = "1.4.1"
 runner = "1.7.0"
-composeDnd = "0.5.0"
 androidsvgAar = "1.4"
-ec4jCore = "1.2.0"
 kotlinxSerializationJson = "1.13.0"
-room = "2.8.5"
 
 publish = "0.37.0"
 collection = "1.7.0"
@@ -60,9 +55,7 @@ monarchJson = "1.0.2"
 regexOnig = "1.0.3"
 regexRe2j = "1.0.2"
 gson = "2.15.0"
-semver = "3.1.0"
 leakcanary = "2.14"
-motionCompose = "2.0.1"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -75,7 +68,6 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }
 publish = { id = "com.vanniktech.maven.publish.base", version.ref = "publish" }
@@ -130,10 +122,6 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
-# Database
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-
 # Testing
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
@@ -151,27 +139,20 @@ androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstall
 
 # Misc
 material = { module = "com.google.android.material:material", version.ref = "material" }
-photoview = { module = "com.github.chrisbanes:PhotoView", version.ref = "photoview" }
 lsp4j = { module = "org.eclipse.lsp4j:org.eclipse.lsp4j", version.ref = "lsp4j" }
 jcodings = { module = "org.jruby.jcodings:jcodings", version.ref = "jcodings" }
 joni = { module = "org.jruby.joni:joni", version.ref = "joni" }
 snakeyaml-engine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "snakeyaml" }
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 androidsvg-aar = { module = "com.caverock:androidsvg-aar", version.ref = "androidsvgAar" }
-ec4j-core = { module = "org.ec4j.core:ec4j-core", version.ref = "ec4jCore" }
 jdt-annotation = { module = "org.eclipse.jdt:org.eclipse.jdt.annotation", version.ref = "jdtAnnotation" }
 anrwatchdog = { module = "com.github.anrwatchdog:anrwatchdog", version.ref = "anrwatchdog" }
 pine-core = { module = "top.canyie.pine:core", version.ref = "coreVersion" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
 
 # Tree-sitter / editor
 tree-sitter = { module = "com.itsaky.androidide.treesitter:android-tree-sitter", version.ref = "tsBinding" }
 tree-sitter-java = { module = "com.itsaky.androidide.treesitter:tree-sitter-java", version.ref = "tsBinding" }
-
-# Compose extras
-compose-dnd = { module = "com.mohamedrejeb.dnd:compose-dnd", version.ref = "composeDnd" }
-material-motion-compose = { module = "io.github.fornewid:material-motion-compose-core", version.ref = "motionCompose" }
 
 # Regex / Monarch
 monarch-code = { module = "io.github.dingyi222666.monarch:monarch", version.ref = "monarch" }

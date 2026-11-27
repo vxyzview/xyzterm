@@ -51,7 +51,9 @@ object Settings {
         }
 
     var terminate_sessions_on_exit by CachedPreference("terminate_sessions_on_exit", false)
+    var command_finished_notifications by CachedPreference("command_finished_notifications", false)
     var auto_backup by CachedPreference("auto_backup", false)
+    var backup_tree_uri by CachedPreference("backup_tree_uri", "")
     // Survives an LMK kill even if it happens milliseconds after the tap.
     var wake_lock_active by CachedPreference("wake_lock_active", false, commitImmediately = true)
     var donated by CachedPreference("donated", false)
@@ -103,6 +105,7 @@ object Settings {
     var app_font_path by CachedPreference("app_font_path", "")
     var terminal_font_path by CachedPreference("terminal_font_path", "")
     var terminal_cursor_style by CachedPreference("terminal_cursor_style", "block")
+    var default_shell by CachedPreference("default_shell", "bash")
     var terminal_extra_keys by CachedPreference("terminal_extra_keys", DEFAULT_TERMINAL_EXTRA_KEYS)
     var current_lang: String by
         CachedPreference("current_lang", application!!.resources.configuration.locales[0].language)

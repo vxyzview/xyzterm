@@ -1,11 +1,14 @@
 package com.xyzterm.terminal
 
+import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
 import com.xyzterm.commands.KeybindingsManager
 import com.xyzterm.file.child
 import com.xyzterm.file.createFileIfNot
 import com.xyzterm.file.localDir
 import com.xyzterm.file.sandboxHomeDir
 import com.xyzterm.settings.Preference
+import com.xyzterm.settings.Settings
 import com.xyzterm.utils.application
 import com.xyzterm.utils.getTempDir
 import java.io.File
@@ -155,6 +158,17 @@ object TerminalBackup {
             }
         val dir = backupDir()
         dir.mkdirs()
+        // tar writes a .part and encryption writes a second full copy, so peak
+        // usage is roughly three archives. Refuse before creating a truncated one.
+        val typicalArchive =
+            dir
+                .listFiles { f ->
+                    f.name.startsWith("terminal-backup-") &&
+                        (f.name.endsWith(".tar.gz") || f.name.endsWith(".tar.gz.enc"))
+                }
+                ?.maxOfOrNull { it.length() }
+                ?: (100L * 1024 * 1024)
+        if (dir.usableSpace < typicalArchive * 3) return false
         val suffix = if (phrase == null) ".tar.gz" else ".tar.gz.enc"
         // Keep the timestamp so pruning still keeps the newest KEEP archives;
         // the UUID makes concurrent/same-millisecond runs non-colliding.
@@ -186,7 +200,30 @@ object TerminalBackup {
             ?.sortedByDescending { it.lastModified() }
             ?.drop(KEEP)
             ?.forEach { it.delete() }
+        copyToSafFolder(target)
         return true
+    }
+
+    /** Mirrors auto-backups into a user-picked SAF folder, which survives uninstall and clear-data. */
+    private fun copyToSafFolder(archive: File) {
+        val uriString = Settings.backup_tree_uri
+        if (uriString.isBlank()) return
+        val context = application ?: return
+        val tree =
+            runCatching { DocumentFile.fromTreeUri(context, Uri.parse(uriString)) }.getOrNull() ?: return
+        runCatching {
+            tree.findFile(archive.name)?.delete()
+            val document = tree.createFile("application/gzip", archive.name) ?: return
+            context.contentResolver.openOutputStream(document.uri)?.use { output ->
+                archive.inputStream().use { it.copyTo(output) }
+            }
+            tree
+                .listFiles()
+                .filter { it.name?.startsWith("terminal-backup-") == true }
+                .sortedByDescending { it.lastModified() }
+                .drop(KEEP)
+                .forEach { it.delete() }
+        }
     }
 
     /**
@@ -228,21 +265,20 @@ object TerminalBackup {
                         ?: "tar exited with $code")
                 }
 
-                // User-supplied archives are a trust boundary: reject symlinks
-                // that point outside the staging tree before swapping directories.
-                val stagingRoot =
-                    runCatching { staging.toPath().toRealPath() }.getOrNull()
-                        ?: return@withContext "backup contains unsafe symlinks"
+                // User-supplied archives are a trust boundary: reject symlinks that
+                // escape the extracted root. The real rootfs legitimately contains
+                // many `..` links and guest-absolute links, so validate the target
+                // text the same way the installer does instead of resolving it on
+                // the host filesystem.
+                val stagingPath = staging.toPath()
                 val unsafeSymlink = runCatching {
-                    Files.walk(staging.toPath()).use { paths ->
+                    Files.walk(stagingPath).use { paths ->
                         paths.iterator().asSequence().any { path ->
                             if (!Files.isSymbolicLink(path)) {
                                 false
                             } else {
-                                val link = Files.readSymbolicLink(path)
-                                link.isAbsolute ||
-                                    link.toString().split('/').contains("..") ||
-                                    !path.toRealPath().startsWith(stagingRoot)
+                                val guestPath = stagingPath.relativize(path).toString()
+                                !isSafeLinkTarget(guestPath, Files.readSymbolicLink(path).toString())
                             }
                         }
                     }

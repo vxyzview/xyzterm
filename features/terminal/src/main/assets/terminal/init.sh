@@ -3,7 +3,7 @@ force_color_prompt=yes
 shopt -s checkwinsize
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/games:/usr/local/bin:/usr/local/sbin:$LOCAL/bin:$PATH
-export SHELL="bash"
+export SHELL="${DEFAULT_SHELL:-bash}"
 
 # archm helpers (utils.sh refuses to run inside the Android shell).
 export TERMINAL_MODE=archm

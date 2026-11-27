@@ -42,6 +42,8 @@ class AutoBackupJobService : JobService() {
             val job =
                 JobInfo.Builder(JOB_ID, ComponentName(context, AutoBackupJobService::class.java))
                     .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
+                    .setRequiresBatteryNotLow(true)
+                    .setRequiresStorageNotLow(true)
                     .setPeriodic(6 * 60 * 60 * 1000L)
                     .build()
             runCatching { scheduler.schedule(job) }

@@ -7,6 +7,8 @@ import android.system.Os
 import com.xyzterm.file.child
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -47,11 +49,14 @@ internal fun parseRootfsManifest(text: String): RootfsManifest {
 /** Rejects absolute paths and any `..` segment before they touch the filesystem. */
 internal fun isSafeEntryPath(path: String): Boolean = !path.startsWith("/") && path.split('/').none { it == ".." }
 
-/** A link target is safe only if it stays inside the rootfs relative to the link's own directory. */
+/**
+ * A link target is safe only if it stays inside the rootfs. Relative targets resolve from the link's own directory;
+ * absolute targets are guest paths and resolve from the root (proot re-roots them on the guest side).
+ */
 internal fun isSafeLinkTarget(linkPath: String, target: String): Boolean {
-    if (target.startsWith("/")) return false
+    val base = if (target.startsWith("/")) "" else File(linkPath).parent.orEmpty()
     val segments = mutableListOf<String>()
-    (File(linkPath).parent.orEmpty() + "/" + target).split('/').forEach { part ->
+    (base + "/" + target.trimStart('/')).split('/').forEach { part ->
         when {
             part.isEmpty() || part == "." -> Unit
             part == ".." -> {
@@ -174,9 +179,11 @@ object RootfsInstaller {
         // Symlinks are created after the file loop; without this an interruption
         // between the two is mistaken for a finished install.
         val links = manifest.entries.filter { it.type == "l" && isSafeEntryPath(it.path) }
+        // Absolute links may resolve outside the sandbox on the host, so check the
+        // entry itself rather than following it.
         return files.isNotEmpty() &&
             files.all { File(root, it.path).isFile } &&
-            links.all { File(root, it.path).exists() }
+            links.all { Files.exists(File(root, it.path).toPath(), LinkOption.NOFOLLOW_LINKS) }
     }
 
     private fun writeContainerConfig(root: File) {
