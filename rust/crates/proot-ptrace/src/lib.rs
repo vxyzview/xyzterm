@@ -214,6 +214,72 @@ impl Tracee {
         Ok(())
     }
 
+    /// Reads the stack pointer and program counter at a tracee stop.
+    #[cfg(target_arch = "aarch64")]
+    pub fn instruction_pointer(&self) -> io::Result<(u64, u64)> {
+        let mut registers: libc::user_regs_struct = unsafe { std::mem::zeroed() };
+        let mut iov = libc::iovec {
+            iov_base: (&mut registers as *mut libc::user_regs_struct).cast(),
+            iov_len: std::mem::size_of::<libc::user_regs_struct>(),
+        };
+        // SAFETY: iovec points to a live register buffer; pid is our tracee.
+        if unsafe {
+            libc::ptrace(
+                libc::PTRACE_GETREGSET,
+                self.pid,
+                libc::NT_PRSTATUS as *mut libc::c_void,
+                (&mut iov as *mut libc::iovec).cast::<libc::c_void>(),
+            )
+        } < 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        Ok((registers.sp, registers.pc))
+    }
+
+    /// Sets the stack pointer and program counter at a tracee stop.
+    #[cfg(target_arch = "aarch64")]
+    pub fn set_instruction_pointer(&self, sp: u64, pc: u64) -> io::Result<()> {
+        let mut registers: libc::user_regs_struct = unsafe { std::mem::zeroed() };
+        let mut get = libc::iovec {
+            iov_base: (&mut registers as *mut libc::user_regs_struct).cast(),
+            iov_len: std::mem::size_of::<libc::user_regs_struct>(),
+        };
+        // SAFETY: get.iov_base points to a live register buffer.
+        if unsafe {
+            libc::ptrace(
+                libc::PTRACE_GETREGSET,
+                self.pid,
+                libc::NT_PRSTATUS as *mut libc::c_void,
+                (&mut get as *mut libc::iovec).cast::<libc::c_void>(),
+            )
+        } < 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        registers.sp = sp;
+        registers.pc = pc;
+        let mut put = libc::iovec {
+            iov_base: (&registers as *const libc::user_regs_struct)
+                .cast_mut()
+                .cast::<libc::c_void>(),
+            iov_len: std::mem::size_of::<libc::user_regs_struct>(),
+        };
+        // SAFETY: put.iov_base points to a live register buffer.
+        if unsafe {
+            libc::ptrace(
+                libc::PTRACE_SETREGSET,
+                self.pid,
+                libc::NT_PRSTATUS as *mut libc::c_void,
+                (&mut put as *mut libc::iovec).cast::<libc::c_void>(),
+            )
+        } < 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        Ok(())
+    }
+
     /// Steps to the next syscall stop, applies the guest/host decision and
     /// returns it. `None` means the tracee exited instead of stopping.
     #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
@@ -455,6 +521,20 @@ mod tests {
             tracee.read_bytes(start, stack.len()).expect("read stack"),
             stack
         );
+        tracee.kill(libc::SIGKILL).expect("kill");
+        let _ = tracee.wait();
+    }
+
+    #[test]
+    #[cfg(target_arch = "aarch64")]
+    fn stack_pointer_and_pc_roundtrip() {
+        let tracee = Tracee::spawn("/bin/sleep", &["30"]).expect("spawn");
+        let (sp, pc) = tracee.instruction_pointer().expect("registers");
+        assert!(sp != 0 && pc != 0);
+        tracee
+            .set_instruction_pointer(sp, pc)
+            .expect("set registers");
+        assert_eq!(tracee.instruction_pointer().expect("read back"), (sp, pc));
         tracee.kill(libc::SIGKILL).expect("kill");
         let _ = tracee.wait();
     }
