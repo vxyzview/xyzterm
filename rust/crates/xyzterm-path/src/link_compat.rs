@@ -12,7 +12,7 @@
 /// PATH_MAX as used by the Android libc calls in the original shim.
 pub const PATH_MAX: usize = 4096;
 pub const AT_EMPTY_PATH: i32 = 0x1000;
-pub const AT_SYMLINK_FOLLOW: i32 = 0x2000;
+pub const AT_SYMLINK_FOLLOW: i32 = 0x400;
 pub const PREFIX: &[u8] = b".l2s.";
 
 /// The highest counter the original tries before giving up (`EXT:132-136`).
@@ -159,6 +159,13 @@ mod tests {
             final_name(&intermediate, 1000),
             Err(LinkError::CounterExhausted)
         );
+    }
+
+    #[test]
+    fn linux_at_flag_values() {
+        // AT_EMPTY_PATH 0x1000, AT_SYMLINK_FOLLOW 0x400, AT_REMOVEDIR 0x2000.
+        assert_eq!(AT_EMPTY_PATH, 0x1000);
+        assert_eq!(AT_SYMLINK_FOLLOW, 0x400);
     }
 
     #[test]

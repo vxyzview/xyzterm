@@ -127,5 +127,5 @@ object XyztermNative {
     const val PATH2_IS_PREFIX: Int = 2
     const val PATHS_ARE_NOT_COMPARABLE: Int = 3
     const val AT_EMPTY_PATH: Int = 0x1000
-    const val AT_SYMLINK_FOLLOW: Int = 0x2000
+    const val AT_SYMLINK_FOLLOW: Int = 0x400
 }
