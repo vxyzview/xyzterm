@@ -1,8 +1,10 @@
 name: Rust native core
 
 # Verifies the Rust workspace on the host and cross-compiles libxyzterm.so for
-# both supported ABIs. The Android app build consumes the artifacts below.
+# both supported ABIs. Reusable so Android builds can produce the artifact in
+# their own run instead of looking up another run's artifact.
 on:
+  workflow_call:
   push:
     branches: [main, rust]
   pull_request:
@@ -73,9 +75,37 @@ jobs:
           done
 
       - name: Upload native libraries
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: libxyzterm
           path: |
             rust/target/aarch64-linux-android/release/libxyzterm.so
             rust/target/armv7-linux-androideabi/release/libxyzterm.so
+
+  stage-jni-libs:
+    name: Stage JNI libraries
+    needs: rust-checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download native libraries
+        uses: actions/download-artifact@v7
+        with:
+          name: libxyzterm
+          path: native
+
+      - name: Map ABIs to flavor jniLibs
+        run: |
+          set -euo pipefail
+          mkdir -p app/src/arm64/jniLibs/arm64-v8a app/src/arm/jniLibs/armeabi-v7a
+          cp native/aarch64-linux-android/release/libxyzterm.so app/src/arm64/jniLibs/arm64-v8a/libxyzterm.so
+          cp native/armv7-linux-androideabi/release/libxyzterm.so app/src/arm/jniLibs/armeabi-v7a/libxyzterm.so
+
+      # Artifact root is app/src, so the caller can download straight into it.
+      - name: Upload staged jniLibs
+        uses: actions/upload-artifact@v7
+        with:
+          name: jni-libs
+          path: |
+            app/src/arm/jniLibs/armeabi-v7a/libxyzterm.so
+            app/src/arm64/jniLibs/arm64-v8a/libxyzterm.so
+          if-no-files-found: error
