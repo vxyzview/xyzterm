@@ -3,6 +3,7 @@
 
 pub mod link_compat;
 pub mod port;
+pub mod translate;
 
 use std::ffi::c_char;
 
