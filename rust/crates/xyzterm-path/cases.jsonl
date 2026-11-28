@@ -1,0 +1,42 @@
+{"fn": "compare_paths", "args": ["/tmp", "/tmp"], "ok": 0}
+{"fn": "compare_paths", "args": ["/tmp/", "/tmp"], "ok": 0}
+{"fn": "compare_paths", "args": ["/tmp", "/tmp/"], "ok": 0}
+{"fn": "compare_paths", "args": ["/tmp/", "/tmp/"], "ok": 0}
+{"fn": "compare_paths", "args": ["/", "/"], "ok": 0}
+{"fn": "compare_paths", "args": ["/", "/tmp"], "ok": 1}
+{"fn": "compare_paths", "args": ["/tmp", "/"], "ok": 2}
+{"fn": "compare_paths", "args": ["/tmp", "/tmp/x"], "ok": 1}
+{"fn": "compare_paths", "args": ["/tmp/x", "/tmp"], "ok": 2}
+{"fn": "compare_paths", "args": ["/a", "/ab"], "ok": 3}
+{"fn": "compare_paths", "args": ["/ab", "/a"], "ok": 3}
+{"fn": "compare_paths", "args": ["/tmp", "/usr"], "ok": 3}
+{"fn": "compare_paths", "args": ["", "/tmp"], "error": "crash: SIGABRT"}
+{"fn": "compare_paths", "args": ["", ""], "error": "crash: SIGABRT"}
+{"fn": "compare_paths", "args": ["/home/user", "/home/user2"], "ok": 3}
+{"fn": "compare_paths", "args": ["/home/user/", "/home/user"], "ok": 0}
+{"fn": "compare_paths", "args": ["./a", "./a"], "ok": 0}
+{"fn": "compare_paths", "args": ["../a", "../a/b"], "ok": 1}
+{"fn": "compare_paths", "args": ["/tmp/a b", "/tmp/a"], "ok": 3}
+{"fn": "compare_paths", "args": ["/tmp/a", "/tmp/A"], "ok": 3}
+{"fn": "compare_paths", "args": ["/tmp/café", "/tmp/café"], "ok": 0}
+{"fn": "compare_paths", "args": ["/tmp/😀", "/tmp/😀/x"], "ok": 1}
+{"fn": "compare_paths2", "args": ["/tmp", 4, "/tmp", 4], "ok": 0}
+{"fn": "compare_paths2", "args": ["/tmp/", 5, "/tmp", 4], "ok": 0}
+{"fn": "compare_paths2", "args": ["/tmp", 4, "/tmp/", 5], "ok": 0}
+{"fn": "compare_paths2", "args": ["/", 1, "/", 1], "ok": 0}
+{"fn": "compare_paths2", "args": ["/", 1, "/tmp", 4], "ok": 1}
+{"fn": "compare_paths2", "args": ["/tmp", 4, "/", 1], "ok": 2}
+{"fn": "compare_paths2", "args": ["/tmp", 4, "/tmp/x", 6], "ok": 1}
+{"fn": "compare_paths2", "args": ["/tmp/x", 6, "/tmp", 4], "ok": 2}
+{"fn": "compare_paths2", "args": ["/a", 2, "/ab", 3], "ok": 3}
+{"fn": "compare_paths2", "args": ["/ab", 3, "/a", 2], "ok": 3}
+{"fn": "compare_paths2", "args": ["/tmp", 4, "/usr", 4], "ok": 3}
+{"fn": "compare_paths2", "args": ["", 0, "/tmp", 4], "error": "crash: SIGABRT"}
+{"fn": "compare_paths2", "args": ["", 0, "", 0], "error": "crash: SIGABRT"}
+{"fn": "compare_paths2", "args": ["/home/user", 10, "/home/user2", 11], "ok": 3}
+{"fn": "compare_paths2", "args": ["/home/user/", 11, "/home/user", 10], "ok": 0}
+{"fn": "compare_paths2", "args": ["./a", 3, "./a", 3], "ok": 0}
+{"fn": "compare_paths2", "args": ["../a", 4, "../a/b", 6], "ok": 1}
+{"fn": "compare_paths2", "args": ["/tmp/a b", 8, "/tmp/a", 6], "ok": 3}
+{"fn": "compare_paths2", "args": ["/tmp/café", 10, "/tmp/café", 10], "ok": 0}
+{"fn": "compare_paths2", "args": ["/tmp/😀", 9, "/tmp/😀/x", 11], "ok": 1}

@@ -1,0 +1,150 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "/data/user/0/com.xyzterm.app/tmp/opencode/proot-path-min",
+  "unit": "path/",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "xyzterm-path",
+  "exports": [
+    {
+      "name": "compare_paths2",
+      "file": "path/path.c",
+      "line": 536,
+      "params": [
+        {
+          "name": "path1",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "length1",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "size_t"
+        },
+        {
+          "name": "path2",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "length2",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "size_t"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "Comparison compare_paths2(const char *path1, size_t length1, const char *path2, size_t length2)"
+    },
+    {
+      "name": "compare_paths",
+      "file": "path/path.c",
+      "line": 589,
+      "params": [
+        {
+          "name": "path1",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "path2",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "Comparison compare_paths(const char *path1, const char *path2)"
+    }
+  ],
+  "classes": [],
+  "js_only": [
+    {
+      "name": "join_paths",
+      "file": "path/path.c",
+      "line": 51,
+      "reason": "is variadic"
+    },
+    {
+      "name": "which",
+      "file": "path/path.c",
+      "line": 119,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "realpath2",
+      "file": "path/path.c",
+      "line": 226,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "getcwd2",
+      "file": "path/path.c",
+      "line": 245,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "chop_finality",
+      "file": "path/path.c",
+      "line": 264,
+      "reason": "writes to a buffer (`char*`) whose size is not a parameter"
+    },
+    {
+      "name": "readlink_proc_pid_fd",
+      "file": "path/path.c",
+      "line": 287,
+      "reason": "uses `pid_t`, which is not a C scalar the bridge knows"
+    },
+    {
+      "name": "translate_path",
+      "file": "path/path.c",
+      "line": 318,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "detranslate_path",
+      "file": "path/path.c",
+      "line": 402,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "belongs_to_guestfs",
+      "file": "path/path.c",
+      "line": 521,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "list_open_fd",
+      "file": "path/path.c",
+      "line": 667,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "substitute_path_prefix",
+      "file": "path/path.c",
+      "line": 679,
+      "reason": "passes a pointer (`char[]`): ownership must be designed"
+    }
+  ],
+  "end_state": "scaffold"
+}

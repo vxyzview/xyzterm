@@ -50,6 +50,9 @@ graphify-out/
 signing.properties
 *signing*.properties
 
+# Rust workspace build output
+/rust/target/
+
 # Rootfs tarballs are downloaded by the build, never committed
 
 app/src/arm/assets/terminal/rootfs-arm.zip

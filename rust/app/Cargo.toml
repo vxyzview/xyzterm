@@ -1,0 +1,15 @@
+[package]
+name = "xyzterm-app"
+version.workspace = true
+edition.workspace = true
+publish = false
+description = "JNI front door for the XYZTerm Rust runtime"
+
+[lib]
+name = "xyzterm"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+jni = "0.21.1"
+sha2 = "0.10"
+xyzterm-path = { path = "../crates/xyzterm-path" }

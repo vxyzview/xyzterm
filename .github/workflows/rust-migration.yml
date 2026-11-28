@@ -1,0 +1,81 @@
+name: Rust native core
+
+# Verifies the Rust workspace on the host and cross-compiles libxyzterm.so for
+# both supported ABIs. The Android app build consumes the artifacts below.
+on:
+  push:
+    branches: [main, rust]
+  pull_request:
+    branches: [main, dev, rust]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust with Android targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi
+          components: rustfmt, clippy
+
+      - name: Host checks
+        working-directory: rust
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --workspace --all-targets -- -D warnings
+          cargo test --workspace
+
+      - name: Resolve Android NDK
+        id: ndk
+        run: |
+          root="${ANDROID_NDK_HOME:-${ANDROID_NDK_LATEST_HOME:-}}"
+          if [ -z "$root" ]; then
+            root=$(find "$ANDROID_HOME/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          fi
+          test -n "$root" && test -d "$root"
+          echo "root=$root" >> "$GITHUB_OUTPUT"
+
+      - name: Build ARM64 library
+        env:
+          BIN: ${{ steps.ndk.outputs.root }}/toolchains/llvm/prebuilt/linux-x86_64/bin
+        run: |
+          CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$BIN/aarch64-linux-android26-clang" \
+          CC_aarch64_linux_android="$BIN/aarch64-linux-android26-clang" \
+          cargo build --manifest-path rust/Cargo.toml -p xyzterm-app --release --target aarch64-linux-android
+
+      - name: Build ARM library
+        env:
+          BIN: ${{ steps.ndk.outputs.root }}/toolchains/llvm/prebuilt/linux-x86_64/bin
+        run: |
+          CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER="$BIN/armv7a-linux-androideabi26-clang" \
+          CC_armv7_linux_androideabi="$BIN/armv7a-linux-androideabi26-clang" \
+          cargo build --manifest-path rust/Cargo.toml -p xyzterm-app --release --target armv7-linux-androideabi
+
+      - name: Verify ABI and 16 KB page alignment
+        run: |
+          for abi in aarch64-linux-android armv7-linux-androideabi; do
+            so="rust/target/$abi/release/libxyzterm.so"
+            test -f "$so"
+            readelf -h "$so" | grep -qE 'AArch64|ARM'
+            # Android 15+ requires 16 KB-aligned load segments on 64-bit.
+            if [ "$abi" = "aarch64-linux-android" ]; then
+              readelf -lW "$so" | awk '/LOAD/{print $NF}' | grep -qv '^0x4000$' && exit 1
+            fi
+            nm -D "$so" | grep -q Java_com_xyzterm_bridge_XyztermNative_initialize
+          done
+
+      - name: Upload native libraries
+        uses: actions/upload-artifact@v6
+        with:
+          name: libxyzterm
+          path: |
+            rust/target/aarch64-linux-android/release/libxyzterm.so
+            rust/target/armv7-linux-androideabi/release/libxyzterm.so
