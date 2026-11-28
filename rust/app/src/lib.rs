@@ -446,6 +446,71 @@ pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_closeSession(
     }
 }
 
+/// Installs a packaged rootfs from its zip + TSV manifest into `destination`.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_installRootfs(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    archive: JString<'_>,
+    manifest_text: JString<'_>,
+    destination: JString<'_>,
+) -> jboolean {
+    let (Some(archive), Some(manifest_text), Some(destination)) = (
+        jstring_value(&mut env, &archive),
+        jstring_value(&mut env, &manifest_text),
+        jstring_value(&mut env, &destination),
+    ) else {
+        throw_bad_argument(&mut env, "installRootfs: null argument");
+        return jni::sys::JNI_FALSE;
+    };
+    let manifest = match rootfs_manager::parse_manifest(&manifest_text) {
+        Ok(manifest) => manifest,
+        Err(error) => {
+            let _ = env.throw_new("java/lang/IllegalArgumentException", error.to_string());
+            return jni::sys::JNI_FALSE;
+        }
+    };
+    match rootfs_manager::install(
+        std::path::Path::new(&archive),
+        &manifest,
+        std::path::Path::new(&destination),
+    ) {
+        Ok(_) => jni::sys::JNI_TRUE,
+        Err(error) => {
+            let _ = env.throw_new("java/io/IOException", error.to_string());
+            jni::sys::JNI_FALSE
+        }
+    }
+}
+
+/// True when every manifest entry is present with the recorded size.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_isRootfsInstalled(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    manifest_text: JString<'_>,
+    destination: JString<'_>,
+) -> jboolean {
+    let (Some(manifest_text), Some(destination)) = (
+        jstring_value(&mut env, &manifest_text),
+        jstring_value(&mut env, &destination),
+    ) else {
+        throw_bad_argument(&mut env, "isRootfsInstalled: null argument");
+        return jni::sys::JNI_FALSE;
+    };
+    match rootfs_manager::parse_manifest(&manifest_text) {
+        Ok(manifest)
+            if rootfs_manager::is_install_complete(
+                std::path::Path::new(&destination),
+                &manifest,
+            ) =>
+        {
+            jni::sys::JNI_TRUE
+        }
+        Ok(_) | Err(_) => jni::sys::JNI_FALSE,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

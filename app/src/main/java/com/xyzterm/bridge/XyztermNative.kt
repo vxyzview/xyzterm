@@ -92,6 +92,17 @@ object XyztermNative {
 
     @JvmStatic external fun closeSession(handle: Long): Boolean
 
+    @JvmStatic external fun installRootfs(
+        archive: String,
+        manifest: String,
+        destination: String,
+    ): Boolean
+
+    @JvmStatic external fun isRootfsInstalled(
+        manifest: String,
+        destination: String,
+    ): Boolean
+
     const val PATHS_ARE_EQUAL: Int = 0
     const val PATH1_IS_PREFIX: Int = 1
     const val PATH2_IS_PREFIX: Int = 2

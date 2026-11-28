@@ -1,0 +1,12 @@
+[package]
+name = "rootfs-manager"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Rust rootfs manifest parsing, ZIP extraction and verification"
+
+[dependencies]
+flate2 = "1"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

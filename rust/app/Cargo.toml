@@ -15,4 +15,5 @@ sha2 = "0.10"
 xyzterm-path = { path = "../crates/xyzterm-path" }
 terminal-engine = { path = "../crates/terminal-engine" }
 terminal-pty = { path = "../crates/terminal-pty" }
+rootfs-manager = { path = "../crates/rootfs-manager" }
 serde_json = "1"

@@ -3,6 +3,7 @@ members = [
     "crates/xyzterm-path",
     "crates/terminal-engine",
     "crates/terminal-pty",
+    "crates/rootfs-manager",
     "app",
 ]
 resolver = "2"
