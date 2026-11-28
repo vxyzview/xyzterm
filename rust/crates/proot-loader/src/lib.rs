@@ -58,6 +58,24 @@ pub fn build_stack(base: u64, argv: &[&str], envp: &[&str], auxv: &[(u64, u64)])
     out
 }
 
+/// Flattens PT_LOAD segments into `(vaddr, bytes)` pairs ready for injection
+/// into a tracee's address space at the guest base address.
+pub fn load_segments(image: &[u8], base: u64) -> Vec<(u64, Vec<u8>)> {
+    let info = match proot_elf::parse(image) {
+        Ok(info) => info,
+        Err(_) => return Vec::new(),
+    };
+    info.load_segments()
+        .iter()
+        .filter_map(|segment| {
+            let start = usize::try_from(segment.offset).ok()?;
+            let length = usize::try_from(segment.filesz).ok()?;
+            let bytes = image.get(start..start + length)?.to_vec();
+            Some((base + segment.vaddr, bytes))
+        })
+        .collect()
+}
+
 /// AArch64 trampoline bytes for `exit` after the loader has finished:
 /// `mov x0, #0; mov x8, #93 (exit); svc #0`. Kept as data in `.rs`, no `.S`.
 pub const AARCH64_EXIT_TRAMPOLINE: &[u8] = &[
@@ -98,6 +116,31 @@ mod tests {
         assert_eq!(read_u64(&stack, auxv_start + 16), AT_ENTRY);
         assert_eq!(read_u64(&stack, auxv_start + 24), 0x400000);
         assert_eq!(read_u64(&stack, auxv_start + 32), AT_NULL);
+    }
+
+    #[test]
+    fn flattens_load_segments_for_injection() {
+        let mut image = vec![0u8; 64 + 56 + 16];
+        image[..4].copy_from_slice(&[0x7f, b'E', b'L', b'F']);
+        image[4] = 2;
+        image[5] = 1;
+        image[16..18].copy_from_slice(&2u16.to_le_bytes());
+        image[18..20].copy_from_slice(&183u16.to_le_bytes());
+        image[32..40].copy_from_slice(&64u64.to_le_bytes());
+        image[54..56].copy_from_slice(&56u16.to_le_bytes());
+        image[56..58].copy_from_slice(&1u16.to_le_bytes());
+        let header = 64;
+        image[header..header + 4].copy_from_slice(&1u32.to_le_bytes()); // PT_LOAD
+        image[header + 8..header + 16].copy_from_slice(&(120u64).to_le_bytes());
+        image[header + 16..header + 24].copy_from_slice(&0x1000u64.to_le_bytes());
+        image[header + 32..header + 40].copy_from_slice(&16u64.to_le_bytes());
+        image[header + 40..header + 48].copy_from_slice(&16u64.to_le_bytes());
+        image[120..136].copy_from_slice(b"loader-payload-1");
+
+        let segments = load_segments(&image, 0x400000);
+        assert_eq!(segments.len(), 1);
+        assert_eq!(segments[0].0, 0x401000);
+        assert_eq!(segments[0].1, b"loader-payload-1");
     }
 
     #[test]

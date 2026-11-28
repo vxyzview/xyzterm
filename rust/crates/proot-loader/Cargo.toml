@@ -5,5 +5,8 @@ edition = "2024"
 publish = false
 description = "Rust Proot loader: guest stack, auxiliary vector and entry trampoline"
 
+[dependencies]
+proot-elf = { path = "../proot-elf" }
+
 [lints.clippy]
 all = { level = "warn", priority = -1 }
