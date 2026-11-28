@@ -3,6 +3,7 @@
 
 use serde_json::{Value, json};
 
+pub mod grid;
 pub mod port;
 pub mod wire;
 
