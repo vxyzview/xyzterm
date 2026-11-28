@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.android.baselineprofile)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktfmt)
 }
 
@@ -25,7 +26,7 @@ android {
 
     buildFeatures {
         viewBinding = true
-        compose = false
+        compose = true
         buildConfig = true
         resValues = true
     }
@@ -127,5 +128,13 @@ dependencies {
     implementation(project(":core:resources"))
     implementation(libs.androidx.appcompat)
     implementation(project(":features:terminal"))
+
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.material3)
+    implementation("androidx.compose.foundation:foundation")
+    implementation(libs.kotlinx.coroutines)
+
     baselineProfile(project(":baselineprofile"))
 }
