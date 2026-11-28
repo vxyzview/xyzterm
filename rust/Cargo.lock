@@ -402,6 +402,10 @@ name = "proot-extensions"
 version = "0.1.0"
 
 [[package]]
+name = "proot-extensions-extra"
+version = "0.1.0"
+
+[[package]]
 name = "proot-fake-id0"
 version = "0.1.0"
 

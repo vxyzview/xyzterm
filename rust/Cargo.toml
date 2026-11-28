@@ -14,6 +14,7 @@ members = [
     "crates/proot-fake-id0",
     "crates/proot-sysvipc",
     "crates/proot-runtime",
+    "crates/proot-extensions-extra",
     "app",
 ]
 resolver = "2"

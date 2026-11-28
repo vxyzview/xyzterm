@@ -1,0 +1,1149 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "/data/user/0/com.xyzterm.app/tmp/opencode/proot-extensions-extra-min",
+  "unit": "extension/extensions_extra_harness/",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "proot-extensions-extra",
+  "exports": [
+    {
+      "name": "ra_ashmem_create",
+      "file": "extension/extensions_extra_harness/ext_ashmem.c",
+      "line": 27,
+      "params": [
+        {
+          "name": "supported",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "flags",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "from_sigsys",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_ashmem_create(long long supported, long long flags, long long from_sigsys, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_ashmem_syscall",
+      "file": "extension/extensions_extra_harness/ext_ashmem.c",
+      "line": 50,
+      "params": [
+        {
+          "name": "sysnum",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "is_ashmem",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "word_at_arg2",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "regs_bytes",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "regs_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:5",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_ashmem_syscall(long long sysnum, long long is_ashmem, long long word_at_arg2, const unsigned char *regs_bytes, unsigned int regs_len, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_ashmem_stat_exit",
+      "file": "extension/extensions_extra_harness/ext_ashmem.c",
+      "line": 75,
+      "params": [
+        {
+          "name": "result",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "word_at_addr",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "chain_state",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_ashmem_stat_exit(long long result, long long word_at_addr, long long chain_state, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_ashmem_chained_exit",
+      "file": "extension/extensions_extra_harness/ext_ashmem.c",
+      "line": 95,
+      "params": [
+        {
+          "name": "chain_state",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "result",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "addr",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_ashmem_chained_exit(long long chain_state, long long result, long long addr, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_extension_layout",
+      "file": "extension/extensions_extra_harness/ext_core.c",
+      "line": 41,
+      "params": [
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_extension_layout(unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_extension_notify",
+      "file": "extension/extensions_extra_harness/ext_core.c",
+      "line": 59,
+      "params": [
+        {
+          "name": "statuses",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "statuses_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "event",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_extension_notify(const unsigned char *statuses, unsigned int statuses_len, long long event, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_extension_initialize",
+      "file": "extension/extensions_extra_harness/ext_core.c",
+      "line": 92,
+      "params": [
+        {
+          "name": "init_status",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:1",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_extension_initialize(long long init_status, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_kompat_needs",
+      "file": "extension/extensions_extra_harness/ext_kompat.c",
+      "line": 27,
+      "params": [
+        {
+          "name": "actual",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "virtual",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "expected",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_kompat_needs(long long actual, long long virtual, long long expected)"
+    },
+    {
+      "name": "ra_kompat_parse_release",
+      "file": "extension/extensions_extra_harness/ext_kompat.c",
+      "line": 36,
+      "params": [
+        {
+          "name": "text",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "text_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_kompat_parse_release(const unsigned char *text, unsigned int text_len)"
+    },
+    {
+      "name": "ra_kompat_parse_utsname",
+      "file": "extension/extensions_extra_harness/ext_kompat.c",
+      "line": 45,
+      "params": [
+        {
+          "name": "text",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "text_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "force",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_kompat_parse_utsname(const unsigned char *text, unsigned int text_len, long long force, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_kompat_sysenter",
+      "file": "extension/extensions_extra_harness/ext_kompat.c",
+      "line": 73,
+      "params": [
+        {
+          "name": "sysnum",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "actual",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "virtual",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "abi_cs",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "det_result",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "regs_bytes",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "regs_len",
+          "ts_type": "len:5",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:7",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_kompat_sysenter(long long sysnum, long long actual, long long virtual, long long abi_cs, long long det_result, const unsigned char *regs_bytes, unsigned int regs_len, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_kompat_sysexit",
+      "file": "extension/extensions_extra_harness/ext_kompat.c",
+      "line": 97,
+      "params": [
+        {
+          "name": "sysnum",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "modified_sysnum",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "actual",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "virtual",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "regs_bytes",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "regs_len",
+          "ts_type": "len:4",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "guest_bytes",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "guest_len",
+          "ts_type": "len:6",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:8",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_kompat_sysexit(long long sysnum, long long modified_sysnum, long long actual, long long virtual, const unsigned char *regs_bytes, unsigned int regs_len, const unsigned char *guest_bytes, unsigned int guest_len, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_mountinfo_bindings",
+      "file": "extension/extensions_extra_harness/ext_mountinfo.c",
+      "line": 31,
+      "params": [
+        {
+          "name": "pairs",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "pairs_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:2",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_mountinfo_bindings(const unsigned char *pairs, unsigned int pairs_len, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_mountinfo_path",
+      "file": "extension/extensions_extra_harness/ext_mountinfo.c",
+      "line": 73,
+      "params": [
+        {
+          "name": "path_bytes",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "path_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "real_text",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "real_len",
+          "ts_type": "len:2",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "compare_result",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "get_tracee_ok",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:6",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_mountinfo_path(const unsigned char *path_bytes, unsigned int path_len, const unsigned char *real_text, unsigned int real_len, long long compare_result, long long get_tracee_ok, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_port_mod",
+      "file": "extension/extensions_extra_harness/ext_port.c",
+      "line": 46,
+      "params": [
+        {
+          "name": "family",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "port",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "is_socketcall",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "is_bind",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "is_udp",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "arg2_bytes",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "arg2_len",
+          "ts_type": "len:5",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:7",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_port_mod(long long family, long long port, long long is_socketcall, long long is_bind, long long is_udp, const unsigned char *arg2_bytes, unsigned int arg2_len, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_port_localhost",
+      "file": "extension/extensions_extra_harness/ext_port.c",
+      "line": 79,
+      "params": [
+        {
+          "name": "family",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "addr_bytes",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "addr_len",
+          "ts_type": "len:1",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_port_localhost(long long family, const unsigned char *addr_bytes, unsigned int addr_len)"
+    },
+    {
+      "name": "ra_port_dispatch",
+      "file": "extension/extensions_extra_harness/ext_port.c",
+      "line": 95,
+      "params": [
+        {
+          "name": "sysnum",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "call",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "regs_bytes",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "regs_len",
+          "ts_type": "len:2",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "guest_bytes",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "guest_len",
+          "ts_type": "len:4",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:6",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_port_dispatch(long long sysnum, long long call, const unsigned char *regs_bytes, unsigned int regs_len, const unsigned char *guest_bytes, unsigned int guest_len, unsigned char *out, unsigned int out_len)"
+    }
+  ],
+  "classes": [],
+  "js_only": [
+    {
+      "name": "_talloc_zero",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 49,
+      "reason": "returns a pointer (`void*`): who frees it must be designed"
+    },
+    {
+      "name": "_talloc",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 55,
+      "reason": "returns a pointer (`void*`): who frees it must be designed"
+    },
+    {
+      "name": "talloc_named_const",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 60,
+      "reason": "returns a pointer (`void*`): who frees it must be designed"
+    },
+    {
+      "name": "_talloc_array",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 66,
+      "reason": "returns a pointer (`void*`): who frees it must be designed"
+    },
+    {
+      "name": "_talloc_zero_array",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 72,
+      "reason": "returns a pointer (`void*`): who frees it must be designed"
+    },
+    {
+      "name": "_talloc_realloc_array",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 78,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "talloc_get_size",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 91,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_free",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 96,
+      "reason": "writes to a buffer (`void*`) whose size is not a parameter"
+    },
+    {
+      "name": "_talloc_set_destructor",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 106,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_reference_loc",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 111,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "talloc_parent",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 117,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_get_type_abort",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 125,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "ra_reset",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 133,
+      "reason": "harness state reset, not a port"
+    },
+    {
+      "name": "get_tracees_list_head",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 150,
+      "reason": "returns a pointer (`Tracees*`): who frees it must be designed"
+    },
+    {
+      "name": "get_sysnum",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 155,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "set_sysnum",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 161,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "peek_reg",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 168,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "poke_reg",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 176,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "read_data",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 183,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "write_data",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 192,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "peek_word",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 207,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "set_sysarg_data",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 215,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "readlink_proc_pid_fd",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 223,
+      "reason": "uses `pid_t`, which is not a C scalar the bridge knows"
+    },
+    {
+      "name": "translate_path",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 231,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "compare_paths",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 240,
+      "reason": "harness stub, not a port"
+    },
+    {
+      "name": "get_tracee",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 246,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "create_temp_file",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 252,
+      "reason": "writes to a buffer (`void*`) whose size is not a parameter"
+    },
+    {
+      "name": "detranslate_sysnum",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 258,
+      "reason": "harness stub, not a port"
+    },
+    {
+      "name": "register_chained_syscall",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 264,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "force_chain_final_result",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 274,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "uname",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 279,
+      "reason": "passes a pointer (`struct utsname*`): ownership must be designed"
+    },
+    {
+      "name": "note",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 285,
+      "reason": "is variadic"
+    },
+    {
+      "name": "ra_mi_fopen",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 291,
+      "reason": "returns a pointer (`FILE*`): who frees it must be designed"
+    },
+    {
+      "name": "ra_mi_fclose",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 305,
+      "reason": "passes a pointer (`FILE*`): ownership must be designed"
+    },
+    {
+      "name": "ra_no_printf",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 317,
+      "reason": "is variadic"
+    },
+    {
+      "name": "restart_syscall_after_seccomp",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 331,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "set_result_after_seccomp",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 337,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "get_elf_aux_vectors_address",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 343,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "fetch_elf_aux_vectors",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 350,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "add_elf_aux_vector",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 357,
+      "reason": "passes a pointer (`ElfAuxVector**`): ownership must be designed"
+    },
+    {
+      "name": "push_elf_aux_vectors",
+      "file": "extension/extensions_extra_harness/linker_stubs.c",
+      "line": 364,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    }
+  ],
+  "end_state": "scaffold"
+}
