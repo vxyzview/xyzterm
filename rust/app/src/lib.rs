@@ -511,6 +511,64 @@ pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_isRootfsInstalled(
     }
 }
 
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_createBackup(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    source: JString<'_>,
+    destination: JString<'_>,
+    passphrase: JString<'_>,
+) -> jboolean {
+    let (Some(source), Some(destination), Some(passphrase)) = (
+        jstring_value(&mut env, &source),
+        jstring_value(&mut env, &destination),
+        jstring_value(&mut env, &passphrase),
+    ) else {
+        throw_bad_argument(&mut env, "createBackup: null argument");
+        return jni::sys::JNI_FALSE;
+    };
+    match backup_engine::create_backup(
+        std::path::Path::new(&source),
+        std::path::Path::new(&destination),
+        passphrase.as_bytes(),
+    ) {
+        Ok(()) => jni::sys::JNI_TRUE,
+        Err(error) => {
+            let _ = env.throw_new("java/io/IOException", error.to_string());
+            jni::sys::JNI_FALSE
+        }
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_restoreBackup(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    archive: JString<'_>,
+    destination: JString<'_>,
+    passphrase: JString<'_>,
+) -> jboolean {
+    let (Some(archive), Some(destination), Some(passphrase)) = (
+        jstring_value(&mut env, &archive),
+        jstring_value(&mut env, &destination),
+        jstring_value(&mut env, &passphrase),
+    ) else {
+        throw_bad_argument(&mut env, "restoreBackup: null argument");
+        return jni::sys::JNI_FALSE;
+    };
+    match backup_engine::restore_backup(
+        std::path::Path::new(&archive),
+        std::path::Path::new(&destination),
+        passphrase.as_bytes(),
+    ) {
+        Ok(()) => jni::sys::JNI_TRUE,
+        Err(error) => {
+            let _ = env.throw_new("java/io/IOException", error.to_string());
+            jni::sys::JNI_FALSE
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

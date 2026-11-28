@@ -16,4 +16,5 @@ xyzterm-path = { path = "../crates/xyzterm-path" }
 terminal-engine = { path = "../crates/terminal-engine" }
 terminal-pty = { path = "../crates/terminal-pty" }
 rootfs-manager = { path = "../crates/rootfs-manager" }
+backup-engine = { path = "../crates/backup-engine" }
 serde_json = "1"

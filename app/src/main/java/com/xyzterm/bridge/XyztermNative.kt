@@ -103,6 +103,18 @@ object XyztermNative {
         destination: String,
     ): Boolean
 
+    @JvmStatic external fun createBackup(
+        source: String,
+        destination: String,
+        passphrase: String,
+    ): Boolean
+
+    @JvmStatic external fun restoreBackup(
+        archive: String,
+        destination: String,
+        passphrase: String,
+    ): Boolean
+
     const val PATHS_ARE_EQUAL: Int = 0
     const val PATH1_IS_PREFIX: Int = 1
     const val PATH2_IS_PREFIX: Int = 2

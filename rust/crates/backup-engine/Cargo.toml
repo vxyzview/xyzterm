@@ -1,0 +1,16 @@
+[package]
+name = "backup-engine"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Rust backup archive and restoration engine"
+
+[dependencies]
+flate2 = "1"
+tar = "0.4"
+sha2 = "0.10"
+aes-gcm = "0.10"
+pbkdf2 = { version = "0.12", features = ["hmac"] }
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
