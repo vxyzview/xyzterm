@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.xyzterm.components.compose.utils;
+package com.xyzterm.components.compose.utils
 
-import android.os.Build;
-import static android.os.Build.VERSION_CODES;
-import androidx.annotation.ChecksSdkIntAtLeast;
+import android.os.Build
+import androidx.annotation.ChecksSdkIntAtLeast
 
-public final class Utilities {
-
-    @ChecksSdkIntAtLeast(api = VERSION_CODES.S)
-    public static final boolean ATLEAST_S = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+object Utilities {
+    @JvmField
+    @field:ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
+    val ATLEAST_S = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 }
