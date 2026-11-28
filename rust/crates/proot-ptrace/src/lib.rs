@@ -117,6 +117,36 @@ impl Tracee {
         Ok(())
     }
 
+    /// Reads the syscall number from the tracee's registers at a syscall stop.
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    pub fn syscall_number(&self) -> io::Result<u64> {
+        let mut registers: libc::user_regs_struct = unsafe { std::mem::zeroed() };
+        let mut iov = libc::iovec {
+            iov_base: (&mut registers as *mut libc::user_regs_struct).cast(),
+            iov_len: std::mem::size_of::<libc::user_regs_struct>(),
+        };
+        // SAFETY: iovec points to a live register buffer; pid is our tracee.
+        if unsafe {
+            libc::ptrace(
+                libc::PTRACE_GETREGSET,
+                self.pid,
+                libc::NT_PRSTATUS as *mut libc::c_void,
+                (&mut iov as *mut libc::iovec).cast::<libc::c_void>(),
+            )
+        } < 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        #[cfg(target_arch = "aarch64")]
+        {
+            Ok(registers.regs[8])
+        }
+        #[cfg(target_arch = "x86_64")]
+        {
+            Ok(registers.orig_rax)
+        }
+    }
+
     /// Resumes the tracee until the next syscall-entry or syscall-exit stop.
     pub fn syscall_step(&self, signal: Option<libc::c_int>) -> io::Result<()> {
         let sig = signal.unwrap_or(0) as *mut libc::c_void;
@@ -244,7 +274,11 @@ mod tests {
         for _ in 0..500 {
             tracee.syscall_step(None).expect("syscall step");
             match tracee.wait().expect("wait") {
-                WaitEvent::Stopped(_) => stops += 1,
+                WaitEvent::Stopped(_) => {
+                    let number = tracee.syscall_number().expect("syscall number");
+                    assert!(number <= 1000, "implausible syscall number: {number}");
+                    stops += 1;
+                }
                 WaitEvent::Exited(_) => {
                     exited = true;
                     break;
