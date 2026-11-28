@@ -1,0 +1,220 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "/data/user/0/com.xyzterm.app/tmp/opencode/proot-min",
+  "unit": "extension/proot_ext_harness/",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "proot-extensions",
+  "exports": [
+    {
+      "name": "ra_fs_corrected_size",
+      "file": "extension/proot_ext_harness/fix_symlink_size_harness.c",
+      "line": 20,
+      "params": [
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_fs_corrected_size(const char *path)"
+    },
+    {
+      "name": "ra_hf_hasprefix",
+      "file": "extension/proot_ext_harness/hidden_files_harness.c",
+      "line": 39,
+      "params": [
+        {
+          "name": "prefix",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "str",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "unsigned int",
+      "prototype": "unsigned int ra_hf_hasprefix(const char *prefix, const char *str)"
+    },
+    {
+      "name": "ra_hf_mybcopy",
+      "file": "extension/proot_ext_harness/hidden_files_harness.c",
+      "line": 44,
+      "params": [
+        {
+          "name": "src",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "num",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "dst",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "dst_n",
+          "ts_type": "len:2",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "unsigned int",
+      "prototype": "unsigned int ra_hf_mybcopy(const unsigned char *src, unsigned int num, unsigned char *dst, unsigned int dst_n)"
+    },
+    {
+      "name": "ra_hf_filter",
+      "file": "extension/proot_ext_harness/hidden_files_harness.c",
+      "line": 53,
+      "params": [
+        {
+          "name": "is64",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "orig",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "res",
+          "ts_type": "len:1",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "copy",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "copy_n",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "unsigned int",
+      "prototype": "unsigned int ra_hf_filter(int is64, const unsigned char *orig, unsigned int res, unsigned char *copy, unsigned int copy_n)"
+    }
+  ],
+  "classes": [],
+  "js_only": [
+    {
+      "name": "get_sysnum",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 29,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "peek_reg",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 37,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "poke_reg",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 46,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "read_data",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 54,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "write_data",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 64,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "read_string",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 74,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "belongs_to_guestfs",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 85,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "readlink_proc_pid_fd",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 93,
+      "reason": "uses `pid_t`, which is not a C scalar the bridge knows"
+    },
+    {
+      "name": "register_chained_syscall",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 102,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "talloc_parent",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 117,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_get_type_abort",
+      "file": "extension/proot_ext_harness/linker_stubs.c",
+      "line": 124,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    }
+  ],
+  "end_state": "scaffold"
+}

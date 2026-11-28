@@ -2,6 +2,7 @@
 //! events, continue, inspect memory and detach. Register access and syscall
 //! interception build on this layer in later units.
 
+use std::cell::Cell;
 use std::ffi::CString;
 use std::io;
 
@@ -15,9 +16,30 @@ pub enum WaitEvent {
 #[derive(Debug)]
 pub struct Tracee {
     pid: libc::pid_t,
+    /// With `PTRACE_O_TRACESYSGOOD`, syscall stops alternate entry/exit.
+    next_syscall_is_entry: Cell<bool>,
+    last_syscall_was_entry: Cell<bool>,
 }
 
 impl Tracee {
+    fn is_syscall_stop(signal: libc::c_int) -> bool {
+        signal == libc::SIGTRAP | 0x80
+    }
+
+    /// Steps until a syscall stop, forwarding any intervening signals.
+    fn next_syscall_stop(&self) -> io::Result<()> {
+        let mut pending = None;
+        for _ in 0..1000 {
+            self.syscall_step(pending)?;
+            match self.wait()? {
+                WaitEvent::Stopped(signal) if Self::is_syscall_stop(signal) => return Ok(()),
+                WaitEvent::Stopped(signal) => pending = Some(signal),
+                _ => return Err(io::Error::other("tracee exited before syscall stop")),
+            }
+        }
+        Err(io::Error::other("no syscall stop observed"))
+    }
+
     pub fn pid(&self) -> i32 {
         self.pid
     }
@@ -53,9 +75,16 @@ impl Tracee {
                 libc::_exit(127);
             }
         }
-        let tracee = Self { pid };
+        let tracee = Self {
+            pid,
+            next_syscall_is_entry: Cell::new(true),
+            last_syscall_was_entry: Cell::new(false),
+        };
         match tracee.wait()? {
-            WaitEvent::Stopped(libc::SIGSTOP) | WaitEvent::Stopped(libc::SIGTRAP) => Ok(tracee),
+            WaitEvent::Stopped(libc::SIGSTOP) | WaitEvent::Stopped(libc::SIGTRAP) => {
+                tracee.set_options(0)?;
+                Ok(tracee)
+            }
             _ => Err(io::Error::other("unexpected initial stop")),
         }
     }
@@ -74,7 +103,20 @@ impl Tracee {
             return Err(io::Error::last_os_error());
         }
         if libc::WIFSTOPPED(status) {
-            Ok(WaitEvent::Stopped(libc::WSTOPSIG(status)))
+            let signal = libc::WSTOPSIG(status);
+            if Self::is_syscall_stop(signal) {
+                let entry = self.next_syscall_is_entry.get();
+                self.next_syscall_is_entry.set(!entry);
+                self.last_syscall_was_entry.set(entry);
+            } else {
+                self.last_syscall_was_entry.set(false);
+                if status >> 16 == libc::PTRACE_EVENT_EXEC {
+                    // execve's syscall-exit stop is still pending once
+                    // PTRACE_SYSCALL is resumed after the exec event.
+                    self.next_syscall_is_entry.set(false);
+                }
+            }
+            Ok(WaitEvent::Stopped(signal))
         } else if libc::WIFEXITED(status) {
             Ok(WaitEvent::Exited(libc::WEXITSTATUS(status)))
         } else if libc::WIFSIGNALED(status) {
@@ -85,6 +127,7 @@ impl Tracee {
     }
 
     pub fn set_options(&self, options: libc::c_long) -> io::Result<()> {
+        let options = options | libc::PTRACE_O_TRACESYSGOOD as libc::c_long;
         // SAFETY: pid is our tracee; options is an opaque ptrace flag word.
         if unsafe {
             libc::ptrace(
@@ -114,6 +157,8 @@ impl Tracee {
         {
             return Err(io::Error::last_os_error());
         }
+        // PTRACE_CONT does not trace syscalls, so no exit stop is pending.
+        self.next_syscall_is_entry.set(true);
         Ok(())
     }
 
@@ -307,29 +352,19 @@ impl Tracee {
 
     /// Advances until the tracee is stopped at a syscall-entry stop.
     ///
-    /// PRoot's ptrace loop cannot tell entry from exit by signal alone: both
-    /// are SIGTRAP. Two consecutive stops with the same syscall number mean
-    /// entry then exit, so the *next* stop is a fresh entry.
+    /// `PTRACE_O_TRACESYSGOOD` distinguishes syscall stops from other traps;
+    /// entry/exit parity is tracked in `wait()` rather than guessed from the
+    /// syscall number, which is not stable across the two stops.
     #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
     pub fn seek_syscall_entry(&self) -> io::Result<()> {
-        let mut previous: Option<u64> = None;
+        if self.last_syscall_was_entry.get() {
+            return Ok(());
+        }
         for _ in 0..1000 {
-            self.syscall_step(None)?;
-            if !matches!(self.wait()?, WaitEvent::Stopped(_)) {
-                return Err(io::Error::other(
-                    "tracee exited while seeking syscall entry",
-                ));
-            }
-            let current = self.syscall_number()?;
-            if previous == Some(current) {
-                // The stop just seen was an exit stop; the next one is an entry.
-                self.syscall_step(None)?;
-                if !matches!(self.wait()?, WaitEvent::Stopped(_)) {
-                    return Err(io::Error::other("tracee exited before syscall entry"));
-                }
+            self.next_syscall_stop()?;
+            if self.last_syscall_was_entry.get() {
                 return Ok(());
             }
-            previous = Some(current);
         }
         Err(io::Error::other("no syscall entry stop observed"))
     }
@@ -338,13 +373,38 @@ impl Tracee {
     #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
     pub fn inject_syscall(&self, number: u64, args: &[u64; 6]) -> io::Result<u64> {
         self.seek_syscall_entry()?;
-        self.set_syscall_args(args)?;
-        self.set_syscall_number(number)?;
-        self.syscall_step(None)?;
-        if !matches!(self.wait()?, WaitEvent::Stopped(_)) {
-            return Err(io::Error::other("tracee exited during injected syscall"));
+        #[cfg(target_arch = "x86_64")]
+        {
+            self.set_syscall_args(args)?;
+            self.set_syscall_number(number)?;
+            self.next_syscall_stop()?;
+            self.return_value()
         }
-        self.return_value()
+        #[cfg(target_arch = "aarch64")]
+        {
+            // The kernel captured the syscall number before the entry stop, so
+            // writing x8 alone leaves the original syscall in flight. Rewind PC
+            // by the 4-byte `svc` instruction to make the kernel capture our x8.
+            let original = self.read_registers()?;
+            let mut setup = original;
+            setup.regs[8] = number;
+            setup.pc -= 4;
+            self.write_registers(&setup)?;
+
+            self.next_syscall_stop()?; // original syscall's exit stop
+            let original_result = self.return_value()?;
+            self.next_syscall_stop()?; // injected syscall's entry stop
+            self.set_syscall_args(args)?;
+            self.set_syscall_number(number)?;
+            self.next_syscall_stop()?; // injected syscall's exit stop
+            let result = self.return_value()?;
+
+            // Resume the tracee as if only its original syscall had run.
+            let mut restore = original;
+            restore.regs[0] = original_result;
+            self.write_registers(&restore)?;
+            Ok(result)
+        }
     }
 
     /// Resumes the tracee until the next syscall-entry or syscall-exit stop.
@@ -702,6 +762,28 @@ mod tests {
         tracee.set_syscall_number(39).expect("set number");
         assert_eq!(tracee.syscall_number().expect("read number"), 39);
         tracee.cont(Some(libc::SIGKILL)).expect("resume with kill");
+        let _ = tracee.wait();
+    }
+
+    #[test]
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    fn injected_getpid_returns_tracee_pid() {
+        let tracee = Tracee::spawn("/bin/sleep", &["30"]).expect("spawn");
+        tracee
+            .set_options(libc::PTRACE_O_TRACEEXEC as libc::c_long)
+            .expect("set_options");
+        tracee.cont(None).expect("continue to exec stop");
+        assert_eq!(
+            tracee.wait().expect("exec stop"),
+            WaitEvent::Stopped(libc::SIGTRAP)
+        );
+
+        let result = tracee
+            .inject_syscall(libc::SYS_getpid as u64, &[0; 6])
+            .expect("inject getpid");
+        assert_eq!(result, tracee.pid() as u64);
+
+        tracee.kill(libc::SIGKILL).expect("kill");
         let _ = tracee.wait();
     }
 

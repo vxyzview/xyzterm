@@ -9,6 +9,7 @@ members = [
     "crates/proot-syscall",
     "crates/proot-ptrace",
     "crates/proot-loader",
+    "crates/proot-extensions",
     "app",
 ]
 resolver = "2"
