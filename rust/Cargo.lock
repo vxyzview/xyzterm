@@ -290,6 +290,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "terminal-pty"
+version = "0.1.0"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "thiserror"
 version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,0 +1,12 @@
+[package]
+name = "terminal-pty"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Rust PTY allocation, shell spawning and process control"
+
+[dependencies]
+libc = "0.2"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
