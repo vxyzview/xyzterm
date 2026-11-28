@@ -5,6 +5,7 @@
 //! units (see `rust/MAP.md`) and are added when those units pass their gates.
 
 pub mod grid_registry;
+pub mod session_manager;
 
 use std::fs::File;
 use std::io::Read;
@@ -313,6 +314,129 @@ pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_closeTerminal(
     match grid_registry::registry().lock() {
         Ok(mut registry) => {
             if registry.close(handle) {
+                jni::sys::JNI_TRUE
+            } else {
+                jni::sys::JNI_FALSE
+            }
+        }
+        Err(_) => jni::sys::JNI_FALSE,
+    }
+}
+
+/// Creates a real shell session backed by a Rust PTY and terminal grid.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_createSession(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    shell: JString<'_>,
+    columns: jint,
+    rows: jint,
+) -> jlong {
+    let Some(shell) = jstring_value(&mut env, &shell) else {
+        return 0;
+    };
+    if columns <= 0 || rows <= 0 {
+        return 0;
+    }
+    match session_manager::sessions().lock() {
+        Ok(mut registry) => registry
+            .create(&shell, columns as usize, rows as usize)
+            .unwrap_or(0) as jlong,
+        Err(_) => 0,
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_writeInput(
+    env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    handle: jlong,
+    data: jni::objects::JByteArray<'_>,
+) -> jboolean {
+    let Ok(bytes) = env.convert_byte_array(&data) else {
+        return jni::sys::JNI_FALSE;
+    };
+    match session_manager::sessions().lock() {
+        Ok(mut registry) => match registry.get_mut(handle as u64) {
+            Some(session) => {
+                if session.write_input(&bytes).is_ok() {
+                    jni::sys::JNI_TRUE
+                } else {
+                    jni::sys::JNI_FALSE
+                }
+            }
+            None => jni::sys::JNI_FALSE,
+        },
+        Err(_) => jni::sys::JNI_FALSE,
+    }
+}
+
+/// Drains available child output and feeds it into the session's Rust grid.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_readOutput(
+    env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    handle: jlong,
+) -> jni::sys::jbyteArray {
+    let bytes = session_manager::sessions()
+        .lock()
+        .ok()
+        .and_then(|mut registry| registry.get_mut(handle as u64).and_then(|s| s.pump().ok()))
+        .unwrap_or_default();
+    match env.byte_array_from_slice(&bytes) {
+        Ok(array) => array.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_resizeTerminal(
+    _env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    handle: jlong,
+    columns: jint,
+    rows: jint,
+) -> jboolean {
+    match session_manager::sessions().lock() {
+        Ok(mut registry) => match registry.get_mut(handle as u64) {
+            Some(session) => {
+                if session.resize(columns as usize, rows as usize) {
+                    jni::sys::JNI_TRUE
+                } else {
+                    jni::sys::JNI_FALSE
+                }
+            }
+            None => jni::sys::JNI_FALSE,
+        },
+        Err(_) => jni::sys::JNI_FALSE,
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_getSessionState(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    handle: jlong,
+) -> jstring {
+    let state = session_manager::sessions()
+        .lock()
+        .ok()
+        .and_then(|registry| registry.get(handle as u64).map(|s| s.state().to_string()));
+    match state {
+        Some(state) => return_string(&mut env, state),
+        None => std::ptr::null_mut(),
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_closeSession(
+    _env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    handle: jlong,
+) -> jboolean {
+    match session_manager::sessions().lock() {
+        Ok(mut registry) => {
+            if registry.close(handle as u64) {
                 jni::sys::JNI_TRUE
             } else {
                 jni::sys::JNI_FALSE

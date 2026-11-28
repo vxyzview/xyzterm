@@ -69,6 +69,29 @@ object XyztermNative {
 
     @JvmStatic external fun closeTerminal(handle: Long): Boolean
 
+    @JvmStatic external fun createSession(
+        shell: String,
+        columns: Int,
+        rows: Int,
+    ): Long
+
+    @JvmStatic external fun writeInput(
+        handle: Long,
+        data: ByteArray,
+    ): Boolean
+
+    @JvmStatic external fun readOutput(handle: Long): ByteArray
+
+    @JvmStatic external fun resizeTerminal(
+        handle: Long,
+        columns: Int,
+        rows: Int,
+    ): Boolean
+
+    @JvmStatic external fun getSessionState(handle: Long): String?
+
+    @JvmStatic external fun closeSession(handle: Long): Boolean
+
     const val PATHS_ARE_EQUAL: Int = 0
     const val PATH1_IS_PREFIX: Int = 1
     const val PATH2_IS_PREFIX: Int = 2

@@ -14,4 +14,5 @@ jni = "0.21.1"
 sha2 = "0.10"
 xyzterm-path = { path = "../crates/xyzterm-path" }
 terminal-engine = { path = "../crates/terminal-engine" }
+terminal-pty = { path = "../crates/terminal-pty" }
 serde_json = "1"

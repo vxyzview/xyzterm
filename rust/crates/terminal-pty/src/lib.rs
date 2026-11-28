@@ -162,6 +162,45 @@ impl Pty {
         }
     }
 
+    /// Switches the master between blocking and non-blocking reads.
+    pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {
+        // SAFETY: fd is open; F_GETFL/F_SETFL take no user memory.
+        let flags = unsafe { libc::fcntl(self.master.as_raw_fd(), libc::F_GETFL) };
+        if flags < 0 {
+            return Err(last_error("fcntl(F_GETFL)"));
+        }
+        let flags = if nonblocking {
+            flags | libc::O_NONBLOCK
+        } else {
+            flags & !libc::O_NONBLOCK
+        };
+        // SAFETY: fd is open and flags is a valid argument.
+        if unsafe { libc::fcntl(self.master.as_raw_fd(), libc::F_SETFL, flags) } != 0 {
+            return Err(last_error("fcntl(F_SETFL)"));
+        }
+        Ok(())
+    }
+
+    /// Non-blocking read: `Ok(None)` means no output is available yet.
+    pub fn try_read(&mut self, buffer: &mut [u8]) -> io::Result<Option<usize>> {
+        // SAFETY: buffer length is passed explicitly; master stays open.
+        let count = unsafe {
+            libc::read(
+                self.master.as_raw_fd(),
+                buffer.as_mut_ptr().cast(),
+                buffer.len(),
+            )
+        };
+        if count >= 0 {
+            return Ok(Some(count as usize));
+        }
+        let error = io::Error::last_os_error();
+        if error.kind() == io::ErrorKind::WouldBlock || error.kind() == io::ErrorKind::Interrupted {
+            return Ok(None);
+        }
+        Err(error)
+    }
+
     pub fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
         loop {
             // SAFETY: buffer length is passed explicitly; master stays open.
