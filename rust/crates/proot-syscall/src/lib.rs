@@ -50,6 +50,26 @@ pub fn translate_number(guest: Abi, host: Abi, syscall: u32) -> Option<u32> {
     number(host, syscall_name)
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Decision {
+    Passthrough,
+    Intercept,
+    Rewrite(u32),
+}
+
+/// Chooses what the interceptor does with a guest syscall number when the
+/// guest ABI differs from the host kernel's ABI.
+pub fn decide(guest: Abi, host: Abi, syscall: u32) -> Decision {
+    if is_privileged(guest, syscall) {
+        return Decision::Intercept;
+    }
+    match translate_number(guest, host, syscall) {
+        Some(host_number) if host_number != syscall => Decision::Rewrite(host_number),
+        Some(_) => Decision::Passthrough,
+        None => Decision::Intercept,
+    }
+}
+
 /// Syscalls PRoot must never pass through unmodified because they change
 /// identity, filesystem namespace or process topology.
 pub fn is_privileged(abi: Abi, number: u32) -> bool {
@@ -114,6 +134,14 @@ mod tests {
         assert_eq!(translate_number(Abi::Arm, Abi::Arm64, 11), Some(221)); // execve
         assert_eq!(translate_number(Abi::Arm64, Abi::Arm, 221), Some(11));
         assert_eq!(translate_number(Abi::Arm, Abi::Arm64, 9999), None);
+    }
+
+    #[test]
+    fn interception_decisions() {
+        assert_eq!(decide(Abi::Arm, Abi::Arm64, 11), Decision::Intercept);
+        assert_eq!(decide(Abi::Arm, Abi::Arm64, 3), Decision::Rewrite(63));
+        assert_eq!(decide(Abi::Arm64, Abi::Arm64, 63), Decision::Passthrough);
+        assert_eq!(decide(Abi::Arm, Abi::Arm64, 9999), Decision::Intercept);
     }
 
     #[test]
