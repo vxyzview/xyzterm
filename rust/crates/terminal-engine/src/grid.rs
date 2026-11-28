@@ -31,8 +31,27 @@ enum State {
 #[derive(Debug, Clone)]
 struct SavedScreen {
     cells: Vec<Vec<char>>,
+    styles: Vec<Vec<u64>>,
     cursor_row: usize,
     cursor_col: usize,
+}
+
+/// Termux `TextStyle.NORMAL` bit layout: foreground 256, background 257.
+const NORMAL_STYLE: u64 = (256 << 40) | (257 << 16);
+
+fn encode_style(fore: u64, back: u64, effect: u64) -> u64 {
+    let mut result = effect & 0b111111111;
+    if fore & 0xff00_0000 == 0xff00_0000 {
+        result |= (1 << 9) | ((fore & 0x00ff_ffff) << 40);
+    } else {
+        result |= (fore & 0b111111111) << 40;
+    }
+    if back & 0xff00_0000 == 0xff00_0000 {
+        result |= (1 << 10) | ((back & 0x00ff_ffff) << 16);
+    } else {
+        result |= (back & 0b111111111) << 16;
+    }
+    result
 }
 
 /// A VT100/VT220/xterm-compatible screen state machine.
@@ -40,6 +59,8 @@ pub struct TerminalGrid {
     cols: usize,
     rows: usize,
     cells: Vec<Vec<char>>,
+    styles: Vec<Vec<u64>>,
+    current_style: u64,
     cursor_row: usize,
     cursor_col: usize,
     title: Option<String>,
@@ -57,10 +78,13 @@ impl TerminalGrid {
     pub fn new(cols: usize, rows: usize) -> Self {
         assert!(cols > 0 && rows > 0, "terminal size must be positive");
         let cells = vec![vec![' '; cols]; rows];
+        let styles = vec![vec![NORMAL_STYLE; cols]; rows];
         Self {
             cols,
             rows,
             cells,
+            styles,
+            current_style: NORMAL_STYLE,
             cursor_row: 0,
             cursor_col: 0,
             title: None,
@@ -85,6 +109,10 @@ impl TerminalGrid {
             row.resize(cols, ' ');
         }
         self.cells.resize(rows, vec![' '; cols]);
+        for row in &mut self.styles {
+            row.resize(cols, NORMAL_STYLE);
+        }
+        self.styles.resize(rows, vec![NORMAL_STYLE; cols]);
         self.cursor_row = self.cursor_row.min(rows - 1);
         self.cursor_col = self.cursor_col.min(cols - 1);
     }
@@ -169,12 +197,16 @@ impl TerminalGrid {
         }
         if self.insert_mode {
             let row = &mut self.cells[self.cursor_row];
+            let styles = &mut self.styles[self.cursor_row];
             if self.cursor_col < row.len() {
                 row.insert(self.cursor_col, ch);
                 row.pop();
+                styles.insert(self.cursor_col, self.current_style);
+                styles.pop();
             }
         } else {
             self.cells[self.cursor_row][self.cursor_col] = ch;
+            self.styles[self.cursor_row][self.cursor_col] = self.current_style;
         }
         let width = unicode_width::UnicodeWidthChar::width(ch)
             .unwrap_or(1)
@@ -193,10 +225,12 @@ impl TerminalGrid {
         if self.cursor_row >= self.rows {
             self.cursor_row = self.rows - 1;
             let removed = self.cells.remove(0);
+            self.styles.remove(0);
             if self.alternate.is_none() {
                 self.scrollback.push(removed);
             }
             self.cells.push(vec![' '; self.cols]);
+            self.styles.push(vec![NORMAL_STYLE; self.cols]);
         }
     }
 
@@ -307,7 +341,8 @@ impl TerminalGrid {
                 'K' => self.erase_line(erase_mode),
                 'h' if first == 4 => self.insert_mode = true,
                 'l' if first == 4 => self.insert_mode = false,
-                'm' | 'n' => {}
+                'm' => self.apply_sgr(),
+                'n' => {}
                 _ => {}
             }
         }
@@ -316,48 +351,140 @@ impl TerminalGrid {
         self.private_marker = false;
     }
 
+    /// Decoded style of a cell: (foreground, background, effect), using the
+    /// same values as `TextStyle.decodeForeColor/decodeBackColor/decodeEffect`.
+    pub fn cell_style(&self, row: usize, col: usize) -> (i64, i64, i64) {
+        let style = self.styles[row][col] as i64;
+        (
+            crate::port::decode_fore_color(style).unwrap_or(0),
+            crate::port::decode_back_color(style).unwrap_or(0),
+            crate::port::decode_effect(style).unwrap_or(0),
+        )
+    }
+
+    fn apply_sgr(&mut self) {
+        let values: Vec<usize> = self
+            .params
+            .split(|b| *b == b';' || *b == b':')
+            .filter(|part| !part.is_empty())
+            .filter_map(|part| std::str::from_utf8(part).ok()?.parse().ok())
+            .collect();
+        if values.is_empty() {
+            self.current_style = NORMAL_STYLE;
+            return;
+        }
+        let (mut fore, mut back, mut effect) = {
+            let style = self.current_style;
+            let fg = if style & (1 << 9) != 0 {
+                0xff00_0000 | ((style >> 40) & 0x00ff_ffff)
+            } else {
+                (style >> 40) & 0b111111111
+            };
+            let bg = if style & (1 << 10) != 0 {
+                0xff00_0000 | ((style >> 16) & 0x00ff_ffff)
+            } else {
+                (style >> 16) & 0b111111111
+            };
+            (fg, bg, style & 0b111111111)
+        };
+        let mut index = 0;
+        while index < values.len() {
+            let value = values[index];
+            match value {
+                0 => {
+                    fore = 256;
+                    back = 257;
+                    effect = 0;
+                }
+                1 => effect |= 1 << 0,
+                3 => effect |= 1 << 1,
+                4 => effect |= 1 << 2,
+                5 => effect |= 1 << 3,
+                7 => effect |= 1 << 4,
+                8 => effect |= 1 << 5,
+                9 => effect |= 1 << 6,
+                22 | 23 | 24 | 25 | 27 | 28 => {
+                    let bit = match value {
+                        22 => 1 << 0,
+                        23 => 1 << 1,
+                        24 => 1 << 2,
+                        25 => 1 << 3,
+                        27 => 1 << 4,
+                        _ => 1 << 5,
+                    };
+                    effect &= !bit;
+                }
+                30..=37 => fore = (value - 30) as u64,
+                90..=97 => fore = (value - 90 + 8) as u64,
+                40..=47 => back = (value - 40) as u64,
+                100..=107 => back = (value - 100 + 8) as u64,
+                39 => fore = 256,
+                49 => back = 257,
+                38 | 48 => {
+                    let target = if value == 38 { &mut fore } else { &mut back };
+                    match values.get(index + 1) {
+                        Some(&5) => {
+                            if let Some(color) = values.get(index + 2) {
+                                *target = *color as u64;
+                                index += 2;
+                            }
+                        }
+                        Some(&2) => {
+                            if let (Some(r), Some(g), Some(b)) = (
+                                values.get(index + 2),
+                                values.get(index + 3),
+                                values.get(index + 4),
+                            ) {
+                                *target = 0xff00_0000
+                                    | (((r & 0xff) as u64) << 16)
+                                    | (((g & 0xff) as u64) << 8)
+                                    | (b & 0xff) as u64;
+                                index += 4;
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+                _ => {}
+            }
+            index += 1;
+        }
+        self.current_style = encode_style(fore, back, effect);
+    }
+
     fn erase_screen(&mut self, mode: usize) {
-        match mode {
-            0 => {
-                let row = self.cursor_row;
-                for col in self.cursor_col..self.cols {
-                    self.cells[row][col] = ' ';
-                }
-                for row in (row + 1)..self.rows {
-                    self.cells[row].fill(' ');
-                }
-            }
-            1 => {
-                let row = self.cursor_row;
-                for col in 0..=self.cursor_col.min(self.cols - 1) {
-                    self.cells[row][col] = ' ';
-                }
-                for cells in self.cells.iter_mut().take(row) {
-                    cells.fill(' ');
-                }
-            }
-            _ => {
-                for row in &mut self.cells {
-                    row.fill(' ');
-                }
+        let row = self.cursor_row;
+        let col = self.cursor_col.min(self.cols - 1);
+        let rows: Vec<usize> = match mode {
+            0 => (row..self.rows).collect(),
+            1 => (0..=row).collect(),
+            _ => (0..self.rows).collect(),
+        };
+        for r in rows {
+            let start = if mode == 0 && r == row { col } else { 0 };
+            let end = if mode == 1 && r == row {
+                col + 1
+            } else {
+                self.cols
+            };
+            for c in start..end {
+                self.cells[r][c] = ' ';
+                self.styles[r][c] = NORMAL_STYLE;
             }
         }
     }
 
     fn erase_line(&mut self, mode: usize) {
         let row = self.cursor_row;
-        match mode {
-            0 => {
-                for col in self.cursor_col..self.cols {
-                    self.cells[row][col] = ' ';
-                }
-            }
-            1 => {
-                for col in 0..=self.cursor_col.min(self.cols - 1) {
-                    self.cells[row][col] = ' ';
-                }
-            }
-            _ => self.cells[row].fill(' '),
+        let col = self.cursor_col.min(self.cols - 1);
+        let (start, end) = match mode {
+            0 => (col, self.cols),
+            1 => (0, col + 1),
+            _ => (0, self.cols),
+        };
+        for c in start..end {
+            self.cells[row][c] = ' ';
+            self.styles[row][c] = NORMAL_STYLE;
         }
     }
 
@@ -367,10 +494,12 @@ impl TerminalGrid {
         }
         let saved = SavedScreen {
             cells: self.cells.clone(),
+            styles: self.styles.clone(),
             cursor_row: self.cursor_row,
             cursor_col: self.cursor_col,
         };
         self.cells = vec![vec![' '; self.cols]; self.rows];
+        self.styles = vec![vec![NORMAL_STYLE; self.cols]; self.rows];
         self.cursor_row = 0;
         self.cursor_col = 0;
         self.alternate = Some(saved);
@@ -379,6 +508,7 @@ impl TerminalGrid {
     fn leave_alternate(&mut self) {
         if let Some(saved) = self.alternate.take() {
             self.cells = saved.cells;
+            self.styles = saved.styles;
             self.cursor_row = saved.cursor_row.min(self.rows - 1);
             self.cursor_col = saved.cursor_col.min(self.cols - 1);
         }
@@ -386,6 +516,8 @@ impl TerminalGrid {
 
     fn reset(&mut self) {
         self.cells = vec![vec![' '; self.cols]; self.rows];
+        self.styles = vec![vec![NORMAL_STYLE; self.cols]; self.rows];
+        self.current_style = NORMAL_STYLE;
         self.cursor_row = 0;
         self.cursor_col = 0;
         self.title = None;
@@ -488,6 +620,22 @@ mod tests {
         assert_eq!(grid.snapshot().screen, "\n");
         grid.append(&bytes[2..]);
         assert_eq!(grid.snapshot().screen, "😀\n");
+    }
+
+    #[test]
+    fn sgr_attributes_are_stored_per_cell() {
+        let mut grid = TerminalGrid::new(20, 2);
+        grid.append(b"\x1b[1;31mA\x1b[0mB");
+        assert_eq!(grid.cell_style(0, 0), (1, 257, 0b1));
+        assert_eq!(grid.cell_style(0, 1), (256, 257, 0));
+        grid.append(b"\x1b[38;2;10;20;30mC");
+        // decodeEffect masks 11 bits, so the truecolor flag is part of it.
+        assert_eq!(
+            grid.cell_style(0, 2),
+            (0xff0a141eu32 as i32 as i64, 257, 512)
+        );
+        grid.append(b"\x1b[48;5;123mD");
+        assert_eq!(grid.cell_style(0, 3).1, 123);
     }
 
     #[test]
