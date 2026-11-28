@@ -1,0 +1,55 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "/home/xyzterm/core/logic",
+  "unit": "src/main/kotlin/com/xyzterm/logic/",
+  "language": "kotlin",
+  "kind": "ffi",
+  "crate_name": "validation",
+  "exports": [
+    {
+      "name": "isValidDeepLinkCommand",
+      "file": "src/main/kotlin/com/xyzterm/logic/DeepLinkCommand.kt",
+      "line": 6,
+      "params": [
+        {
+          "name": "command",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.logic.DeepLinkCommandKt.isValidDeepLinkCommand(String command)"
+    },
+    {
+      "name": "isValidSessionName",
+      "file": "src/main/kotlin/com/xyzterm/logic/SessionNames.kt",
+      "line": 4,
+      "params": [
+        {
+          "name": "name",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "String"
+        }
+      ],
+      "returns": "boolean",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "boolean",
+      "prototype": "com.xyzterm.logic.SessionNamesKt.isValidSessionName(String name)"
+    }
+  ],
+  "classes": [],
+  "js_only": [],
+  "end_state": "bindings"
+}

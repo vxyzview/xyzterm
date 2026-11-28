@@ -1,0 +1,13 @@
+target/
+.rust-anything/
+ruby/*.so
+ruby/*.bundle
+php/*.so
+php/*.dylib
+php/*.dll
+cs/*.so
+cs/*.dylib
+cs/*.dll
+ps/*.so
+ps/*.dylib
+ps/*.dll

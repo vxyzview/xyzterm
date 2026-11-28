@@ -48,5 +48,13 @@ After G2, Kotlin is 45 units / 4 ready / 41 blocked / 1 parse error, with `start
 ## Open questions
 None from G1 — Q1–Q12 all accepted. Deferred decisions are listed in `DECISIONS.md`; none blocks the pilot.
 
+## G3 pilot — `rust/validation`
+- `bridge` from `core/logic` as root (repo-root auto-detect picks Java and cannot see Kotlin units); `--end-state bindings`; crate `rust/validation`.
+- `record`: 477 cases (238 session names, 239 deep-link commands) from the JUnit fixtures plus UTF-16/whitespace traps. `diff`: **477/477**. `bench`: **8.3x slower overall** (6.4x/4.6x per call) — migration, not speed.
+- `gate`: pass (fmt, clippy, cargo test 3 tests, 38 Rust lines for 12 Kotlin, no `unsafe` without SAFETY, no `unimplemented!`, API and behavior).
+- Android JNI libs built for arm64-v8a and armeabi-v7a, API 26, 3 entry points checked. Local host is aarch64 while NDK tools are x86_64: an `llvm-nm` shim was needed outside the repo, and NDK 28 was used because the NDK 30 download did not finish.
+- `diff --profile android` handed to the operator: `rust-anything diff /home/xyzterm/rust/validation --profile android --device <serial>`.
+- `shadow` generated `rust/validation/java/com/xyzterm/logic/DeepLinkCommandKtShadow.java`; cut-over is ADR-013, deferred to G4.
+
 ## Next gate
-G3: port loop, pilot first — `rust-anything rules`, `bridge`, `record`, `port.rs`, `build`, `diff`, `bench`, android-profile build/diff, `shadow`, `gate`, then switch Kotlin callers. Stop at G3.
+G4: Gradle/CI integration — `:core:native` owns `jniLibs/` and generated Java, `preBuild` cargo task, keep rules, workflows + Dockerfile, `reproducible.yml`, APK size and cold-start deltas. Then switch Kotlin callers per ADR-013.

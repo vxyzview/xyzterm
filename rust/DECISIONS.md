@@ -24,9 +24,9 @@ Base commit `ec937f27c` (`main` = `rust-port`; `versionName = "1.0.9"` at `app/b
 - **Consequences:** no VT work in the default scope.
 
 ## ADR-005 — End state is `bindings` (Q5)
-- **Context:** `bridge` in the installed CLI has no `--end-state` flag (confirmed against `--help`).
-- **Decision:** record `bindings` as the end state of every unit: generated wrappers keep Kotlin call sites callable without changing their API.
-- **Consequences:** the pilot settles the cut-over mechanism (shadow with `@file:JvmName`, then thin delegates or edited call sites).
+- **Context:** the brief assumed `--end-state` did not exist (5.0.1); installed 5.0.2 `bridge --help` lists `--end-state` with `replace|bindings|scaffold`.
+- **Decision:** pass `--end-state bindings` at bridge time: generated wrappers become the public API that Kotlin callers keep importing.
+- **Consequences:** the cut-over mechanism is settled in ADR-013 during the pilot.
 
 ## ADR-006 — Repo rules vs tool (Q6)
 - **Context:** AGENTS.md requires commit + push after finished work, bans committing `.md` and skill/plugin folders, and bans local `./gradlew` builds. `rust-anything doctor` reports the OpenCode skill as stale; this harness is OpenCode, not Claude Code. `.gitignore` ignores only `Todo.md`, `/PRODUCT.md`, `/DESIGN.md` (lines 20, 43, 44).
@@ -62,6 +62,11 @@ Base commit `ec937f27c` (`main` = `rust-port`; `versionName = "1.0.9"` at `app/b
 - **Context:** `pr-check.yml` exists at `.github/workflows/pr-check.yml:1-43` but has no runs on origin. The latest tag run `46082516440` and main push `46082448517` are green.
 - **Decision:** accept those green runs as the pre-change baseline; the first draft PR's `pr-check.yml` run is the real compile gate.
 - **Consequences:** no pr-check evidence exists until the draft PR is opened.
+
+## ADR-013 — Pilot cut-over mechanism (G3)
+- **Context:** `bridge` emits `java/com/xyzterm/logic/SessionNamesKt.java` and `DeepLinkCommandKt.java` with the same fully qualified names as the Kotlin file facades in `:core:logic`; compiling both collides. `record` and `map` need the original Kotlin sources to stay available.
+- **Decision:** keep the original Kotlin top-level functions in `:core:logic` as the recording reference and rename their facades with `@file:JvmName("SessionNamesKtOriginal")` / `@file:JvmName("DeepLinkCommandKtOriginal")`. The generated Java wrappers own the public facade names. Callers switch to `com.xyzterm.logic.SessionNamesKt.isValidSessionName(...)` / `DeepLinkCommandKt.isValidDeepLinkCommand(...)` when G4 adds the Android library module that owns `jniLibs/`. The generated `DeepLinkCommandKtShadow` is a verification-only drop-in with `RUST_ANYTHING_MODE=old|shadow|new`.
+- **Consequences:** no Kotlin caller is switched before the Gradle/JNI wiring exists, so CI stays green. The original Kotlin functions remain in the source tree for `record`/`map`, not for app calls.
 
 ## Deferred (need their own ADR and operator approval)
 Hand-port of `link2symlink.cpp`; porting leaf helpers from proot; replacing the Termux emulator with a Rust VT core. None are part of "done".
