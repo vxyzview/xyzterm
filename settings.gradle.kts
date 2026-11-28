@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-include(":app", ":core:main", ":core:components", ":core:resources")
+include(":app", ":core:main", ":core:components", ":core:logic", ":core:resources")
 
 include(":baselineprofile")
 
