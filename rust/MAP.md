@@ -15,15 +15,15 @@ Reports: `/data/user/0/com.xyzterm.app/tmp/opencode/ra-phase0/{kotlin,java,c}.js
 | Java | 3 | 1 | 2 caution | 0 | 0 | 0 (0 bridgeable exports in all 3) |
 | C | 23 | 4 | 16 caution | 3 | 4 (readiness 0) | 39 |
 
-Kotlin's three `ready` units have `bridgeable = 0`: `app/src/main/java/com/xyzterm/app/`, `buildSrc/src/main/kotlin/DownloadRootfsTask.kt`, `core/main/src/main/java/com/xyzterm/events/`. Pointing rust-anything at the repo as-is ports nothing — seam first (Phase 2).
+After G2, Kotlin is 45 units / 4 ready / 41 blocked / 1 parse error, with `start_here = ['core/logic/src/main/kotlin/com/xyzterm/logic/']` — readiness 100, `bridgeable = 2`, `exports = 2`. The three original `ready` units have `bridgeable = 0`: `app/src/main/java/com/xyzterm/app/`, `buildSrc/src/main/kotlin/DownloadRootfsTask.kt`, `core/main/src/main/java/com/xyzterm/events/`. Pointing rust-anything at the untouched repo ports nothing — seam first (Phase 2).
 
 ## Units — state
 `pilot` = first pipeline proof; `candidate` = seam not extracted yet; `stays` = out of scope.
 
 | Candidate | Anchor | Blocker → seam | State |
 |---|---|---|---|
-| `SessionNames` | `FT/terminal/SessionNames.kt:4` | visibility only | pilot |
-| `DeepLinkCommand` | `FT/terminal/DeepLinkCommand.kt:6` | visibility; UTF-16 length + Kotlin whitespace traps | pilot |
+| `SessionNames` | `FT/terminal/SessionNames.kt:3` → `core/logic/src/main/kotlin/com/xyzterm/logic/SessionNames.kt:4` | visibility only | seam ready (delegate in place) |
+| `DeepLinkCommand` | `FT/terminal/DeepLinkCommand.kt:3` → `core/logic/src/main/kotlin/com/xyzterm/logic/DeepLinkCommand.kt:5` | visibility; UTF-16 length + Kotlin whitespace traps | seam ready (delegate in place) |
 | `RootfsInstaller.parseRootfsManifest` | `FT/terminal/RootfsInstaller.kt:27,50,56` | data-class returns and `File(linkPath).parent` → path `String` | candidate |
 | `TerminalBackup.detectBackupLayout`, `isUnsafeBackupLink` | `FT/terminal/TerminalBackup.kt:38,52` | enum return → `String` | candidate |
 | `UpdateManager.updateApkName`, `isNewer` | `CM/UpdateManager.kt:32,59` | `Array<String>` → `List<String>`; move `object` member out | candidate |
@@ -49,4 +49,4 @@ Kotlin's three `ready` units have `bridgeable = 0`: `app/src/main/java/com/xyzte
 None from G1 — Q1–Q12 all accepted. Deferred decisions are listed in `DECISIONS.md`; none blocks the pilot.
 
 ## Next gate
-G2: seam extraction in Kotlin, one move per commit, JUnit suite green on CI, then re-run `analyze --lang kotlin` and stop.
+G3: port loop, pilot first — `rust-anything rules`, `bridge`, `record`, `port.rs`, `build`, `diff`, `bench`, android-profile build/diff, `shadow`, `gate`, then switch Kotlin callers. Stop at G3.
