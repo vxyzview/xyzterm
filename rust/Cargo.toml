@@ -6,6 +6,7 @@ members = [
     "crates/rootfs-manager",
     "crates/backup-engine",
     "crates/proot-elf",
+    "crates/proot-syscall",
     "app",
 ]
 resolver = "2"

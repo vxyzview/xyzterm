@@ -1,0 +1,9 @@
+[package]
+name = "proot-syscall"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Rust syscall number tables and lookup for ARM/ARM64 Proot guests"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
