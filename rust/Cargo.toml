@@ -12,6 +12,7 @@ members = [
     "crates/proot-extensions",
     "crates/link2symlink-compat",
     "crates/proot-fake-id0",
+    "crates/proot-sysvipc",
     "app",
 ]
 resolver = "2"

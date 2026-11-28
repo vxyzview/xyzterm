@@ -1,0 +1,932 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "/data/user/0/com.xyzterm.app/tmp/opencode/proot-sysvipc-min",
+  "unit": "extension/sysvipc_harness/",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "proot-sysvipc",
+  "exports": [
+    {
+      "name": "ra_msgget",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 204,
+      "params": [
+        {
+          "name": "id",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "flags",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "objects",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "objects_len",
+          "ts_type": "len:2",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_msgget(long long id, long long flags, unsigned char *objects, unsigned int objects_len)"
+    },
+    {
+      "name": "ra_msg_match",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 216,
+      "params": [
+        {
+          "name": "sender",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "filter",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "flags",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_msg_match(long long sender, long long filter, long long flags)"
+    },
+    {
+      "name": "ra_semget",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 222,
+      "params": [
+        {
+          "name": "key",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "nsems",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "flags",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "objects",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "objects_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_semget(long long key, long long nsems, long long flags, unsigned char *objects, unsigned int objects_len)"
+    },
+    {
+      "name": "ra_msgrcv_flags",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 243,
+      "params": [
+        {
+          "name": "msgsz",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "msgflg",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "state_out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "state_len",
+          "ts_type": "len:2",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_msgrcv_flags(long long msgsz, long long msgflg, unsigned char *state_out, unsigned int state_len)"
+    },
+    {
+      "name": "ra_msgrcv_deliver",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 260,
+      "params": [
+        {
+          "name": "items",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "items_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "msgsz",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "msgtyp",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "msgflg",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:5",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_msgrcv_deliver(const unsigned char *items, unsigned int items_len, long long msgsz, long long msgtyp, long long msgflg, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_msgctl",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 298,
+      "params": [
+        {
+          "name": "object_id",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "cmd",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "objects",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "objects_len",
+          "ts_type": "len:2",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_msgctl(long long object_id, long long cmd, unsigned char *objects, unsigned int objects_len)"
+    },
+    {
+      "name": "ra_sem_check",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 313,
+      "params": [
+        {
+          "name": "sems",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "sems_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "ops",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "ops_len",
+          "ts_type": "len:2",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "wait_type_in",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_sem_check(unsigned char *sems, unsigned int sems_len, const unsigned char *ops, unsigned int ops_len, long long wait_type_in)"
+    },
+    {
+      "name": "ra_semctl",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 340,
+      "params": [
+        {
+          "name": "semnum",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "cmd",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "cmdarg",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "sems",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "sems_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:5",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_semctl(long long semnum, long long cmd, long long cmdarg, unsigned char *sems, unsigned int sems_len, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_shmget",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 364,
+      "params": [
+        {
+          "name": "key",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "size",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "flags",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "objects",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "objects_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_shmget(long long key, long long size, long long flags, unsigned char *objects, unsigned int objects_len)"
+    },
+    {
+      "name": "ra_shmctl",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 377,
+      "params": [
+        {
+          "name": "object_id",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "cmd",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "mappings",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "objects",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "objects_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:5",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_shmctl(long long object_id, long long cmd, long long mappings, unsigned char *objects, unsigned int objects_len, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_shmdt",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 400,
+      "params": [
+        {
+          "name": "addr",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "mappings",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "mappings_len",
+          "ts_type": "len:1",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_shmdt(long long addr, const unsigned char *mappings, unsigned int mappings_len, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_shm_recvmsg_pointers",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 421,
+      "params": [
+        {
+          "name": "is32",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "guest_buf",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:2",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_shm_recvmsg_pointers(long long is32, long long guest_buf, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_wake",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 445,
+      "params": [
+        {
+          "name": "reason",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "state",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "status",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_wake(long long reason, long long state, long long status, unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_layout",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 461,
+      "params": [
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_layout(unsigned char *out, unsigned int out_len)"
+    },
+    {
+      "name": "ra_shm_fill_proc",
+      "file": "extension/sysvipc_harness/originals.c",
+      "line": 506,
+      "params": [
+        {
+          "name": "objects",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "objects_len",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "page_size",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long long"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_len",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "long long",
+      "prototype": "long long ra_shm_fill_proc(const unsigned char *objects, unsigned int objects_len, long long page_size, unsigned char *out, unsigned int out_len)"
+    }
+  ],
+  "classes": [],
+  "js_only": [
+    {
+      "name": "_talloc_zero",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 43,
+      "reason": "returns a pointer (`void*`): who frees it must be designed"
+    },
+    {
+      "name": "_talloc",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 49,
+      "reason": "returns a pointer (`void*`): who frees it must be designed"
+    },
+    {
+      "name": "_talloc_array",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 55,
+      "reason": "returns a pointer (`void*`): who frees it must be designed"
+    },
+    {
+      "name": "_talloc_zero_array",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 61,
+      "reason": "returns a pointer (`void*`): who frees it must be designed"
+    },
+    {
+      "name": "_talloc_realloc_array",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 67,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "talloc_get_size",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 82,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_free",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 87,
+      "reason": "writes to a buffer (`void*`) whose size is not a parameter"
+    },
+    {
+      "name": "_talloc_set_destructor",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 99,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_reference_loc",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 104,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "talloc_parent",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 110,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_get_type_abort",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 116,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "ra_reset",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 124,
+      "reason": "kept on request"
+    },
+    {
+      "name": "get_tracees_list_head",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 141,
+      "reason": "returns a pointer (`Tracees*`): who frees it must be designed"
+    },
+    {
+      "name": "get_extension",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 146,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "get_sysnum",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 154,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "set_sysnum",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 160,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "peek_reg",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 166,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "poke_reg",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 174,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "read_data",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 181,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "write_data",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 190,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "ra_fake_pipe2",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 201,
+      "reason": "passes a pointer (`int[]`): ownership must be designed"
+    },
+    {
+      "name": "ra_fake_fork",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 209,
+      "reason": "uses `pid_t`, which is not a C scalar the bridge knows"
+    },
+    {
+      "name": "ra_fake_read",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 214,
+      "reason": "kept on request"
+    },
+    {
+      "name": "ra_fake_write",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 228,
+      "reason": "kept on request"
+    },
+    {
+      "name": "ra_fake_close",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 234,
+      "reason": "kept on request"
+    },
+    {
+      "name": "ra_fake_time",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 240,
+      "reason": "passes a pointer (`time_t*`): ownership must be designed"
+    },
+    {
+      "name": "ra_fake_syscall",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 247,
+      "reason": "is variadic"
+    },
+    {
+      "name": "register_chained_syscall",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 261,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "force_chain_final_result",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 270,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "restart_syscall_after_seccomp",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 276,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "set_result_after_seccomp",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 282,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "detranslate_sysnum",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 288,
+      "reason": "kept on request"
+    },
+    {
+      "name": "create_temp_file",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 295,
+      "reason": "writes to a buffer (`void*`) whose size is not a parameter"
+    },
+    {
+      "name": "create_temp_name",
+      "file": "extension/sysvipc_harness/linker_stubs.c",
+      "line": 302,
+      "reason": "writes to a buffer (`void*`) whose size is not a parameter"
+    }
+  ],
+  "end_state": "scaffold"
+}
