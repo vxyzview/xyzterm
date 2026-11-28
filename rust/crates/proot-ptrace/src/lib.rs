@@ -117,6 +117,24 @@ impl Tracee {
         Ok(())
     }
 
+    /// Resumes the tracee until the next syscall-entry or syscall-exit stop.
+    pub fn syscall_step(&self, signal: Option<libc::c_int>) -> io::Result<()> {
+        let sig = signal.unwrap_or(0) as *mut libc::c_void;
+        // SAFETY: pid is our tracee; signal is 0 or a valid signal.
+        if unsafe {
+            libc::ptrace(
+                libc::PTRACE_SYSCALL,
+                self.pid,
+                std::ptr::null_mut::<libc::c_void>(),
+                sig,
+            )
+        } < 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        Ok(())
+    }
+
     /// Reads one machine word from the tracee's address space.
     pub fn peek_word(&self, address: usize) -> io::Result<u64> {
         // SAFETY: address is supplied by the caller; ptrace validates it.
@@ -208,6 +226,34 @@ mod tests {
         assert!(tracee.peek_word(0).is_err());
         tracee.kill(libc::SIGKILL).expect("kill");
         let _ = tracee.wait();
+    }
+
+    #[test]
+    fn syscall_stepping_observes_entry_and_exit_stops() {
+        let tracee = Tracee::spawn("/bin/true", &[]).expect("spawn");
+        tracee
+            .set_options(libc::PTRACE_O_TRACEEXEC as libc::c_long)
+            .expect("set_options");
+        tracee.cont(None).expect("continue to exec stop");
+        assert_eq!(
+            tracee.wait().expect("exec stop"),
+            WaitEvent::Stopped(libc::SIGTRAP)
+        );
+        let mut stops = 0;
+        let mut exited = false;
+        for _ in 0..500 {
+            tracee.syscall_step(None).expect("syscall step");
+            match tracee.wait().expect("wait") {
+                WaitEvent::Stopped(_) => stops += 1,
+                WaitEvent::Exited(_) => {
+                    exited = true;
+                    break;
+                }
+                WaitEvent::Signaled(_) => break,
+            }
+        }
+        assert!(exited, "child did not exit");
+        assert!(stops >= 2, "expected syscall entry/exit stops, got {stops}");
     }
 
     #[test]
