@@ -24,6 +24,8 @@ enum State {
     Esc,
     Csi,
     Osc,
+    /// An ESC seen inside OSC; the next '\' completes ST.
+    OscEsc,
     /// Device control / other string sequences: discarded until ST or BEL.
     Dcs,
 }
@@ -31,6 +33,7 @@ enum State {
 #[derive(Debug, Clone)]
 struct SavedScreen {
     cells: Vec<Vec<char>>,
+    decorations: Vec<Vec<Vec<char>>>,
     styles: Vec<Vec<u64>>,
     cursor_row: usize,
     cursor_col: usize,
@@ -59,6 +62,7 @@ pub struct TerminalGrid {
     cols: usize,
     rows: usize,
     cells: Vec<Vec<char>>,
+    decorations: Vec<Vec<Vec<char>>>,
     styles: Vec<Vec<u64>>,
     current_style: u64,
     cursor_row: usize,
@@ -78,11 +82,13 @@ impl TerminalGrid {
     pub fn new(cols: usize, rows: usize) -> Self {
         assert!(cols > 0 && rows > 0, "terminal size must be positive");
         let cells = vec![vec![' '; cols]; rows];
+        let decorations = vec![vec![Vec::new(); cols]; rows];
         let styles = vec![vec![NORMAL_STYLE; cols]; rows];
         Self {
             cols,
             rows,
             cells,
+            decorations,
             styles,
             current_style: NORMAL_STYLE,
             cursor_row: 0,
@@ -109,6 +115,10 @@ impl TerminalGrid {
             row.resize(cols, ' ');
         }
         self.cells.resize(rows, vec![' '; cols]);
+        for row in &mut self.decorations {
+            row.resize(cols, Vec::new());
+        }
+        self.decorations.resize(rows, vec![Vec::new(); cols]);
         for row in &mut self.styles {
             row.resize(cols, NORMAL_STYLE);
         }
@@ -121,12 +131,19 @@ impl TerminalGrid {
         let lines: Vec<String> = self
             .cells
             .iter()
-            .map(|row| {
-                row.iter()
-                    .filter(|c| **c != '\0')
-                    .collect::<String>()
-                    .trim_end()
-                    .to_string()
+            .enumerate()
+            .map(|(index, row)| {
+                let mut text = String::new();
+                for (col, ch) in row.iter().enumerate() {
+                    if *ch == '\0' {
+                        continue;
+                    }
+                    text.push(*ch);
+                    for mark in &self.decorations[index][col] {
+                        text.push(*mark);
+                    }
+                }
+                text.trim_end().to_string()
             })
             .collect();
         Snapshot {
@@ -166,6 +183,7 @@ impl TerminalGrid {
             State::Esc => self.escape(ch),
             State::Csi => self.csi(ch),
             State::Osc => self.osc(ch),
+            State::OscEsc => self.osc_escape(ch),
             State::Dcs => self.dcs(ch),
         }
     }
@@ -191,16 +209,26 @@ impl TerminalGrid {
     }
 
     fn put(&mut self, ch: char) {
+        let width = unicode_width::UnicodeWidthChar::width(ch).unwrap_or(1);
+        if width == 0 {
+            // Combining mark: attach to the previous cell without moving.
+            let target = self.cursor_col.saturating_sub(1).min(self.cols - 1);
+            self.decorations[self.cursor_row][target].push(ch);
+            return;
+        }
         if self.cursor_col >= self.cols {
             self.cursor_col = 0;
             self.line_feed();
         }
         if self.insert_mode {
             let row = &mut self.cells[self.cursor_row];
+            let decorations = &mut self.decorations[self.cursor_row];
             let styles = &mut self.styles[self.cursor_row];
             if self.cursor_col < row.len() {
                 row.insert(self.cursor_col, ch);
                 row.pop();
+                decorations.insert(self.cursor_col, Vec::new());
+                decorations.pop();
                 styles.insert(self.cursor_col, self.current_style);
                 styles.pop();
             }
@@ -208,9 +236,6 @@ impl TerminalGrid {
             self.cells[self.cursor_row][self.cursor_col] = ch;
             self.styles[self.cursor_row][self.cursor_col] = self.current_style;
         }
-        let width = unicode_width::UnicodeWidthChar::width(ch)
-            .unwrap_or(1)
-            .max(1);
         if width == 2 && self.cursor_col + 1 < self.cols {
             // The second cell is a continuation placeholder, not a character.
             self.cells[self.cursor_row][self.cursor_col + 1] = '\0';
@@ -225,11 +250,13 @@ impl TerminalGrid {
         if self.cursor_row >= self.rows {
             self.cursor_row = self.rows - 1;
             let removed = self.cells.remove(0);
+            self.decorations.remove(0);
             self.styles.remove(0);
             if self.alternate.is_none() {
                 self.scrollback.push(removed);
             }
             self.cells.push(vec![' '; self.cols]);
+            self.decorations.push(vec![Vec::new(); self.cols]);
             self.styles.push(vec![NORMAL_STYLE; self.cols]);
         }
     }
@@ -275,18 +302,30 @@ impl TerminalGrid {
         }
     }
 
+    fn finish_osc(&mut self) {
+        let value = String::from_utf8_lossy(&self.params).into_owned();
+        let title = value
+            .split_once(';')
+            .map_or(value.as_str(), |(_, title)| title);
+        self.title = Some(title.to_string());
+        self.state = State::Ground;
+    }
+
     fn osc(&mut self, ch: char) {
         if ch == '\u{7}' {
-            let value = String::from_utf8_lossy(&self.params).into_owned();
-            let title = value
-                .split_once(';')
-                .map_or(value.as_str(), |(_, title)| title);
-            self.title = Some(title.to_string());
-            self.state = State::Ground;
+            self.finish_osc();
         } else if ch == '\u{1b}' {
-            self.state = State::Dcs;
+            self.state = State::OscEsc;
         } else {
             self.params.push(ch as u8);
+        }
+    }
+
+    fn osc_escape(&mut self, ch: char) {
+        if ch == '\\' || ch == '\u{7}' {
+            self.finish_osc();
+        } else {
+            self.state = State::Osc;
         }
     }
 
@@ -469,6 +508,7 @@ impl TerminalGrid {
             };
             for c in start..end {
                 self.cells[r][c] = ' ';
+                self.decorations[r][c].clear();
                 self.styles[r][c] = NORMAL_STYLE;
             }
         }
@@ -484,6 +524,7 @@ impl TerminalGrid {
         };
         for c in start..end {
             self.cells[row][c] = ' ';
+            self.decorations[row][c].clear();
             self.styles[row][c] = NORMAL_STYLE;
         }
     }
@@ -494,11 +535,13 @@ impl TerminalGrid {
         }
         let saved = SavedScreen {
             cells: self.cells.clone(),
+            decorations: self.decorations.clone(),
             styles: self.styles.clone(),
             cursor_row: self.cursor_row,
             cursor_col: self.cursor_col,
         };
         self.cells = vec![vec![' '; self.cols]; self.rows];
+        self.decorations = vec![vec![Vec::new(); self.cols]; self.rows];
         self.styles = vec![vec![NORMAL_STYLE; self.cols]; self.rows];
         self.cursor_row = 0;
         self.cursor_col = 0;
@@ -508,6 +551,7 @@ impl TerminalGrid {
     fn leave_alternate(&mut self) {
         if let Some(saved) = self.alternate.take() {
             self.cells = saved.cells;
+            self.decorations = saved.decorations;
             self.styles = saved.styles;
             self.cursor_row = saved.cursor_row.min(self.rows - 1);
             self.cursor_col = saved.cursor_col.min(self.cols - 1);
@@ -516,6 +560,7 @@ impl TerminalGrid {
 
     fn reset(&mut self) {
         self.cells = vec![vec![' '; self.cols]; self.rows];
+        self.decorations = vec![vec![Vec::new(); self.cols]; self.rows];
         self.styles = vec![vec![NORMAL_STYLE; self.cols]; self.rows];
         self.current_style = NORMAL_STYLE;
         self.cursor_row = 0;
@@ -549,6 +594,8 @@ impl From<&Snapshot> for SnapshotHeader {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    include!("grid_cases.rs");
 
     fn render(cols: usize, rows: usize, input: &[u8]) -> String {
         let mut grid = TerminalGrid::new(cols, rows);
@@ -620,6 +667,13 @@ mod tests {
         assert_eq!(grid.snapshot().screen, "\n");
         grid.append(&bytes[2..]);
         assert_eq!(grid.snapshot().screen, "😀\n");
+    }
+
+    #[test]
+    fn recorded_snapshots_match() {
+        for (input, expected) in RECORDED_CASES {
+            assert_eq!(render(20, 5, input), *expected, "input: {input:?}");
+        }
     }
 
     #[test]
