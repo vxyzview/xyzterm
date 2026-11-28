@@ -1,0 +1,9 @@
+[package]
+name = "proot-elf"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Pure-Rust ELF header and program-header parsing for the Proot loader"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

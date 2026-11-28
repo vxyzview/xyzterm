@@ -5,6 +5,7 @@ members = [
     "crates/terminal-pty",
     "crates/rootfs-manager",
     "crates/backup-engine",
+    "crates/proot-elf",
     "app",
 ]
 resolver = "2"
