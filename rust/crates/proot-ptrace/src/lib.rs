@@ -214,6 +214,27 @@ impl Tracee {
         Ok(())
     }
 
+    /// Steps to the next syscall stop, applies the guest/host decision and
+    /// returns it. `None` means the tracee exited instead of stopping.
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    pub fn intercept_syscall(
+        &self,
+        guest: proot_syscall::Abi,
+        host: proot_syscall::Abi,
+    ) -> io::Result<Option<proot_syscall::Decision>> {
+        self.syscall_step(None)?;
+        let event = self.wait()?;
+        if !matches!(event, WaitEvent::Stopped(_)) {
+            return Ok(None);
+        }
+        let number = self.syscall_number()? as u32;
+        let decision = proot_syscall::decide(guest, host, number);
+        if let proot_syscall::Decision::Rewrite(rewritten) = decision {
+            self.set_syscall_number(u64::from(rewritten))?;
+        }
+        Ok(Some(decision))
+    }
+
     /// Reads one machine word from the tracee's address space.
     pub fn peek_word(&self, address: usize) -> io::Result<u64> {
         // SAFETY: address is supplied by the caller; ptrace validates it.
@@ -346,6 +367,23 @@ mod tests {
         }
         assert!(exited, "child did not exit");
         assert!(stops >= 2, "expected syscall entry/exit stops, got {stops}");
+    }
+
+    #[test]
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    fn live_interception_returns_decisions() {
+        let abi = proot_syscall::Abi::host().expect("arm host");
+        let tracee = Tracee::spawn("/bin/true", &[]).expect("spawn");
+        tracee.cont(None).expect("continue");
+        let _ = tracee.wait().expect("wait");
+        let mut decisions = 0;
+        for _ in 0..500 {
+            match tracee.intercept_syscall(abi, abi).expect("intercept") {
+                Some(_) => decisions += 1,
+                None => break,
+            }
+        }
+        assert!(decisions > 0, "no syscall decisions observed");
     }
 
     #[test]

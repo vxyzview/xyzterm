@@ -7,8 +7,6 @@ description = "Rust ptrace tracee management for the Proot runtime"
 
 [dependencies]
 libc = "0.2"
-
-[dev-dependencies]
 proot-syscall = { path = "../proot-syscall" }
 
 [lints.clippy]
