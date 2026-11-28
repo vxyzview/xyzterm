@@ -1,0 +1,15 @@
+[package]
+name = "proot-runtime"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "First host-verifiable end-to-end guest ELF execution path using ptrace"
+
+[dependencies]
+libc = "0.2"
+proot-elf = { path = "../proot-elf" }
+proot-loader = { path = "../proot-loader" }
+proot-ptrace = { path = "../proot-ptrace" }
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
