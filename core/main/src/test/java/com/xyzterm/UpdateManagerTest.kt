@@ -1,5 +1,6 @@
 package com.xyzterm
 
+import com.xyzterm.UpdateManager.isNewer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
