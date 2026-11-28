@@ -255,6 +255,32 @@ impl Tracee {
         Ok(value as u64)
     }
 
+    /// Reads an arbitrary byte range, handling unaligned boundaries.
+    pub fn read_bytes(&self, address: usize, length: usize) -> io::Result<Vec<u8>> {
+        let mut output = Vec::with_capacity(length);
+        for index in 0..length {
+            let current = address + index;
+            let word_address = current & !7;
+            let shift = (current - word_address) * 8;
+            let word = self.peek_word(word_address)?;
+            output.push((word >> shift) as u8);
+        }
+        Ok(output)
+    }
+
+    /// Writes an arbitrary byte range with read-modify-write at unaligned edges.
+    pub fn write_bytes(&self, address: usize, bytes: &[u8]) -> io::Result<()> {
+        for (index, byte) in bytes.iter().enumerate() {
+            let current = address + index;
+            let word_address = current & !7;
+            let shift = (current - word_address) * 8;
+            let mut word = self.peek_word(word_address)?;
+            word = (word & !(0xffu64 << shift)) | (u64::from(*byte) << shift);
+            self.poke_word(word_address, word)?;
+        }
+        Ok(())
+    }
+
     /// Writes one machine word into the tracee's address space.
     pub fn poke_word(&self, address: usize, value: u64) -> io::Result<()> {
         // SAFETY: address and value are plain machine words.
@@ -384,6 +410,27 @@ mod tests {
             }
         }
         assert!(decisions > 0, "no syscall decisions observed");
+    }
+
+    #[test]
+    fn byte_memory_access_roundtrip() {
+        let tracee = Tracee::spawn("/bin/sleep", &["30"]).expect("spawn");
+        let maps = std::fs::read_to_string(format!("/proc/{}/maps", tracee.pid())).expect("maps");
+        let line = maps
+            .lines()
+            .find(|line| line.contains("rw-p") && !line.contains("/dev/"))
+            .expect("writable mapping");
+        let range = line.split_whitespace().next().expect("address range");
+        let start =
+            usize::from_str_radix(range.split('-').next().expect("start"), 16).expect("hex");
+        let payload = b"xyzterm-stack";
+        tracee.write_bytes(start, payload).expect("write bytes");
+        assert_eq!(
+            tracee.read_bytes(start, payload.len()).expect("read bytes"),
+            payload
+        );
+        tracee.kill(libc::SIGKILL).expect("kill");
+        let _ = tracee.wait();
     }
 
     #[test]
