@@ -90,6 +90,9 @@ object XyztermNative {
 
     @JvmStatic external fun getSessionState(handle: Long): String?
 
+    /** JSON with `row`, `col`, `title` and `screen` for a live session. */
+    @JvmStatic external fun sessionSnapshot(handle: Long): String?
+
     @JvmStatic external fun closeSession(handle: Long): Boolean
 
     @JvmStatic external fun installRootfs(

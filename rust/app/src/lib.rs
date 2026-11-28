@@ -428,6 +428,29 @@ pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_getSessionState(
     }
 }
 
+/// One batched read of a live session's cursor, title and visible screen.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_sessionSnapshot(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    handle: jlong,
+) -> jstring {
+    let snapshot = session_manager::sessions()
+        .lock()
+        .ok()
+        .and_then(|registry| registry.get(handle as u64).map(|s| s.snapshot()));
+    let Some(snapshot) = snapshot else {
+        return std::ptr::null_mut();
+    };
+    let value = serde_json::json!({
+        "row": snapshot.cursor_row,
+        "col": snapshot.cursor_col,
+        "title": snapshot.title,
+        "screen": snapshot.screen,
+    });
+    return_string(&mut env, value.to_string())
+}
+
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_closeSession(
     _env: JNIEnv<'_>,
