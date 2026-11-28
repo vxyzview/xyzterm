@@ -11,7 +11,7 @@ val copyRustJava =
     }
 
 android {
-    namespace = "com.xyzterm.native"
+    namespace = "com.xyzterm.rustnative"
     compileSdk = 37
     ndkVersion = "30.0.16248370"
 
