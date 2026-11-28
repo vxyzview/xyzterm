@@ -43,6 +43,13 @@ pub fn number(abi: Abi, name: &str) -> Option<u32> {
         .map(|entry| entry.0)
 }
 
+/// Maps a guest syscall number to the host ABI's number by syscall name.
+/// Used when a 32-bit ARM guest runs under an AArch64 kernel.
+pub fn translate_number(guest: Abi, host: Abi, syscall: u32) -> Option<u32> {
+    let syscall_name = name(guest, syscall)?;
+    number(host, syscall_name)
+}
+
 /// Syscalls PRoot must never pass through unmodified because they change
 /// identity, filesystem namespace or process topology.
 pub fn is_privileged(abi: Abi, number: u32) -> bool {
@@ -98,6 +105,15 @@ mod tests {
         assert_eq!(name(Abi::Arm64, 64), Some("write"));
         assert_eq!(name(Abi::Arm64, 221), Some("execve"));
         assert_eq!(number(Abi::Arm64, "execve"), Some(221));
+    }
+
+    #[test]
+    fn arm_to_arm64_translation() {
+        assert_eq!(translate_number(Abi::Arm, Abi::Arm64, 3), Some(63)); // read
+        assert_eq!(translate_number(Abi::Arm, Abi::Arm64, 4), Some(64)); // write
+        assert_eq!(translate_number(Abi::Arm, Abi::Arm64, 11), Some(221)); // execve
+        assert_eq!(translate_number(Abi::Arm64, Abi::Arm, 221), Some(11));
+        assert_eq!(translate_number(Abi::Arm, Abi::Arm64, 9999), None);
     }
 
     #[test]
