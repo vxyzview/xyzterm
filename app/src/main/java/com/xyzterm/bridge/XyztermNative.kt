@@ -39,6 +39,21 @@ object XyztermNative {
         expectedSha256: String,
     ): Boolean
 
+    @JvmStatic external fun keyCode(
+        keyCode: Int,
+        keyMode: Int,
+        cursorApp: Boolean,
+        keypadApplication: Boolean,
+    ): String?
+
+    @JvmStatic external fun perceivedBrightness(color: Int): Int
+
+    @JvmStatic external fun decodeForeColor(style: Long): Int
+
+    @JvmStatic external fun decodeBackColor(style: Long): Int
+
+    @JvmStatic external fun decodeEffect(style: Long): Int
+
     const val PATHS_ARE_EQUAL: Int = 0
     const val PATH1_IS_PREFIX: Int = 1
     const val PATH2_IS_PREFIX: Int = 2

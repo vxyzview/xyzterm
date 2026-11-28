@@ -10,7 +10,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use jni::JNIEnv;
 use jni::objects::{JClass, JString};
-use jni::sys::{jboolean, jint, jstring};
+use jni::sys::{jboolean, jint, jlong, jstring};
 use sha2::{Digest, Sha256};
 use xyzterm_path::{link_compat, port};
 
@@ -172,6 +172,69 @@ pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_verifyRootfs(
         }
         Ok(_) | Err(_) => jni::sys::JNI_FALSE,
     }
+}
+
+/// Terminal key encoding from Termux v0.118.3 `KeyHandler.getCode`.
+/// Returns `null` where the original returns Java `null`.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_keyCode(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    key_code: jint,
+    key_mode: jint,
+    cursor_app: jboolean,
+    keypad_application: jboolean,
+) -> jstring {
+    match terminal_engine::port::get_code(
+        jlong::from(key_code),
+        jlong::from(key_mode),
+        cursor_app != 0,
+        keypad_application != 0,
+    ) {
+        Ok(Some(value)) => return_string(&mut env, value),
+        Ok(None) => std::ptr::null_mut(),
+        Err(message) => {
+            let _ = env.throw_new("java/lang/IllegalStateException", message);
+            std::ptr::null_mut()
+        }
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_perceivedBrightness(
+    _env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    color: jint,
+) -> jint {
+    terminal_engine::port::get_perceived_brightness_of_color(jlong::from(color)).unwrap_or(0)
+        as jint
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_decodeForeColor(
+    _env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    style: jlong,
+) -> jint {
+    terminal_engine::port::decode_fore_color(style).unwrap_or(0) as jint
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_decodeBackColor(
+    _env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    style: jlong,
+) -> jint {
+    terminal_engine::port::decode_back_color(style).unwrap_or(0) as jint
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_decodeEffect(
+    _env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    style: jlong,
+) -> jint {
+    terminal_engine::port::decode_effect(style).unwrap_or(0) as jint
 }
 
 #[cfg(test)]

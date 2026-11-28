@@ -1,0 +1,200 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "/data/user/0/com.xyzterm.app/tmp/opencode/termux-v0.118.3/terminal-emulator/src/main/java",
+  "unit": "com/termux/terminal/",
+  "language": "java",
+  "kind": "ffi",
+  "crate_name": "terminal-engine",
+  "exports": [
+    {
+      "name": "getCode",
+      "file": "com/termux/terminal/KeyHandler.java",
+      "line": 156,
+      "params": [
+        {
+          "name": "keyCode",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keyMode",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "cursorApp",
+          "ts_type": "boolean",
+          "optional": false,
+          "rest": false,
+          "native_type": "boolean"
+        },
+        {
+          "name": "keypadApplication",
+          "ts_type": "boolean",
+          "optional": false,
+          "rest": false,
+          "native_type": "boolean"
+        }
+      ],
+      "returns": "string",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "String",
+      "prototype": "com.termux.terminal.KeyHandler.getCode(int keyCode, int keyMode, boolean cursorApp, boolean keypadApplication)"
+    },
+    {
+      "name": "getPerceivedBrightnessOfColor",
+      "file": "com/termux/terminal/TerminalColors.java",
+      "line": 87,
+      "params": [
+        {
+          "name": "color",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "com.termux.terminal.TerminalColors.getPerceivedBrightnessOfColor(int color)"
+    },
+    {
+      "name": "decodeForeColor",
+      "file": "com/termux/terminal/TextStyle.java",
+      "line": 69,
+      "params": [
+        {
+          "name": "style",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "com.termux.terminal.TextStyle.decodeForeColor(long style)"
+    },
+    {
+      "name": "decodeBackColor",
+      "file": "com/termux/terminal/TextStyle.java",
+      "line": 78,
+      "params": [
+        {
+          "name": "style",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "com.termux.terminal.TextStyle.decodeBackColor(long style)"
+    },
+    {
+      "name": "decodeEffect",
+      "file": "com/termux/terminal/TextStyle.java",
+      "line": 86,
+      "params": [
+        {
+          "name": "style",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "long"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "com.termux.terminal.TextStyle.decodeEffect(long style)"
+    }
+  ],
+  "classes": [],
+  "js_only": [
+    {
+      "name": "logError",
+      "file": "com/termux/terminal/Logger.java",
+      "line": 11,
+      "reason": "uses the class `TerminalSessionClient`"
+    },
+    {
+      "name": "logWarn",
+      "file": "com/termux/terminal/Logger.java",
+      "line": 18,
+      "reason": "uses the class `TerminalSessionClient`"
+    },
+    {
+      "name": "logInfo",
+      "file": "com/termux/terminal/Logger.java",
+      "line": 25,
+      "reason": "uses the class `TerminalSessionClient`"
+    },
+    {
+      "name": "logDebug",
+      "file": "com/termux/terminal/Logger.java",
+      "line": 32,
+      "reason": "uses the class `TerminalSessionClient`"
+    },
+    {
+      "name": "logVerbose",
+      "file": "com/termux/terminal/Logger.java",
+      "line": 39,
+      "reason": "uses the class `TerminalSessionClient`"
+    },
+    {
+      "name": "logStackTraceWithMessage",
+      "file": "com/termux/terminal/Logger.java",
+      "line": 46,
+      "reason": "uses the class `TerminalSessionClient`"
+    },
+    {
+      "name": "getMessageAndStackTraceString",
+      "file": "com/termux/terminal/Logger.java",
+      "line": 50,
+      "reason": "uses the class `Throwable`"
+    },
+    {
+      "name": "getStackTraceString",
+      "file": "com/termux/terminal/Logger.java",
+      "line": 61,
+      "reason": "uses the class `Throwable`"
+    },
+    {
+      "name": "width",
+      "file": "com/termux/terminal/WcWidth.java",
+      "line": 514,
+      "reason": "overloaded: one name, several signatures"
+    },
+    {
+      "name": "zeroWidthCharsCount",
+      "file": "com/termux/terminal/WcWidth.java",
+      "line": 545,
+      "reason": "uses `char`, a UTF-16 code unit"
+    }
+  ],
+  "end_state": "scaffold"
+}
