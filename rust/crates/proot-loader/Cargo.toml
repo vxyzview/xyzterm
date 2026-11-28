@@ -1,0 +1,9 @@
+[package]
+name = "proot-loader"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Rust Proot loader: guest stack, auxiliary vector and entry trampoline"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

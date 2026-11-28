@@ -390,10 +390,15 @@ name = "proot-elf"
 version = "0.1.0"
 
 [[package]]
+name = "proot-loader"
+version = "0.1.0"
+
+[[package]]
 name = "proot-ptrace"
 version = "0.1.0"
 dependencies = [
  "libc",
+ "proot-syscall",
 ]
 
 [[package]]
