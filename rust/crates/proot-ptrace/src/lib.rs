@@ -434,6 +434,32 @@ mod tests {
     }
 
     #[test]
+    fn loader_stack_can_be_written_into_a_tracee() {
+        let tracee = Tracee::spawn("/bin/sleep", &["30"]).expect("spawn");
+        let maps = std::fs::read_to_string(format!("/proc/{}/maps", tracee.pid())).expect("maps");
+        let line = maps
+            .lines()
+            .find(|line| line.contains("rw-p") && !line.contains("/dev/"))
+            .expect("writable mapping");
+        let range = line.split_whitespace().next().expect("range");
+        let start =
+            usize::from_str_radix(range.split('-').next().expect("start"), 16).expect("hex");
+        let stack = proot_loader::build_stack(
+            start as u64,
+            &["sh", "-c", "echo hi"],
+            &["HOME=/root"],
+            &[(proot_loader::AT_PAGESZ, 4096)],
+        );
+        tracee.write_bytes(start, &stack).expect("write stack");
+        assert_eq!(
+            tracee.read_bytes(start, stack.len()).expect("read stack"),
+            stack
+        );
+        tracee.kill(libc::SIGKILL).expect("kill");
+        let _ = tracee.wait();
+    }
+
+    #[test]
     fn detach_releases_the_child() {
         let tracee = Tracee::spawn("/bin/true", &[]).expect("spawn");
         tracee.detach().expect("detach");
