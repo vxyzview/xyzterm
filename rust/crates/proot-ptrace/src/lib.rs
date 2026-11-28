@@ -305,9 +305,39 @@ impl Tracee {
         }
     }
 
-    /// Injects a syscall at a syscall-entry stop and returns its result.
+    /// Advances until the tracee is stopped at a syscall-entry stop.
+    ///
+    /// PRoot's ptrace loop cannot tell entry from exit by signal alone: both
+    /// are SIGTRAP. Two consecutive stops with the same syscall number mean
+    /// entry then exit, so the *next* stop is a fresh entry.
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    pub fn seek_syscall_entry(&self) -> io::Result<()> {
+        let mut previous: Option<u64> = None;
+        for _ in 0..1000 {
+            self.syscall_step(None)?;
+            if !matches!(self.wait()?, WaitEvent::Stopped(_)) {
+                return Err(io::Error::other(
+                    "tracee exited while seeking syscall entry",
+                ));
+            }
+            let current = self.syscall_number()?;
+            if previous == Some(current) {
+                // The stop just seen was an exit stop; the next one is an entry.
+                self.syscall_step(None)?;
+                if !matches!(self.wait()?, WaitEvent::Stopped(_)) {
+                    return Err(io::Error::other("tracee exited before syscall entry"));
+                }
+                return Ok(());
+            }
+            previous = Some(current);
+        }
+        Err(io::Error::other("no syscall entry stop observed"))
+    }
+
+    /// Seeks a syscall-entry stop, injects a syscall and returns its result.
     #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
     pub fn inject_syscall(&self, number: u64, args: &[u64; 6]) -> io::Result<u64> {
+        self.seek_syscall_entry()?;
         self.set_syscall_args(args)?;
         self.set_syscall_number(number)?;
         self.syscall_step(None)?;
