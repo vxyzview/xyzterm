@@ -54,6 +54,21 @@ object XyztermNative {
 
     @JvmStatic external fun decodeEffect(style: Long): Int
 
+    @JvmStatic external fun createTerminal(
+        columns: Int,
+        rows: Int,
+    ): Long
+
+    @JvmStatic external fun appendTerminal(
+        handle: Long,
+        data: ByteArray,
+    ): Boolean
+
+    /** JSON with `row`, `col`, `title` and `screen`. */
+    @JvmStatic external fun terminalSnapshot(handle: Long): String?
+
+    @JvmStatic external fun closeTerminal(handle: Long): Boolean
+
     const val PATHS_ARE_EQUAL: Int = 0
     const val PATH1_IS_PREFIX: Int = 1
     const val PATH2_IS_PREFIX: Int = 2

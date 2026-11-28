@@ -438,6 +438,7 @@ name = "xyzterm-app"
 version = "0.1.0"
 dependencies = [
  "jni",
+ "serde_json",
  "sha2",
  "terminal-engine",
  "xyzterm-path",

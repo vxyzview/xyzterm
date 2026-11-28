@@ -4,6 +4,8 @@
 //! Session, PTY, Proot, backup and loader entry points move in from their own
 //! units (see `rust/MAP.md`) and are added when those units pass their gates.
 
+pub mod grid_registry;
+
 use std::fs::File;
 use std::io::Read;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -235,6 +237,89 @@ pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_decodeEffect(
     style: jlong,
 ) -> jint {
     terminal_engine::port::decode_effect(style).unwrap_or(0) as jint
+}
+
+/// Creates a Rust-owned terminal grid; Kotlin receives only an opaque handle.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_createTerminal(
+    _env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    columns: jint,
+    rows: jint,
+) -> jlong {
+    if columns <= 0 || rows <= 0 {
+        return 0;
+    }
+    match grid_registry::registry().lock() {
+        Ok(mut registry) => registry
+            .create(columns as usize, rows as usize)
+            .unwrap_or(0),
+        Err(_) => 0,
+    }
+}
+
+/// Appends a batch of child-process output bytes to a terminal grid.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_appendTerminal(
+    env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    handle: jlong,
+    data: jni::objects::JByteArray<'_>,
+) -> jboolean {
+    let Ok(bytes) = env.convert_byte_array(&data) else {
+        return jni::sys::JNI_FALSE;
+    };
+    match grid_registry::registry().lock() {
+        Ok(mut registry) => {
+            if registry.append(handle, &bytes) {
+                jni::sys::JNI_TRUE
+            } else {
+                jni::sys::JNI_FALSE
+            }
+        }
+        Err(_) => jni::sys::JNI_FALSE,
+    }
+}
+
+/// One batched read of cursor, title and visible screen as JSON.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_terminalSnapshot(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    handle: jlong,
+) -> jstring {
+    let snapshot = grid_registry::registry()
+        .lock()
+        .ok()
+        .and_then(|registry| registry.snapshot(handle));
+    let Some(snapshot) = snapshot else {
+        return std::ptr::null_mut();
+    };
+    let value = serde_json::json!({
+        "row": snapshot.cursor_row,
+        "col": snapshot.cursor_col,
+        "title": snapshot.title,
+        "screen": snapshot.screen,
+    });
+    return_string(&mut env, value.to_string())
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_closeTerminal(
+    _env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    handle: jlong,
+) -> jboolean {
+    match grid_registry::registry().lock() {
+        Ok(mut registry) => {
+            if registry.close(handle) {
+                jni::sys::JNI_TRUE
+            } else {
+                jni::sys::JNI_FALSE
+            }
+        }
+        Err(_) => jni::sys::JNI_FALSE,
+    }
 }
 
 #[cfg(test)]
