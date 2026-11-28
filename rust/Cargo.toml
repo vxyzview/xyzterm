@@ -11,6 +11,7 @@ members = [
     "crates/proot-loader",
     "crates/proot-extensions",
     "crates/link2symlink-compat",
+    "crates/proot-fake-id0",
     "app",
 ]
 resolver = "2"

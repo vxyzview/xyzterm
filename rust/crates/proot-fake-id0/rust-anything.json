@@ -1,0 +1,1807 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "/data/user/0/com.xyzterm.app/tmp/opencode/fakeid0-min",
+  "unit": "extension/fakeid0_harness/",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "proot-fake-id0",
+  "exports": [
+    {
+      "name": "ra_fid0_dtoo",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 65,
+      "params": [
+        {
+          "name": "n",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_dtoo(int n)"
+    },
+    {
+      "name": "ra_fid0_otod",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 70,
+      "params": [
+        {
+          "name": "n",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_otod(int n)"
+    },
+    {
+      "name": "ra_fid0_get_name",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 76,
+      "params": [
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_get_name(const char *path)"
+    },
+    {
+      "name": "ra_fid0_get_dir_path",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 86,
+      "params": [
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:1",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_get_dir_path(const char *path, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_get_meta_path",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 102,
+      "params": [
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:1",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_get_meta_path(const char *path, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_path_exists",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 121,
+      "params": [
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_path_exists(const char *path)"
+    },
+    {
+      "name": "ra_fid0_get_permissions",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 129,
+      "params": [
+        {
+          "name": "meta_path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "ruid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsuid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "rgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "egid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "umask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "caps_active",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "uses_real",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_get_permissions(const char *meta_path, int ruid, int euid, int suid, int fsuid, int rgid, int egid, int sgid, int fsgid, int umask, int caps_active, int keep_caps, int uses_real)"
+    },
+    {
+      "name": "ra_fid0_read_meta_file",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 142,
+      "params": [
+        {
+          "name": "meta_path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "ruid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsuid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "rgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "egid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "umask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "caps_active",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:12",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_read_meta_file(const char *meta_path, int ruid, int euid, int suid, int fsuid, int rgid, int egid, int sgid, int fsgid, int umask, int caps_active, int keep_caps, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_write_meta_file",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 166,
+      "params": [
+        {
+          "name": "meta_path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "mode",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "owner",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "group",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "is_creat",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "ruid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsuid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "rgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "egid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "umask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "caps_active",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:16",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_write_meta_file(const char *meta_path, unsigned int mode, unsigned int owner, unsigned int group, int is_creat, int ruid, int euid, int suid, int fsuid, int rgid, int egid, int sgid, int fsgid, int umask, int caps_active, int keep_caps, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_check_dir_perms",
+      "file": "extension/fakeid0_harness/helpers_harness.c",
+      "line": 198,
+      "params": [
+        {
+          "name": "type",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "rel_path",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "ruid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsuid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "rgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "egid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "umask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "caps_active",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_check_dir_perms(int type, const char *path, const char *rel_path, int ruid, int euid, int suid, int fsuid, int rgid, int egid, int sgid, int fsgid, int umask, int caps_active, int keep_caps)"
+    },
+    {
+      "name": "ra_fid0_setxid",
+      "file": "extension/fakeid0_harness/ids_harness.c",
+      "line": 235,
+      "params": [
+        {
+          "name": "kind",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "ruid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsuid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "rgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "egid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "umask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "caps_active",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "new_id",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:13",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_setxid(int kind, int ruid, int euid, int suid, int fsuid, int rgid, int egid, int sgid, int fsgid, int umask, int caps_active, int keep_caps, unsigned int new_id, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_setrexid",
+      "file": "extension/fakeid0_harness/ids_harness.c",
+      "line": 250,
+      "params": [
+        {
+          "name": "kind",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "ruid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsuid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "rgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "egid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "umask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "caps_active",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "new_r",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "new_e",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:14",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_setrexid(int kind, int ruid, int euid, int suid, int fsuid, int rgid, int egid, int sgid, int fsgid, int umask, int caps_active, int keep_caps, unsigned int new_r, unsigned int new_e, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_setresxid",
+      "file": "extension/fakeid0_harness/ids_harness.c",
+      "line": 266,
+      "params": [
+        {
+          "name": "kind",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "ruid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsuid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "rgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "egid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "umask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "caps_active",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "new_r",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "new_e",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "new_s",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:15",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_setresxid(int kind, int ruid, int euid, int suid, int fsuid, int rgid, int egid, int sgid, int fsgid, int umask, int caps_active, int keep_caps, unsigned int new_r, unsigned int new_e, unsigned int new_s, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_setfsxid",
+      "file": "extension/fakeid0_harness/ids_harness.c",
+      "line": 284,
+      "params": [
+        {
+          "name": "kind",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "ruid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsuid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "rgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "egid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "umask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "caps_active",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "new_fs",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:13",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_setfsxid(int kind, int ruid, int euid, int suid, int fsuid, int rgid, int egid, int sgid, int fsgid, int umask, int caps_active, int keep_caps, unsigned int new_fs, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_init_ids",
+      "file": "extension/fakeid0_harness/ids_harness.c",
+      "line": 300,
+      "params": [
+        {
+          "name": "uid_string",
+          "ts_type": "string",
+          "optional": false,
+          "rest": false,
+          "native_type": "const char*"
+        },
+        {
+          "name": "fallback_uid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fallback_gid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:3",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_init_ids(const char *uid_string, int fallback_uid, int fallback_gid, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_prctl_keepcaps",
+      "file": "extension/fakeid0_harness/ids_harness.c",
+      "line": 334,
+      "params": [
+        {
+          "name": "op",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "result",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "arg",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_prctl_keepcaps(int op, int result, unsigned int arg, int keep_caps)"
+    },
+    {
+      "name": "ra_fid0_exec_setid",
+      "file": "extension/fakeid0_harness/ids_harness.c",
+      "line": 342,
+      "params": [
+        {
+          "name": "st_mode",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "ruid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsuid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "rgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "egid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "fsgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "umask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "caps_active",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "keep_caps",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:12",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_exec_setid(unsigned int st_mode, int ruid, int euid, int suid, int fsuid, int rgid, int egid, int sgid, int fsgid, int umask, int caps_active, int keep_caps, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_statx",
+      "file": "extension/fakeid0_harness/misc_harness.c",
+      "line": 35,
+      "params": [
+        {
+          "name": "mask",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "st_uid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "st_gid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "real_uid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "real_gid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "suid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "sgid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:7",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_statx(unsigned int mask, unsigned int st_uid, unsigned int st_gid, unsigned int real_uid, unsigned int real_gid, unsigned int suid, unsigned int sgid, unsigned char *out, unsigned int out_n)"
+    },
+    {
+      "name": "ra_fid0_stat_mode",
+      "file": "extension/fakeid0_harness/misc_harness.c",
+      "line": 72,
+      "params": [
+        {
+          "name": "meta_mode",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "st_mode",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "unsigned int",
+      "prototype": "unsigned int ra_fid0_stat_mode(unsigned int meta_mode, unsigned int st_mode)"
+    },
+    {
+      "name": "ra_fid0_access_check",
+      "file": "extension/fakeid0_harness/misc_harness.c",
+      "line": 79,
+      "params": [
+        {
+          "name": "mode",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "perms",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_access_check(int mode, int perms)"
+    },
+    {
+      "name": "ra_fid0_open_check",
+      "file": "extension/fakeid0_harness/misc_harness.c",
+      "line": 97,
+      "params": [
+        {
+          "name": "flags",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "perms",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_open_check(int flags, int perms)"
+    },
+    {
+      "name": "ra_fid0_socket_check",
+      "file": "extension/fakeid0_harness/misc_harness.c",
+      "line": 109,
+      "params": [
+        {
+          "name": "result",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "family",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "protocol",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "euid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_socket_check(int result, int family, int protocol, int euid)"
+    },
+    {
+      "name": "ra_fid0_sendmsg_scan",
+      "file": "extension/fakeid0_harness/misc_harness.c",
+      "line": 140,
+      "params": [
+        {
+          "name": "buf",
+          "ts_type": "bytes",
+          "optional": false,
+          "rest": false,
+          "native_type": "const unsigned char*"
+        },
+        {
+          "name": "controllen",
+          "ts_type": "len:0",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "is32",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "int"
+        },
+        {
+          "name": "real_uid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "real_gid",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        },
+        {
+          "name": "out",
+          "ts_type": "buffer",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned char*"
+        },
+        {
+          "name": "out_n",
+          "ts_type": "len:5",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "is_generator": false,
+      "type_params": [],
+      "uses_instanceof": false,
+      "native_return": "int",
+      "prototype": "int ra_fid0_sendmsg_scan(const unsigned char *buf, unsigned int controllen, int is32, unsigned int real_uid, unsigned int real_gid, unsigned char *out, unsigned int out_n)"
+    }
+  ],
+  "classes": [],
+  "js_only": [
+    {
+      "name": "peek_reg",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 54,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "poke_reg",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 63,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "belongs_to_guestfs",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 70,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "note",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 77,
+      "reason": "is variadic"
+    },
+    {
+      "name": "get_sysnum",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 87,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "set_sysnum",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 95,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "read_data",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 102,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "write_data",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 112,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "read_string",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 122,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "alloc_mem",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 132,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "set_sysarg_data",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 140,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "register_chained_syscall",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 150,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "readlink_proc_pid_fd",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 165,
+      "reason": "uses `pid_t`, which is not a C scalar the bridge knows"
+    },
+    {
+      "name": "translate_path",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 174,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "detranslate_path",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 186,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "getcwd2",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 195,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "compare_paths",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 203,
+      "reason": "linker stub, ptrace-only path helper"
+    },
+    {
+      "name": "get_root",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 211,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "new_binding",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 218,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "initialize_bindings",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 228,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "should_skip_file_access_due_to_f2fs_bug",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 235,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "get_elf_aux_vectors_address",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 243,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "fetch_elf_aux_vectors",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 250,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "push_elf_aux_vectors",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 258,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "get_tracee",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 267,
+      "reason": "passes a pointer (`const Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "get_extension",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 276,
+      "reason": "passes a pointer (`Tracee*`): ownership must be designed"
+    },
+    {
+      "name": "_talloc_zero",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 285,
+      "reason": "linker stub, ptrace-only talloc helper"
+    },
+    {
+      "name": "talloc_named_const",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 292,
+      "reason": "linker stub, ptrace-only talloc helper"
+    },
+    {
+      "name": "talloc_strdup",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 299,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_free",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 306,
+      "reason": "writes to a buffer (`void*`) whose size is not a parameter"
+    },
+    {
+      "name": "talloc_unlink",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 313,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_get_type_abort",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 320,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "_talloc_set_destructor",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 327,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    },
+    {
+      "name": "talloc_parent",
+      "file": "extension/fakeid0_harness/linker_stubs.c",
+      "line": 333,
+      "reason": "passes a pointer (`const void*`) with no length parameter after it"
+    }
+  ],
+  "end_state": "scaffold"
+}
