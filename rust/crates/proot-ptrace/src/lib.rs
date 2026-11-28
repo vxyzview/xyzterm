@@ -147,6 +147,55 @@ impl Tracee {
         }
     }
 
+    /// Overwrites the syscall register at a syscall stop.
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    pub fn set_syscall_number(&self, number: u64) -> io::Result<()> {
+        let mut registers: libc::user_regs_struct = unsafe { std::mem::zeroed() };
+        let mut get = libc::iovec {
+            iov_base: (&mut registers as *mut libc::user_regs_struct).cast(),
+            iov_len: std::mem::size_of::<libc::user_regs_struct>(),
+        };
+        // SAFETY: get.iov_base points to a live register buffer.
+        if unsafe {
+            libc::ptrace(
+                libc::PTRACE_GETREGSET,
+                self.pid,
+                libc::NT_PRSTATUS as *mut libc::c_void,
+                (&mut get as *mut libc::iovec).cast::<libc::c_void>(),
+            )
+        } < 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        #[cfg(target_arch = "aarch64")]
+        {
+            registers.regs[8] = number;
+        }
+        #[cfg(target_arch = "x86_64")]
+        {
+            registers.orig_rax = number;
+        }
+        let mut put = libc::iovec {
+            iov_base: (&registers as *const libc::user_regs_struct)
+                .cast_mut()
+                .cast::<libc::c_void>(),
+            iov_len: std::mem::size_of::<libc::user_regs_struct>(),
+        };
+        // SAFETY: put.iov_base points to a live register buffer with valid values.
+        if unsafe {
+            libc::ptrace(
+                libc::PTRACE_SETREGSET,
+                self.pid,
+                libc::NT_PRSTATUS as *mut libc::c_void,
+                (&mut put as *mut libc::iovec).cast::<libc::c_void>(),
+            )
+        } < 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        Ok(())
+    }
+
     /// Resumes the tracee until the next syscall-entry or syscall-exit stop.
     pub fn syscall_step(&self, signal: Option<libc::c_int>) -> io::Result<()> {
         let sig = signal.unwrap_or(0) as *mut libc::c_void;
@@ -277,6 +326,10 @@ mod tests {
                 WaitEvent::Stopped(_) => {
                     let number = tracee.syscall_number().expect("syscall number");
                     assert!(number <= 1000, "implausible syscall number: {number}");
+                    tracee
+                        .set_syscall_number(number)
+                        .expect("set syscall number");
+                    assert_eq!(tracee.syscall_number().expect("read back"), number);
                     stops += 1;
                 }
                 WaitEvent::Exited(_) => {
