@@ -42,6 +42,23 @@ val downloadRootfs =
 
 tasks.named("preBuild") { dependsOn(downloadRootfs) }
 
+// JVM unit tests call the JNI wrappers too, so they need a host build of the JNI library.
+val buildRustHost by
+    tasks.registering(Exec::class) {
+        workingDir(rootProject.file("rust"))
+        inputs.dir(rootProject.file("rust/validation/src"))
+        outputs.file(rootProject.file("rust/validation/target/release/libvalidation.so"))
+        commandLine("cargo", "build", "--manifest-path", "validation/Cargo.toml", "--release", "--locked")
+    }
+
+tasks.withType<Test>().configureEach {
+    dependsOn(buildRustHost)
+    systemProperty(
+        "rust-anything.lib.validation",
+        rootProject.file("rust/validation/target/release/libvalidation.so").absolutePath,
+    )
+}
+
 dependencies {
     implementation(project(":core:main"))
     implementation(project(":core:components"))

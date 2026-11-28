@@ -3,6 +3,13 @@ plugins {
     alias(libs.plugins.ktfmt)
 }
 
+val rustJava = layout.buildDirectory.dir("generated/rust/java")
+val copyRustJava =
+    tasks.register<Sync>("copyRustJava") {
+        from(rootProject.file("rust/validation/java/rustanything"))
+        into(rustJava.map { it.dir("rustanything") })
+    }
+
 android {
     namespace = "com.xyzterm.native"
     compileSdk = 37
@@ -17,10 +24,9 @@ android {
 
     sourceSets {
         getByName("main") {
-            java.srcDir(rootProject.file("rust/validation/java"))
-            // Generated facade wrappers collide with the Kotlin file facades that
-            // rust-anything still records from; callers use the native class directly.
-            java.exclude("com/xyzterm/logic/**")
+            // Only the rustanything classes are compiled: the generated facade
+            // wrappers would collide with the Kotlin facades rust-anything records from.
+            java.srcDir(rustJava)
             jniLibs.srcDir(rootProject.file("rust/validation/jniLibs"))
         }
     }
@@ -69,5 +75,9 @@ listOf(
 }
 
 tasks.named("preBuild") {
-    dependsOn(tasks.named("installValidationarm64_v8a"), tasks.named("installValidationarmeabi_v7a"))
+    dependsOn(
+        copyRustJava,
+        tasks.named("installValidationarm64_v8a"),
+        tasks.named("installValidationarmeabi_v7a"),
+    )
 }
