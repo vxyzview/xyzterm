@@ -330,6 +330,11 @@ mod tests {
                         .set_syscall_number(number)
                         .expect("set syscall number");
                     assert_eq!(tracee.syscall_number().expect("read back"), number);
+                    let abi = proot_syscall::Abi::host().expect("arm host");
+                    assert!(!matches!(
+                        proot_syscall::decide(abi, abi, number as u32),
+                        proot_syscall::Decision::Rewrite(_)
+                    ));
                     stops += 1;
                 }
                 WaitEvent::Exited(_) => {
