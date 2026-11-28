@@ -196,6 +196,127 @@ impl Tracee {
         Ok(())
     }
 
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    fn read_registers(&self) -> io::Result<libc::user_regs_struct> {
+        let mut registers: libc::user_regs_struct = unsafe { std::mem::zeroed() };
+        let mut iov = libc::iovec {
+            iov_base: (&mut registers as *mut libc::user_regs_struct).cast(),
+            iov_len: std::mem::size_of::<libc::user_regs_struct>(),
+        };
+        // SAFETY: iovec points to a live register buffer; pid is our tracee.
+        if unsafe {
+            libc::ptrace(
+                libc::PTRACE_GETREGSET,
+                self.pid,
+                libc::NT_PRSTATUS as *mut libc::c_void,
+                (&mut iov as *mut libc::iovec).cast::<libc::c_void>(),
+            )
+        } < 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        Ok(registers)
+    }
+
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    fn write_registers(&self, registers: &libc::user_regs_struct) -> io::Result<()> {
+        let mut iov = libc::iovec {
+            iov_base: (registers as *const libc::user_regs_struct)
+                .cast_mut()
+                .cast::<libc::c_void>(),
+            iov_len: std::mem::size_of::<libc::user_regs_struct>(),
+        };
+        // SAFETY: iovec points to a live, initialized register buffer.
+        if unsafe {
+            libc::ptrace(
+                libc::PTRACE_SETREGSET,
+                self.pid,
+                libc::NT_PRSTATUS as *mut libc::c_void,
+                (&mut iov as *mut libc::iovec).cast::<libc::c_void>(),
+            )
+        } < 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        Ok(())
+    }
+
+    /// Sets the six syscall argument registers.
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    pub fn set_syscall_args(&self, args: &[u64; 6]) -> io::Result<()> {
+        let mut registers = self.read_registers()?;
+        #[cfg(target_arch = "aarch64")]
+        {
+            for (index, value) in args.iter().enumerate() {
+                registers.regs[index] = *value;
+            }
+        }
+        #[cfg(target_arch = "x86_64")]
+        {
+            registers.rdi = args[0];
+            registers.rsi = args[1];
+            registers.rdx = args[2];
+            registers.r10 = args[3];
+            registers.r8 = args[4];
+            registers.r9 = args[5];
+        }
+        self.write_registers(&registers)
+    }
+
+    /// Reads the six syscall argument registers.
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    pub fn syscall_args(&self) -> io::Result<[u64; 6]> {
+        let registers = self.read_registers()?;
+        #[cfg(target_arch = "aarch64")]
+        {
+            Ok([
+                registers.regs[0],
+                registers.regs[1],
+                registers.regs[2],
+                registers.regs[3],
+                registers.regs[4],
+                registers.regs[5],
+            ])
+        }
+        #[cfg(target_arch = "x86_64")]
+        {
+            Ok([
+                registers.rdi,
+                registers.rsi,
+                registers.rdx,
+                registers.r10,
+                registers.r8,
+                registers.r9,
+            ])
+        }
+    }
+
+    /// Reads the syscall return register.
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    pub fn return_value(&self) -> io::Result<u64> {
+        let registers = self.read_registers()?;
+        #[cfg(target_arch = "aarch64")]
+        {
+            Ok(registers.regs[0])
+        }
+        #[cfg(target_arch = "x86_64")]
+        {
+            Ok(registers.rax)
+        }
+    }
+
+    /// Injects a syscall at a syscall-entry stop and returns its result.
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    pub fn inject_syscall(&self, number: u64, args: &[u64; 6]) -> io::Result<u64> {
+        self.set_syscall_args(args)?;
+        self.set_syscall_number(number)?;
+        self.syscall_step(None)?;
+        if !matches!(self.wait()?, WaitEvent::Stopped(_)) {
+            return Err(io::Error::other("tracee exited during injected syscall"));
+        }
+        self.return_value()
+    }
+
     /// Resumes the tracee until the next syscall-entry or syscall-exit stop.
     pub fn syscall_step(&self, signal: Option<libc::c_int>) -> io::Result<()> {
         let sig = signal.unwrap_or(0) as *mut libc::c_void;
@@ -536,6 +657,21 @@ mod tests {
             .expect("set registers");
         assert_eq!(tracee.instruction_pointer().expect("read back"), (sp, pc));
         tracee.kill(libc::SIGKILL).expect("kill");
+        let _ = tracee.wait();
+    }
+
+    #[test]
+    #[cfg(any(target_arch = "aarch64", target_arch = "x86_64"))]
+    fn syscall_arguments_roundtrip_in_registers() {
+        let tracee = Tracee::spawn("/bin/sleep", &["30"]).expect("spawn");
+        tracee.cont(None).expect("continue");
+        let _ = tracee.wait().expect("stop");
+        let args = [11, 22, 33, 44, 55, 66];
+        tracee.set_syscall_args(&args).expect("set args");
+        assert_eq!(tracee.syscall_args().expect("read args"), args);
+        tracee.set_syscall_number(39).expect("set number");
+        assert_eq!(tracee.syscall_number().expect("read number"), 39);
+        tracee.cont(Some(libc::SIGKILL)).expect("resume with kill");
         let _ = tracee.wait();
     }
 
