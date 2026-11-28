@@ -139,3 +139,11 @@
 -keep,allowoptimization class androidx.compose.ui.graphics.colorspace.TransferParameters { *; }
 -keep,allowoptimization class androidx.compose.ui.graphics.colorspace.Rgb { *; }
 -keep class coil.util.** { *; }
+
+# rust-anything JNI bridge: native method names and generated wrappers are reached by name.
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
+-keep class rustanything.** { *; }
+-keep class com.xyzterm.logic.SessionNamesKt { *; }
+-keep class com.xyzterm.logic.DeepLinkCommandKt { *; }

@@ -1,3 +1,3 @@
 package com.xyzterm.terminal
 
-internal fun isValidSessionName(name: String): Boolean = com.xyzterm.logic.isValidSessionName(name)
+internal fun isValidSessionName(name: String): Boolean = rustanything.ValidationNative.call_isValidSessionName(name)

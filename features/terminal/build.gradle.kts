@@ -46,6 +46,7 @@ dependencies {
     implementation(project(":core:main"))
     implementation(project(":core:components"))
     implementation(project(":core:logic"))
+    implementation(project(":core:native"))
     implementation(project(":core:resources"))
     implementation(project(":features:terminal:proot"))
     implementation(project(":features:terminal:link2symlink"))

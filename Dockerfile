@@ -11,6 +11,8 @@ ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platfo
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     wget \
+    curl \
+    ca-certificates \
     unzip \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
@@ -22,8 +24,16 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
     mv /tmp/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest && \
     rm /tmp/cmdline-tools.zip
 
-# Accept Android SDK licenses
-RUN yes | sdkmanager --licenses || true
+# Accept Android SDK licenses and install the NDK used by the Rust JNI build
+RUN yes | sdkmanager --licenses || true && sdkmanager "ndk;30.0.16248370"
+
+# Rust toolchain pinned by rust/rust-toolchain.toml (1.97.0)
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV CARGO_HOME=/usr/local/cargo
+ENV PATH=${PATH}:${CARGO_HOME}/bin
+ENV ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/30.0.16248370
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.97.0 && \
+    rustup target add aarch64-linux-android armv7-linux-androideabi
 
 # Set the working directory
 WORKDIR /app

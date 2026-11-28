@@ -63,10 +63,10 @@ Base commit `ec937f27c` (`main` = `rust-port`; `versionName = "1.0.9"` at `app/b
 - **Decision:** accept those green runs as the pre-change baseline; the first draft PR's `pr-check.yml` run is the real compile gate.
 - **Consequences:** no pr-check evidence exists until the draft PR is opened.
 
-## ADR-013 — Pilot cut-over mechanism (G3)
-- **Context:** `bridge` emits `java/com/xyzterm/logic/SessionNamesKt.java` and `DeepLinkCommandKt.java` with the same fully qualified names as the Kotlin file facades in `:core:logic`; compiling both collides. `record` and `map` need the original Kotlin sources to stay available.
-- **Decision:** keep the original Kotlin top-level functions in `:core:logic` as the recording reference and rename their facades with `@file:JvmName("SessionNamesKtOriginal")` / `@file:JvmName("DeepLinkCommandKtOriginal")`. The generated Java wrappers own the public facade names. Callers switch to `com.xyzterm.logic.SessionNamesKt.isValidSessionName(...)` / `DeepLinkCommandKt.isValidDeepLinkCommand(...)` when G4 adds the Android library module that owns `jniLibs/`. The generated `DeepLinkCommandKtShadow` is a verification-only drop-in with `RUST_ANYTHING_MODE=old|shadow|new`.
-- **Consequences:** no Kotlin caller is switched before the Gradle/JNI wiring exists, so CI stays green. The original Kotlin functions remain in the source tree for `record`/`map`, not for app calls.
+## ADR-013 — Pilot cut-over mechanism (G3, revised at G4)
+- **Context:** `bridge` emits `java/com/xyzterm/logic/SessionNamesKt.java` and `DeepLinkCommandKt.java` with the same fully qualified names as the Kotlin file facades in `:core:logic`; compiling both collides. Renaming the Kotlin facades with `@file:JvmName` was tried and reverted: `record` resolves the original by its generated facade name and recorded **0 cases**, so the recording became stale.
+- **Decision:** keep the original Kotlin top-level functions and their facade names unchanged in `:core:logic` (the `record`/`map` reference). `:core:native` compiles only the generated `rustanything/**` Java classes and excludes `com/xyzterm/logic/**`. Kotlin callers switch to `rustanything.ValidationNative.call_isValidSessionName(...)` / `call_isValidDeepLinkCommand(...)`. Generated shadow classes remain verification-only (`RUST_ANYTHING_MODE=old|shadow|new`).
+- **Consequences:** no facade collision, `record` still finds the original, and `gate` passes after re-recording. The original Kotlin functions are no longer called by the app.
 
 ## Deferred (need their own ADR and operator approval)
 Hand-port of `link2symlink.cpp`; porting leaf helpers from proot; replacing the Termux emulator with a Rust VT core. None are part of "done".

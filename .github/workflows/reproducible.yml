@@ -188,6 +188,15 @@ jobs:
 
 
 
+      - name: Install Rust toolchain for JNI build
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.0
+          targets: aarch64-linux-android,armv7-linux-androideabi
+
+      - name: Pin NDK for Rust build
+        run: echo "ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/$NDK_VERSION" >> $GITHUB_ENV
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
