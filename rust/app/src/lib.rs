@@ -592,6 +592,33 @@ pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_restoreBackup(
     }
 }
 
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_exportSessions(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+) -> jstring {
+    let json = session_manager::sessions()
+        .lock()
+        .map(|registry| registry.export_json())
+        .unwrap_or_else(|_| "[]".to_string());
+    return_string(&mut env, json)
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_xyzterm_bridge_XyztermNative_importSessions(
+    mut env: JNIEnv<'_>,
+    _class: JClass<'_>,
+    json: JString<'_>,
+) -> jint {
+    let Some(json) = jstring_value(&mut env, &json) else {
+        return 0;
+    };
+    match session_manager::sessions().lock() {
+        Ok(mut registry) => registry.import_json(&json) as jint,
+        Err(_) => 0,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

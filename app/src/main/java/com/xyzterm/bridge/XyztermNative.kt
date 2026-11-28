@@ -93,6 +93,10 @@ object XyztermNative {
     /** JSON with `row`, `col`, `title` and `screen` for a live session. */
     @JvmStatic external fun sessionSnapshot(handle: Long): String?
 
+    @JvmStatic external fun exportSessions(): String
+
+    @JvmStatic external fun importSessions(json: String): Int
+
     @JvmStatic external fun closeSession(handle: Long): Boolean
 
     @JvmStatic external fun installRootfs(

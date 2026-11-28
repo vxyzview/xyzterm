@@ -11,17 +11,25 @@ use terminal_pty::Pty;
 pub struct Session {
     pty: Pty,
     grid: TerminalGrid,
+    name: String,
+    shell: String,
+    columns: usize,
+    rows: usize,
     state: &'static str,
 }
 
 impl Session {
-    pub fn new(shell: &str, columns: usize, rows: usize) -> io::Result<Self> {
+    pub fn new(name: &str, shell: &str, columns: usize, rows: usize) -> io::Result<Self> {
         let mut pty = Pty::open(columns as u16, rows as u16)?;
         pty.set_nonblocking(true)?;
         pty.spawn(shell, &[])?;
         Ok(Self {
             pty,
             grid: TerminalGrid::new(columns, rows),
+            name: name.to_string(),
+            shell: shell.to_string(),
+            columns,
+            rows,
             state: "running",
         })
     }
@@ -82,7 +90,17 @@ impl SessionRegistry {
     }
 
     pub fn create(&mut self, shell: &str, columns: usize, rows: usize) -> io::Result<u64> {
-        let session = Session::new(shell, columns, rows)?;
+        self.create_named(shell, shell, columns, rows)
+    }
+
+    pub fn create_named(
+        &mut self,
+        name: &str,
+        shell: &str,
+        columns: usize,
+        rows: usize,
+    ) -> io::Result<u64> {
+        let session = Session::new(name, shell, columns, rows)?;
         self.next_handle = self
             .next_handle
             .checked_add(1)
@@ -102,6 +120,52 @@ impl SessionRegistry {
 
     pub fn close(&mut self, handle: u64) -> bool {
         self.sessions.remove(&handle).is_some()
+    }
+
+    /// Stable metadata for persistence; live PTY state is not serializable.
+    pub fn export_json(&self) -> String {
+        let entries: Vec<serde_json::Value> = self
+            .sessions
+            .values()
+            .map(|session| {
+                serde_json::json!({
+                    "name": session.name,
+                    "shell": session.shell,
+                    "columns": session.columns,
+                    "rows": session.rows,
+                })
+            })
+            .collect();
+        serde_json::Value::Array(entries).to_string()
+    }
+
+    /// Recreates sessions from exported metadata; returns how many started.
+    pub fn import_json(&mut self, text: &str) -> usize {
+        let Ok(entries) = serde_json::from_str::<Vec<serde_json::Value>>(text) else {
+            return 0;
+        };
+        let mut started = 0;
+        for entry in entries {
+            let Some(name) = entry.get("name").and_then(|v| v.as_str()) else {
+                continue;
+            };
+            let Some(shell) = entry.get("shell").and_then(|v| v.as_str()) else {
+                continue;
+            };
+            let Some(columns) = entry.get("columns").and_then(|v| v.as_u64()) else {
+                continue;
+            };
+            let Some(rows) = entry.get("rows").and_then(|v| v.as_u64()) else {
+                continue;
+            };
+            if self
+                .create_named(name, shell, columns as usize, rows as usize)
+                .is_ok()
+            {
+                started += 1;
+            }
+        }
+        started
     }
 }
 
@@ -158,6 +222,20 @@ mod tests {
         assert!(session.snapshot().cursor_row < 43);
         assert!(session.snapshot().screen.contains("hi-xyzterm"));
         assert!(registry.close(handle));
+    }
+
+    #[test]
+    fn sessions_roundtrip_through_json() {
+        let mut registry = SessionRegistry::new();
+        let handle = registry
+            .create_named("main", "/bin/sh", 80, 24)
+            .expect("create");
+        let json = registry.export_json();
+        assert!(json.contains("\"name\":\"main\""));
+        assert!(registry.close(handle));
+        assert_eq!(registry.import_json(&json), 1);
+        assert!(registry.export_json().contains("\"shell\":\"/bin/sh\""));
+        let _ = registry.close(1);
     }
 
     #[test]
