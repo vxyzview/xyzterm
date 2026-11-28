@@ -26,7 +26,7 @@ android {
         getByName("main") {
             // Only the rustanything classes are compiled: the generated facade
             // wrappers would collide with the Kotlin facades rust-anything records from.
-            java.srcDir(rustJava)
+            java.srcDir(rustJava.get().asFile)
             jniLibs.srcDir(rootProject.file("rust/validation/jniLibs"))
         }
     }
